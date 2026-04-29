@@ -200,6 +200,7 @@ private:
     ID3D11InputLayout* m_inputLayout = nullptr;
     ID3D11Buffer* m_vertexBuffer = nullptr;
     ID3D11Buffer* m_transformCB = nullptr;
+    ID3D11Buffer* 
 
     static HRESULT CompileShaderFromFile(
         const wchar_t* path,
