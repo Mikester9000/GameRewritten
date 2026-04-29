@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="GameRewritten.vcxproj" Id="eefceac6-b77e-4a28-9eb8-b3a86bf4d82e" />
+</Solution>
