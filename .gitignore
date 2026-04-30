@@ -24,6 +24,9 @@ mono_crash.*
 x64/
 x86/
 [Ww][Ii][Nn]32/
+!src/platform/win32/
+!src/platform/win32/Win32Window.cpp
+!src/platform/win32/Win32Window.hpp
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
