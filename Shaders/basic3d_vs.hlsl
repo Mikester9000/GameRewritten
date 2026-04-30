@@ -1,7 +1,6 @@
 cbuffer Transform : register(b0)
 {
-    float xOffset;
-    float3 _pad; // pad to 16 bytes (constant buffers are 16-byte aligned)
+    float4x4 mvp;
 };
 
 struct VSIn
@@ -19,7 +18,7 @@ struct VSOut
 VSOut main(VSIn input)
 {
     VSOut o;
-    o.pos = float4(input.pos.x + xOffset, input.pos.y, input.pos.z, 1.0f);
+    o.pos = mul(float4(input.pos, 1.0f), mvp);
     o.col = input.col;
     return o;
 }

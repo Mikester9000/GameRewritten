@@ -18,22 +18,28 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
+    <None Include="packages.config" />
+    <None Include=".github\copilot-instructions.md" />
+    <None Include="Shaders\basic3d_vs.hlsl" />
+    <None Include="Shaders\triangle_ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\app\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="D3D11Renderer.cpp">
+    <ClCompile Include="src\platform\win32\Win32Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Win32Window.cpp">
+    <ClCompile Include="src\rendering\d3d11\D3D11Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="triangle_ps.hlsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="triangle_vs.hlsl">
-      <Filter>Shaders</Filter>
-    </None>
+    <ClInclude Include="src\platform\win32\Win32Window.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rendering\d3d11\D3D11Renderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
