@@ -20,7 +20,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include=".github\copilot-instructions.md" />
-    <None Include="Shaders\basic3d_vs.hlsl" />
     <None Include="Shaders\triangle_ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
@@ -33,6 +32,12 @@
     <ClCompile Include="src\rendering\d3d11\D3D11Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\logger\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\Forest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\platform\win32\Win32Window.hpp">
@@ -41,5 +46,19 @@
     <ClInclude Include="src\rendering\d3d11\D3D11Renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\logger\Logger.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\Forest.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\ground_vs.hlsl" />
+    <FxCompile Include="Shaders\ground_ps.hlsl" />
+    <FxCompile Include="Shaders\sky_vs.hlsl" />
+    <FxCompile Include="Shaders\sky_ps.hlsl" />
+    <FxCompile Include="Shaders\basic3d_ps.hlsl" />
+    <FxCompile Include="Shaders\basic3d_vs.hlsl" />
   </ItemGroup>
 </Project>

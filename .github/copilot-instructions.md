@@ -5,15 +5,19 @@
 - Break tasks into incremental, hands-on steps.
 - Provide runnable examples and code when relevant.
 - Keep responses focused on software development.
+- Ensure edits and suggestions follow a logical, predictable, beginner-friendly structure: make each addition simple, clearly explained, and built on previous steps so a newcomer can follow the progression.
+- Ask clarifying questions about what each part should do before proposing final code; propose small iterative drafts for user review so the user controls logic and structure.
 
 ## Project Guidelines
-- Use the lesson-planning and teaching style from Game-Engine-for-Teaching while avoiding its current structure; enable selective reuse of code rather than wholesale copying.
+- Explicitly reference Game-Engine-for-Teaching as a source to selectively extract and simplify ideas and code; use its lesson-planning and teaching style while avoiding its current structure; enable selective reuse rather than wholesale copying. When recommending extractions, cite file paths and indicate required adaptations.
+- For each recommended extraction or lesson, provide beginner-friendly, incremental next steps toward the end goal: prioritize tasks, keep steps small, include runnable examples, and specify expected outcomes or acceptance criteria.
 - Tailor guidance to help the user rebuild parts of the Game-Engine-for-Teaching repository in their own way and to progress toward creating an FF15-like game/engine; recommend which pieces of code to pull and how to adapt them.
 - Favor designs and code paths compatible with Direct3D 11 and low-spec GPUs (target GeForce GT 610). Optimize recommendations, shaders, and asset budgets to run on that hardware.
 - Aim for FF15-like visual and audio goals within GT610 limits: propose simplified rendering techniques, reduced-resolution assets, and audio compression/streaming strategies that emulate the look/sound without exceeding performance budgets.
 - Use Game-Engine-for-Teaching as a reference source for lessons and code extraction; selectively rewrite and simplify its code into this project to achieve a fully working game engine.
 - Provide very simple, beginner-friendly, step-by-step explanations and explain every part plainly as if the user has no experience; refactor explanations and code to be human/child-like understandable.
 - Break tasks into small, incremental, focused steps and provide examples and runnable code when relevant.
+- Favor a modular, visual-engineering workflow that enables adding game features and content with minimal coding; recommend component-based editors, visual node graphs, hot-reload, small script hooks, and data-driven content pipelines.
 
 ## Hardware and Performance Targets
 - Target Direct3D 11 as the primary graphics API and ensure code paths and shaders compile cleanly for D3D11.
@@ -36,6 +40,8 @@
 ## Code Organization and Style
 - Keep code and project structure neat, orderly, and beginner-readable; write for easy comprehension by average readers, minimize code volume and duplication, and design for maintainability so future changes remain small and safe.
 - Keep files small and focused; prefer files under 2000 lines.
+- Assign ownership: make each new feature/module own its shaders and GPU resources; colocate shader files and GPU resource management with the owning module and document lifecycle responsibilities.
+- When adding new resources, declare matching member variables in the appropriate header before using them in .cpp to avoid undefined symbol or build errors.
 - Minimize overall code volume: prefer small, focused modules and simple APIs; avoid unnecessary layers and abstractions that add cognitive load.
 - Favor clear naming, brief comments, and straightforward control flow to aid average readers.
 - Design for maintainability: use modular boundaries, explicit interfaces, simple tests, and readable documentation to keep future changes manageable.
@@ -45,6 +51,7 @@
 - Prefer simple, explicit constructs over clever/compact ones to aid learning.
 - Prefer shader code and rendering utilities that are easy to understand and test on D3D11 hardware.
 - Prefer explicit configuration for hardware capability checks and fallback paths.
+- Structure code changes so each edit is simple, logically ordered, and explicitly documented to help beginners edit, debug, and understand the codebase.
 
 ### Naming + Style Rules
 - Use simple, purpose-driven names: prefer clarity over cleverness.
@@ -67,7 +74,10 @@
 
 ## Refactoring and Change Process
 - Make changes in small, focused, and concise steps.
-- For every change provide exact file, area, and line context plus a brief explanation of why the change was made.
+- Preserve the current project structure and existing naming conventions during refactors; avoid renames or moves unless necessary and document any changes with clear migration steps.
+- For every change provide exact insertion or replacement locations (repository path plus line numbers or function context), indicate whether the edit is an insertion, replacement, or deletion, and include a short rationale for the change.
+- Prefer minimal, non-breaking edits and avoid duplicate instructions across files or documentation.
+- Favor isolated edits that add or modify self-contained code blocks or files to reduce merge and review complexity.
 - Explain what links where and why: describe dependencies, imports, and how files interact.
 - Show before-and-after snippets when relevant and specify exact ranges (file paths and line numbers or function names).
 - Recommend minimal, safe edits that preserve learnability and incremental progress.
@@ -92,9 +102,13 @@
 - Use analogies sparingly and only when they clarify a concrete programming detail.
 - Prefer step-by-step instructions with clear expected outcomes for each step.
 - Label examples clearly and indicate how to run them locally.
+- Structure explanations so each step follows logically from the previous step; verify logical progression and simplicity for beginners.
+- Make every new code example or edit simple, clearly explained, and explicitly connected to prior steps to aid learning and debugging.
+- Ask what each code part should do before proposing final code; present alternatives and iterative drafts to enable user control over logic, structure, and implementation details.
+- Provide beginner-friendly incremental next steps toward the end goal for each topic or recommended extraction: prioritize tasks, keep steps small, and include expected outcomes.
 
 ## Project-Specific Rules
-- Recommend which parts of Game-Engine-for-Teaching to extract, and provide a simplified/rewritten alternative tailored to this project.
+- Recommend which parts of Game-Engine-for-Teaching to extract, and provide a simplified/rewritten alternative tailored to this project. When recommending specific extractions, cite source file paths, required adaptations, and licensing notes.
 - Prioritize building a fully working engine incrementally: identify minimal viable subsystems (rendering, input, update loop, asset pipeline) and guide their assembly.
 - When reusing code, document license-safe copying practices and necessary adaptations (API, naming, simplification).
 - Vendor external dependencies with permissive free licenses suitable for commercial release; include license files, clear attribution, and prefer vendoring or pinned submodules to ensure future reproducibility.
@@ -129,8 +143,51 @@
 - Create new sections only when an instruction does not fit existing categories.
 - Use bullet lists for instructions and maintain consistent indentation and spacing.
 
+## Merge & Edit Guidance
+- Include exact insertion or replacement locations for every edit: repository path plus line numbers or function/context markers.
+- Indicate edit type explicitly: insertion, replacement, or deletion.
+- Prefer minimal, non-breaking edits over large rewrites.
+- Avoid adding instructions that duplicate existing semantics; enhance or consolidate existing instructions instead.
+- Favor isolated, self-contained file or code-block edits to reduce merge and review complexity.
+- Provide exact patch/diff suggestions when possible and recommend a minimal commit message and branch name.
+- Include a short rationale and expected verification steps for each delivered change set.
+- Enforce a mandatory four-phase workflow for all substantive changes:
+  - Plan: state scope, goals, exact file paths and line ranges, edit types, assumptions, and a short risk assessment.
+  - Human-style review: present the plan for review by a human reviewer; collect explicit reviewer comments and requested changes.
+  - Revised plan: update the plan to address reviewer feedback and confirm or correct initial assumptions.
+  - Final code: produce the final code changes only after reviewer sign-off and explicit confirmation of assumptions.
+  - Allow optional extra QA phases for complex or high-risk changes (e.g., extended automated tests, platform-specific validation, staged rollouts).
+- Preserve existing error-reduction, placement, and minimal-change rules when applying the four-phase workflow; require exact locations and minimal edits at each phase.
+- Prefer conservative edits first and provide optional progressive refinements in subsequent workflow iterations.
+
 ## Clarity and Output Requirements
 - Keep instructions concise and actionable.
 - Use the imperative mood ("Use X", not "You should use X").
 - Avoid redundant phrases and preserve existing formatting conventions.
 - For every delivered change set, include exact file/area/line context and a short rationale.
+- Return the complete merged Markdown content only when asked to produce files or docs; do not add extra meta-commentary.
+
+## AI Prompting & Model Guidance
+- When requesting edits or code from LLM workflows, state the target model (e.g., GPT-4.1, GPT-5-mini), desired verbosity, and output format.
+- When requesting future project work outputs, prefer guidance and code formatted for GPT-5-mini handoff style: concise implementation steps, explicit inputs/outputs, minimal reproducible context, clear next actions, and verification/acceptance criteria.
+- Request incremental drafts and explicit review points to enable small commits and safe iteration.
+- Ask for conservative code changes first and optional progressive refinements in later drafts.
+- Provide minimal reproducible contexts (file snippets, exact paths, commands to run) to maximize output quality and reduce hallucination risk.
+- Prefer explicit examples, unit tests, or smoke-test scripts to validate suggested edits on D3D11/GT610.
+
+## Reliability and Testing Rules
+- Design systems to fail fast in development and degrade gracefully in production.
+- Validate inputs and asset integrity at load time; provide clear error messages and fallback assets.
+- Implement deterministic update loops and fixed-step simulation where appropriate for reproducible results and easier debugging.
+- Add runtime health checks (watchdogs) and simple recovery paths for streaming, asset IO, and audio subsystems.
+- Require lightweight automated tests for critical subsystems (renderer smoke, input, audio streaming) and run them in CI.
+- Define minimal runtime telemetry and logging (configurable/opt-out) to help diagnose low-spec failures without high overhead.
+- Use assertions in development builds; keep error-handling and safe fallbacks in release builds.
+- Provide scripted manual QA checklists for GT610: render correctness, audio streaming, input latency, scene streaming stutter.
+
+## Structure and Placement Rules (Notes)
+- Group semantically related instructions under appropriate headings.
+- Place general instructions before specific ones.
+- If multiple sections exist, add to the most relevant section.
+- Create new sections only when the instruction doesn't fit existing categories.
+- Use bullet lists for instructions and maintain consistent indentation and spacing.
