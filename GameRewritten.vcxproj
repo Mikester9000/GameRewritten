@@ -78,6 +78,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)third_party;$(ProjectDir)third_party\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -96,6 +97,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)third_party;$(ProjectDir)third_party\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -112,6 +114,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)third_party;$(ProjectDir)third_party\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -134,6 +137,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)third_party;$(ProjectDir)third_party\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,13 +154,36 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
   <ItemGroup>
     <None Include=".github\copilot-instructions.md" />
     <None Include="packages.config" />
+    <!-- Content/ asset files (data-driven, loaded at runtime via AssetLoader) -->
+    <None Include="Content\Materials\default.material.json" />
+    <None Include="Content\Prefabs\tree.prefab.json" />
+    <None Include="Content\Scenes\test.scene.json" />
+    <!-- Documentation -->
+    <None Include="docs\ASSETS.md" />
+    <!-- Third-party licenses -->
+    <None Include="third_party\imgui\LICENSE.txt" />
+    <None Include="third_party\nlohmann\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\app\Main.cpp" />
+    <ClCompile Include="src\assets\AssetLoader.cpp" />
     <ClCompile Include="src\game\Forest.cpp" />
     <ClCompile Include="src\logger\Logger.cpp" />
     <ClCompile Include="src\platform\win32\Win32Window.cpp" />
     <ClCompile Include="src\rendering\d3d11\D3D11Renderer.cpp" />
+    <ClCompile Include="src\ui\ImGuiLayer.cpp" />
+    <!-- Dear ImGui core (vendored, MIT licence) -->
+    <ClCompile Include="third_party\imgui\imgui.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_draw.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_tables.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_widgets.cpp" />
+    <!-- imgui_demo.cpp is excluded from the build but kept for reference -->
+    <ClCompile Include="third_party\imgui\imgui_demo.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <!-- Dear ImGui Win32 + DX11 backends -->
+    <ClCompile Include="third_party\imgui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="third_party\imgui\backends\imgui_impl_dx11.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\basic3d_vs.hlsl">
@@ -171,10 +198,12 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\assets\AssetLoader.hpp" />
     <ClInclude Include="src\game\Forest.hpp" />
     <ClInclude Include="src\logger\Logger.hpp" />
     <ClInclude Include="src\platform\win32\Win32Window.hpp" />
     <ClInclude Include="src\rendering\d3d11\D3D11Renderer.hpp" />
+    <ClInclude Include="src\ui\ImGuiLayer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\basic3d_ps.hlsl">
