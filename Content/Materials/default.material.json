@@ -1,0 +1,13 @@
+{
+    "name": "default",
+    "shader": "Shaders/basic3d",
+    "textures": {
+        "albedo": "Textures/default_albedo.png",
+        "normal": "Textures/default_normal.png"
+    },
+    "params": {
+        "roughness": 0.5,
+        "metallic": 0.0,
+        "color": [1.0, 1.0, 1.0, 1.0]
+    }
+}

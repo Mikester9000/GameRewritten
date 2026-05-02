@@ -95,6 +95,14 @@ LRESULT CALLBACK Win32Window::MainWindowProc(HWND hwnd, UINT msg, WPARAM wparam,
 
 LRESULT Win32Window::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+    // Give the registered hook (e.g. ImGui) first chance to consume the message.
+    if (wndProcHook)
+    {
+        LRESULT hookResult = wndProcHook(hwnd, msg, wparam, lparam);
+        if (hookResult)
+            return hookResult;
+    }
+
     switch (msg)
     {
     case WM_CLOSE:

@@ -1,0 +1,14 @@
+{
+    "name": "tree_oak",
+    "mesh": "Models/tree_oak.obj",
+    "material": "Materials/default.material.json",
+    "defaults": {
+        "scale": [1.0, 1.0, 1.0],
+        "rotation": [0.0, 0.0, 0.0]
+    },
+    "lod": [
+        { "distance": 0,   "mesh": "Models/tree_oak.obj" },
+        { "distance": 50,  "mesh": "Models/tree_oak_lod1.obj" },
+        { "distance": 100, "mesh": "Models/tree_oak_lod2.obj" }
+    ]
+}

@@ -22,6 +22,8 @@ extern "C" __declspec(dllimport) int __stdcall MessageBoxW(HWND, LPCWSTR, LPCWST
 #include "../platform/win32/Win32Window.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../game/Forest.hpp"
+#include "../ui/ImGuiLayer.hpp"
+#include "../assets/AssetLoader.hpp"
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
@@ -47,6 +49,28 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         return 1;
     }
     forest.Populate(renderer,80, 50.0f); // 80 trees in 50-unit radius
+
+    // Initialize ImGui overlay (pause menu + debug overlay).
+    ImGuiLayer imguiLayer;
+    if (!imguiLayer.Initialize(window.GetHandle(), renderer.GetDevice(), renderer.GetContext()))
+    {
+        MessageBoxW(nullptr, L"Failed to initialize ImGui.", L"Error", 0);
+        return 1;
+    }
+    // Forward Win32 messages to ImGui (mouse, keyboard, etc.).
+    window.SetWndProcHook(&ImGuiLayer::WndProcHook);
+
+    // Load sample Content/ assets and log them (stub — no GPU resources yet).
+    {
+        MaterialAsset mat;
+        AssetLoader::LoadMaterial("Content/Materials/default.material.json", mat);
+
+        PrefabAsset prefab;
+        AssetLoader::LoadPrefab("Content/Prefabs/tree.prefab.json", prefab);
+
+        SceneAsset scene;
+        AssetLoader::LoadScene("Content/Scenes/test.scene.json", scene);
+    }
 
     // Simple loop: process messages + render frames.
     float t = 0.0f;
@@ -90,6 +114,13 @@ updateCameraFromPlayer();
     bool useTerrainPatch = true;
     bool wasTDown = false;
     bool wasGDown = false;
+    // Toggle key edge-detection state (track previous frame state).
+    bool wasEscDown = false;
+    bool wasF1Down  = false;
+    // FPS smoothing accumulator.
+    float fpsAccum = 0.0f;
+    int   fpsFrames = 0;
+    float displayFPS = 0.0f;
     while (window.ProcessEvents())
     {
         LARGE_INTEGER currCounter{};
@@ -102,40 +133,78 @@ updateCameraFromPlayer();
         // Clamp to avoid huge spikes when app loses focus
         deltaTime = std::clamp(deltaTime, 0.0f, 0.05f);
         
+        // FPS calculation (smooth over ~0.5 s).
+        fpsAccum += deltaTime;
+        fpsFrames++;
+        if (fpsAccum >= 0.5f)
+        {
+            displayFPS = static_cast<float>(fpsFrames) / fpsAccum;
+            fpsAccum = 0.0f;
+            fpsFrames = 0;
+        }
+
         // Check if the window is active
         if (GetForegroundWindow() != window.GetHandle()) {
             continue; // Skip the loop if the window is not active
         }
 
-        // Exit the program when ESC is pressed
-        if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
-            break; // Exit the main loop
-        }
-        bool tDown = (GetAsyncKeyState('T') & 0x8000) != 0;
-        if (tDown && !wasTDown)
-        {
-            useTerrainPatch = true;
-        }
-        wasTDown = tDown;
+        // --- Toggle keys (edge-detect so they fire once per press) ---
 
-        bool gDown = (GetAsyncKeyState('G') & 0x8000) != 0;
-        if (gDown && !wasGDown)
+        // Esc: toggle pause menu (was: exit the program).
+        bool escDown = (GetAsyncKeyState(VK_ESCAPE) & 0x8000) != 0;
+        if (escDown && !wasEscDown)
+            imguiLayer.TogglePauseMenu();
+        wasEscDown = escDown;
+
+        // F1: toggle debug overlay.
+        bool f1Down = (GetAsyncKeyState(VK_F1) & 0x8000) != 0;
+        if (f1Down && !wasF1Down)
+            imguiLayer.ToggleDebugOverlay();
+        wasF1Down = f1Down;
+
+        // Handle quit/resume signals from the UI.
+        if (imguiLayer.WantsQuit())
+            break;
+        imguiLayer.ClearFrameFlags();
+
+        // T / G — terrain toggle (only when not paused).
+        if (!imguiLayer.IsPauseMenuOpen())
         {
-            useTerrainPatch = false;
+            bool tDown = (GetAsyncKeyState('T') & 0x8000) != 0;
+            if (tDown && !wasTDown)
+                useTerrainPatch = true;
+            wasTDown = tDown;
+
+            bool gDown = (GetAsyncKeyState('G') & 0x8000) != 0;
+            if (gDown && !wasGDown)
+                useTerrainPatch = false;
+            wasGDown = gDown;
         }
-        wasGDown = gDown;
-       
+
+        // Show/hide system cursor and re-center mouse based on pause state.
+        const bool paused = imguiLayer.IsPauseMenuOpen();
+        if (paused)
+        {
+            ShowCursor(TRUE);
+        }
+        else
+        {
+            ShowCursor(FALSE);
+        }
+
         // Animate the clear color so you can see it is updating.
         t += deltaTime * 1.0f;
         float r = 0.2f + 0.2f * sinf(t);
         float g = 0.2f + 0.2f * sinf(t * 1.7f);
         float b = 0.3f + 0.2f * sinf(t * 2.3f);
-        // Mouse look (insert this before the movement block)
+
+        // Mouse look — skip when pause menu is open so the mouse can interact
+        // with ImGui widgets.
         int mouseDeltaX = 0, mouseDeltaY = 0;
         POINT mouse;
         GetCursorPos(&mouse);
 
-        if (!firstFrame) {
+        if (!paused && !firstFrame) {
             mouseDeltaX = mouse.x - centerPoint.x;
             mouseDeltaY = mouse.y - centerPoint.y;
             yaw += mouseDeltaX * 0.005f;
@@ -143,12 +212,15 @@ updateCameraFromPlayer();
             if (pitch > 1.5f) pitch = 1.5f;
             if (pitch < -1.5f) pitch = -1.5f;
         }
-        SetCursorPos(centerPoint.x, centerPoint.y);
+        if (!paused)
+            SetCursorPos(centerPoint.x, centerPoint.y);
         firstFrame = false;
 
         // Update renderer rotation from yaw/pitch
         renderer.SetCameraRotation(yaw, pitch);
-        // --- Replace old camera movement / grounding block (lines 130-204) with this ---
+
+        // Movement + gravity — skipped while pause menu is open.
+        if (!paused)
         {
             // Movement uses yaw for forward/right directions (player-facing movement)
             float forwardX = sinf(yaw);
@@ -203,15 +275,19 @@ updateCameraFromPlayer();
                 renderer.SetCameraVelocityY(0.0f);
             }
 
-            // Finally, compute camera from player and apply rotation
+            // Compute camera from player and apply rotation
             updateCameraFromPlayer();
             renderer.SetCameraRotation(yaw, pitch);
         }
-        // --- end replacement ---
 
-        
-
-        
+        // Pass camera info and FPS stats to ImGuiLayer for the debug overlay.
+        {
+            float cx, cy, cz, cyaw, cpitch;
+            renderer.GetCameraPosition(cx, cy, cz);
+            renderer.GetCameraRotation(cyaw, cpitch);
+            imguiLayer.SetCameraInfo(cx, cy, cz, cyaw, cpitch);
+            imguiLayer.SetFrameStats(displayFPS, deltaTime);
+        }
         renderer.ClearScreen(r, g, b, 1.0f);
         renderer.DrawSky();
         
@@ -224,11 +300,17 @@ updateCameraFromPlayer();
         // draw the forest
         forest.Draw(renderer);
         renderer.DrawRotatingTriangle(deltaTime);
+
+        // ImGui: begin frame, draw UI panels, then render ImGui draw data.
+        imguiLayer.BeginFrame();
+        imguiLayer.EndFrame();
+
         renderer.PresentFrame();
         Sleep(1); // tiny sleep so we don't peg CPU at 100%
     }
     // before renderer.Shutdown();
     forest.Shutdown();
+    imguiLayer.Shutdown();
     renderer.Shutdown();
     window.Close();
     return 0;
