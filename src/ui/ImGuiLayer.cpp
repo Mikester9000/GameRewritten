@@ -129,9 +129,10 @@ void ImGuiLayer::DrawPauseMenu()
     ImGui::SetNextWindowSize(ImVec2(winW, winH), ImGuiCond_Always);
 
     ImGuiWindowFlags flags =
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove   |
-        ImGuiWindowFlags_NoCollapse;
+        ImGuiWindowFlags_NoResize    |
+        ImGuiWindowFlags_NoMove      |
+        ImGuiWindowFlags_NoCollapse  |
+        ImGuiWindowFlags_NoTitleBar;
 
     if (ImGui::Begin("## PauseMenu", nullptr, flags))
     {
