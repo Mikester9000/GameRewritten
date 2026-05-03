@@ -211,6 +211,7 @@ void PrimitiveRenderer::AddInstance(const PrimitivePrefab& prefab,
         dp.scaleX   = part.scaleX * scale;
         dp.scaleY   = part.scaleY * scale;
         dp.scaleZ   = part.scaleZ * scale;
+        dp.yaw      = yaw;
         dp.r        = part.r;
         dp.g        = part.g;
         dp.b        = part.b;
@@ -278,13 +279,16 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
         if (wantVS != activeVS) { m_context->VSSetShader(wantVS, nullptr, 0); activeVS = wantVS; }
         if (wantPS != activePS) { m_context->PSSetShader(wantPS, nullptr, 0); activePS = wantPS; }
 
-        // Build world matrix: scale, then translate to (world + offset).
+        // Build world matrix: scale → rotate (Y axis) → translate to (world + offset).
+        // The offset was already rotated by yaw in AddInstance, so the rotation here
+        // only affects the cube faces/normals — matching how the part looks when placed.
         XMMATRIX scaleMat  = XMMatrixScaling(dp.scaleX, dp.scaleY, dp.scaleZ);
+        XMMATRIX rotMat    = XMMatrixRotationY(dp.yaw);
         XMMATRIX transMat  = XMMatrixTranslation(
             dp.worldX + dp.offsetX,
             dp.worldY + dp.offsetY,
             dp.worldZ + dp.offsetZ);
-        XMMATRIX worldMat  = scaleMat * transMat;
+        XMMATRIX worldMat  = scaleMat * rotMat * transMat;
 
         // Fill constant buffer.
         PrimCB cb;

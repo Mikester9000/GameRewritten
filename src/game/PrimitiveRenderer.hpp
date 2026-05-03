@@ -65,6 +65,7 @@ private:
         float worldX, worldY, worldZ; // prefab placement position
         float offsetX, offsetY, offsetZ;
         float scaleX, scaleY, scaleZ;
+        float yaw;    // Y-axis rotation of the whole instance (radians)
         float r, g, b, a;
         bool  isTree; // selects tree shader vs default prim shader
     };

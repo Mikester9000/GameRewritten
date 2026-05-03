@@ -113,16 +113,22 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // --- Primitive Renderer ---
     // Draws multi-part box prefab instances placed via the World Editor.
     // Separate from Forest (which handles procedural trees).
+    // primRendererPtr stays nullptr if initialization fails so WorldEditor falls
+    // back to the legacy Forest cube renderer instead of queuing invisible parts.
     PrimitiveRenderer primRenderer;
-    if (!primRenderer.Initialize(renderer))
+    PrimitiveRenderer* primRendererPtr = nullptr;
+    if (primRenderer.Initialize(renderer))
     {
-        // Non-fatal: the editor falls back to the legacy forest cube renderer.
+        primRendererPtr = &primRenderer;
+    }
+    else
+    {
         LOG_WARN("Main: PrimitiveRenderer failed to initialize; placed prefabs will use fallback cube.");
     }
 
     // --- World Editor ---
     WorldEditor worldEditor;
-    worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, &primRenderer);
+    worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
     // Spawn any authored instances already saved in cell_0_0.json (startup cell).
     worldEditor.SpawnCellInstances(0, 0, renderer);
 
