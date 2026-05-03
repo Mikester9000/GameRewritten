@@ -52,8 +52,10 @@ bool WorldGrid::Load(const std::string& worldJsonPath)
     float rawCellSize = j.value("cell_size", 200.0f);
     if (rawCellSize <= 0.0f)
     {
-        LOG_ERROR("WorldGrid: 'cell_size' must be > 0, got " + std::to_string(rawCellSize)
-                  + " in '" + worldJsonPath + "'");
+        std::ostringstream err;
+        err << "WorldGrid: 'cell_size' must be > 0, got " << rawCellSize
+            << " in '" << worldJsonPath << "'";
+        LOG_ERROR(err.str());
         return false;
     }
     m_cellSize = rawCellSize;

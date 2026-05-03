@@ -254,14 +254,27 @@ updateCameraFromPlayer();
             {
                 LOG_INFO("F5: WorldGrid reloaded OK — repopulating forest...");
                 // Rebuild forest from updated cell data so gameplay sees the changes.
+                // Compute which cell the player is currently standing in.
                 int playerCX = 0, playerCZ = 0;
                 worldGrid.WorldToCell(playerX, playerZ, playerCX, playerCZ);
+
+                // Find the exact cell by coordinates (not by array index) to be safe.
                 auto reloadedCells = worldGrid.GetActiveCells(playerCX, playerCZ, 0);
-                if (!reloadedCells.empty() && reloadedCells[0].forestEnabled)
+                const WorldCell* playerCell = nullptr;
+                for (const auto& c : reloadedCells)
                 {
-                    const WorldCell& c = reloadedCells[0];
-                    forest.Populate(renderer, c.forestTreeCount, c.forestRadius,
-                                    c.CenterX(), c.CenterZ());
+                    if (c.cx == playerCX && c.cz == playerCZ)
+                    {
+                        playerCell = &c;
+                        break;
+                    }
+                }
+
+                if (playerCell && playerCell->forestEnabled)
+                {
+                    forest.Populate(renderer, playerCell->forestTreeCount,
+                                    playerCell->forestRadius,
+                                    playerCell->CenterX(), playerCell->CenterZ());
                     LOG_INFO("F5: forest repopulated from cell data.");
                 }
             }
