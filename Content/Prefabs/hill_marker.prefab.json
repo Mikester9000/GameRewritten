@@ -1,0 +1,8 @@
+{
+    "name": "hill_marker",
+    "category": "prop",
+    "parts": [
+        { "shape": "box", "offset": [0.0, 0.40, 0.0], "scale": [0.30, 0.80, 0.30], "color": [0.50, 0.46, 0.40, 1.0] },
+        { "shape": "box", "offset": [0.0, 0.92, 0.0], "scale": [0.60, 0.14, 0.14], "color": [0.52, 0.48, 0.42, 1.0] }
+    ]
+}

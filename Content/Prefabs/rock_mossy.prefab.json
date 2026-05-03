@@ -1,0 +1,8 @@
+{
+    "name": "rock_mossy",
+    "category": "rock",
+    "parts": [
+        { "shape": "box", "offset": [0.0, 0.45, 0.0], "scale": [1.40, 0.90, 1.20], "color": [0.32, 0.38, 0.30, 1.0] },
+        { "shape": "box", "offset": [0.3, 0.80, 0.2], "scale": [0.70, 0.60, 0.60], "color": [0.28, 0.42, 0.26, 1.0] }
+    ]
+}

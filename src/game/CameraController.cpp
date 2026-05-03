@@ -49,14 +49,14 @@ void CameraController::ComputeCamFromPlayer()
 // ---------------------------------------------------------------------------
 // Update
 // ---------------------------------------------------------------------------
-void CameraController::Update(float dt, bool paused, bool& inOutFirstFrame,
-                               D3D11Renderer& renderer)
+void CameraController::Update(float dt, bool allowMovement, bool allowMouseLook,
+                               bool& inOutFirstFrame, D3D11Renderer& renderer)
 {
     // --- Mouse look ---
     POINT mouse;
     GetCursorPos(&mouse);
 
-    if (!paused && !inOutFirstFrame)
+    if (allowMouseLook && !inOutFirstFrame)
     {
         int dx = mouse.x - m_centerPoint.x;
         int dy = mouse.y - m_centerPoint.y;
@@ -65,8 +65,10 @@ void CameraController::Update(float dt, bool paused, bool& inOutFirstFrame,
         if (m_pitch >  maxPitch) m_pitch =  maxPitch;
         if (m_pitch < -maxPitch) m_pitch = -maxPitch;
     }
-    // Re-centre the cursor so the next frame's delta is always relative to centre.
-    if (!paused)
+    // Re-centre the cursor only when mouse-look is active so the next frame's
+    // delta is always relative to centre. When placement mode is on we leave
+    // the cursor wherever ImGui puts it (free cursor for clicking).
+    if (allowMouseLook)
         SetCursorPos(m_centerPoint.x, m_centerPoint.y);
 
     inOutFirstFrame = false;
@@ -74,8 +76,8 @@ void CameraController::Update(float dt, bool paused, bool& inOutFirstFrame,
     // Sync rotation to renderer so all draw calls use the latest values.
     renderer.SetCameraRotation(m_yaw, m_pitch);
 
-    // --- Movement + gravity (skip when paused / editor active) ---
-    if (!paused)
+    // --- Movement + gravity (skip only when movement is explicitly blocked) ---
+    if (allowMovement)
     {
         float forwardX =  sinf(m_yaw);
         float forwardZ =  cosf(m_yaw);

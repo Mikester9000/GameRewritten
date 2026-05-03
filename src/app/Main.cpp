@@ -13,6 +13,8 @@
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../game/Forest.hpp"
 #include "../game/CameraController.hpp"
+#include "../game/PrefabLibrary.hpp"
+#include "../game/PrimitiveRenderer.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../ui/WorldEditor.hpp"
 #include "../assets/AssetLoader.hpp"
@@ -103,9 +105,31 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Forward Win32 messages to ImGui (mouse, keyboard, etc.).
     window.SetWndProcHook(&ImGuiLayer::WndProcHook);
 
+    // --- Prefab Library ---
+    // Loads all "prefabs.*" from the Asset Registry and caches their primitive-part
+    // definitions so the World Editor can look up prefab shapes at placement time.
+    PrefabLibrary prefabLibrary;
+    prefabLibrary.Load(registry);
+
+    // --- Primitive Renderer ---
+    // Draws multi-part box prefab instances placed via the World Editor.
+    // Separate from Forest (which handles procedural trees).
+    // primRendererPtr stays nullptr if initialization fails so WorldEditor falls
+    // back to the legacy Forest cube renderer instead of queuing invisible parts.
+    PrimitiveRenderer primRenderer;
+    PrimitiveRenderer* primRendererPtr = nullptr;
+    if (primRenderer.Initialize(renderer))
+    {
+        primRendererPtr = &primRenderer;
+    }
+    else
+    {
+        LOG_WARN("Main: PrimitiveRenderer failed to initialize; placed prefabs will use fallback cube.");
+    }
+
     // --- World Editor ---
     WorldEditor worldEditor;
-    worldEditor.SetReferences(&registry, &worldGrid, &forest);
+    worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
     // Spawn any authored instances already saved in cell_0_0.json (startup cell).
     worldEditor.SpawnCellInstances(0, 0, renderer);
 
@@ -174,6 +198,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     camController.SetCenterPoint(centerPoint);
 
     bool firstFrame = true;
+    bool prevEditorActive = false;  // tracks previous frame's placement-mode state
     LARGE_INTEGER perfFreq{};
     QueryPerformanceFrequency(&perfFreq);
 
@@ -246,6 +271,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             if (regOk)
             {
                 LOG_INFO("F5: AssetRegistry reloaded OK.");
+                prefabLibrary.Reload(registry);
                 worldEditor.RefreshPrefabList();
             }
             else
@@ -276,6 +302,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                     forest.Populate(renderer, playerCell->forestTreeCount,
                                     playerCell->forestRadius,
                                     playerCell->CenterX(), playerCell->CenterZ());
+                    // Re-spawn placed prefab instances in the primitive renderer.
+                    primRenderer.ClearInstances();
                     worldEditor.SpawnCellInstances(playerCX, playerCZ, renderer);
                     LOG_INFO("F5: forest repopulated from cell data.");
                 }
@@ -334,10 +362,25 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         float b = 0.3f + 0.2f * sinf(t * 2.3f);
 
         // --- Camera + movement (now handled by CameraController) ---
-        // When placement mode is active, treat it like paused so the cursor
-        // stays visible and mouse look is disabled.
-        const bool effectivePaused = paused || editorActive;
-        camController.Update(deltaTime, effectivePaused, firstFrame, renderer);
+        // Movement: enabled as long as the pause menu is closed.
+        //   Player can still walk/jump while World Editor Placement Mode is active.
+        // Mouse look: disabled during Placement Mode so the cursor stays free for
+        //   clicking on the ground.  Re-enabled when Placement Mode turns off.
+        //   To avoid a sudden camera jump when mouse-look re-enables, we treat the
+        //   first frame after the transition as a "first frame" (skips the delta).
+        const bool allowMovement  = !paused;
+        const bool allowMouseLook = !paused && !editorActive;
+
+        // Detect the moment Placement Mode turns OFF so we can reset mouse baseline.
+        if (prevEditorActive && !editorActive)
+        {
+            // Re-center cursor and skip the first mouse-look delta to avoid a jump.
+            SetCursorPos(centerPoint.x, centerPoint.y);
+            firstFrame = true;
+        }
+        prevEditorActive = editorActive;
+
+        camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
 
         // --- Left-click placement ---
         // Check ImGui::GetIO().WantCaptureMouse BEFORE BeginFrame for the
@@ -385,6 +428,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             else renderer.DrawGroundPlane();
             // draw the forest
             forest.Draw(renderer);
+            // draw placed primitive prefab instances
+            primRenderer.Draw(renderer);
             renderer.DrawRotatingTriangle(deltaTime);
 
             // ImGui: begin frame, draw UI panels, then render ImGui draw data.
@@ -404,6 +449,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         Sleep(1); // tiny sleep so we don't peg CPU at 100%
     }
     // before renderer.Shutdown();
+    primRenderer.Shutdown();
     forest.Shutdown();
     imguiLayer.Shutdown();
     tp::Nav::Shutdown();

@@ -21,6 +21,8 @@
 class AssetRegistry;
 class WorldGrid;
 class Forest;
+class PrefabLibrary;
+class PrimitiveRenderer;
 class D3D11Renderer;
 class CameraController;
 
@@ -28,7 +30,11 @@ class WorldEditor
 {
 public:
     // Bind external systems.  Must be called before DrawPanel() / HandlePlacement().
-    void SetReferences(AssetRegistry* registry, WorldGrid* grid, Forest* forest);
+    // prefabLib and primRenderer may be nullptr for backward compatibility; when
+    // provided they are used for placed-instance spawning and rendering.
+    void SetReferences(AssetRegistry* registry, WorldGrid* grid, Forest* forest,
+                       PrefabLibrary* prefabLib = nullptr,
+                       PrimitiveRenderer* primRenderer = nullptr);
 
     // Draw the "World Editor" ImGui panel.  Call this inside an ImGui frame.
     // playerCX/playerCZ = current grid cell the player is in (shown in the panel).
@@ -45,8 +51,9 @@ public:
                          D3D11Renderer& renderer,
                          int activeCX, int activeCZ);
 
-    // Spawn all authored instances from the given cell into the forest so they appear
-    // in the world.  Call after Populate() so persisted objects are always visible.
+    // Spawn all authored instances from the given cell into the primitive renderer
+    // (and optionally the legacy forest) so they appear in the world.
+    // Call after Populate() so persisted objects are always visible.
     void SpawnCellInstances(int cx, int cz, D3D11Renderer& renderer);
 
     // Returns true while Placement Mode is active.
@@ -61,7 +68,9 @@ private:
     std::vector<std::string> m_prefabIds;   // IDs beginning with "prefabs." (sorted)
     std::string m_selectedPrefabId;         // the currently-selected prefab ID (stable across reloads)
 
-    AssetRegistry* m_registry = nullptr;
-    WorldGrid*     m_grid     = nullptr;
-    Forest*        m_forest   = nullptr;
+    AssetRegistry*    m_registry      = nullptr;
+    WorldGrid*        m_grid          = nullptr;
+    Forest*           m_forest        = nullptr;
+    PrefabLibrary*    m_prefabLib     = nullptr;
+    PrimitiveRenderer* m_primRenderer = nullptr;
 };

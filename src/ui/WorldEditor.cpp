@@ -7,6 +7,8 @@
 #include "../assets/AssetRegistry.hpp"
 #include "../world/WorldGrid.hpp"
 #include "../game/Forest.hpp"
+#include "../game/PrefabLibrary.hpp"
+#include "../game/PrimitiveRenderer.hpp"
 #include "../game/CameraController.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../logger/Logger.hpp"
@@ -24,11 +26,14 @@
 // ---------------------------------------------------------------------------
 // SetReferences
 // ---------------------------------------------------------------------------
-void WorldEditor::SetReferences(AssetRegistry* registry, WorldGrid* grid, Forest* forest)
+void WorldEditor::SetReferences(AssetRegistry* registry, WorldGrid* grid, Forest* forest,
+                                 PrefabLibrary* prefabLib, PrimitiveRenderer* primRenderer)
 {
-    m_registry = registry;
-    m_grid     = grid;
-    m_forest   = forest;
+    m_registry     = registry;
+    m_grid         = grid;
+    m_forest       = forest;
+    m_prefabLib    = prefabLib;
+    m_primRenderer = primRenderer;
     RefreshPrefabList();
 }
 
@@ -153,7 +158,9 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
         if (cell)
         {
             cell->instances.clear();
-            // Repopulate forest without the authored instances.
+            // Clear authored prefab parts from the primitive renderer.
+            if (m_primRenderer) m_primRenderer->ClearInstances();
+            // Repopulate procedural forest trees without the authored instances.
             if (cell->forestEnabled)
                 m_forest->Populate(renderer, cell->forestTreeCount,
                                    cell->forestRadius,
@@ -244,8 +251,20 @@ bool WorldEditor::HandlePlacement(POINT screenPos,
     }
     cell->instances.push_back(inst);
 
-    // Spawn visually in the forest (same representation as procedural trees for now).
-    m_forest->AddInstance(renderer, hitX, hitY, hitZ, inst.scale);
+    // Spawn visually using the primitive renderer (preferred) or fall back to
+    // the legacy forest renderer if no PrefabLibrary is available.
+    if (m_primRenderer && m_prefabLib)
+    {
+        const PrimitivePrefab* prefab = m_prefabLib->GetPrefab(m_selectedPrefabId);
+        if (prefab)
+            m_primRenderer->AddInstance(*prefab, hitX, hitY, hitZ, inst.yaw, inst.scale);
+        else
+            m_forest->AddInstance(renderer, hitX, hitY, hitZ, inst.scale); // fallback
+    }
+    else
+    {
+        m_forest->AddInstance(renderer, hitX, hitY, hitZ, inst.scale);
+    }
 
     std::ostringstream ss;
     ss << "WorldEditor: placed '" << m_selectedPrefabId
@@ -265,7 +284,19 @@ void WorldEditor::SpawnCellInstances(int cx, int cz, D3D11Renderer& renderer)
     if (!cell || cell->instances.empty()) return;
 
     for (const auto& inst : cell->instances)
+    {
+        if (m_primRenderer && m_prefabLib)
+        {
+            const PrimitivePrefab* prefab = m_prefabLib->GetPrefab(inst.prefab);
+            if (prefab)
+            {
+                m_primRenderer->AddInstance(*prefab, inst.x, inst.y, inst.z, inst.yaw, inst.scale);
+                continue;
+            }
+        }
+        // Fallback: use legacy forest cube for prefabs not in the library.
         m_forest->AddInstance(renderer, inst.x, inst.y, inst.z, inst.scale);
+    }
 
     std::ostringstream ss;
     ss << "WorldEditor: spawned " << cell->instances.size()
