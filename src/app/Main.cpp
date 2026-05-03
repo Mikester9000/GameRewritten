@@ -25,6 +25,12 @@ extern "C" __declspec(dllimport) int __stdcall MessageBoxW(HWND, LPCWSTR, LPCWST
 #include "../ui/ImGuiLayer.hpp"
 #include "../assets/AssetLoader.hpp"
 
+// ThirdParty subsystem wrappers (from the ThirdParty static library)
+#include "tp_audio.hpp"
+#include "tp_physics.hpp"
+#include "tp_navigation.hpp"
+#include "tp_image.hpp"
+
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
     Win32Window window;
@@ -71,6 +77,34 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         SceneAsset scene;
         AssetLoader::LoadScene("Content/Scenes/test.scene.json", scene);
     }
+
+    // ── ThirdParty subsystem smoke tests ──────────────────────────────────
+    // Audio: initialize the miniaudio engine (opens the default audio device).
+    tp::Audio::Init();
+
+    // Physics: initialize Jolt and run a quick one-step smoke test.
+    tp::PhysicsBodyId physGroundId, physSphereId;
+    if (tp::Physics::Init())
+    {
+        physGroundId = tp::Physics::AddStaticGround(0.0f);
+        physSphereId = tp::Physics::AddDynamicSphere(0.0f, 5.0f, 0.0f, 0.5f, 1.0f);
+        // Take one physics step so we know integration runs without crashing.
+        tp::Physics::Step(1.0f / 60.0f);
+        float sx = 0.0f, sy = 0.0f, sz = 0.0f;
+        tp::Physics::GetBodyPosition(physSphereId, sx, sy, sz);
+        OutputDebugStringA("[Game] Physics smoke test: sphere stepped OK.\n");
+    }
+
+    // Navigation: init (navmesh build is deferred until level geometry is ready).
+    tp::Nav::Init();
+
+    // Image: attempt to load Content/Textures/placeholder.png (may not exist yet).
+    {
+        tp::Image img;
+        tp::Image::Load("Content/Textures/placeholder.png", img);
+        img.Free(); // safe to call even if load failed
+    }
+    // ── End ThirdParty smoke tests ─────────────────────────────────────────
 
     // Simple loop: process messages + render frames.
     float t = 0.0f;
@@ -311,6 +345,9 @@ updateCameraFromPlayer();
     // before renderer.Shutdown();
     forest.Shutdown();
     imguiLayer.Shutdown();
+    tp::Nav::Shutdown();
+    tp::Physics::Shutdown();
+    tp::Audio::Shutdown();
     renderer.Shutdown();
     window.Close();
     return 0;

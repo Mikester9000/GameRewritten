@@ -4,4 +4,5 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="GameRewritten.vcxproj" Id="eefceac6-b77e-4a28-9eb8-b3a86bf4d82e" />
+  <Project Path="ThirdParty\ThirdParty.vcxproj" Id="a1b2c3d4-e5f6-7890-abcd-ef1234567890" />
 </Solution>
