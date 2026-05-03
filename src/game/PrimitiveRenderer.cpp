@@ -254,7 +254,7 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
         0.1f, 2000.0f);
 
     // Shared pipeline state.
-    UINT stride = sizeof(float) * 10; // 3+3+4 floats = 40 bytes
+    UINT stride = sizeof(float) * 10; // 3+3+4 = 10 floats per vertex, 40 bytes total
     UINT offset = 0;
     m_context->IASetInputLayout(m_layout);
     m_context->IASetVertexBuffers(0, 1, &m_vb, &stride, &offset);
@@ -262,7 +262,9 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
     m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // Fixed directional light (matches the sky gradient direction).
-    XMFLOAT4 lightDir  { 0.5f, -0.8f, 0.3f, 0.0f };  // direction light comes FROM
+    // lightDir points FROM the light source toward the scene;
+    // the shaders negate this to get the direction TOWARD the light.
+    XMFLOAT4 lightDir  { 0.5f, -0.8f, 0.3f, 0.0f };  // from-light direction (sun at top-left)
     XMFLOAT4 lightColor{ 1.0f,  0.95f, 0.85f, 1.0f }; // warm sunlight
 
     ID3D11VertexShader* activeVS = nullptr;

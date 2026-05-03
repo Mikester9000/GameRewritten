@@ -245,4 +245,4 @@ The three-box composition gives the silhouette more visual interest than a singl
 | Placement Mode checkbox is greyed out | No `prefabs.*` entries are registered — check `AssetRegistry.json` |
 | Object not visible after placing | Check the `Output` window in Visual Studio for JSON parse errors in the prefab file |
 | Object appears at wrong height | The engine snaps Y to terrain automatically; verify terrain is enabled in the cell JSON |
-| Camera jumps when leaving Placement Mode | This was fixed in this PR — update to the latest code |
+| Camera jumps when leaving Placement Mode | Fixed — the engine resets the mouse baseline (re-centres the cursor and skips the first mouse-look delta) when Placement Mode is turned off. Ensure you are running the latest version of the code. |

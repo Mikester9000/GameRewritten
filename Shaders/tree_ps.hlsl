@@ -30,8 +30,11 @@ float4 main(PSIn input) : SV_TARGET
     // Scale factor 0.18 tuned so a 2-unit-tall tree transitions from ~0.4 to ~0.8.
     float gradient = saturate(input.worldPos.y * 0.18f + 0.5f);
 
-    // Cheap per-location variation using a hash on the XZ position.
-    // This makes every tree look slightly different without any texture.
+    // Cheap per-location variation using a hash on the XZ world position.
+    // The constants (127.1, 311.7, 43758.5453) are arbitrary prime-like values
+    // chosen to scatter the sine output into pseudo-random results — a common
+    // GPU hash pattern. This makes every tree look slightly different without
+    // any texture or extra memory.
     float2 xz     = float2(input.worldPos.x, input.worldPos.z);
     float  hash   = frac(sin(dot(xz, float2(127.1f, 311.7f))) * 43758.5453f);
     float  vary   = 1.0f + hash * 0.12f - 0.06f; // +/- 6 % brightness variation
