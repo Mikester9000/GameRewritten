@@ -16,6 +16,8 @@ recommended integration order, and rationale.
 | miniaudio | v0.11.25 | Audio playback (WAV, MP3, OGG, FLAC) |
 | Jolt Physics | v5.3.0 | Rigid body physics |
 | Recast & Detour | v1.6.0 | Navmesh generation and pathfinding |
+| Tracy Profiler | v0.11.1 | CPU frame profiling (Debug only) |
+| DirectXTex | Nov 2024 | Runtime texture loading (PNG→CPU, DDS/BCn decode) |
 
 ---
 
@@ -42,11 +44,15 @@ recommended integration order, and rationale.
 - **License:** MIT
 - **Purpose:** Load DDS textures, generate mipmaps, convert/compress to
   BC1/BC3/BC7 at content-cook time. Significant VRAM savings on GT610.
-- **Recommended approach:**
-  1. Vendor just the `DirectXTex/` core source folder.
-  2. Use it in a command-line "cooker" tool (separate project) that converts
-     PNG to BC1 DDS as a pre-build step.
-  3. At runtime, load DDS directly with the existing D3D11 renderer.
+- **Status:** ✅ Vendored for runtime loading.  Offline converter not yet added.
+- **Future offline pipeline:**
+  A command-line converter tool can live at `tools/TextureCooker/` and share
+  the vendored `third_party/DirectXTex/` source files (no duplication needed).
+  The tool would call `DirectX::LoadFromWICFile` then `DirectX::Compress` to
+  produce BC1/BC3 DDS files as a pre-build step.  Add a stub
+  `tools/TextureCooker/TextureCooker.vcxproj` (console application) that
+  includes the same DirectXTex sources and references `third_party/DirectXTex/`
+  to implement the offline pipeline later.
 
 ### 3. cgltf — Lightweight glTF 2.0 loader
 - **URL:** https://github.com/jnsmalm/cgltf (or KhronosGroup reference)
@@ -89,7 +95,6 @@ recommended integration order, and rationale.
 
 | Library | License | Purpose |
 |---------|---------|---------|
-| Tracy Profiler | MIT | CPU/GPU frame profiling, zone markers |
 | OpenFBX | MIT | Lightweight FBX importer if Assimp is too heavy |
 | KTX-Software | Apache 2.0 | KTX2/BasisU GPU texture compression pipeline |
 | Ozz Animation | MIT | Skeletal animation runtime (blend trees, IK) |
