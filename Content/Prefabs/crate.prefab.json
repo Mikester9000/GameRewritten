@@ -1,0 +1,7 @@
+{
+    "name": "crate",
+    "category": "prop",
+    "parts": [
+        { "shape": "box", "offset": [0.0, 0.4, 0.0], "scale": [0.80, 0.80, 0.80], "color": [0.52, 0.40, 0.22, 1.0] }
+    ]
+}

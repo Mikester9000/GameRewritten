@@ -7,7 +7,7 @@
 //   cam.Init(0.f, 0.f, -3.f, 0.f, -0.5f);
 //   cam.SetCenterPoint(centerPoint);
 //   // each frame:
-//   cam.Update(dt, paused, firstFrame, renderer);
+//   cam.Update(dt, allowMovement, allowMouseLook, firstFrame, renderer);
 //   // for mouse picking:
 //   cam.ScreenPointToRay(mx, my, vpW, vpH, ox, oy, oz, dx, dy, dz);
 
@@ -48,9 +48,15 @@ public:
     void SetCenterPoint(POINT center);
 
     // Advance camera + player movement by one frame.
-    // paused       = true when pause menu or editor mode is active (skips input + movement).
-    // inOutFirstFrame = true on the very first tick; suppresses the large initial delta.
-    void Update(float dt, bool paused, bool& inOutFirstFrame, D3D11Renderer& renderer);
+    // allowMovement  = true when WASD/jump/gravity should be processed.
+    //                  Pass false only when the pause menu is open.
+    // allowMouseLook = true when yaw/pitch should follow the mouse.
+    //                  Pass false during World Editor Placement Mode so the cursor
+    //                  stays free and is NOT recentered (avoids camera jumps).
+    // inOutFirstFrame = true on the very first tick after mouse-look is re-enabled;
+    //                  suppresses the large initial delta from cursor warp.
+    void Update(float dt, bool allowMovement, bool allowMouseLook,
+                bool& inOutFirstFrame, D3D11Renderer& renderer);
 
     // Build a world-space picking ray from a screen-space mouse position.
     // mouseX/mouseY = client-space pixel coordinates (top-left = 0,0).

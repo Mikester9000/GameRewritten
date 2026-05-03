@@ -1,0 +1,7 @@
+{
+    "name": "rock_small",
+    "category": "rock",
+    "parts": [
+        { "shape": "box", "offset": [0.0, 0.2, 0.0], "scale": [0.80, 0.40, 0.70], "color": [0.38, 0.36, 0.36, 1.0] }
+    ]
+}
