@@ -1,8 +1,16 @@
 {
     "name": "overworld",
     "version": 1,
-    "cell_size": 200.0,
+    "cell_size": 400.0,
     "cells": [
-        { "cx": 0, "cz": 0, "file": "Content/World/cell_0_0.json" }
+        { "cx": -1, "cz": -1, "file": "Content/World/cell_-1_-1.json" },
+        { "cx":  0, "cz": -1, "file": "Content/World/cell_0_-1.json" },
+        { "cx":  1, "cz": -1, "file": "Content/World/cell_1_-1.json" },
+        { "cx": -1, "cz":  0, "file": "Content/World/cell_-1_0.json" },
+        { "cx":  0, "cz":  0, "file": "Content/World/cell_0_0.json" },
+        { "cx":  1, "cz":  0, "file": "Content/World/cell_1_0.json" },
+        { "cx": -1, "cz":  1, "file": "Content/World/cell_-1_1.json" },
+        { "cx":  0, "cz":  1, "file": "Content/World/cell_0_1.json" },
+        { "cx":  1, "cz":  1, "file": "Content/World/cell_1_1.json" }
     ]
 }

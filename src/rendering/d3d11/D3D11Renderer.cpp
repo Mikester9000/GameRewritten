@@ -254,43 +254,97 @@ void D3D11Renderer::CreateGroundPlane()
 
 bool D3D11Renderer::CreateTerrainPatch()
 {
-    // User-reviewed defaults:
-    // 200x200 quads => 201x201 vertices
+    // Build the initial terrain for a default grassland cell at origin.
+    TerrainParams defaults{};
+    defaults.biome        = "grassland";
+    defaults.seed         = 12345;
+    defaults.cellOriginX  = 0.0f;
+    defaults.cellOriginZ  = 0.0f;
+    defaults.cellWorldSize = 400.0f;
+    defaults.heightScale  = 8.0f;
+    defaults.noiseFreq    = 0.08f;
+    defaults.noiseFreq2   = 0.03f;
+    return RebuildTerrainPatch(defaults);
+}
+
+bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
+{
+    // Release any existing GPU buffers before rebuilding.
+    if (m_terrainPatchVertexBuffer) { m_terrainPatchVertexBuffer->Release(); m_terrainPatchVertexBuffer = nullptr; }
+    if (m_terrainPatchIndexBuffer)  { m_terrainPatchIndexBuffer->Release();  m_terrainPatchIndexBuffer  = nullptr; }
+    m_terrainPatchIndexCount = 0;
+    m_terrainAvailable = false;
+    m_terrainHeights.clear();
+
+    // 200x200 quads → 201x201 verts covering the full cell.
     const int quadsX = 200;
     const int quadsZ = 200;
     const int vertsX = quadsX + 1;
     const int vertsZ = quadsZ + 1;
-    const float cellSize = 1.0f;
-    const float halfSizeX = (quadsX * cellSize) * 0.5f;
-    const float halfSizeZ = (quadsZ * cellSize) * 0.5f;
-    const float halfHeightRange = 7.5f; // ~15 total range
+    const float quadSize = params.cellWorldSize / static_cast<float>(quadsX); // world units per quad
 
-    auto sampleHeight = [halfHeightRange](float x, float z) -> float
-        {
-            float h0 = sinf(x * 0.08f) * cosf(z * 0.08f);   // [-1,1]
-            float h1 = sinf((x + z) * 0.03f);               // [-1,1]
-            return (h0 * 5.0f) + (h1 * 2.5f);               // approx [-7.5, +7.5]
-        };
+    // Biome-specific vertex-color gradients (low-height colour → high-height colour).
+    float lowR, lowG, lowB, hiR, hiG, hiB;
+    if (params.biome == "desert")
+    {
+        lowR = 0.78f; lowG = 0.65f; lowB = 0.35f; // sandy tan
+        hiR  = 0.62f; hiG  = 0.52f; hiB  = 0.30f; // darker sandy rock
+    }
+    else if (params.biome == "rocky")
+    {
+        lowR = 0.38f; lowG = 0.36f; lowB = 0.34f; // dark grey stone
+        hiR  = 0.58f; hiG  = 0.56f; hiB  = 0.52f; // lighter grey
+    }
+    else if (params.biome == "snow")
+    {
+        lowR = 0.45f; lowG = 0.47f; lowB = 0.52f; // blue-grey rock
+        hiR  = 0.95f; hiG  = 0.96f; hiB  = 1.00f; // near-white snow
+    }
+    else // grassland (default)
+    {
+        lowR = 0.15f; lowG = 0.50f; lowB = 0.15f; // green
+        hiR  = 0.45f; hiG  = 0.42f; hiB  = 0.38f; // brown rock
+    }
+
+    // Biome-specific noise tuning.
+    float nFreq1 = params.noiseFreq;
+    float nFreq2 = params.noiseFreq2;
+    float hScale = params.heightScale;
+    // Desert: smoother dunes; Rocky: sharper peaks; Snow: similar to rocky.
+    if (params.biome == "desert")  { nFreq1 *= 0.6f; nFreq2 *= 0.5f; }
+    if (params.biome == "rocky")   { nFreq1 *= 1.3f; nFreq2 *= 1.2f; }
+    if (params.biome == "snow")    { nFreq1 *= 1.1f; nFreq2 *= 1.0f; }
+
+    // Seed offset: shifts sample coordinates so each seed gives unique terrain.
+    float seedOX = static_cast<float>(params.seed) * 0.12345f;
+    float seedOZ = static_cast<float>(params.seed) * 0.09876f;
+
+    auto sampleHeight = [&](float wx, float wz) -> float
+    {
+        float sx = wx + seedOX;
+        float sz = wz + seedOZ;
+        float h0 = sinf(sx * nFreq1) * cosf(sz * nFreq1);   // [-1,1]
+        float h1 = sinf((sx + sz) * nFreq2);                 // [-1,1]
+        return (h0 * hScale * 0.667f) + (h1 * hScale * 0.333f);
+    };
+
+    const float halfHeightRange = hScale;
 
     std::vector<Vertex> vertices;
     vertices.resize(static_cast<size_t>(vertsX * vertsZ));
 
-    // Build positions + colors for entire grid
     for (int z = 0; z < vertsZ; ++z)
     {
         for (int x = 0; x < vertsX; ++x)
         {
-            float worldX = (x * cellSize) - halfSizeX;
-            float worldZ = (z * cellSize) - halfSizeZ;
+            float worldX = params.cellOriginX + x * quadSize;
+            float worldZ = params.cellOriginZ + z * quadSize;
             float worldY = sampleHeight(worldX, worldZ);
 
             float h01 = (worldY + halfHeightRange) / (halfHeightRange * 2.0f);
             if (h01 < 0.0f) h01 = 0.0f;
             if (h01 > 1.0f) h01 = 1.0f;
 
-            // Low=green, high=rock-ish
-            float lowR = 0.15f, lowG = 0.50f, lowB = 0.15f;
-            float hiR = 0.45f, hiG = 0.42f, hiB = 0.38f;
             float r = lowR + (hiR - lowR) * h01;
             float g = lowG + (hiG - lowG) * h01;
             float b = lowB + (hiB - lowB) * h01;
@@ -303,25 +357,22 @@ bool D3D11Renderer::CreateTerrainPatch()
         }
     }
 
-    // Store height grid for sampling (do this once after vertices fully built)
-    m_terrainVertsX = vertsX;
-    m_terrainVertsZ = vertsZ;
-    m_terrainCellSize = cellSize;
-    m_terrainHalfSizeX = halfSizeX;
-    m_terrainHalfSizeZ = halfSizeZ;
-    m_terrainHeights.clear();
+    // Store height grid for SampleTerrainHeight().
+    m_terrainVertsX   = vertsX;
+    m_terrainVertsZ   = vertsZ;
+    m_terrainCellSize = quadSize;
+    m_terrainOriginX  = params.cellOriginX;
+    m_terrainOriginZ  = params.cellOriginZ;
+    // Keep legacy half-size fields in sync (used by nothing critical now).
+    m_terrainHalfSizeX = params.cellWorldSize * 0.5f;
+    m_terrainHalfSizeZ = params.cellWorldSize * 0.5f;
     m_terrainHeights.reserve(static_cast<size_t>(vertsX * vertsZ));
     for (int z = 0; z < vertsZ; ++z)
-    {
         for (int x = 0; x < vertsX; ++x)
-        {
-            const Vertex& vv = vertices[static_cast<size_t>(z * vertsX + x)];
-            m_terrainHeights.push_back(vv.y);
-        }
-    }
+            m_terrainHeights.push_back(vertices[static_cast<size_t>(z * vertsX + x)].y);
     m_terrainAvailable = true;
 
-    // Compute normals (finite differences)
+    // Compute smooth normals via finite differences.
     for (int z = 0; z < vertsZ; ++z)
     {
         for (int x = 0; x < vertsX; ++x)
@@ -331,23 +382,14 @@ bool D3D11Renderer::CreateTerrainPatch()
             int zD = (z > 0) ? z - 1 : z;
             int zU = (z < vertsZ - 1) ? z + 1 : z;
 
-            const Vertex& vL = vertices[static_cast<size_t>(z * vertsX + xL)];
-            const Vertex& vR = vertices[static_cast<size_t>(z * vertsX + xR)];
-            const Vertex& vD = vertices[static_cast<size_t>(zD * vertsX + x)];
-            const Vertex& vU = vertices[static_cast<size_t>(zU * vertsX + x)];
+            float dx = vertices[static_cast<size_t>(z  * vertsX + xR)].y
+                     - vertices[static_cast<size_t>(z  * vertsX + xL)].y;
+            float dz = vertices[static_cast<size_t>(zU * vertsX + x)].y
+                     - vertices[static_cast<size_t>(zD * vertsX + x)].y;
 
-            float dx = vR.y - vL.y;
-            float dz = vU.y - vD.y;
-
-            // Up-biased normal
-            float nx = -dx;
-            float ny = 2.0f;
-            float nz = -dz;
+            float nx = -dx, ny = 2.0f, nz = -dz;
             float len = sqrtf(nx * nx + ny * ny + nz * nz);
-            if (len > 0.0001f)
-            {
-                nx /= len; ny /= len; nz /= len;
-            }
+            if (len > 0.0001f) { nx /= len; ny /= len; nz /= len; }
 
             Vertex& out = vertices[static_cast<size_t>(z * vertsX + x)];
             out.nx = nx; out.ny = ny; out.nz = nz;
@@ -356,7 +398,6 @@ bool D3D11Renderer::CreateTerrainPatch()
 
     std::vector<uint32_t> indices;
     indices.reserve(static_cast<size_t>(quadsX * quadsZ * 6));
-
     for (int z = 0; z < quadsZ; ++z)
     {
         for (int x = 0; x < quadsX; ++x)
@@ -365,8 +406,6 @@ bool D3D11Renderer::CreateTerrainPatch()
             uint32_t i1 = static_cast<uint32_t>(z * vertsX + (x + 1));
             uint32_t i2 = static_cast<uint32_t>((z + 1) * vertsX + x);
             uint32_t i3 = static_cast<uint32_t>((z + 1) * vertsX + (x + 1));
-
-            // Winding for LH system
             indices.push_back(i0); indices.push_back(i2); indices.push_back(i1);
             indices.push_back(i1); indices.push_back(i2); indices.push_back(i3);
         }
@@ -375,45 +414,40 @@ bool D3D11Renderer::CreateTerrainPatch()
     m_terrainPatchIndexCount = static_cast<UINT>(indices.size());
 
     D3D11_BUFFER_DESC vbd{};
-    vbd.Usage = D3D11_USAGE_DEFAULT;
+    vbd.Usage     = D3D11_USAGE_DEFAULT;
     vbd.ByteWidth = static_cast<UINT>(vertices.size() * sizeof(Vertex));
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
     D3D11_SUBRESOURCE_DATA vinit{};
     vinit.pSysMem = vertices.data();
-
     HRESULT hr = device->CreateBuffer(&vbd, &vinit, &m_terrainPatchVertexBuffer);
     if (FAILED(hr)) return false;
 
     D3D11_BUFFER_DESC ibd{};
-    ibd.Usage = D3D11_USAGE_DEFAULT;
+    ibd.Usage     = D3D11_USAGE_DEFAULT;
     ibd.ByteWidth = static_cast<UINT>(indices.size() * sizeof(uint32_t));
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
     D3D11_SUBRESOURCE_DATA iinit{};
     iinit.pSysMem = indices.data();
-
     hr = device->CreateBuffer(&ibd, &iinit, &m_terrainPatchIndexBuffer);
     if (FAILED(hr)) return false;
 
     return true;
 }
-// Add near other method implementations (after CreateTerrainPatch or before Shutdown)
 
 float D3D11Renderer::SampleTerrainHeight(float worldX, float worldZ) const
 {
     if (!m_terrainAvailable || m_terrainVertsX <= 0 || m_terrainVertsZ <= 0)
         return 0.0f;
 
-    // Convert world pos -> grid local coordinates (0..vertsX-1, 0..vertsZ-1)
-    float localX = (worldX + m_terrainHalfSizeX) / m_terrainCellSize;
-    float localZ = (worldZ + m_terrainHalfSizeZ) / m_terrainCellSize;
+    // Convert world pos → local grid index using the cell origin.
+    float localX = (worldX - m_terrainOriginX) / m_terrainCellSize;
+    float localZ = (worldZ - m_terrainOriginZ) / m_terrainCellSize;
 
-    // Clamp to grid extents (so sampling near edges works)
+    // Clamp to grid extents so sampling near/outside edges still works.
     if (localX < 0.0f) localX = 0.0f;
     if (localZ < 0.0f) localZ = 0.0f;
-    if (localX > (float)(m_terrainVertsX - 1)) localX = (float)(m_terrainVertsX - 1);
-    if (localZ > (float)(m_terrainVertsZ - 1)) localZ = (float)(m_terrainVertsZ - 1);
+    if (localX > static_cast<float>(m_terrainVertsX - 1)) localX = static_cast<float>(m_terrainVertsX - 1);
+    if (localZ > static_cast<float>(m_terrainVertsZ - 1)) localZ = static_cast<float>(m_terrainVertsZ - 1);
 
     int x0 = static_cast<int>(floorf(localX));
     int z0 = static_cast<int>(floorf(localZ));

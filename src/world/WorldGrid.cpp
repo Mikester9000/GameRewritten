@@ -163,9 +163,13 @@ bool WorldGrid::LoadCellFile(const std::string& path, WorldCell& out)
 
     if (j.contains("terrain"))
     {
-        const auto& t     = j["terrain"];
-        out.terrainEnabled    = t.value("enabled",      true);
+        const auto& t      = j["terrain"];
+        out.terrainEnabled     = t.value("enabled",      true);
+        out.terrainBiome       = t.value("biome",        "grassland");
+        out.terrainSeed        = t.value("seed",         12345);
         out.terrainHeightScale = t.value("height_scale", 8.0f);
+        out.terrainNoiseFreq   = t.value("noise_freq",   0.08f);
+        out.terrainNoiseFreq2  = t.value("noise_freq2",  0.03f);
     }
 
     if (j.contains("forest"))
@@ -272,7 +276,11 @@ bool WorldGrid::SaveCell(int cx, int cz)
     j["cz"]  = cell->cz;
 
     j["terrain"]["enabled"]      = cell->terrainEnabled;
+    j["terrain"]["biome"]        = cell->terrainBiome;
+    j["terrain"]["seed"]         = cell->terrainSeed;
     j["terrain"]["height_scale"] = cell->terrainHeightScale;
+    j["terrain"]["noise_freq"]   = cell->terrainNoiseFreq;
+    j["terrain"]["noise_freq2"]  = cell->terrainNoiseFreq2;
 
     j["forest"]["enabled"]    = cell->forestEnabled;
     j["forest"]["tree_count"] = cell->forestTreeCount;

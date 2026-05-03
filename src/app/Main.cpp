@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstdint>
 #include <algorithm> // for std::clamp
+#include <sstream>   // for std::ostringstream (cell crossing log)
 // --- Hacky but simple approach for day 1 ---
 // We include the .cpp files to avoid headers for now.
 // This is NOT how big projects do it, but it's a good beginner stepping stone.
@@ -71,28 +72,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     WorldGrid worldGrid;
     worldGrid.Load("Content/World/world.json");
 
-    // Create and initialize forest (after renderer is initialized)
+    // Create and initialize forest (after renderer is initialized).
     Forest forest;
     if (!forest.Initialize(renderer))
     {
         MessageBoxW(nullptr, L"Failed to initialize Forest.", L"Error", 0);
         return 1;
-    }
-    // Populate forest from the first active world cell (cell-driven open world).
-    // The player starts at world (0,0), which is cell (0,0).
-    {
-        int startCX = 0, startCZ = 0;
-        auto activeCells = worldGrid.GetActiveCells(startCX, startCZ, 0);
-        if (!activeCells.empty() && activeCells[0].forestEnabled)
-        {
-            const WorldCell& c = activeCells[0];
-            forest.Populate(renderer, c.forestTreeCount, c.forestRadius,
-                            c.CenterX(), c.CenterZ());
-        }
-        else
-        {
-            forest.Populate(renderer, 80, 50.0f); // fallback if no cell data
-        }
     }
 
     // Initialize ImGui overlay (pause menu + debug overlay).
@@ -130,8 +115,43 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // --- World Editor ---
     WorldEditor worldEditor;
     worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
-    // Spawn any authored instances already saved in cell_0_0.json (startup cell).
-    worldEditor.SpawnCellInstances(0, 0, renderer);
+
+    // Helper: rebuild terrain mesh, repopulate forest, and respawn placed instances for a cell.
+    // Called on startup, F5, and whenever the player crosses into a new cell.
+    auto rebuildTerrainForCell = [&](const WorldCell& cell)
+    {
+        D3D11Renderer::TerrainParams tp;
+        tp.biome         = cell.terrainBiome;
+        tp.seed          = cell.terrainSeed;
+        tp.cellOriginX   = cell.OriginX();
+        tp.cellOriginZ   = cell.OriginZ();
+        tp.cellWorldSize = cell.cellSize;
+        tp.heightScale   = cell.terrainHeightScale;
+        tp.noiseFreq     = cell.terrainNoiseFreq;
+        tp.noiseFreq2    = cell.terrainNoiseFreq2;
+        if (cell.terrainEnabled)
+            renderer.RebuildTerrainPatch(tp);
+
+        if (cell.forestEnabled)
+        {
+            forest.Populate(renderer, cell.forestTreeCount,
+                            cell.forestRadius, cell.CenterX(), cell.CenterZ());
+        }
+        primRenderer.ClearInstances();
+        worldEditor.SpawnCellInstances(cell.cx, cell.cz, renderer);
+    };
+
+    // Build terrain + instances for the startup cell (player starts near world origin).
+    {
+        // Player camera starts at (0, 0, -3); use (X=0, Z=-3) for the initial cell.
+        int startCX = 0, startCZ = 0;
+        worldGrid.WorldToCell(0.0f, -3.0f, startCX, startCZ);
+        WorldCell* startCell = worldGrid.FindCell(startCX, startCZ);
+        if (startCell)
+            rebuildTerrainForCell(*startCell);
+        else
+            forest.Populate(renderer, 80, 50.0f); // fallback if no cell data
+    }
 
     // Load sample Content/ assets and log them (stub — no GPU resources yet).
     {
@@ -212,6 +232,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasF1Down  = false;
     bool wasF5Down  = false;
     bool wasLButtonDown = false;
+    // Track the cell the player was in last frame to detect cell-crossing.
+    // Compute from the actual camera start position (x=0, z=-3).
+    int lastPlayerCX = 0, lastPlayerCZ = 0;
+    worldGrid.WorldToCell(0.0f, -3.0f, lastPlayerCX, lastPlayerCZ);
     // FPS smoothing accumulator.
     float fpsAccum = 0.0f;
     int   fpsFrames = 0;
@@ -259,8 +283,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         wasF1Down = f1Down;
 
         // F5: reload Asset Registry and World Grid without restarting.
-        // Also repopulates the forest from the reloaded cell data so changes
-        // to tree_count/radius in cell JSON take effect immediately.
+        // Also rebuilds terrain + forest for the active cell and respawns instances.
         bool f5Down = (GetAsyncKeyState(VK_F5) & 0x8000) != 0;
         if (f5Down && !wasF5Down)
         {
@@ -279,33 +302,16 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
             if (gridOk)
             {
-                LOG_INFO("F5: WorldGrid reloaded OK — repopulating forest...");
-                // Rebuild forest from updated cell data so gameplay sees the changes.
-                // Compute which cell the player is currently standing in.
+                LOG_INFO("F5: WorldGrid reloaded OK — rebuilding terrain for active cell...");
                 int playerCX = 0, playerCZ = 0;
                 worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), playerCX, playerCZ);
-
-                // Find the exact cell by coordinates (not by array index) to be safe.
-                auto reloadedCells = worldGrid.GetActiveCells(playerCX, playerCZ, 0);
-                const WorldCell* playerCell = nullptr;
-                for (const auto& c : reloadedCells)
+                WorldCell* playerCell = worldGrid.FindCell(playerCX, playerCZ);
+                if (playerCell)
                 {
-                    if (c.cx == playerCX && c.cz == playerCZ)
-                    {
-                        playerCell = &c;
-                        break;
-                    }
-                }
-
-                if (playerCell && playerCell->forestEnabled)
-                {
-                    forest.Populate(renderer, playerCell->forestTreeCount,
-                                    playerCell->forestRadius,
-                                    playerCell->CenterX(), playerCell->CenterZ());
-                    // Re-spawn placed prefab instances in the primitive renderer.
-                    primRenderer.ClearInstances();
-                    worldEditor.SpawnCellInstances(playerCX, playerCZ, renderer);
-                    LOG_INFO("F5: forest repopulated from cell data.");
+                    rebuildTerrainForCell(*playerCell);
+                    lastPlayerCX = playerCX;
+                    lastPlayerCZ = playerCZ;
+                    LOG_INFO("F5: terrain rebuilt and instances respawned.");
                 }
             }
             else
@@ -381,6 +387,29 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         prevEditorActive = editorActive;
 
         camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
+
+        // --- Cell-crossing detection: rebuild terrain instantly on biome change ---
+        // This gives hard biome borders with no loading screen.
+        {
+            int playerCX = 0, playerCZ = 0;
+            worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
+                                  playerCX, playerCZ);
+            if (playerCX != lastPlayerCX || playerCZ != lastPlayerCZ)
+            {
+                WorldCell* newCell = worldGrid.FindCell(playerCX, playerCZ);
+                if (newCell)
+                {
+                    std::ostringstream ss;
+                    ss << "Cell change: (" << lastPlayerCX << "," << lastPlayerCZ
+                       << ") -> (" << playerCX << "," << playerCZ
+                       << ") biome=" << newCell->terrainBiome;
+                    LOG_INFO(ss.str());
+                    rebuildTerrainForCell(*newCell);
+                }
+                lastPlayerCX = playerCX;
+                lastPlayerCZ = playerCZ;
+            }
+        }
 
         // --- Left-click placement ---
         // Check ImGui::GetIO().WantCaptureMouse BEFORE BeginFrame for the

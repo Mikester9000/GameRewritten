@@ -1,0 +1,8 @@
+{
+    "name": "desert_crate_weathered",
+    "category": "prop",
+    "parts": [
+        { "shape": "box", "offset": [0.0, 0.30, 0.0], "scale": [0.60, 0.60, 0.60], "color": [0.62, 0.50, 0.30, 1.0] },
+        { "shape": "box", "offset": [0.0, 0.30, 0.0], "scale": [0.64, 0.08, 0.64], "color": [0.55, 0.42, 0.25, 1.0] }
+    ]
+}
