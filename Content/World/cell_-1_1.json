@@ -1,0 +1,18 @@
+{
+    "cx": -1,
+    "cz": 1,
+    "terrain": {
+        "enabled": true,
+        "biome": "snow",
+        "seed": 11583,
+        "height_scale": 16.0,
+        "noise_freq": 0.08,
+        "noise_freq2": 0.04
+    },
+    "forest": {
+        "enabled": false,
+        "tree_count": 0,
+        "radius": 150.0
+    },
+    "instances": []
+}

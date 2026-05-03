@@ -1,0 +1,8 @@
+{
+    "name": "desert_ruins_pillar",
+    "category": "ruin",
+    "parts": [
+        { "shape": "box", "offset": [0.0, 0.90, 0.0], "scale": [0.50, 1.80, 0.50], "color": [0.74, 0.67, 0.50, 1.0] },
+        { "shape": "box", "offset": [0.0, 0.10, 0.0], "scale": [0.70, 0.20, 0.70], "color": [0.70, 0.62, 0.46, 1.0] }
+    ]
+}

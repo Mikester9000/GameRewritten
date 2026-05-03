@@ -1,17 +1,17 @@
 {
-    "cx": 0,
-    "cz": 0,
+    "cx": 1,
+    "cz": 1,
     "terrain": {
         "enabled": true,
         "biome": "grassland",
-        "seed": 12345,
-        "height_scale": 8.0,
-        "noise_freq": 0.08,
-        "noise_freq2": 0.03
+        "seed": 93847,
+        "height_scale": 7.0,
+        "noise_freq": 0.07,
+        "noise_freq2": 0.028
     },
     "forest": {
         "enabled": true,
-        "tree_count": 60,
+        "tree_count": 40,
         "radius": 150.0
     },
     "instances": []

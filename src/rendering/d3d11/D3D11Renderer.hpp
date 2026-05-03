@@ -2,12 +2,25 @@
 #include <windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include <vector> 
+#include <vector>
+#include <string>
 
 // A simple class for setting up and drawing with Direct3D 11.
 class D3D11Renderer
 {
 public:
+    // Parameters that drive biome-specific terrain generation.
+    struct TerrainParams
+    {
+        std::string biome      = "grassland"; // grassland | desert | rocky | snow
+        int         seed       = 12345;
+        float       cellOriginX = 0.0f;  // world-space X of cell bottom-left corner
+        float       cellOriginZ = 0.0f;  // world-space Z of cell bottom-left corner
+        float       cellWorldSize = 400.0f; // cell side length in world units
+        float       heightScale = 8.0f;
+        float       noiseFreq  = 0.08f;
+        float       noiseFreq2 = 0.03f;
+    };
     D3D11Renderer();
     bool Initialize(HWND windowHandle, int width, int height);
     void Shutdown();
@@ -21,6 +34,11 @@ public:
     void GetCameraRotation(float& yaw, float& pitch) const;
     void DrawGroundPlane();
     void DrawTerrainPatch();
+    // Rebuild the terrain mesh from biome/seed parameters (called on cell transition or F5).
+    // Releases old GPU buffers before creating new ones — safe to call multiple times.
+    bool RebuildTerrainPatch(const TerrainParams& params);
+    // Release the terrain mesh and mark terrain unavailable (for cells with terrain.enabled=false).
+    void ClearTerrainPatch();
     float SampleTerrainHeight(float worldX, float worldZ) const;
     bool IsTerrainAvailable() const;
 // Gravity and jumping control
@@ -53,6 +71,8 @@ private:
     float m_terrainCellSize = 1.0f;
     float m_terrainHalfSizeX = 0.0f;
     float m_terrainHalfSizeZ = 0.0f;
+    float m_terrainOriginX = 0.0f;   // world-space X of terrain mesh start
+    float m_terrainOriginZ = 0.0f;   // world-space Z of terrain mesh start
     bool m_terrainAvailable = false;
     struct LightConstantBuffer
     {

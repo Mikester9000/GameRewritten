@@ -1,0 +1,9 @@
+{
+    "name": "rocky_pillar_broken",
+    "category": "ruin",
+    "parts": [
+        { "shape": "box", "offset": [0.0, 0.15, 0.0], "scale": [0.70, 0.30, 0.70], "color": [0.46, 0.44, 0.42, 1.0] },
+        { "shape": "box", "offset": [0.0, 0.75, 0.0], "scale": [0.55, 1.00, 0.55], "color": [0.44, 0.42, 0.40, 1.0] },
+        { "shape": "box", "offset": [0.2, 1.30, 0.1], "scale": [0.45, 0.30, 0.45], "color": [0.48, 0.46, 0.44, 1.0] }
+    ]
+}

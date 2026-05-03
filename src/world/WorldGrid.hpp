@@ -36,8 +36,12 @@ struct WorldCell
     float cellSize = 200.0f;   // world-space size of this cell (set from world.json)
 
     // Terrain settings for this cell
-    bool  terrainEnabled    = true;
-    float terrainHeightScale = 8.0f;
+    bool        terrainEnabled    = true;
+    std::string terrainBiome      = "grassland"; // grassland, desert, rocky, snow
+    int         terrainSeed       = 12345;
+    float       terrainHeightScale = 8.0f;
+    float       terrainNoiseFreq  = 0.08f;
+    float       terrainNoiseFreq2 = 0.03f;
 
     // Forest settings for this cell
     bool  forestEnabled   = true;

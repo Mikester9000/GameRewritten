@@ -1,0 +1,18 @@
+{
+    "cx": 0,
+    "cz": -1,
+    "terrain": {
+        "enabled": true,
+        "biome": "desert",
+        "seed": 81273,
+        "height_scale": 6.0,
+        "noise_freq": 0.06,
+        "noise_freq2": 0.02
+    },
+    "forest": {
+        "enabled": false,
+        "tree_count": 0,
+        "radius": 150.0
+    },
+    "instances": []
+}

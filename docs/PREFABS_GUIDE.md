@@ -202,6 +202,8 @@ The three-box composition gives the silhouette more visual interest than a singl
 
 ## Quick-reference: all built-in prefabs
 
+### Generic prefabs (no biome prefix)
+
 | Asset ID | Name | Category |
 |----------|------|----------|
 | `prefabs.tree` | tree_oak | tree |
@@ -234,6 +236,146 @@ The three-box composition gives the silhouette more visual interest than a singl
 | `prefabs.crystal_formation` | crystal_formation | prop |
 | `prefabs.fallen_log` | fallen_log | prop |
 | `prefabs.mushroom_ring` | mushroom_ring | prop |
+
+### Biome-prefixed prefabs
+
+#### Grassland (`prefabs.grass.*`)
+
+| Asset ID | Description | Category |
+|----------|-------------|----------|
+| `prefabs.grass.tree_oak_a` | Oak tree variant A (3 parts) | tree |
+| `prefabs.grass.tree_oak_b` | Oak tree variant B (4 parts) | tree |
+| `prefabs.grass.tree_willow` | Drooping willow-style tree | tree |
+| `prefabs.grass.bush_a` | Small bush | tree |
+| `prefabs.grass.bush_b` | Large bush | tree |
+| `prefabs.grass.rock_mossy` | Mossy boulder cluster | rock |
+| `prefabs.grass.rock_small` | Small grey rock | rock |
+| `prefabs.grass.log_fallen` | Fallen log | prop |
+| `prefabs.grass.fence_post` | Wooden fence segment | prop |
+| `prefabs.grass.well` | Stone well | prop |
+| `prefabs.grass.signpost` | Directional signpost | prop |
+| `prefabs.grass.campfire` | Campfire with rocks | prop |
+| `prefabs.grass.flower_patch` | Colourful flower cluster | prop |
+
+#### Desert (`prefabs.desert.*`)
+
+| Asset ID | Description | Category |
+|----------|-------------|----------|
+| `prefabs.desert.cactus_tall` | Tall branching cactus | prop |
+| `prefabs.desert.cactus_squat` | Short stubby cactus | prop |
+| `prefabs.desert.dead_shrub` | Dried-out twig shrub | prop |
+| `prefabs.desert.sand_rock_a` | Sandy sandstone formation A | rock |
+| `prefabs.desert.sand_rock_b` | Sandy sandstone cluster B | rock |
+| `prefabs.desert.ruins_wall` | Crumbling sandstone wall | ruin |
+| `prefabs.desert.ruins_pillar` | Standing stone pillar | ruin |
+| `prefabs.desert.tent` | Desert shelter tent | prop |
+| `prefabs.desert.dune_marker` | Striped dune waymarker | prop |
+| `prefabs.desert.crate_weathered` | Sun-bleached crate | prop |
+| `prefabs.desert.obelisk` | Tall ancient obelisk | ruin |
+
+#### Rocky (`prefabs.rocky.*`)
+
+| Asset ID | Description | Category |
+|----------|-------------|----------|
+| `prefabs.rocky.boulder_a` | Large multi-chunk boulder | rock |
+| `prefabs.rocky.boulder_b` | Medium boulder pair | rock |
+| `prefabs.rocky.cliff_chunk` | Tall cliff fragment | rock |
+| `prefabs.rocky.rubble_pile` | Scattered rock debris | rock |
+| `prefabs.rocky.pillar` | Smooth stone pillar | ruin |
+| `prefabs.rocky.pillar_broken` | Shattered pillar stump | ruin |
+| `prefabs.rocky.ruins_arch` | Stone arch gateway | ruin |
+| `prefabs.rocky.ruins_wall` | Broken stone wall | ruin |
+| `prefabs.rocky.dead_tree` | Bare leafless tree | tree |
+| `prefabs.rocky.waymarker` | Stacked stone waypoint | prop |
+
+#### Snow (`prefabs.snow.*`)
+
+| Asset ID | Description | Category |
+|----------|-------------|----------|
+| `prefabs.snow.pine_a` | Snow-capped tall pine | tree |
+| `prefabs.snow.pine_b` | Snow-capped short pine | tree |
+| `prefabs.snow.dead_tree` | Frost-covered dead tree | tree |
+| `prefabs.snow.boulder` | Snow-topped boulder | rock |
+| `prefabs.snow.ice_shard` | Crystalline ice spire | prop |
+| `prefabs.snow.mound` | Rounded snow mound | prop |
+| `prefabs.snow.ruins_pillar` | Snow-dusted stone pillar | ruin |
+| `prefabs.snow.ruins_wall` | Snow-covered crumbling wall | ruin |
+| `prefabs.snow.dead_shrub` | Frozen twig shrub | prop |
+| `prefabs.snow.camp_marker` | Snow-capped stone marker | prop |
+
+### Vehicles (`prefabs.props.*`)
+
+| Asset ID | Description | Category |
+|----------|-------------|----------|
+| `prefabs.props.vehicle_car` | PS2-style blocky car | prop |
+| `prefabs.props.vehicle_truck` | PS2-style box truck | prop |
+| `prefabs.props.vehicle_motorcycle` | PS2-style motorcycle | prop |
+
+---
+
+## Biomes and terrain cell JSON
+
+### How biomes work
+
+Each world cell has a `terrain.biome` setting that controls the height-map noise pattern and vertex-color gradient used when the cell's terrain mesh is built. There is **no blending** — walking across a cell boundary immediately switches terrain (hard biome border). This gives a clear, retro feel.
+
+| Biome | Ground colors | Terrain character |
+|-------|---------------|-------------------|
+| `grassland` | Green lowlands → brown rock tops | Moderate rolling hills |
+| `desert` | Sandy tan lowlands → pale bleached sandstone tops | Smooth, wide dunes |
+| `rocky` | Dark grey stone → lighter grey | Sharp, jagged peaks |
+| `snow` | Blue-grey stone → near-white snow | Cold, craggy mountains |
+
+### Cell JSON fields
+
+Each `Content/World/cell_X_Z.json` supports the following terrain keys:
+
+```json
+{
+    "cx": 0,
+    "cz": 0,
+    "terrain": {
+        "enabled": true,
+        "biome": "grassland",
+        "seed": 12345,
+        "height_scale": 8.0,
+        "noise_freq": 0.08,
+        "noise_freq2": 0.03
+    },
+    "forest": { ... },
+    "instances": [ ... ]
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | bool | `true` | Whether the terrain mesh is generated for this cell |
+| `biome` | string | `"grassland"` | One of `"grassland"`, `"desert"`, `"rocky"`, `"snow"` |
+| `seed` | int | `12345` | Shifts the noise sample coordinates so every cell has a unique shape |
+| `height_scale` | float | `8.0` | Vertical amplitude of hills in world units |
+| `noise_freq` | float | `0.08` | Primary noise frequency (higher = more detail) |
+| `noise_freq2` | float | `0.03` | Secondary noise frequency for large-scale variation |
+
+### World grid layout (3×3 test grid)
+
+The starter world uses a 3×3 grid of 400×400-unit cells:
+
+```
+(-1,1) snow    (0,1) rocky    (1,1) grassland
+(-1,0) snow    (0,0) grassland (1,0) desert
+(-1,-1) rocky  (0,-1) desert  (1,-1) rocky
+```
+
+The player starts in cell (0,-1) (just south of the grassland centre) and can walk in any direction to cross into a neighboring biome. Terrain rebuilds instantly with no loading screen.
+
+### Adding a new cell
+
+1. Create `Content/World/cell_X_Z.json` with the desired biome + seed.
+2. Add an entry to `Content/World/world.json` in the `"cells"` array:
+   ```json
+   { "cx": 2, "cz": 0, "file": "Content/World/cell_2_0.json" }
+   ```
+3. Press **F5** in-game to reload the world grid and rebuild the active cell's terrain.
 
 ---
 

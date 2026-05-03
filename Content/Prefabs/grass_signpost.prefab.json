@@ -1,0 +1,8 @@
+{
+    "name": "grass_signpost",
+    "category": "prop",
+    "parts": [
+        { "shape": "box", "offset": [0.0, 0.80, 0.0], "scale": [0.12, 1.60, 0.12], "color": [0.48, 0.30, 0.12, 1.0] },
+        { "shape": "box", "offset": [0.4, 1.30, 0.0], "scale": [0.80, 0.30, 0.10], "color": [0.70, 0.65, 0.50, 1.0] }
+    ]
+}
