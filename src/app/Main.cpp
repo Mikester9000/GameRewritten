@@ -12,7 +12,9 @@
 #include "../platform/win32/Win32Window.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../game/Forest.hpp"
+#include "../game/CameraController.hpp"
 #include "../ui/ImGuiLayer.hpp"
+#include "../ui/WorldEditor.hpp"
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
 #include "../world/WorldGrid.hpp"
@@ -34,6 +36,9 @@ extern "C" __declspec(dllimport) int __stdcall MessageBoxW(HWND, LPCWSTR, LPCWST
 #include "tp_image.hpp"
 #include "tp_texture.hpp"
 #include "tp_tracy.hpp"
+
+// ImGui for WantCaptureMouse check
+#include "../../third_party/imgui/imgui.h"
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
@@ -97,6 +102,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Forward Win32 messages to ImGui (mouse, keyboard, etc.).
     window.SetWndProcHook(&ImGuiLayer::WndProcHook);
 
+    // --- World Editor ---
+    WorldEditor worldEditor;
+    worldEditor.SetReferences(&registry, &worldGrid, &forest);
+    // Spawn any authored instances already saved in cell_0_0.json (startup cell).
+    worldEditor.SpawnCellInstances(0, 0, renderer);
+
     // Load sample Content/ assets and log them (stub — no GPU resources yet).
     {
         GR_ZONE_SCOPED_N("Asset Load");
@@ -146,36 +157,20 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // Simple loop: process messages + render frames.
     float t = 0.0f;
-    float yaw = 0.0f, pitch = 0.0f;
+
+    // --- Camera + player movement (now owned by CameraController) ---
+    CameraController camController;
+    camController.Init(0.0f, 0.0f, -3.0f, 0.0f, -0.5f);
+
     renderer.SetCameraPosition(0.0f, 0.0f, -3.0f);
     renderer.SetCameraRotation(0.0f, -0.5f);
-    // Player (world) state separate from camera (insert here)
-float playerX = 0.0f;
-float playerY = 0.0f;
-float playerZ = -3.0f;
-
-// Camera follow parameters (tweakable)
-const float cameraDistance = 4.0f; // how far behind the player the camera sits
-const float cameraHeight = 2.0f;   // camera height above player
-const float eyeOffset = 1.0f;      // how high the player's "eyes" sit above ground
-
-// Helper to update camera from player each frame
-auto updateCameraFromPlayer = [&]() {
-    float camOffsetX = -sinf(yaw) * cameraDistance;
-    float camOffsetZ = -cosf(yaw) * cameraDistance;
-    float camX = playerX + camOffsetX;
-    float camZ = playerZ + camOffsetZ;
-    float camY = playerY + cameraHeight;
-    renderer.SetCameraPosition(camX, camY, camZ);
-    };
-// Set initial camera once from player
-updateCameraFromPlayer();
     // Center the mouse before the loop
     RECT windowRect;
     GetClientRect(window.GetHandle(), &windowRect);
     POINT centerPoint{ (windowRect.right - windowRect.left) / 2, (windowRect.bottom - windowRect.top) / 2 };
     ClientToScreen(window.GetHandle(), &centerPoint);
     SetCursorPos(centerPoint.x, centerPoint.y);
+    camController.SetCenterPoint(centerPoint);
 
     bool firstFrame = true;
     LARGE_INTEGER perfFreq{};
@@ -190,6 +185,7 @@ updateCameraFromPlayer();
     bool wasEscDown = false;
     bool wasF1Down  = false;
     bool wasF5Down  = false;
+    bool wasLButtonDown = false;
     // FPS smoothing accumulator.
     float fpsAccum = 0.0f;
     int   fpsFrames = 0;
@@ -246,7 +242,10 @@ updateCameraFromPlayer();
             bool gridOk = worldGrid.Reload();   // safe: keeps old grid on parse error
 
             if (regOk)
+            {
                 LOG_INFO("F5: AssetRegistry reloaded OK.");
+                worldEditor.RefreshPrefabList();
+            }
             else
                 LOG_WARN("F5: AssetRegistry reload failed — keeping old registry.");
 
@@ -256,7 +255,7 @@ updateCameraFromPlayer();
                 // Rebuild forest from updated cell data so gameplay sees the changes.
                 // Compute which cell the player is currently standing in.
                 int playerCX = 0, playerCZ = 0;
-                worldGrid.WorldToCell(playerX, playerZ, playerCX, playerCZ);
+                worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), playerCX, playerCZ);
 
                 // Find the exact cell by coordinates (not by array index) to be safe.
                 auto reloadedCells = worldGrid.GetActiveCells(playerCX, playerCZ, 0);
@@ -275,6 +274,7 @@ updateCameraFromPlayer();
                     forest.Populate(renderer, playerCell->forestTreeCount,
                                     playerCell->forestRadius,
                                     playerCell->CenterX(), playerCell->CenterZ());
+                    worldEditor.SpawnCellInstances(playerCX, playerCZ, renderer);
                     LOG_INFO("F5: forest repopulated from cell data.");
                 }
             }
@@ -305,8 +305,10 @@ updateCameraFromPlayer();
         }
 
         // Show/hide system cursor and re-center mouse based on pause state.
+        // Show cursor when paused OR when the World Editor is in placement mode.
         const bool paused = imguiLayer.IsPauseMenuOpen();
-        if (paused)
+        const bool editorActive = worldEditor.IsPlacementModeActive();
+        if (paused || editorActive)
         {
             ShowCursor(TRUE);
         }
@@ -321,94 +323,43 @@ updateCameraFromPlayer();
         float g = 0.2f + 0.2f * sinf(t * 1.7f);
         float b = 0.3f + 0.2f * sinf(t * 2.3f);
 
-        // Mouse look — skip when pause menu is open so the mouse can interact
-        // with ImGui widgets.
-        int mouseDeltaX = 0, mouseDeltaY = 0;
-        POINT mouse;
-        GetCursorPos(&mouse);
+        // --- Camera + movement (now handled by CameraController) ---
+        // When placement mode is active, treat it like paused so the cursor
+        // stays visible and mouse look is disabled.
+        const bool effectivePaused = paused || editorActive;
+        camController.Update(deltaTime, effectivePaused, firstFrame, renderer);
 
-        if (!paused && !firstFrame) {
-            mouseDeltaX = mouse.x - centerPoint.x;
-            mouseDeltaY = mouse.y - centerPoint.y;
-            yaw += mouseDeltaX * 0.005f;
-            pitch -= mouseDeltaY * 0.005f;
-            if (pitch > 1.5f) pitch = 1.5f;
-            if (pitch < -1.5f) pitch = -1.5f;
-        }
-        if (!paused)
-            SetCursorPos(centerPoint.x, centerPoint.y);
-        firstFrame = false;
+        // --- Left-click placement ---
+        // Check ImGui::GetIO().WantCaptureMouse BEFORE BeginFrame for the
+        // value from the previous frame — correct for input processing.
+        bool lbDown = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+        bool lbClicked = lbDown && !wasLButtonDown;
+        wasLButtonDown = lbDown;
 
-        // Update renderer rotation from yaw/pitch
-        renderer.SetCameraRotation(yaw, pitch);
-
-        // Movement + gravity — skipped while pause menu is open.
-        if (!paused)
+        if (lbClicked && editorActive && !ImGui::GetIO().WantCaptureMouse)
         {
-            // Movement uses yaw for forward/right directions (player-facing movement)
-            float forwardX = sinf(yaw);
-            float forwardZ = cosf(yaw);
-            float rightX = cosf(yaw);
-            float rightZ = -sinf(yaw);
+            // Get cursor position in window client coordinates.
+            POINT clickPos;
+            GetCursorPos(&clickPos);
+            ScreenToClient(window.GetHandle(), &clickPos);
 
-            const float moveSpeed = 4.0f; // units per second
-            const float moveStep = moveSpeed * deltaTime;
+            // Determine the active cell from the player position.
+            int activeCX = 0, activeCZ = 0;
+            worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
+                                   activeCX, activeCZ);
 
-            // Apply horizontal movement to the player position (XZ plane)
-            if (GetAsyncKeyState('W') & 0x8000) { playerX += forwardX * moveStep; playerZ += forwardZ * moveStep; }
-            if (GetAsyncKeyState('S') & 0x8000) { playerX -= forwardX * moveStep; playerZ -= forwardZ * moveStep; }
-            if (GetAsyncKeyState('A') & 0x8000) { playerX -= rightX * moveStep; playerZ -= rightZ * moveStep; }
-            if (GetAsyncKeyState('D') & 0x8000) { playerX += rightX * moveStep; playerZ += rightZ * moveStep; }
-
-            // Gravity and jumping applied to player vertical velocity
-            const float gravity = -20.0f;
-            const float jumpVelocity = 6.0f;
-            const float terminalVelocity = -30.0f;
-
-            float velocityY = renderer.GetCameraVelocityY(); // reuse existing velocity storage
-            if (!renderer.GetIsGrounded()) {
-                velocityY += gravity * deltaTime;
-            }
-            else if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
-                velocityY = jumpVelocity;
-                renderer.SetIsGrounded(false);
-            }
-
-            if (velocityY < terminalVelocity) velocityY = terminalVelocity;
-            renderer.SetCameraVelocityY(velocityY);
-
-            // Integrate vertical motion into playerY
-            playerY += velocityY * deltaTime;
-
-            // Ground collision / terrain snap (operate on player position)
-            float groundY = 0.0f;
-            if (renderer.IsTerrainAvailable()) {
-                groundY = renderer.SampleTerrainHeight(playerX, playerZ) + eyeOffset;
-            }
-
-            if (playerY <= groundY) {
-                playerY = groundY;
-                velocityY = 0.0f;
-                renderer.SetCameraVelocityY(0.0f);
-                renderer.SetIsGrounded(true);
-            }
-            else if (renderer.GetIsGrounded()) {
-                // While grounded and walking, keep player snapped to terrain so movement follows slopes
-                playerY = groundY;
-                renderer.SetCameraVelocityY(0.0f);
-            }
-
-            // Compute camera from player and apply rotation
-            updateCameraFromPlayer();
-            renderer.SetCameraRotation(yaw, pitch);
+            worldEditor.HandlePlacement(
+                clickPos,
+                static_cast<float>(renderer.GetRenderWidth()),
+                static_cast<float>(renderer.GetRenderHeight()),
+                camController, renderer,
+                activeCX, activeCZ);
         }
 
         // Pass camera info and FPS stats to ImGuiLayer for the debug overlay.
         {
-            float cx, cy, cz, cyaw, cpitch;
-            renderer.GetCameraPosition(cx, cy, cz);
-            renderer.GetCameraRotation(cyaw, cpitch);
-            imguiLayer.SetCameraInfo(cx, cy, cz, cyaw, cpitch);
+            imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),
+                                     camController.GetYaw(),  camController.GetPitch());
             imguiLayer.SetFrameStats(displayFPS, deltaTime);
         }
         renderer.ClearScreen(r, g, b, 1.0f);
@@ -428,6 +379,13 @@ updateCameraFromPlayer();
 
             // ImGui: begin frame, draw UI panels, then render ImGui draw data.
             imguiLayer.BeginFrame();
+            // Draw the World Editor panel inside the ImGui frame.
+            {
+                int activeCX = 0, activeCZ = 0;
+                worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
+                                       activeCX, activeCZ);
+                worldEditor.DrawPanel(activeCX, activeCZ, renderer);
+            }
             imguiLayer.EndFrame();
 
             renderer.PresentFrame();

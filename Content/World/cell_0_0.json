@@ -9,5 +9,6 @@
         "enabled": true,
         "tree_count": 80,
         "radius": 50.0
-    }
+    },
+    "instances": []
 }

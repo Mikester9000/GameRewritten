@@ -6,6 +6,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 class AssetRegistry
 {
@@ -21,6 +22,10 @@ public:
     // Look up a scoped ID such as "textures.placeholder".
     // Returns the file path string, or empty string + logs an error if not found.
     std::string GetPath(const std::string& assetId) const;
+
+    // Returns all registered asset IDs that start with 'prefix'.
+    // Example: GetIdsByPrefix("prefabs.") returns {"prefabs.tree", ...}.
+    std::vector<std::string> GetIdsByPrefix(const std::string& prefix) const;
 
     // How many assets are currently registered.
     int Count() const { return static_cast<int>(m_assets.size()); }

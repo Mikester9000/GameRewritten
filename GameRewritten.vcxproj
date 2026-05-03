@@ -175,6 +175,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <None Include="docs\ASSETS.md" />
     <None Include="docs\THIRD_PARTY.md" />
     <None Include="docs\ROADMAP_VENDORING.md" />
+    <None Include="docs\WORLD_EDITOR.md" />
     <!-- Third-party licenses -->
     <None Include="third_party\imgui\LICENSE.txt" />
     <None Include="third_party\nlohmann\LICENSE.txt" />
@@ -185,11 +186,13 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\app\Main.cpp" />
     <ClCompile Include="src\assets\AssetLoader.cpp" />
     <ClCompile Include="src\assets\AssetRegistry.cpp" />
+    <ClCompile Include="src\game\CameraController.cpp" />
     <ClCompile Include="src\game\Forest.cpp" />
     <ClCompile Include="src\logger\Logger.cpp" />
     <ClCompile Include="src\platform\win32\Win32Window.cpp" />
     <ClCompile Include="src\rendering\d3d11\D3D11Renderer.cpp" />
     <ClCompile Include="src\ui\ImGuiLayer.cpp" />
+    <ClCompile Include="src\ui\WorldEditor.cpp" />
     <ClCompile Include="src\world\WorldGrid.cpp" />
     <!-- Dear ImGui core (vendored, MIT licence) -->
     <ClCompile Include="third_party\imgui\imgui.cpp" />
@@ -219,11 +222,13 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
   <ItemGroup>
     <ClInclude Include="src\assets\AssetLoader.hpp" />
     <ClInclude Include="src\assets\AssetRegistry.hpp" />
+    <ClInclude Include="src\game\CameraController.hpp" />
     <ClInclude Include="src\game\Forest.hpp" />
     <ClInclude Include="src\logger\Logger.hpp" />
     <ClInclude Include="src\platform\win32\Win32Window.hpp" />
     <ClInclude Include="src\rendering\d3d11\D3D11Renderer.hpp" />
     <ClInclude Include="src\ui\ImGuiLayer.hpp" />
+    <ClInclude Include="src\ui\WorldEditor.hpp" />
     <ClInclude Include="src\world\WorldGrid.hpp" />
   </ItemGroup>
   <ItemGroup>

@@ -63,6 +63,14 @@ public:
     // Remove and destroy a body by id.
     static void RemoveBody(PhysicsBodyId id);
 
+    // Cast a ray and return the first hit.
+    // ox/oy/oz = ray origin; dx/dy/dz = normalised ray direction; maxDist = max distance.
+    // Check RayHit::hit before using the position fields.
+    struct RayHit { float x, y, z; float fraction; bool hit; };
+    static RayHit CastRay(float ox, float oy, float oz,
+                           float dx, float dy, float dz,
+                           float maxDist = 1000.0f);
+
 private:
     Physics() = delete;
 };

@@ -123,6 +123,21 @@ void Forest::Shutdown()
     m_context = nullptr;
 }
 
+void Forest::ClearInstances()
+{
+    m_instances.clear();
+}
+
+void Forest::AddInstance(D3D11Renderer& renderer, float x, float y, float z, float scale)
+{
+    // Snap y to terrain so the instance sits on the ground.
+    float groundY = renderer.IsTerrainAvailable()
+                        ? renderer.SampleTerrainHeight(x, z)
+                        : y;
+    Instance inst{ x, groundY, z, scale };
+    m_instances.push_back(inst);
+}
+
 // Replace the existing Populate and Draw implementations with the following:
 
 void Forest::Populate(D3D11Renderer& renderer, int count, float radius, float centerX, float centerZ)

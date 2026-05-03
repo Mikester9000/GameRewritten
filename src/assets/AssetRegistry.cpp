@@ -108,3 +108,20 @@ std::string AssetRegistry::GetPath(const std::string& assetId) const
     }
     return it->second;
 }
+
+// ---------------------------------------------------------------------------
+// GetIdsByPrefix
+// ---------------------------------------------------------------------------
+std::vector<std::string> AssetRegistry::GetIdsByPrefix(const std::string& prefix) const
+{
+    std::vector<std::string> result;
+    for (const auto& [id, path] : m_assets)
+    {
+        if (id.size() >= prefix.size() &&
+            id.compare(0, prefix.size(), prefix) == 0)
+        {
+            result.push_back(id);
+        }
+    }
+    return result;
+}
