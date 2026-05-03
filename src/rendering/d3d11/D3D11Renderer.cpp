@@ -288,7 +288,7 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
     if (params.biome == "desert")
     {
         lowR = 0.78f; lowG = 0.65f; lowB = 0.35f; // sandy tan
-        hiR  = 0.62f; hiG  = 0.52f; hiB  = 0.30f; // darker sandy rock
+        hiR  = 0.90f; hiG  = 0.85f; hiB  = 0.72f; // pale bleached sandstone
     }
     else if (params.biome == "rocky")
     {
@@ -341,9 +341,18 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
             float worldZ = params.cellOriginZ + z * quadSize;
             float worldY = sampleHeight(worldX, worldZ);
 
-            float h01 = (worldY + halfHeightRange) / (halfHeightRange * 2.0f);
-            if (h01 < 0.0f) h01 = 0.0f;
-            if (h01 > 1.0f) h01 = 1.0f;
+            // Avoid divide-by-zero when height_scale is 0: flat terrain uses midpoint color.
+            float h01;
+            if (halfHeightRange > 0.0001f)
+            {
+                h01 = (worldY + halfHeightRange) / (halfHeightRange * 2.0f);
+                if (h01 < 0.0f) h01 = 0.0f;
+                if (h01 > 1.0f) h01 = 1.0f;
+            }
+            else
+            {
+                h01 = 0.5f; // flat cell: blend low and high color equally
+            }
 
             float r = lowR + (hiR - lowR) * h01;
             float g = lowG + (hiG - lowG) * h01;
@@ -374,7 +383,9 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
             m_terrainHeights.push_back(vertices[static_cast<size_t>(z * vertsX + x)].y);
         }
     }
-    m_terrainAvailable = true;
+    // NOTE: m_terrainAvailable is set AFTER both GPU buffers are created successfully
+    // (further below). Setting it here would make the engine believe terrain is ready
+    // even if CreateBuffer fails.
 
     // Compute smooth normals via finite differences.
     for (int z = 0; z < vertsZ; ++z)
@@ -435,7 +446,18 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
     hr = device->CreateBuffer(&ibd, &iinit, &m_terrainPatchIndexBuffer);
     if (FAILED(hr)) return false;
 
+    // Both GPU buffers were created successfully — terrain is now ready to render and sample.
+    m_terrainAvailable = true;
     return true;
+}
+
+void D3D11Renderer::ClearTerrainPatch()
+{
+    if (m_terrainPatchVertexBuffer) { m_terrainPatchVertexBuffer->Release(); m_terrainPatchVertexBuffer = nullptr; }
+    if (m_terrainPatchIndexBuffer)  { m_terrainPatchIndexBuffer->Release();  m_terrainPatchIndexBuffer  = nullptr; }
+    m_terrainPatchIndexCount = 0;
+    m_terrainHeights.clear();
+    m_terrainAvailable = false;
 }
 
 float D3D11Renderer::SampleTerrainHeight(float worldX, float worldZ) const

@@ -131,21 +131,26 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         tp.noiseFreq2    = cell.terrainNoiseFreq2;
         if (cell.terrainEnabled)
             renderer.RebuildTerrainPatch(tp);
+        else
+            renderer.ClearTerrainPatch(); // ensure previous cell's patch is removed
 
         if (cell.forestEnabled)
         {
             forest.Populate(renderer, cell.forestTreeCount,
                             cell.forestRadius, cell.CenterX(), cell.CenterZ());
         }
+        else
+        {
+            forest.ClearInstances(); // remove trees from previous forested cell
+        }
         primRenderer.ClearInstances();
         worldEditor.SpawnCellInstances(cell.cx, cell.cz, renderer);
     };
 
-    // Build terrain + instances for the startup cell (player starts near world origin).
+    // Build terrain + instances for the startup cell (centre of grassland cell 0,0).
     {
-        // Player camera starts at (0, 0, -3); use (X=0, Z=-3) for the initial cell.
         int startCX = 0, startCZ = 0;
-        worldGrid.WorldToCell(0.0f, -3.0f, startCX, startCZ);
+        worldGrid.WorldToCell(200.0f, 200.0f, startCX, startCZ);
         WorldCell* startCell = worldGrid.FindCell(startCX, startCZ);
         if (startCell)
             rebuildTerrainForCell(*startCell);
@@ -205,9 +210,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // --- Camera + player movement (now owned by CameraController) ---
     CameraController camController;
-    camController.Init(0.0f, 0.0f, -3.0f, 0.0f, -0.5f);
+    // Spawn in the centre of the grassland cell (0,0): world X=200, Z=200.
+    // This keeps the player well inside the first terrain patch and away from
+    // any cell-boundary void on the first frame.
+    camController.Init(200.0f, 0.0f, 200.0f, 0.0f, -0.5f);
 
-    renderer.SetCameraPosition(0.0f, 0.0f, -3.0f);
+    renderer.SetCameraPosition(200.0f, 0.0f, 200.0f);
     renderer.SetCameraRotation(0.0f, -0.5f);
     // Center the mouse before the loop
     RECT windowRect;
@@ -233,9 +241,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasF5Down  = false;
     bool wasLButtonDown = false;
     // Track the cell the player was in last frame to detect cell-crossing.
-    // Compute from the actual camera start position (x=0, z=-3).
+    // Initialise from the actual spawn position (200, 200) → cell (0,0).
     int lastPlayerCX = 0, lastPlayerCZ = 0;
-    worldGrid.WorldToCell(0.0f, -3.0f, lastPlayerCX, lastPlayerCZ);
+    worldGrid.WorldToCell(200.0f, 200.0f, lastPlayerCX, lastPlayerCZ);
     // FPS smoothing accumulator.
     float fpsAccum = 0.0f;
     int   fpsFrames = 0;

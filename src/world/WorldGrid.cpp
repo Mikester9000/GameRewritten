@@ -170,6 +170,15 @@ bool WorldGrid::LoadCellFile(const std::string& path, WorldCell& out)
         out.terrainHeightScale = t.value("height_scale", 8.0f);
         out.terrainNoiseFreq   = t.value("noise_freq",   0.08f);
         out.terrainNoiseFreq2  = t.value("noise_freq2",  0.03f);
+
+        // Validate biome name to catch typos early (data-driven workflows are hard to debug silently).
+        const std::string& b = out.terrainBiome;
+        if (b != "grassland" && b != "desert" && b != "rocky" && b != "snow")
+        {
+            LOG_WARN("WorldGrid: unknown terrain.biome '" + b +
+                     "' in '" + path + "' — will render as grassland. "
+                     "Valid values: grassland, desert, rocky, snow.");
+        }
     }
 
     if (j.contains("forest"))

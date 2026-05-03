@@ -322,7 +322,7 @@ Each world cell has a `terrain.biome` setting that controls the height-map noise
 | Biome | Ground colors | Terrain character |
 |-------|---------------|-------------------|
 | `grassland` | Green lowlands → brown rock tops | Moderate rolling hills |
-| `desert` | Sandy tan lowlands → pale rock tops | Smooth, wide dunes |
+| `desert` | Sandy tan lowlands → pale bleached sandstone tops | Smooth, wide dunes |
 | `rocky` | Dark grey stone → lighter grey | Sharp, jagged peaks |
 | `snow` | Blue-grey stone → near-white snow | Cold, craggy mountains |
 

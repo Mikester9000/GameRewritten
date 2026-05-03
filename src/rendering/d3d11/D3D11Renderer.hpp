@@ -37,6 +37,8 @@ public:
     // Rebuild the terrain mesh from biome/seed parameters (called on cell transition or F5).
     // Releases old GPU buffers before creating new ones — safe to call multiple times.
     bool RebuildTerrainPatch(const TerrainParams& params);
+    // Release the terrain mesh and mark terrain unavailable (for cells with terrain.enabled=false).
+    void ClearTerrainPatch();
     float SampleTerrainHeight(float worldX, float worldZ) const;
     bool IsTerrainAvailable() const;
 // Gravity and jumping control
