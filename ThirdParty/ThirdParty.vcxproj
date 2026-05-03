@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <ProjectGuid>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
+    <RootNamespace>ThirdParty</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <!-- Static library for all configurations -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+
+  <!-- Output directories: match the game project layout -->
+  <PropertyGroup>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\ThirdParty\</IntDir>
+  </PropertyGroup>
+
+  <!-- ── Debug | Win32 ── -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <!-- Include paths: own wrappers, all vendored headers -->
+      <AdditionalIncludeDirectories>
+        $(SolutionDir)ThirdParty\src;
+        $(SolutionDir)third_party\stb;
+        $(SolutionDir)third_party\miniaudio;
+        $(SolutionDir)third_party\jolt;
+        $(SolutionDir)third_party\recast\Recast\Include;
+        $(SolutionDir)third_party\recast\Detour\Include;
+        $(SolutionDir)third_party\recast\DetourCrowd\Include;
+        $(SolutionDir)third_party\recast\DetourTileCache\Include;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <!-- Disable warnings from third-party code -->
+      <DisableSpecificWarnings>4100;4127;4244;4267;4305;4456;4457;4459;4514;4571;4625;4626;4710;4711;4820;5045;5246;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)ThirdParty.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+
+  <!-- ── Release | Win32 ── -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>
+        $(SolutionDir)ThirdParty\src;
+        $(SolutionDir)third_party\stb;
+        $(SolutionDir)third_party\miniaudio;
+        $(SolutionDir)third_party\jolt;
+        $(SolutionDir)third_party\recast\Recast\Include;
+        $(SolutionDir)third_party\recast\Detour\Include;
+        $(SolutionDir)third_party\recast\DetourCrowd\Include;
+        $(SolutionDir)third_party\recast\DetourTileCache\Include;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4100;4127;4244;4267;4305;4456;4457;4459;4514;4571;4625;4626;4710;4711;4820;5045;5246;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)ThirdParty.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+
+  <!-- ── Debug | x64 ── -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>
+        $(SolutionDir)ThirdParty\src;
+        $(SolutionDir)third_party\stb;
+        $(SolutionDir)third_party\miniaudio;
+        $(SolutionDir)third_party\jolt;
+        $(SolutionDir)third_party\recast\Recast\Include;
+        $(SolutionDir)third_party\recast\Detour\Include;
+        $(SolutionDir)third_party\recast\DetourCrowd\Include;
+        $(SolutionDir)third_party\recast\DetourTileCache\Include;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4100;4127;4244;4267;4305;4456;4457;4459;4514;4571;4625;4626;4710;4711;4820;5045;5246;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)ThirdParty.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+
+  <!-- ── Release | x64 ── -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>
+        $(SolutionDir)ThirdParty\src;
+        $(SolutionDir)third_party\stb;
+        $(SolutionDir)third_party\miniaudio;
+        $(SolutionDir)third_party\jolt;
+        $(SolutionDir)third_party\recast\Recast\Include;
+        $(SolutionDir)third_party\recast\Detour\Include;
+        $(SolutionDir)third_party\recast\DetourCrowd\Include;
+        $(SolutionDir)third_party\recast\DetourTileCache\Include;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4100;4127;4244;4267;4305;4456;4457;4459;4514;4571;4625;4626;4710;4711;4820;5045;5246;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)ThirdParty.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+
+  <!-- ── Source files ── -->
+  <ItemGroup>
+    <!-- Wrapper sources -->
+    <ClCompile Include="src\tp_image.cpp" />
+    <ClCompile Include="src\tp_audio.cpp" />
+    <ClCompile Include="src\tp_physics.cpp" />
+    <ClCompile Include="src\tp_navigation.cpp" />
+
+    <!-- Jolt Physics — unity build (one .cpp includes all 130+ Jolt .cpp files) -->
+    <ClCompile Include="..\third_party\jolt\jolt_all.cpp">
+      <!-- Increase optimization for large unity file in Debug too -->
+      <Optimization Condition="'$(Configuration)'=='Debug'">Disabled</Optimization>
+    </ClCompile>
+
+    <!-- Recast core source files -->
+    <ClCompile Include="..\third_party\recast\Recast\Source\Recast.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastAlloc.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastArea.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastAssert.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastContour.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastFilter.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastLayers.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastMesh.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastMeshDetail.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastRasterization.cpp" />
+    <ClCompile Include="..\third_party\recast\Recast\Source\RecastRegion.cpp" />
+
+    <!-- Detour core source files -->
+    <ClCompile Include="..\third_party\recast\Detour\Source\DetourAlloc.cpp" />
+    <ClCompile Include="..\third_party\recast\Detour\Source\DetourAssert.cpp" />
+    <ClCompile Include="..\third_party\recast\Detour\Source\DetourCommon.cpp" />
+    <ClCompile Include="..\third_party\recast\Detour\Source\DetourNavMesh.cpp" />
+    <ClCompile Include="..\third_party\recast\Detour\Source\DetourNavMeshBuilder.cpp" />
+    <ClCompile Include="..\third_party\recast\Detour\Source\DetourNavMeshQuery.cpp" />
+    <ClCompile Include="..\third_party\recast\Detour\Source\DetourNode.cpp" />
+
+    <!-- DetourCrowd source files -->
+    <ClCompile Include="..\third_party\recast\DetourCrowd\Source\DetourCrowd.cpp" />
+    <ClCompile Include="..\third_party\recast\DetourCrowd\Source\DetourLocalBoundary.cpp" />
+    <ClCompile Include="..\third_party\recast\DetourCrowd\Source\DetourObstacleAvoidance.cpp" />
+    <ClCompile Include="..\third_party\recast\DetourCrowd\Source\DetourPathCorridor.cpp" />
+    <ClCompile Include="..\third_party\recast\DetourCrowd\Source\DetourPathQueue.cpp" />
+    <ClCompile Include="..\third_party\recast\DetourCrowd\Source\DetourProximityGrid.cpp" />
+
+    <!-- DetourTileCache source files -->
+    <ClCompile Include="..\third_party\recast\DetourTileCache\Source\DetourTileCache.cpp" />
+    <ClCompile Include="..\third_party\recast\DetourTileCache\Source\DetourTileCacheBuilder.cpp" />
+  </ItemGroup>
+
+  <!-- ── Header files (for VS Solution Explorer visibility) ── -->
+  <ItemGroup>
+    <ClInclude Include="src\tp_image.hpp" />
+    <ClInclude Include="src\tp_audio.hpp" />
+    <ClInclude Include="src\tp_physics.hpp" />
+    <ClInclude Include="src\tp_navigation.hpp" />
+  </ItemGroup>
+
+  <!-- ── License / documentation items ── -->
+  <ItemGroup>
+    <None Include="..\third_party\stb\LICENSE.txt" />
+    <None Include="..\third_party\miniaudio\LICENSE.txt" />
+    <None Include="..\third_party\jolt\LICENSE.txt" />
+    <None Include="..\third_party\recast\LICENSE.txt" />
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
