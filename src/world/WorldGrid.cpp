@@ -149,10 +149,11 @@ bool WorldGrid::LoadCellFile(const std::string& path, WorldCell& out)
 void WorldGrid::WorldToCell(float worldX, float worldZ, int& outCX, int& outCZ) const
 {
     // floor() is used so negative coordinates map correctly:
-    //   e.g. worldX=-1 → cell -1, worldX=199 → cell 0 (with cellSize=200).
-    // This supports grids that extend in negative directions.
-    // If the world only has positive cells, GetActiveCells() will simply
-    // return no matching cells for negative indices.
+    //   worldX=-1   → floor(-1/200)   = floor(-0.005) = -1  → cell -1
+    //   worldX=199  → floor(199/200)  = floor(0.995)  =  0  → cell  0
+    //   worldX=200  → floor(200/200)  = floor(1.0)    =  1  → cell  1
+    // This means grids extending into negative territory work naturally.
+    // GetActiveCells() will simply return no matches for cells not in m_cells.
     outCX = static_cast<int>(std::floor(worldX / m_cellSize));
     outCZ = static_cast<int>(std::floor(worldZ / m_cellSize));
 }
