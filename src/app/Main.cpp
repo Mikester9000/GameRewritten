@@ -30,6 +30,8 @@ extern "C" __declspec(dllimport) int __stdcall MessageBoxW(HWND, LPCWSTR, LPCWST
 #include "tp_physics.hpp"
 #include "tp_navigation.hpp"
 #include "tp_image.hpp"
+#include "tp_texture.hpp"
+#include "tp_tracy.hpp"
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
@@ -68,6 +70,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // Load sample Content/ assets and log them (stub — no GPU resources yet).
     {
+        GR_ZONE_SCOPED_N("Asset Load");
         MaterialAsset mat;
         AssetLoader::LoadMaterial("Content/Materials/default.material.json", mat);
 
@@ -89,7 +92,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         physGroundId = tp::Physics::AddStaticGround(0.0f);
         physSphereId = tp::Physics::AddDynamicSphere(0.0f, 5.0f, 0.0f, 0.5f, 1.0f);
         // Take one physics step so we know integration runs without crashing.
-        tp::Physics::Step(1.0f / 60.0f);
+        {
+            GR_ZONE_SCOPED_N("Physics Step");
+            tp::Physics::Step(1.0f / 60.0f);
+        }
         float sx = 0.0f, sy = 0.0f, sz = 0.0f;
         tp::Physics::GetBodyPosition(physSphereId, sx, sy, sz);
         OutputDebugStringA("[Game] Physics smoke test: sphere stepped OK.\n");
@@ -104,6 +110,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         tp::Image::Load("Content/Textures/placeholder.png", img);
         img.Free(); // safe to call even if load failed
     }
+
+    // DirectXTex smoke test: load placeholder.png via DirectXTex and log metadata.
+    tp::Texture::SmokeTest();
     // ── End ThirdParty smoke tests ─────────────────────────────────────────
 
     // Simple loop: process messages + render frames.
@@ -323,23 +332,27 @@ updateCameraFromPlayer();
             imguiLayer.SetFrameStats(displayFPS, deltaTime);
         }
         renderer.ClearScreen(r, g, b, 1.0f);
-        renderer.DrawSky();
-        
+        {
+            GR_ZONE_SCOPED_N("Renderer Frame");
+            renderer.DrawSky();
             
-        
-        
-        // draw terrain/ground
-        if (useTerrainPatch) renderer.DrawTerrainPatch();
-        else renderer.DrawGroundPlane();
-        // draw the forest
-        forest.Draw(renderer);
-        renderer.DrawRotatingTriangle(deltaTime);
+                
+            
+            
+            // draw terrain/ground
+            if (useTerrainPatch) renderer.DrawTerrainPatch();
+            else renderer.DrawGroundPlane();
+            // draw the forest
+            forest.Draw(renderer);
+            renderer.DrawRotatingTriangle(deltaTime);
 
-        // ImGui: begin frame, draw UI panels, then render ImGui draw data.
-        imguiLayer.BeginFrame();
-        imguiLayer.EndFrame();
+            // ImGui: begin frame, draw UI panels, then render ImGui draw data.
+            imguiLayer.BeginFrame();
+            imguiLayer.EndFrame();
 
-        renderer.PresentFrame();
+            renderer.PresentFrame();
+        }
+        GR_FRAME_MARK;
         Sleep(1); // tiny sleep so we don't peg CPU at 100%
     }
     // before renderer.Shutdown();

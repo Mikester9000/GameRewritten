@@ -98,6 +98,60 @@ Include a `LICENSE.txt` file **inside** each vendor folder.
   2. Replace the four subdirectories in `third_party/recast/`.
   3. Update `ThirdParty.vcxproj` if any `.cpp` files were added or removed.
 
+### `third_party/tracy/` — Tracy Profiler v0.11.1
+- **License:** MIT (`third_party/tracy/LICENSE.txt`)
+- **Purpose:** Frame-level CPU profiling.  Zones mark logical work segments
+  (renderer frame, physics step, asset loading) so the Tracy profiler UI can
+  display time-line data.
+- **Enabled:** **Debug builds only.**  `GR_ENABLE_TRACY` (and `TRACY_ENABLE`)
+  are defined only in the Debug preprocessor settings of both
+  `ThirdParty.vcxproj` and `GameRewritten.vcxproj`.
+  `TracyClient.cpp` is compiled into `ThirdParty.lib` only for Debug.
+  Release builds include **no** Tracy headers or client code.
+- **Usage in game code:**
+  ```cpp
+  #include "tp_tracy.hpp"   // from ThirdParty/src/
+  GR_FRAME_MARK;            // at the end of each rendered frame
+  GR_ZONE_SCOPED_N("name"); // inside any scope you want to profile
+  ```
+- **Profiler UI:** Download the Tracy profiler UI from
+  https://github.com/wolfpld/tracy/releases (the `Tracy-*.zip` file).
+  Run it, then start a Debug build of the game — the profiler connects
+  automatically on localhost.
+- **Files compiled (Debug only):** `third_party/tracy/TracyClient.cpp`
+- **Files compiled (headers only):** `third_party/tracy/tracy/Tracy.hpp`
+  (transitively includes `client/` and `common/` headers).
+- **Home page:** https://github.com/wolfpld/tracy
+- **Update:**
+  1. Download the new release source archive.
+  2. Replace the `third_party/tracy/` subtree (keep `LICENSE.txt`).
+  3. Verify `TracyClient.cpp` path is still
+     `third_party/tracy/TracyClient.cpp`.
+
+### `third_party/DirectXTex/` — DirectXTex (Nov 2024 snapshot)
+- **License:** MIT (`third_party/DirectXTex/LICENSE.txt`)
+- **Purpose:** Runtime CPU-side texture loading (PNG, JPG, DDS, TGA, HDR)
+  with full DDS/BCn decode support.  Used by `ThirdParty/src/tp_texture.cpp`.
+  Does **not** replace stb_image — both coexist.  DirectXTex adds DDS and
+  BCn support that stb_image lacks.
+- **Wrapper:** `ThirdParty/src/tp_texture.hpp` / `tp_texture.cpp`
+  exposes `tp::Texture::LoadFromFile()` and `tp::Texture::SmokeTest()`.
+- **Future offline pipeline:** A command-line converter tool (not yet
+  implemented) can live at `tools/TextureCooker/` and use the same vendored
+  source to batch-convert PNG → DDS (BC1/BC3/BC7) as a pre-build step.
+  See `docs/ROADMAP_VENDORING.md` for the planned approach.
+- **Files compiled (all configs):** All core `.cpp` files in
+  `third_party/DirectXTex/` except `BCDirectCompute.cpp` (GPU compute,
+  excluded) and `DirectXTexD3D12.cpp` (D3D12, not used).
+- **System libs required:** `windowscodecs.lib` (WIC) — added via
+  `#pragma comment(lib, ...)` in `tp_texture.cpp`.  `d3d11.lib` and
+  `dxgi.lib` are already linked by the game renderer.
+- **Home page:** https://github.com/microsoft/DirectXTex
+- **Update:**
+  1. Download the new source archive from the GitHub releases page.
+  2. Replace the files in `third_party/DirectXTex/`.
+  3. Update `ThirdParty.vcxproj` if any `.cpp` files were added or removed.
+
 ---
 
 ## Verification checklist

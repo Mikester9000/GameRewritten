@@ -85,7 +85,8 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- GR_ENABLE_TRACY + TRACY_ENABLE activate Tracy client in Debug only -->
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;GR_ENABLE_TRACY;TRACY_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <!-- Include paths: own wrappers, all vendored headers -->
@@ -98,6 +99,8 @@
         $(SolutionDir)third_party\recast\Detour\Include;
         $(SolutionDir)third_party\recast\DetourCrowd\Include;
         $(SolutionDir)third_party\recast\DetourTileCache\Include;
+        $(SolutionDir)third_party\tracy;
+        $(SolutionDir)third_party\DirectXTex;
         %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <!-- Disable warnings from third-party code -->
@@ -115,6 +118,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
+      <!-- No GR_ENABLE_TRACY in Release — Tracy client code is excluded -->
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -127,6 +131,7 @@
         $(SolutionDir)third_party\recast\Detour\Include;
         $(SolutionDir)third_party\recast\DetourCrowd\Include;
         $(SolutionDir)third_party\recast\DetourTileCache\Include;
+        $(SolutionDir)third_party\DirectXTex;
         %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4100;4127;4244;4267;4305;4456;4457;4459;4514;4571;4625;4626;4710;4711;4820;5045;5246;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -141,7 +146,8 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- GR_ENABLE_TRACY + TRACY_ENABLE activate Tracy client in Debug only -->
+      <PreprocessorDefinitions>_DEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;GR_ENABLE_TRACY;TRACY_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>
@@ -153,6 +159,8 @@
         $(SolutionDir)third_party\recast\Detour\Include;
         $(SolutionDir)third_party\recast\DetourCrowd\Include;
         $(SolutionDir)third_party\recast\DetourTileCache\Include;
+        $(SolutionDir)third_party\tracy;
+        $(SolutionDir)third_party\DirectXTex;
         %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4100;4127;4244;4267;4305;4456;4457;4459;4514;4571;4625;4626;4710;4711;4820;5045;5246;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -169,6 +177,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
+      <!-- No GR_ENABLE_TRACY in Release — Tracy client code is excluded -->
       <PreprocessorDefinitions>NDEBUG;_LIB;JPH_DEBUG_RENDERER_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -181,6 +190,7 @@
         $(SolutionDir)third_party\recast\Detour\Include;
         $(SolutionDir)third_party\recast\DetourCrowd\Include;
         $(SolutionDir)third_party\recast\DetourTileCache\Include;
+        $(SolutionDir)third_party\DirectXTex;
         %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4100;4127;4244;4267;4305;4456;4457;4459;4514;4571;4625;4626;4710;4711;4820;5045;5246;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -197,6 +207,11 @@
     <ClCompile Include="src\tp_audio.cpp" />
     <ClCompile Include="src\tp_physics.cpp" />
     <ClCompile Include="src\tp_navigation.cpp" />
+    <ClCompile Include="src\tp_texture.cpp" />
+
+    <!-- Tracy profiler client — Debug builds only; Release excludes entirely -->
+    <ClCompile Include="..\third_party\tracy\TracyClient.cpp"
+               Condition="'$(Configuration)'=='Debug'" />
 
     <!-- Jolt Physics — individual source files (unity build caused C2084 duplicate-definition errors) -->
     <ClCompile Include="..\third_party\jolt\Jolt\AABBTree\AABBTreeBuilder.cpp" />
@@ -362,6 +377,28 @@
     <!-- DetourTileCache source files -->
     <ClCompile Include="..\third_party\recast\DetourTileCache\Source\DetourTileCache.cpp" />
     <ClCompile Include="..\third_party\recast\DetourTileCache\Source\DetourTileCacheBuilder.cpp" />
+
+    <!-- DirectXTex — core CPU-side texture loading/processing (MIT) -->
+    <!-- BCDirectCompute.cpp and DirectXTexD3D12.cpp are intentionally excluded
+         (require GPU compute / D3D12 which are not used here). -->
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexImage.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexUtil.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexConvert.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexDDS.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexWIC.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexTGA.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexHDR.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexFlipRotate.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexResize.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexMipmaps.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexMisc.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexNormalMaps.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexPMAlpha.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexCompress.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\DirectXTexD3D11.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\BC.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\BC4BC5.cpp" />
+    <ClCompile Include="..\third_party\DirectXTex\BC6HBC7.cpp" />
   </ItemGroup>
 
   <!-- ── Header files (for VS Solution Explorer visibility) ── -->
@@ -370,6 +407,8 @@
     <ClInclude Include="src\tp_audio.hpp" />
     <ClInclude Include="src\tp_physics.hpp" />
     <ClInclude Include="src\tp_navigation.hpp" />
+    <ClInclude Include="src\tp_texture.hpp" />
+    <ClInclude Include="src\tp_tracy.hpp" />
   </ItemGroup>
 
   <!-- ── License / documentation items ── -->
@@ -378,6 +417,8 @@
     <None Include="..\third_party\miniaudio\LICENSE.txt" />
     <None Include="..\third_party\jolt\LICENSE.txt" />
     <None Include="..\third_party\recast\LICENSE.txt" />
+    <None Include="..\third_party\tracy\LICENSE.txt" />
+    <None Include="..\third_party\DirectXTex\LICENSE.txt" />
   </ItemGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
