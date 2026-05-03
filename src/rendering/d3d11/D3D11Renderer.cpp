@@ -342,6 +342,9 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
             float worldY = sampleHeight(worldX, worldZ);
 
             // Avoid divide-by-zero when height_scale is 0: flat terrain uses midpoint color.
+            // Epsilon of 0.0001 is orders of magnitude smaller than any useful height range
+            // (minimum meaningful scale is ~0.1 world units) but large enough to avoid
+            // IEEE 754 denormal-float precision issues.
             float h01;
             if (halfHeightRange > 0.0001f)
             {
@@ -453,8 +456,16 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
 
 void D3D11Renderer::ClearTerrainPatch()
 {
-    if (m_terrainPatchVertexBuffer) { m_terrainPatchVertexBuffer->Release(); m_terrainPatchVertexBuffer = nullptr; }
-    if (m_terrainPatchIndexBuffer)  { m_terrainPatchIndexBuffer->Release();  m_terrainPatchIndexBuffer  = nullptr; }
+    if (m_terrainPatchVertexBuffer)
+    {
+        m_terrainPatchVertexBuffer->Release();
+        m_terrainPatchVertexBuffer = nullptr;
+    }
+    if (m_terrainPatchIndexBuffer)
+    {
+        m_terrainPatchIndexBuffer->Release();
+        m_terrainPatchIndexBuffer = nullptr;
+    }
     m_terrainPatchIndexCount = 0;
     m_terrainHeights.clear();
     m_terrainAvailable = false;
