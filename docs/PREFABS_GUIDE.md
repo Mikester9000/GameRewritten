@@ -366,7 +366,7 @@ The starter world uses a 3×3 grid of 400×400-unit cells:
 (-1,-1) rocky  (0,-1) desert  (1,-1) rocky
 ```
 
-The player starts in cell (0,-1) (just south of the grassland centre) and can walk in any direction to cross into a neighbouring biome. Terrain rebuilds instantly with no loading screen.
+The player starts in cell (0,-1) (just south of the grassland centre) and can walk in any direction to cross into a neighboring biome. Terrain rebuilds instantly with no loading screen.
 
 ### Adding a new cell
 

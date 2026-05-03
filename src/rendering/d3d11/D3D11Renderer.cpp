@@ -368,8 +368,12 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
     m_terrainHalfSizeZ = params.cellWorldSize * 0.5f;
     m_terrainHeights.reserve(static_cast<size_t>(vertsX * vertsZ));
     for (int z = 0; z < vertsZ; ++z)
+    {
         for (int x = 0; x < vertsX; ++x)
+        {
             m_terrainHeights.push_back(vertices[static_cast<size_t>(z * vertsX + x)].y);
+        }
+    }
     m_terrainAvailable = true;
 
     // Compute smooth normals via finite differences.
