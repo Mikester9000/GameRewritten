@@ -18,6 +18,7 @@
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
 #include "../world/WorldGrid.hpp"
+#include <logger/Logger.hpp>
 // We defined the classes in the other .cpp files.
 // For this beginner seed, the simplest way is to forward-declare them here
 // and rely on the linker. (Later we will convert to headers.)
@@ -189,7 +190,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // FPS smoothing accumulator.
     float fpsAccum = 0.0f;
     int   fpsFrames = 0;
-    float displayFPS = 0.0f;
+    float displayFPS = 0.0f; 
+    bool cursorVisible = false; // track actual cursor visibility state we requested
     while (window.ProcessEvents())
     {
         LARGE_INTEGER currCounter{};
@@ -306,15 +308,23 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         // Show/hide system cursor and re-center mouse based on pause state.
         // Show cursor when paused OR when the World Editor is in placement mode.
+       
         const bool paused = imguiLayer.IsPauseMenuOpen();
         const bool editorActive = worldEditor.IsPlacementModeActive();
-        if (paused || editorActive)
+        const bool wantCursorVisible = paused || editorActive;
+        if (wantCursorVisible != cursorVisible)
         {
-            ShowCursor(TRUE);
-        }
-        else
-        {
-            ShowCursor(FALSE);
+            if (wantCursorVisible)
+            {
+                // Ensure visible regardless of current internal ShowCursor counter.
+                while (ShowCursor(TRUE) < 0) {}
+            }
+            else
+            {
+                // Ensure hidden regardless of current internal ShowCursor counter.
+                while (ShowCursor(FALSE) >= 0) {}
+            }
+            cursorVisible = wantCursorVisible;
         }
 
         // Animate the clear color so you can see it is updating.
