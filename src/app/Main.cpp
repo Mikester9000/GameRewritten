@@ -14,6 +14,8 @@
 #include "../game/Forest.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../assets/AssetLoader.hpp"
+#include "../assets/AssetRegistry.hpp"
+#include "../world/WorldGrid.hpp"
 // We defined the classes in the other .cpp files.
 // For this beginner seed, the simplest way is to forward-declare them here
 // and rely on the linker. (Later we will convert to headers.)
@@ -49,6 +51,18 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         return 1;
     }
 
+    // --- Asset Registry ---
+    // Maps scoped IDs (e.g. "textures.placeholder") to file paths.
+    // Press F5 at runtime to reload without restarting.
+    AssetRegistry registry;
+    registry.Load("Content/AssetRegistry.json");
+
+    // --- World Grid ---
+    // Loads Content/World/world.json which lists all world cells.
+    // Each cell drives terrain + forest for that chunk of the open world.
+    WorldGrid worldGrid;
+    worldGrid.Load("Content/World/world.json");
+
     // Create and initialize forest (after renderer is initialized)
     Forest forest;
     if (!forest.Initialize(renderer))
@@ -56,7 +70,22 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         MessageBoxW(nullptr, L"Failed to initialize Forest.", L"Error", 0);
         return 1;
     }
-    forest.Populate(renderer,80, 50.0f); // 80 trees in 50-unit radius
+    // Populate forest from the first active world cell (cell-driven open world).
+    // The player starts at world (0,0), which is cell (0,0).
+    {
+        int startCX = 0, startCZ = 0;
+        auto activeCells = worldGrid.GetActiveCells(startCX, startCZ, 0);
+        if (!activeCells.empty() && activeCells[0].forestEnabled)
+        {
+            const WorldCell& c = activeCells[0];
+            forest.Populate(renderer, c.forestTreeCount, c.forestRadius,
+                            c.CenterX(), c.CenterZ());
+        }
+        else
+        {
+            forest.Populate(renderer, 80, 50.0f); // fallback if no cell data
+        }
+    }
 
     // Initialize ImGui overlay (pause menu + debug overlay).
     ImGuiLayer imguiLayer;
@@ -160,6 +189,7 @@ updateCameraFromPlayer();
     // Toggle key edge-detection state (track previous frame state).
     bool wasEscDown = false;
     bool wasF1Down  = false;
+    bool wasF5Down  = false;
     // FPS smoothing accumulator.
     float fpsAccum = 0.0f;
     int   fpsFrames = 0;
@@ -204,6 +234,56 @@ updateCameraFromPlayer();
         if (f1Down && !wasF1Down)
             imguiLayer.ToggleDebugOverlay();
         wasF1Down = f1Down;
+
+        // F5: reload Asset Registry and World Grid without restarting.
+        // Also repopulates the forest from the reloaded cell data so changes
+        // to tree_count/radius in cell JSON take effect immediately.
+        bool f5Down = (GetAsyncKeyState(VK_F5) & 0x8000) != 0;
+        if (f5Down && !wasF5Down)
+        {
+            LOG_INFO("F5: reloading Asset Registry and World Grid...");
+            bool regOk  = registry.Reload();    // safe: keeps old data on parse error
+            bool gridOk = worldGrid.Reload();   // safe: keeps old grid on parse error
+
+            if (regOk)
+                LOG_INFO("F5: AssetRegistry reloaded OK.");
+            else
+                LOG_WARN("F5: AssetRegistry reload failed — keeping old registry.");
+
+            if (gridOk)
+            {
+                LOG_INFO("F5: WorldGrid reloaded OK — repopulating forest...");
+                // Rebuild forest from updated cell data so gameplay sees the changes.
+                // Compute which cell the player is currently standing in.
+                int playerCX = 0, playerCZ = 0;
+                worldGrid.WorldToCell(playerX, playerZ, playerCX, playerCZ);
+
+                // Find the exact cell by coordinates (not by array index) to be safe.
+                auto reloadedCells = worldGrid.GetActiveCells(playerCX, playerCZ, 0);
+                const WorldCell* playerCell = nullptr;
+                for (const auto& c : reloadedCells)
+                {
+                    if (c.cx == playerCX && c.cz == playerCZ)
+                    {
+                        playerCell = &c;
+                        break;
+                    }
+                }
+
+                if (playerCell && playerCell->forestEnabled)
+                {
+                    forest.Populate(renderer, playerCell->forestTreeCount,
+                                    playerCell->forestRadius,
+                                    playerCell->CenterX(), playerCell->CenterZ());
+                    LOG_INFO("F5: forest repopulated from cell data.");
+                }
+            }
+            else
+            {
+                LOG_WARN("F5: WorldGrid reload failed — keeping old world grid.");
+            }
+        }
+        wasF5Down = f5Down;
 
         // Handle quit/resume signals from the UI.
         if (imguiLayer.WantsQuit())

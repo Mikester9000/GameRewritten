@@ -163,10 +163,15 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <None Include=".github\copilot-instructions.md" />
     <None Include="packages.config" />
     <!-- Content/ asset files (data-driven, loaded at runtime via AssetLoader) -->
+    <None Include="Content\AssetRegistry.json" />
     <None Include="Content\Materials\default.material.json" />
     <None Include="Content\Prefabs\tree.prefab.json" />
     <None Include="Content\Scenes\test.scene.json" />
+    <!-- World grid data files -->
+    <None Include="Content\World\world.json" />
+    <None Include="Content\World\cell_0_0.json" />
     <!-- Documentation -->
+    <None Include="docs\ASSET_REGISTRY.md" />
     <None Include="docs\ASSETS.md" />
     <None Include="docs\THIRD_PARTY.md" />
     <None Include="docs\ROADMAP_VENDORING.md" />
@@ -179,11 +184,13 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
   <ItemGroup>
     <ClCompile Include="src\app\Main.cpp" />
     <ClCompile Include="src\assets\AssetLoader.cpp" />
+    <ClCompile Include="src\assets\AssetRegistry.cpp" />
     <ClCompile Include="src\game\Forest.cpp" />
     <ClCompile Include="src\logger\Logger.cpp" />
     <ClCompile Include="src\platform\win32\Win32Window.cpp" />
     <ClCompile Include="src\rendering\d3d11\D3D11Renderer.cpp" />
     <ClCompile Include="src\ui\ImGuiLayer.cpp" />
+    <ClCompile Include="src\world\WorldGrid.cpp" />
     <!-- Dear ImGui core (vendored, MIT licence) -->
     <ClCompile Include="third_party\imgui\imgui.cpp" />
     <ClCompile Include="third_party\imgui\imgui_draw.cpp" />
@@ -211,11 +218,13 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\assets\AssetLoader.hpp" />
+    <ClInclude Include="src\assets\AssetRegistry.hpp" />
     <ClInclude Include="src\game\Forest.hpp" />
     <ClInclude Include="src\logger\Logger.hpp" />
     <ClInclude Include="src\platform\win32\Win32Window.hpp" />
     <ClInclude Include="src\rendering\d3d11\D3D11Renderer.hpp" />
     <ClInclude Include="src\ui\ImGuiLayer.hpp" />
+    <ClInclude Include="src\world\WorldGrid.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\basic3d_ps.hlsl">
