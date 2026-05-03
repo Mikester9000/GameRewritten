@@ -6,16 +6,6 @@
 #include <cmath>
 #include <cstdint>
 #include <algorithm> // for std::clamp
-
-// We defined the classes in the other .cpp files.
-// For this beginner seed, the simplest way is to forward-declare them here
-// and rely on the linker. (Later we will convert to headers.)
-class Win32Window;
-class D3D11Renderer;
-
-// Tell the compiler these classes exist somewhere else.
-extern "C" __declspec(dllimport) int __stdcall MessageBoxW(HWND, LPCWSTR, LPCWSTR, unsigned int);
-
 // --- Hacky but simple approach for day 1 ---
 // We include the .cpp files to avoid headers for now.
 // This is NOT how big projects do it, but it's a good beginner stepping stone.
@@ -24,6 +14,16 @@ extern "C" __declspec(dllimport) int __stdcall MessageBoxW(HWND, LPCWSTR, LPCWST
 #include "../game/Forest.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../assets/AssetLoader.hpp"
+// We defined the classes in the other .cpp files.
+// For this beginner seed, the simplest way is to forward-declare them here
+// and rely on the linker. (Later we will convert to headers.)
+class Win32Window;
+class D3D11Renderer;
+
+// Tell the compiler these classes exist somewhere else.
+extern "C" __declspec(dllimport) int __stdcall MessageBoxW(HWND, LPCWSTR, LPCWSTR,unsigned int);
+
+
 
 // ThirdParty subsystem wrappers (from the ThirdParty static library)
 #include "tp_audio.hpp"
