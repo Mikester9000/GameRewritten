@@ -4,14 +4,17 @@
 // F1   → toggle debug overlay (FPS, dt, camera)
 
 #include "ImGuiLayer.hpp"
+#include <Windows.h>
 
 // ImGui core + backends (vendored under third_party/)
 #include "../../third_party/imgui/imgui.h"
 #include "../../third_party/imgui/backends/imgui_impl_win32.h"
 #include "../../third_party/imgui/backends/imgui_impl_dx11.h"
 
-#include "logger/Logger.hpp"
 
+#include "logger/Logger.hpp"
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
+    HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 ImGuiLayer::ImGuiLayer() = default;
 
 bool ImGuiLayer::Initialize(HWND hwnd,
