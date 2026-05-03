@@ -1,0 +1,7 @@
+{
+    "name": "marker_stone",
+    "category": "prop",
+    "parts": [
+        { "shape": "box", "offset": [0.0, 0.30, 0.0], "scale": [0.50, 0.60, 0.22], "color": [0.42, 0.40, 0.38, 1.0] }
+    ]
+}
