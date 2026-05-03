@@ -12,6 +12,20 @@
 #include <vector>
 
 // ---------------------------------------------------------------------------
+// CellInstance
+// ---------------------------------------------------------------------------
+// One authored object placed inside a WorldCell via the World Editor.
+struct CellInstance
+{
+    std::string prefab;    // scoped asset ID, e.g. "prefabs.tree"
+    float x     = 0.0f;   // world-space position
+    float y     = 0.0f;   // world-space position
+    float z     = 0.0f;   // world-space position
+    float yaw   = 0.0f;   // rotation around Y axis (radians)
+    float scale = 1.0f;   // uniform scale
+};
+
+// ---------------------------------------------------------------------------
 // WorldCell
 // ---------------------------------------------------------------------------
 // Describes one tile of the world grid.
@@ -29,6 +43,12 @@ struct WorldCell
     bool  forestEnabled   = true;
     int   forestTreeCount = 80;
     float forestRadius    = 50.0f;
+
+    // Authored instances placed by the World Editor.
+    std::vector<CellInstance> instances;
+
+    // File path this cell was loaded from (used by WorldGrid::SaveCell).
+    std::string filePath;
 
     // Convenience: world-space origin (bottom-left corner) of this cell.
     float OriginX() const { return cx * cellSize; }
@@ -61,6 +81,13 @@ public:
     float       GetCellSize() const  { return m_cellSize; }
     const std::string& GetName() const { return m_name; }
     int         CellCount()  const  { return static_cast<int>(m_cells.size()); }
+
+    // Returns a mutable pointer to the cell at (cx,cz), or nullptr if not found.
+    WorldCell* FindCell(int cx, int cz);
+
+    // Write the cell at (cx,cz) back to its JSON file (preserving terrain/forest settings).
+    // Returns true on success; logs an error and keeps in-memory data on failure.
+    bool SaveCell(int cx, int cz);
 
 private:
     bool LoadCellFile(const std::string& path, WorldCell& out);

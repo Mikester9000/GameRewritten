@@ -77,6 +77,7 @@ bool WorldGrid::Load(const std::string& worldJsonPath)
         std::string cellFile = entry.value("file", "");
         if (!cellFile.empty())
         {
+            cell.filePath = cellFile;
             if (!LoadCellFile(cellFile, cell))
             {
                 std::ostringstream warn;
@@ -175,6 +176,24 @@ bool WorldGrid::LoadCellFile(const std::string& path, WorldCell& out)
         out.forestRadius    = f.value("radius",     50.0f);
     }
 
+    // Parse authored instances placed by the World Editor (optional field).
+    out.instances.clear();
+    if (j.contains("instances") && j["instances"].is_array())
+    {
+        for (const auto& inst : j["instances"])
+        {
+            CellInstance ci;
+            ci.prefab = inst.value("prefab", "");
+            ci.x      = inst.value("x",     0.0f);
+            ci.y      = inst.value("y",     0.0f);
+            ci.z      = inst.value("z",     0.0f);
+            ci.yaw    = inst.value("yaw",   0.0f);
+            ci.scale  = inst.value("scale", 1.0f);
+            if (!ci.prefab.empty())
+                out.instances.push_back(ci);
+        }
+    }
+
     std::ostringstream ss;
     ss << "WorldGrid: loaded cell (" << out.cx << "," << out.cz << ")";
     LOG_INFO(ss.str());
@@ -210,4 +229,100 @@ std::vector<WorldCell> WorldGrid::GetActiveCells(int playerCX, int playerCZ, int
             active.push_back(cell);
     }
     return active;
+}
+
+// ---------------------------------------------------------------------------
+// WorldGrid::FindCell
+// ---------------------------------------------------------------------------
+WorldCell* WorldGrid::FindCell(int cx, int cz)
+{
+    for (auto& cell : m_cells)
+    {
+        if (cell.cx == cx && cell.cz == cz)
+            return &cell;
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+// WorldGrid::SaveCell
+// ---------------------------------------------------------------------------
+bool WorldGrid::SaveCell(int cx, int cz)
+{
+    WorldCell* cell = FindCell(cx, cz);
+    if (!cell)
+    {
+        std::ostringstream err;
+        err << "WorldGrid::SaveCell: no cell (" << cx << "," << cz << ") in grid";
+        LOG_ERROR(err.str());
+        return false;
+    }
+
+    if (cell->filePath.empty())
+    {
+        std::ostringstream err;
+        err << "WorldGrid::SaveCell: cell (" << cx << "," << cz << ") has no file path; cannot save.";
+        LOG_ERROR(err.str());
+        return false;
+    }
+
+    // Build JSON preserving terrain + forest settings, then write instances.
+    json j;
+    j["cx"]  = cell->cx;
+    j["cz"]  = cell->cz;
+
+    j["terrain"]["enabled"]      = cell->terrainEnabled;
+    j["terrain"]["height_scale"] = cell->terrainHeightScale;
+
+    j["forest"]["enabled"]    = cell->forestEnabled;
+    j["forest"]["tree_count"] = cell->forestTreeCount;
+    j["forest"]["radius"]     = cell->forestRadius;
+
+    j["instances"] = json::array();
+    for (const auto& inst : cell->instances)
+    {
+        json entry;
+        entry["prefab"] = inst.prefab;
+        entry["x"]      = inst.x;
+        entry["y"]      = inst.y;
+        entry["z"]      = inst.z;
+        entry["yaw"]    = inst.yaw;
+        entry["scale"]  = inst.scale;
+        j["instances"].push_back(entry);
+    }
+
+    std::ofstream out(cell->filePath);
+    if (!out.is_open())
+    {
+        LOG_ERROR("WorldGrid::SaveCell: cannot open '" + cell->filePath + "' for writing.");
+        return false;
+    }
+
+    try
+    {
+        out << j.dump(4);
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR(std::string("WorldGrid::SaveCell: write error: ") + e.what());
+        return false;
+    }
+
+    // std::ofstream write failures typically set failbit/badbit rather than throwing.
+    // Always check the stream state after writing, regardless of exceptions.
+    if (!out.good())
+    {
+        std::ostringstream streamErr;
+        streamErr << "WorldGrid::SaveCell: stream error after write to '"
+                  << cell->filePath
+                  << "' (disk full, permission denied, or IO error).";
+        LOG_ERROR(streamErr.str());
+        return false;
+    }
+
+    std::ostringstream ss;
+    ss << "WorldGrid::SaveCell: saved cell (" << cx << "," << cz << ") to '"
+       << cell->filePath << "' with " << cell->instances.size() << " instance(s).";
+    LOG_INFO(ss.str());
+    return true;
 }

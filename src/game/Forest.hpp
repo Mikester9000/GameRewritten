@@ -14,6 +14,15 @@ public:
     void Populate(D3D11Renderer& renderer, int count, float radius, float centerX = 0.0f, float centerZ = 0.0f);
     void Draw(const D3D11Renderer& renderer);
 
+    // Add a single instance at the given world position (y is snapped to terrain).
+    void AddInstance(D3D11Renderer& renderer, float x, float y, float z, float scale = 1.0f);
+
+    // Remove all instances (both procedural and authored).
+    void ClearInstances();
+
+    // How many instances are currently in memory.
+    int GetInstanceCount() const { return static_cast<int>(m_instances.size()); }
+
 private:
     struct Instance { float x, y, z, scale; };
     std::vector<Instance> m_instances;

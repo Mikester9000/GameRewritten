@@ -25,6 +25,8 @@
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/CastResult.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
@@ -295,6 +297,38 @@ void Physics::RemoveBody(PhysicsBodyId id)
     JPH::BodyID jphId(id.id);
     bi.RemoveBody(jphId);
     bi.DestroyBody(jphId);
+}
+
+Physics::RayHit Physics::CastRay(float ox, float oy, float oz,
+                                   float dx, float dy, float dz,
+                                   float maxDist)
+{
+    RayHit result{};
+    if (!detail::g_initialized || !detail::g_physicsSystem)
+        return result;
+
+    JPH::RRayCast ray;
+    ray.mOrigin    = JPH::RVec3(static_cast<double>(ox),
+                                 static_cast<double>(oy),
+                                 static_cast<double>(oz));
+    ray.mDirection = JPH::Vec3(dx * maxDist, dy * maxDist, dz * maxDist);
+
+    JPH::RayCastResult hit;
+    bool didHit = detail::g_physicsSystem->GetNarrowPhaseQuery().CastRay(
+        ray, hit,
+        JPH::BroadPhaseLayerFilter{},
+        JPH::ObjectLayerFilter{},
+        JPH::BodyFilter{});
+
+    if (didHit)
+    {
+        result.fraction = hit.mFraction;
+        result.x = ox + dx * maxDist * hit.mFraction;
+        result.y = oy + dy * maxDist * hit.mFraction;
+        result.z = oz + dz * maxDist * hit.mFraction;
+        result.hit = true;
+    }
+    return result;
 }
 
 } // namespace tp

@@ -8,6 +8,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 using json = nlohmann::json;
 
@@ -107,4 +108,24 @@ std::string AssetRegistry::GetPath(const std::string& assetId) const
         return {};
     }
     return it->second;
+}
+
+// ---------------------------------------------------------------------------
+// GetIdsByPrefix
+// ---------------------------------------------------------------------------
+std::vector<std::string> AssetRegistry::GetIdsByPrefix(const std::string& prefix) const
+{
+    std::vector<std::string> result;
+    for (const auto& [id, path] : m_assets)
+    {
+        if (id.size() >= prefix.size() &&
+            id.compare(0, prefix.size(), prefix) == 0)
+        {
+            result.push_back(id);
+        }
+    }
+    // Sort so the caller always receives a deterministic order regardless of
+    // the unordered_map's internal iteration sequence.
+    std::sort(result.begin(), result.end());
+    return result;
 }
