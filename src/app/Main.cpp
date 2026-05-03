@@ -236,14 +236,39 @@ updateCameraFromPlayer();
         wasF1Down = f1Down;
 
         // F5: reload Asset Registry and World Grid without restarting.
-        // This lets you edit JSON files and see changes immediately.
+        // Also repopulates the forest from the reloaded cell data so changes
+        // to tree_count/radius in cell JSON take effect immediately.
         bool f5Down = (GetAsyncKeyState(VK_F5) & 0x8000) != 0;
         if (f5Down && !wasF5Down)
         {
             LOG_INFO("F5: reloading Asset Registry and World Grid...");
-            registry.Reload();    // safe: keeps old data on parse error
-            worldGrid.Reload();   // safe: keeps old grid on parse error
-            LOG_INFO("F5: reload complete.");
+            bool regOk  = registry.Reload();    // safe: keeps old data on parse error
+            bool gridOk = worldGrid.Reload();   // safe: keeps old grid on parse error
+
+            if (regOk)
+                LOG_INFO("F5: AssetRegistry reloaded OK.");
+            else
+                LOG_WARN("F5: AssetRegistry reload failed — keeping old registry.");
+
+            if (gridOk)
+            {
+                LOG_INFO("F5: WorldGrid reloaded OK — repopulating forest...");
+                // Rebuild forest from updated cell data so gameplay sees the changes.
+                int playerCX = 0, playerCZ = 0;
+                worldGrid.WorldToCell(playerX, playerZ, playerCX, playerCZ);
+                auto reloadedCells = worldGrid.GetActiveCells(playerCX, playerCZ, 0);
+                if (!reloadedCells.empty() && reloadedCells[0].forestEnabled)
+                {
+                    const WorldCell& c = reloadedCells[0];
+                    forest.Populate(renderer, c.forestTreeCount, c.forestRadius,
+                                    c.CenterX(), c.CenterZ());
+                    LOG_INFO("F5: forest repopulated from cell data.");
+                }
+            }
+            else
+            {
+                LOG_WARN("F5: WorldGrid reload failed — keeping old world grid.");
+            }
         }
         wasF5Down = f5Down;
 

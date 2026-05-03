@@ -16,8 +16,6 @@ using json = nlohmann::json;
 // ---------------------------------------------------------------------------
 bool AssetRegistry::Load(const std::string& path)
 {
-    m_registryPath = path;
-
     std::ifstream file(path);
     if (!file.is_open())
     {
@@ -53,6 +51,14 @@ bool AssetRegistry::Load(const std::string& path)
         }
         std::string assetPath = pathVal.get<std::string>();
 
+        // Skip empty paths — GetPath() returns "" for "not found", so storing
+        // an empty path would make it impossible to tell the two cases apart.
+        if (assetPath.empty())
+        {
+            LOG_WARN("AssetRegistry: skipping empty path for id '" + id + "'");
+            continue;
+        }
+
         // Warn if the file doesn't exist so the developer notices quickly.
         {
             std::ifstream check(assetPath);
@@ -64,6 +70,10 @@ bool AssetRegistry::Load(const std::string& path)
     }
 
     m_assets = std::move(newAssets);
+
+    // Only record the path after a fully successful load so that Reload()
+    // doesn't keep retrying a previously bad path.
+    m_registryPath = path;
 
     std::ostringstream ss;
     ss << "AssetRegistry: loaded " << m_assets.size()

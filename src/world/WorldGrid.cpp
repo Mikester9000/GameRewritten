@@ -47,7 +47,16 @@ bool WorldGrid::Load(const std::string& worldJsonPath)
         return false;
 
     m_name     = j.value("name",      "world");
-    m_cellSize = j.value("cell_size", 200.0f);
+
+    // Validate cell_size: must be > 0 or WorldToCell() will divide by zero.
+    float rawCellSize = j.value("cell_size", 200.0f);
+    if (rawCellSize <= 0.0f)
+    {
+        LOG_ERROR("WorldGrid: 'cell_size' must be > 0, got " + std::to_string(rawCellSize)
+                  + " in '" + worldJsonPath + "'");
+        return false;
+    }
+    m_cellSize = rawCellSize;
 
     if (!j.contains("cells") || !j["cells"].is_array())
     {
@@ -119,8 +128,35 @@ bool WorldGrid::LoadCellFile(const std::string& path, WorldCell& out)
     if (!ReadJsonFile(path, j))
         return false;
 
-    out.cx = j.value("cx", out.cx);
-    out.cz = j.value("cz", out.cz);
+    // Treat cx/cz in the cell file as validation only — the manifest is the
+    // authoritative source of a cell's grid coordinates.  Warn and continue
+    // if there is a mismatch; do NOT overwrite out.cx/out.cz.
+    if (j.contains("cx") && j["cx"].is_number_integer())
+    {
+        int fileCX = j["cx"].get<int>();
+        if (fileCX != out.cx)
+        {
+            std::ostringstream w;
+            w << "WorldGrid: cell file '" << path
+              << "' has cx=" << fileCX
+              << " but manifest says cx=" << out.cx
+              << ". Using manifest value.";
+            LOG_WARN(w.str());
+        }
+    }
+    if (j.contains("cz") && j["cz"].is_number_integer())
+    {
+        int fileCZ = j["cz"].get<int>();
+        if (fileCZ != out.cz)
+        {
+            std::ostringstream w;
+            w << "WorldGrid: cell file '" << path
+              << "' has cz=" << fileCZ
+              << " but manifest says cz=" << out.cz
+              << ". Using manifest value.";
+            LOG_WARN(w.str());
+        }
+    }
 
     if (j.contains("terrain"))
     {
