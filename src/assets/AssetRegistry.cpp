@@ -8,6 +8,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 using json = nlohmann::json;
 
@@ -123,5 +124,8 @@ std::vector<std::string> AssetRegistry::GetIdsByPrefix(const std::string& prefix
             result.push_back(id);
         }
     }
+    // Sort so the caller always receives a deterministic order regardless of
+    // the unordered_map's internal iteration sequence.
+    std::sort(result.begin(), result.end());
     return result;
 }

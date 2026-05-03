@@ -8,7 +8,12 @@
 //   3. Call HandlePlacement() each frame (before BeginFrame is fine) to process clicks.
 //   4. Call SpawnCellInstances() after loading or reloading a cell to show persisted instances.
 
+// Use an include guard for WIN32_LEAN_AND_MEAN rather than unconditionally
+// redefining it here, to avoid macro-redefinition warnings when other
+// translation units (or build settings) have already defined it.
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #include <string>
 #include <vector>
@@ -51,10 +56,10 @@ public:
     void RefreshPrefabList();
 
 private:
-    bool m_placementMode     = false;
-    int  m_selectedPrefabIdx = 0;
+    bool m_placementMode = false;
 
-    std::vector<std::string> m_prefabIds; // IDs beginning with "prefabs."
+    std::vector<std::string> m_prefabIds;   // IDs beginning with "prefabs." (sorted)
+    std::string m_selectedPrefabId;         // the currently-selected prefab ID (stable across reloads)
 
     AssetRegistry* m_registry = nullptr;
     WorldGrid*     m_grid     = nullptr;

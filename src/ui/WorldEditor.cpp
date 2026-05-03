@@ -18,6 +18,7 @@
 #include "tp_physics.hpp"
 
 #include <cmath>
+#include <algorithm>
 #include <sstream>
 
 // ---------------------------------------------------------------------------
@@ -36,18 +37,27 @@ void WorldEditor::SetReferences(AssetRegistry* registry, WorldGrid* grid, Forest
 // ---------------------------------------------------------------------------
 void WorldEditor::RefreshPrefabList()
 {
+    // Remember the current selection so it survives a reload.
+    std::string prevSelected = m_selectedPrefabId;
+
     m_prefabIds.clear();
     if (!m_registry) return;
 
     m_prefabIds = m_registry->GetIdsByPrefix("prefabs.");
+    // Sort so the list is deterministic across runs/reloads regardless of
+    // unordered_map iteration order.
+    std::sort(m_prefabIds.begin(), m_prefabIds.end());
 
-    // Fallback: always show at least one entry so the editor isn't empty.
-    if (m_prefabIds.empty())
-        m_prefabIds.push_back("prefabs.tree");
+    // Do NOT inject a fallback entry when the list is empty — placing an instance
+    // that references an unregistered ID would corrupt the cell file.
 
-    // Clamp selection index.
-    if (m_selectedPrefabIdx >= static_cast<int>(m_prefabIds.size()))
-        m_selectedPrefabIdx = 0;
+    // Restore previous selection by ID; fall back to the first entry if not found.
+    m_selectedPrefabId.clear();
+    if (!m_prefabIds.empty())
+    {
+        auto it = std::find(m_prefabIds.begin(), m_prefabIds.end(), prevSelected);
+        m_selectedPrefabId = (it != m_prefabIds.end()) ? *it : m_prefabIds[0];
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +83,16 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
     }
 
     // --- Placement mode toggle ---
+    // Disable the checkbox (and force mode off) when no prefabs are registered,
+    // so clicks can't write instances referencing non-existent asset IDs.
+    if (m_prefabIds.empty())
+    {
+        m_placementMode = false;
+        ImGui::BeginDisabled();
+    }
     ImGui::Checkbox("Placement Mode", &m_placementMode);
+    if (m_prefabIds.empty())
+        ImGui::EndDisabled();
     if (m_placementMode)
     {
         ImGui::SameLine();
@@ -88,11 +107,11 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
     {
         if (ImGui::BeginListBox("##prefabs", ImVec2(-1.0f, 80.0f)))
         {
-            for (int i = 0; i < static_cast<int>(m_prefabIds.size()); ++i)
+            for (const auto& id : m_prefabIds)
             {
-                bool selected = (i == m_selectedPrefabIdx);
-                if (ImGui::Selectable(m_prefabIds[i].c_str(), selected))
-                    m_selectedPrefabIdx = i;
+                bool selected = (id == m_selectedPrefabId);
+                if (ImGui::Selectable(id.c_str(), selected))
+                    m_selectedPrefabId = id;
                 if (selected) ImGui::SetItemDefaultFocus();
             }
             ImGui::EndListBox();
@@ -100,7 +119,11 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
     }
     else
     {
-        ImGui::TextDisabled("(no prefabs registered)");
+        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f),
+            "No prefabs registered.");
+        ImGui::TextDisabled("Add 'prefabs.*' entries to");
+        ImGui::TextDisabled("Content/AssetRegistry.json");
+        ImGui::TextDisabled("then press F5 to reload.");
     }
 
     ImGui::Separator();
@@ -156,7 +179,7 @@ bool WorldEditor::HandlePlacement(POINT screenPos,
                                    int activeCX, int activeCZ)
 {
     if (!m_placementMode || !m_grid || !m_forest) return false;
-    if (m_prefabIds.empty()) return false;
+    if (m_prefabIds.empty() || m_selectedPrefabId.empty()) return false;
 
     // Build picking ray from screen position.
     float ox, oy, oz, dx, dy, dz;
@@ -202,9 +225,8 @@ bool WorldEditor::HandlePlacement(POINT screenPos,
         hitY = renderer.SampleTerrainHeight(hitX, hitZ);
 
     // Create the instance record.
-    const std::string& prefabId = m_prefabIds[m_selectedPrefabIdx];
     CellInstance inst;
-    inst.prefab = prefabId;
+    inst.prefab = m_selectedPrefabId;
     inst.x      = hitX;
     inst.y      = hitY;
     inst.z      = hitZ;
@@ -224,7 +246,7 @@ bool WorldEditor::HandlePlacement(POINT screenPos,
     m_forest->AddInstance(renderer, hitX, hitY, hitZ, inst.scale);
 
     std::ostringstream ss;
-    ss << "WorldEditor: placed '" << prefabId
+    ss << "WorldEditor: placed '" << m_selectedPrefabId
        << "' at (" << hitX << ", " << hitY << ", " << hitZ << ")";
     LOG_INFO(ss.str());
     return true;

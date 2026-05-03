@@ -11,7 +11,12 @@
 //   // for mouse picking:
 //   cam.ScreenPointToRay(mx, my, vpW, vpH, ox, oy, oz, dx, dy, dz);
 
+// Use an include guard for WIN32_LEAN_AND_MEAN rather than unconditionally
+// redefining it here, to avoid macro-redefinition warnings when other
+// translation units (or build settings) have already defined it.
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 
 class D3D11Renderer; // forward declaration

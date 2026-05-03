@@ -308,6 +308,15 @@ bool WorldGrid::SaveCell(int cx, int cz)
         return false;
     }
 
+    // std::ofstream write failures typically set failbit/badbit rather than throwing.
+    // Always check the stream state after writing, regardless of exceptions.
+    if (!out.good())
+    {
+        LOG_ERROR("WorldGrid::SaveCell: stream error after write to '" + cell->filePath +
+                  "' (disk full, permission denied, or IO error).");
+        return false;
+    }
+
     std::ostringstream ss;
     ss << "WorldGrid::SaveCell: saved cell (" << cx << "," << cz << ") to '"
        << cell->filePath << "' with " << cell->instances.size() << " instance(s).";
