@@ -7,8 +7,7 @@
 //   - JPH_DEBUG_RENDERER    : off (we don't use Jolt's own renderer)
 //   - Single-threaded job system used at start; upgrade later if needed.
 
-// Disable Jolt's debug renderer to avoid pulling in renderer deps
-#define JPH_DEBUG_RENDERER_OFF
+// JPH_DEBUG_RENDERER_OFF is defined via project preprocessor definitions.
 
 #include "Jolt/AABBTree/AABBTreeBuilder.cpp"
 #include "Jolt/Core/Color.cpp"

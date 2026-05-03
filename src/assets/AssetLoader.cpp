@@ -4,7 +4,7 @@
 
 #include "AssetLoader.hpp"
 #include "../../third_party/nlohmann/json.hpp"
-#include "../../logger/Logger.hpp"
+#include "logger/Logger.hpp"
 
 #include <fstream>
 #include <sstream>

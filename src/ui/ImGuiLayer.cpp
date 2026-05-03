@@ -10,7 +10,7 @@
 #include "../../third_party/imgui/backends/imgui_impl_win32.h"
 #include "../../third_party/imgui/backends/imgui_impl_dx11.h"
 
-#include "../../logger/Logger.hpp"
+#include "logger/Logger.hpp"
 
 ImGuiLayer::ImGuiLayer() = default;
 
