@@ -241,8 +241,8 @@ updateCameraFromPlayer();
         if (f5Down && !wasF5Down)
         {
             LOG_INFO("F5: reloading Asset Registry and World Grid...");
-            registry.Load();   // safe: keeps old data on parse error
-            worldGrid.Reload(); // safe: keeps old grid on parse error
+            registry.Reload();    // safe: keeps old data on parse error
+            worldGrid.Reload();   // safe: keeps old grid on parse error
             LOG_INFO("F5: reload complete.");
         }
         wasF5Down = f5Down;

@@ -72,6 +72,19 @@ bool AssetRegistry::Load(const std::string& path)
     return true;
 }
 
+bool AssetRegistry::Reload()
+{
+    // Save old state so we can restore it if Load() fails.
+    auto oldAssets = m_assets;
+
+    if (!Load(m_registryPath))
+    {
+        m_assets = std::move(oldAssets);
+        return false;
+    }
+    return true;
+}
+
 // ---------------------------------------------------------------------------
 // GetPath
 // ---------------------------------------------------------------------------

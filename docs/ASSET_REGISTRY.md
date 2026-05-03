@@ -73,14 +73,15 @@ While the game window is in focus, press **F5**.
 
 What happens:
 1. `Content/AssetRegistry.json` is read from disk again.
-2. `Content/World/world.json` (and any cell files) is read from disk again.
+2. `Content/World/world.json` (and all its referenced `cell_X_Z.json` files) is read from disk again.
 3. The Output window logs how many assets were loaded.
 4. If either file has a JSON error, the **old data is kept** — no crash.
 
 This means you can:
-- Edit `AssetRegistry.json` in a text editor while the game runs.
+- Edit `Content/AssetRegistry.json` in a text editor while the game runs.
+- Edit `Content/World/world.json` or any `cell_X_Z.json` file.
 - Press F5 — changes take effect immediately.
-- If you make a typo, the game logs an error and keeps the old registry.
+- If you make a typo, the game logs an error and keeps the old registry/grid.
 
 ---
 
