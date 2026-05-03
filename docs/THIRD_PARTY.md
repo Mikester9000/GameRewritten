@@ -70,15 +70,19 @@ Include a `LICENSE.txt` file **inside** each vendor folder.
 - **License:** MIT (`third_party/jolt/LICENSE.txt`)
 - **Purpose:** Rigid body physics simulation (ground, spheres, capsules,
   constraints).  Used by `ThirdParty/src/tp_physics.cpp`.
-- **Build approach:** Unity build via `jolt_all.cpp` (includes all 130+ Jolt
-  `.cpp` files in one translation unit).
+- **Build approach:** Individual `.cpp` files listed in `ThirdParty.vcxproj`.
+  (`jolt_all.cpp` is kept as a reference but is **not** compiled; the unity
+  build caused C2084 duplicate-definition errors in MSVC when `Character.cpp`
+  and `Ragdoll.cpp` were in the same translation unit.)
 - **MSVC flags:** SSE2 baseline only (GT610 compatible).
-  No AVX/AVX2/SSE4.x enabled.
+  No AVX/AVX2/SSE4.x enabled.  `JPH_DEBUG_RENDERER_OFF` is set via project
+  preprocessor definitions (not in source).
 - **Home page:** https://github.com/jrouwe/JoltPhysics
 - **Update:**
   1. Download the new release archive.
   2. Replace `third_party/jolt/Jolt/` with the new `Jolt/` directory.
-  3. Regenerate `jolt_all.cpp` by listing new `.cpp` files under `Jolt/`.
+  3. Update the Jolt `<ClCompile>` entries in `ThirdParty.vcxproj` to match
+     any `.cpp` files added or removed in the new release.
   4. Check the Jolt changelog for API breaking changes.
 
 ### `third_party/recast/` — Recast & Detour v1.6.0
