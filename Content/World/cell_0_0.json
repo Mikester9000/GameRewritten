@@ -1,0 +1,13 @@
+{
+    "cx": 0,
+    "cz": 0,
+    "terrain": {
+        "enabled": true,
+        "height_scale": 8.0
+    },
+    "forest": {
+        "enabled": true,
+        "tree_count": 80,
+        "radius": 50.0
+    }
+}

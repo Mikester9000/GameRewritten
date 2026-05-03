@@ -1,0 +1,10 @@
+{
+    "version": 1,
+    "assets": {
+        "textures.placeholder":      "Content/Textures/placeholder.png",
+        "materials.default":         "Content/Materials/default.material.json",
+        "prefabs.tree":              "Content/Prefabs/tree.prefab.json",
+        "scenes.test":               "Content/Scenes/test.scene.json",
+        "worlds.overworld":          "Content/World/world.json"
+    }
+}

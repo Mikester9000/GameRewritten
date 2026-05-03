@@ -1,0 +1,8 @@
+{
+    "name": "overworld",
+    "version": 1,
+    "cell_size": 200.0,
+    "cells": [
+        { "cx": 0, "cz": 0, "file": "Content/World/cell_0_0.json" }
+    ]
+}

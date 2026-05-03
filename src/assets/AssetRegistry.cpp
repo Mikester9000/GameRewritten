@@ -1,0 +1,87 @@
+// AssetRegistry.cpp
+// Loads Content/AssetRegistry.json and answers GetPath() queries.
+// Safe reload: on parse error the old registry stays intact.
+
+#include "AssetRegistry.hpp"
+#include "../../third_party/nlohmann/json.hpp"
+#include "logger/Logger.hpp"
+
+#include <fstream>
+#include <sstream>
+
+using json = nlohmann::json;
+
+// ---------------------------------------------------------------------------
+// Load / Reload
+// ---------------------------------------------------------------------------
+bool AssetRegistry::Load(const std::string& path)
+{
+    m_registryPath = path;
+
+    std::ifstream file(path);
+    if (!file.is_open())
+    {
+        LOG_ERROR("AssetRegistry: cannot open '" + path + "'");
+        return false;
+    }
+
+    json j;
+    try
+    {
+        file >> j;
+    }
+    catch (const json::parse_error& e)
+    {
+        LOG_ERROR("AssetRegistry: JSON parse error in '" + path + "': " + e.what());
+        return false;  // keep old registry intact
+    }
+
+    if (!j.contains("assets") || !j["assets"].is_object())
+    {
+        LOG_ERROR("AssetRegistry: missing 'assets' object in '" + path + "'");
+        return false;
+    }
+
+    // Build into a temp map first; only replace m_assets on full success.
+    std::unordered_map<std::string, std::string> newAssets;
+    for (auto& [id, pathVal] : j["assets"].items())
+    {
+        if (!pathVal.is_string())
+        {
+            LOG_WARN("AssetRegistry: skipping non-string value for id '" + id + "'");
+            continue;
+        }
+        std::string assetPath = pathVal.get<std::string>();
+
+        // Warn if the file doesn't exist so the developer notices quickly.
+        {
+            std::ifstream check(assetPath);
+            if (!check.is_open())
+                LOG_WARN("AssetRegistry: path not found on disk: '" + assetPath + "' (id='" + id + "')");
+        }
+
+        newAssets[id] = std::move(assetPath);
+    }
+
+    m_assets = std::move(newAssets);
+
+    std::ostringstream ss;
+    ss << "AssetRegistry: loaded " << m_assets.size()
+       << " asset(s) from '" << path << "'";
+    LOG_INFO(ss.str());
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// GetPath
+// ---------------------------------------------------------------------------
+std::string AssetRegistry::GetPath(const std::string& assetId) const
+{
+    auto it = m_assets.find(assetId);
+    if (it == m_assets.end())
+    {
+        LOG_ERROR("AssetRegistry: unknown asset id '" + assetId + "'");
+        return {};
+    }
+    return it->second;
+}
