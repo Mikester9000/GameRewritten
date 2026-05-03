@@ -17,12 +17,12 @@
 // One authored object placed inside a WorldCell via the World Editor.
 struct CellInstance
 {
-    std::string prefab;       // scoped asset ID, e.g. "prefabs.tree"
-    float x     = 0.0f;      // world-space position
-    float y     = 0.0f;
-    float z     = 0.0f;
-    float yaw   = 0.0f;      // rotation around Y axis (radians)
-    float scale = 1.0f;      // uniform scale
+    std::string prefab;    // scoped asset ID, e.g. "prefabs.tree"
+    float x     = 0.0f;   // world-space position
+    float y     = 0.0f;   // world-space position
+    float z     = 0.0f;   // world-space position
+    float yaw   = 0.0f;   // rotation around Y axis (radians)
+    float scale = 1.0f;   // uniform scale
 };
 
 // ---------------------------------------------------------------------------

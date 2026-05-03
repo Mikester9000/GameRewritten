@@ -181,7 +181,8 @@ bool WorldEditor::HandlePlacement(POINT screenPos,
     {
         // Fallback: intersect ray with the Y=0 ground plane (or terrain baseline).
         // Ray: P = origin + t * dir.  At Y=0: t = -oy / dy.
-        if (fabsf(dy) > 1e-6f)
+        static const float MIN_RAY_DIR_EPSILON = 1e-6f;
+        if (fabsf(dy) > MIN_RAY_DIR_EPSILON)
         {
             float t = -oy / dy;
             if (t > 0.0f)

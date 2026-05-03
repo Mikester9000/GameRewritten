@@ -260,7 +260,9 @@ bool WorldGrid::SaveCell(int cx, int cz)
 
     if (cell->filePath.empty())
     {
-        LOG_ERROR("WorldGrid::SaveCell: cell has no file path; cannot save.");
+        std::ostringstream err;
+        err << "WorldGrid::SaveCell: cell (" << cx << "," << cz << ") has no file path; cannot save.";
+        LOG_ERROR(err.str());
         return false;
     }
 

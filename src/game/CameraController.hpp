@@ -20,9 +20,20 @@ class CameraController
 {
 public:
     // --- Tweakable parameters (public for easy access) ---
-    float cameraDistance = 4.0f;  // distance behind player
-    float cameraHeight   = 2.0f;  // camera height above player
-    float eyeOffset      = 1.0f;  // how high the player eye sits above ground
+    float cameraDistance = 4.0f;   // distance behind player
+    float cameraHeight   = 2.0f;   // camera height above player
+    float eyeOffset      = 1.0f;   // how high the player eye sits above ground
+
+    // Mouse look sensitivity (radians per pixel).
+    float mouseSensitivity = 0.005f;
+    // Maximum pitch angle (radians). Prevents flipping upside down.
+    float maxPitch = 1.5f;
+
+    // Movement and physics settings.
+    float moveSpeed          =  4.0f;   // units per second
+    float gravity            = -20.0f;  // world units per second squared
+    float jumpVelocity       =  6.0f;   // initial vertical speed on jump
+    float terminalVelocity   = -30.0f;  // fastest the player can fall
 
     // Set initial state. Call once before the game loop.
     void Init(float startX, float startY, float startZ,

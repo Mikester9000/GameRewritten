@@ -60,10 +60,10 @@ void CameraController::Update(float dt, bool paused, bool& inOutFirstFrame,
     {
         int dx = mouse.x - m_centerPoint.x;
         int dy = mouse.y - m_centerPoint.y;
-        m_yaw   += static_cast<float>(dx) * 0.005f;
-        m_pitch -= static_cast<float>(dy) * 0.005f;
-        if (m_pitch >  1.5f) m_pitch =  1.5f;
-        if (m_pitch < -1.5f) m_pitch = -1.5f;
+        m_yaw   += static_cast<float>(dx) * mouseSensitivity;
+        m_pitch -= static_cast<float>(dy) * mouseSensitivity;
+        if (m_pitch >  maxPitch) m_pitch =  maxPitch;
+        if (m_pitch < -maxPitch) m_pitch = -maxPitch;
     }
     // Re-centre the cursor so the next frame's delta is always relative to centre.
     if (!paused)
@@ -82,7 +82,6 @@ void CameraController::Update(float dt, bool paused, bool& inOutFirstFrame,
         float rightX   =  cosf(m_yaw);
         float rightZ   = -sinf(m_yaw);
 
-        const float moveSpeed = 4.0f; // units per second
         float step = moveSpeed * dt;
 
         if (GetAsyncKeyState('W') & 0x8000) { m_playerX += forwardX * step; m_playerZ += forwardZ * step; }
@@ -91,10 +90,6 @@ void CameraController::Update(float dt, bool paused, bool& inOutFirstFrame,
         if (GetAsyncKeyState('D') & 0x8000) { m_playerX += rightX * step;   m_playerZ += rightZ * step;   }
 
         // Gravity + jumping
-        const float gravity          = -20.0f;
-        const float jumpVelocity     =   6.0f;
-        const float terminalVelocity = -30.0f;
-
         if (!m_isGrounded)
         {
             m_velocityY += gravity * dt;
@@ -131,7 +126,6 @@ void CameraController::Update(float dt, bool paused, bool& inOutFirstFrame,
 
     // Apply camera position to renderer so all draw calls use the correct view.
     renderer.SetCameraPosition(m_camX, m_camY, m_camZ);
-    renderer.SetCameraRotation(m_yaw, m_pitch);
 }
 
 // ---------------------------------------------------------------------------
