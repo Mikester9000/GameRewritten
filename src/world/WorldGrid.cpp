@@ -9,7 +9,6 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
-#include <cstdlib>  // abs
 
 using json = nlohmann::json;
 
@@ -95,7 +94,20 @@ bool WorldGrid::Load(const std::string& worldJsonPath)
 // ---------------------------------------------------------------------------
 bool WorldGrid::Reload()
 {
-    return Load(m_worldJsonPath);
+    // Save old state so we can restore it if Load() fails.
+    std::string           oldName     = m_name;
+    float                 oldCellSize = m_cellSize;
+    std::vector<WorldCell> oldCells   = m_cells;
+
+    if (!Load(m_worldJsonPath))
+    {
+        // Restore previous good state — no crash, no empty world.
+        m_name     = std::move(oldName);
+        m_cellSize = oldCellSize;
+        m_cells    = std::move(oldCells);
+        return false;
+    }
+    return true;
 }
 
 // ---------------------------------------------------------------------------
