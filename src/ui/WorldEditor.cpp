@@ -103,6 +103,8 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
 
     // --- Prefab selection ---
     ImGui::Text("Prefab:");
+    // Warning color used when the prefab list is empty.
+    static constexpr ImVec4 WARNING_COLOR = ImVec4(1.0f, 0.4f, 0.4f, 1.0f);
     if (!m_prefabIds.empty())
     {
         if (ImGui::BeginListBox("##prefabs", ImVec2(-1.0f, 80.0f)))
@@ -119,7 +121,7 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
     }
     else
     {
-        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f),
+        ImGui::TextColored(WARNING_COLOR,
             "No prefabs registered.");
         ImGui::TextDisabled("Add 'prefabs.*' entries to");
         ImGui::TextDisabled("Content/AssetRegistry.json");

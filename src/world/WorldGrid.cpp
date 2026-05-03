@@ -312,8 +312,11 @@ bool WorldGrid::SaveCell(int cx, int cz)
     // Always check the stream state after writing, regardless of exceptions.
     if (!out.good())
     {
-        LOG_ERROR("WorldGrid::SaveCell: stream error after write to '" + cell->filePath +
-                  "' (disk full, permission denied, or IO error).");
+        std::ostringstream streamErr;
+        streamErr << "WorldGrid::SaveCell: stream error after write to '"
+                  << cell->filePath
+                  << "' (disk full, permission denied, or IO error).";
+        LOG_ERROR(streamErr.str());
         return false;
     }
 
