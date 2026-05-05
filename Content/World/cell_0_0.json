@@ -5,7 +5,7 @@
         "enabled": true,
         "biome": "grassland",
         "seed": 12345,
-        "height_scale": 8.0,
+        "height_scale": 3.0,
         "noise_freq": 0.08,
         "noise_freq2": 0.03
     },

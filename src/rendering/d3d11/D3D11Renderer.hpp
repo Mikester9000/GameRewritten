@@ -106,9 +106,8 @@ private:
     ID3D11PixelShader* skyPixelShader = nullptr;
     ID3D11InputLayout* skyInputLayout = nullptr;
     ID3D11Buffer* lightConstantBuffer = nullptr;
-	ID3D11Buffer* m_terrainPatchVertexBuffer = nullptr;
-	ID3D11Buffer* m_terrainPatchIndexBuffer = nullptr;
-	UINT m_terrainPatchIndexCount = 0;
+    ID3D11Buffer* m_terrainPatchVertexBuffer = nullptr;
+    UINT m_terrainPatchVertexCount = 0;
 
 
 };  

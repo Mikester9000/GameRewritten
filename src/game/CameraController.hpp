@@ -35,7 +35,7 @@ public:
     float maxPitch = 1.5f;
 
     // Movement and physics settings.
-    float moveSpeed          =  4.0f;   // units per second
+    float moveSpeed          =  10.0f;   // units per second
     float gravity            = -20.0f;  // world units per second squared
     float jumpVelocity       =  6.0f;   // initial vertical speed on jump
     float terminalVelocity   = -30.0f;  // fastest the player can fall

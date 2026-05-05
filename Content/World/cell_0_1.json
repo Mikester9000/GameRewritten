@@ -5,8 +5,8 @@
         "enabled": true,
         "biome": "rocky",
         "seed": 48765,
-        "height_scale": 11.0,
-        "noise_freq": 0.11,
+        "height_scale": 25.0,
+        "noise_freq": 0.005,
         "noise_freq2": 0.05
     },
     "forest": {
