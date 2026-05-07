@@ -1,4 +1,5 @@
 #include "D3D11Renderer.hpp"
+#include "D3D11RendererHelpers.hpp"
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -50,6 +51,18 @@ namespace
         SafeRelease(vsBlob);
         SafeRelease(psBlob);
         SafeRelease(inputLayout);
+        SafeRelease(vertexShader);
+        SafeRelease(pixelShader);
+    }
+
+    void CleanupSkyShaderSetupFailure(
+        ID3DBlob*& vsBlob,
+        ID3DBlob*& psBlob,
+        ID3D11VertexShader*& vertexShader,
+        ID3D11PixelShader*& pixelShader)
+    {
+        SafeRelease(vsBlob);
+        SafeRelease(psBlob);
         SafeRelease(vertexShader);
         SafeRelease(pixelShader);
     }
@@ -271,15 +284,37 @@ void D3D11Renderer::CreateSkyShaders()
     ID3DBlob* vsBlob = nullptr;
     ID3DBlob* psBlob = nullptr;
 
-    // Compile sky vertex shader
-    HRESULT hr = D3DCompileFromFile(L"Shaders/sky_vs.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &vsBlob, nullptr);
-    if (FAILED(hr)) { LOG_ERROR("Failed to compile Shaders/sky_vs.hlsl"); }
-    device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &skyVertexShader);
+    HRESULT hr = CompileShaderFromFile(L"Shaders/sky_vs.hlsl", "main", "vs_5_0", &vsBlob);
+    if (FAILED(hr) || !vsBlob)
+    {
+        LOG_ERROR("Failed to compile Shaders/sky_vs.hlsl");
+        CleanupSkyShaderSetupFailure(vsBlob, psBlob, skyVertexShader, skyPixelShader);
+        return;
+    }
 
-    // Compile sky pixel shader
-    hr = D3DCompileFromFile(L"Shaders/sky_ps.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &psBlob, nullptr);
-    if (FAILED(hr)) { LOG_ERROR("Failed to compile Shaders/sky_ps.hlsl"); }
-    device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &skyPixelShader);
+    hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &skyVertexShader);
+    if (FAILED(hr) || !skyVertexShader)
+    {
+        LOG_ERROR("Failed to create sky vertex shader");
+        CleanupSkyShaderSetupFailure(vsBlob, psBlob, skyVertexShader, skyPixelShader);
+        return;
+    }
+
+    hr = CompileShaderFromFile(L"Shaders/sky_ps.hlsl", "main", "ps_5_0", &psBlob);
+    if (FAILED(hr) || !psBlob)
+    {
+        LOG_ERROR("Failed to compile Shaders/sky_ps.hlsl");
+        CleanupSkyShaderSetupFailure(vsBlob, psBlob, skyVertexShader, skyPixelShader);
+        return;
+    }
+
+    hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &skyPixelShader);
+    if (FAILED(hr) || !skyPixelShader)
+    {
+        LOG_ERROR("Failed to create sky pixel shader");
+        CleanupSkyShaderSetupFailure(vsBlob, psBlob, skyVertexShader, skyPixelShader);
+        return;
+    }
 
     // No input layout needed for SV_VertexID trick
 
@@ -301,12 +336,6 @@ void D3D11Renderer::DrawSky()
 }
 void D3D11Renderer::CreateGroundPlane()
 {
-    struct Vertex {
-        float x, y, z;
-        float nx, ny, nz;
-        float r, g, b, a;
-    };
-
     Vertex vertices[] = {
         { -1000.0f, -1.0f, -1000.0f, 0.0f, 1.0f, 0.0f, 0.2f, 0.8f, 0.2f, 1.0f },
         {  1000.0f, -1.0f, -1000.0f, 0.0f, 1.0f, 0.0f, 0.2f, 0.8f, 0.2f, 1.0f },
@@ -363,141 +392,12 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
     const int vertsZ = quadsZ + 1;
     const float quadSize = params.cellWorldSize / static_cast<float>(quadsX);
 
-    // Biome colour gradients: low-height colour → high-height colour.
-    float lowR, lowG, lowB, hiR, hiG, hiB;
-    if (params.biome == "desert")
-    {
-        lowR = 0.78f; lowG = 0.65f; lowB = 0.35f;
-        hiR = 0.90f; hiG = 0.85f; hiB = 0.72f;
-    }
-    else if (params.biome == "rocky")
-    {
-        lowR = 0.38f; lowG = 0.36f; lowB = 0.34f;
-        hiR = 0.58f; hiG = 0.56f; hiB = 0.52f;
-    }
-    else if (params.biome == "snow")
-    {
-        lowR = 0.45f; lowG = 0.47f; lowB = 0.52f;
-        hiR = 0.95f; hiG = 0.96f; hiB = 1.00f;
-    }
-    else // grassland (default)
-    {
-        lowR = 0.15f; lowG = 0.50f; lowB = 0.15f;
-        hiR = 0.45f; hiG = 0.42f; hiB = 0.38f;
-    }
-
-    // Biome-specific noise tuning fed by JSON fields.
-    float nFreq = params.noiseFreq;
-    float hScale = params.heightScale;
-    if (params.biome == "desert") { nFreq *= 0.6f; }
-    if (params.biome == "rocky") { nFreq *= 1.3f; hScale *= 1.1f; }
-    if (params.biome == "snow") { nFreq *= 1.1f; }
-
-    // Seed shifts sample space so each seed produces unique, non-repeating terrain.
-    float seedOX = static_cast<float>(params.seed) * 0.12345f;
-    float seedOZ = static_cast<float>(params.seed) * 0.09876f;
-
-    // --- 4-octave FBM value noise (no external library needed) ---
-    // hashNoise: maps integer grid cell to a pseudo-random float in [-1, 1].
-    auto hashNoise = [](int ix, int iz) -> float
-        {
-            int n = ix * 1619 + iz * 31337;
-            n = (n << 13) ^ n;
-            n = n * (n * n * 15731 + 789221) + 1376312589;
-            return 1.0f - static_cast<float>(n & 0x7fffffff) / 1073741824.0f;
-        };
-
-    // smoothNoise: bilinear interpolation with smoothstep curve between hash values.
-    auto smoothNoise = [&](float fx, float fz) -> float
-        {
-            int   ix = static_cast<int>(floorf(fx));
-            int   iz = static_cast<int>(floorf(fz));
-            float tx = fx - static_cast<float>(ix);
-            float tz = fz - static_cast<float>(iz);
-            // Smoothstep: eases in/out to remove grid artifacts.
-            tx = tx * tx * (3.0f - 2.0f * tx);
-            tz = tz * tz * (3.0f - 2.0f * tz);
-            float h00 = hashNoise(ix, iz);
-            float h10 = hashNoise(ix + 1, iz);
-            float h01 = hashNoise(ix, iz + 1);
-            float h11 = hashNoise(ix + 1, iz + 1);
-            return h00 + (h10 - h00) * tx
-                + (h01 - h00) * tz
-                + (h11 - h10 - h01 + h00) * tx * tz;
-        };
-
-    
-    // Each octave: double the frequency, half the amplitude.
-        // sampleHeight: stacks 4 octaves (big hills → fine detail).
-    // Rocky terrain uses a special diagonal mountain-range shape first,
-    // then adds smaller noise on top as surface detail.
-    auto sampleHeight = [&](float wx, float wz) -> float
-        {
-            float sx = wx + seedOX;
-            float sz = wz + seedOZ;
-
-            if (params.biome == "rocky")
-            {
-                const float cellCenterX = params.cellOriginX + params.cellWorldSize * 0.5f;
-                const float cellCenterZ = params.cellOriginZ + params.cellWorldSize * 0.5f;
-                const float invSqrt2 = 0.70710678f;
-
-                // Local position around the middle of the cell.
-                float localX = wx - cellCenterX;
-                float localZ = wz - cellCenterZ;
-
-                // Rotate the coordinates 45 degrees so the range runs diagonally.
-                float alongRange = (localX + localZ) * invSqrt2;
-                float acrossRange = (localX - localZ) * invSqrt2;
-
-                // Wide cross-range falloff creates a broad gentle mountain body.
-                float halfRangeWidth = params.cellWorldSize * 0.30f;
-                float across01 = 1.0f - (fabsf(acrossRange) / halfRangeWidth);
-                if (across01 < 0.0f) across01 = 0.0f;
-                if (across01 > 1.0f) across01 = 1.0f;
-                across01 = across01 * across01 * (3.0f - 2.0f * across01);
-
-                // Broad variation along the range gives several connected mountain masses.
-                float ridgeFreq = (nFreq > 0.0001f) ? nFreq : 0.0001f;
-                float alongShape = 0.5f + 0.5f * smoothNoise(
-                    alongRange * ridgeFreq + seedOX * 0.01f,
-                    seedOZ * 0.01f);
-                alongShape = 0.55f + alongShape * 0.45f;
-
-                // Secondary peaks keep the chain from looking too uniform.
-                float secondary = 0.5f + 0.5f * smoothNoise(
-                    alongRange * (ridgeFreq * 2.2f) + seedOZ * 0.02f,
-                    seedOX * 0.02f);
-                secondary *= 0.25f;
-
-                // noise_freq2 becomes rocky surface detail instead of the main shape.
-                float detailFreq = (params.noiseFreq2 > 0.0001f) ? params.noiseFreq2 : (ridgeFreq * 3.0f);
-                float detail = 0.0f;
-                float amp = hScale * 0.12f;
-                float freq = detailFreq;
-                for (int oct = 0; oct < 3; ++oct)
-                {
-                    detail += smoothNoise(sx * freq, sz * freq) * amp;
-                    amp *= 0.5f;
-                    freq *= 2.0f;
-                }
-                detail *= across01;
-
-                float baseRange = across01 * hScale * (alongShape + secondary);
-                return baseRange + detail;
-            }
-
-            float h = 0.0f;
-            float amp = hScale;
-            float freq = nFreq;
-            for (int oct = 0; oct < 4; ++oct)
-            {
-                h += smoothNoise(sx * freq, sz * freq) * amp;
-                amp *= 0.5f;
-                freq *= 2.0f;
-            }
-            return h;
-        };
+    const D3D11RendererHelpers::BiomeGradient gradient =
+        D3D11RendererHelpers::SelectBiomeGradient(params.biome);
+    const D3D11RendererHelpers::TerrainTuning tuning =
+        D3D11RendererHelpers::ApplyBiomeTerrainTuning(params.biome, params.noiseFreq, params.heightScale);
+    const float nFreq = tuning.noiseFreq;
+    const float hScale = tuning.heightScale;
 
     // --- Step 1: Build shared height grid for SampleTerrainHeight() ---
     // This lets the camera and forest placement know the terrain Y at any world position.
@@ -509,16 +409,19 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
     m_terrainHalfSizeX = params.cellWorldSize * 0.5f;
     m_terrainHalfSizeZ = params.cellWorldSize * 0.5f;
 
-    m_terrainHeights.resize(static_cast<size_t>(vertsX * vertsZ));
-    for (int z = 0; z < vertsZ; ++z)
-    {
-        for (int x = 0; x < vertsX; ++x)
-        {
-            float wx = params.cellOriginX + x * quadSize;
-            float wz = params.cellOriginZ + z * quadSize;
-            m_terrainHeights[static_cast<size_t>(z * vertsX + x)] = sampleHeight(wx, wz);
-        }
-    }
+    D3D11RendererHelpers::BuildTerrainHeightGrid(
+        params.biome,
+        params.seed,
+        params.cellOriginX,
+        params.cellOriginZ,
+        params.cellWorldSize,
+        nFreq,
+        params.noiseFreq2,
+        hScale,
+        vertsX,
+        vertsZ,
+        quadSize,
+        m_terrainHeights);
 
     // Helper: fetch height from the grid by grid index.
     auto hAt = [&](int xi, int zi) -> float
@@ -526,24 +429,7 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
             return m_terrainHeights[static_cast<size_t>(zi * vertsX + xi)];
         };
 
-    // Helper: map a height value to a biome colour via the gradient.
     const float halfRange = hScale * 1.5f; // slightly wider than max FBM output for safe clamping
-    auto heightToColor = [&](float hy, float& r, float& g, float& b)
-        {
-            float h01 = (halfRange > 0.0001f) ? (hy + halfRange) / (halfRange * 2.0f) : 0.5f;
-            if (h01 < 0.0f) h01 = 0.0f;
-            if (h01 > 1.0f) h01 = 1.0f;
-            r = lowR + (hiR - lowR) * h01;
-            g = lowG + (hiG - lowG) * h01;
-            b = lowB + (hiB - lowB) * h01;
-        };
-
-    // Helper: normalise a 3-component vector in place.
-    auto normalise = [](float& nx, float& ny, float& nz)
-        {
-            float len = sqrtf(nx * nx + ny * ny + nz * nz);
-            if (len > 0.0001f) { nx /= len; ny /= len; nz /= len; }
-        };
 
     // --- Step 2: Build unindexed flat-shaded triangle vertices ---
     // Each quad emits 6 private vertices (2 triangles × 3 verts).
@@ -567,47 +453,19 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
             float y01 = hAt(x, z + 1);
             float y11 = hAt(x + 1, z + 1);
 
-            // Triangle A: (x,z) → (x,z+1) → (x+1,z)
-            {
-                float ax = wx0 - wx0, ay = y01 - y00, az = wz1 - wz0; // edge0
-                float bx = wx1 - wx0, by = y10 - y00, bz = wz0 - wz0; // edge1
-                float nx = ay * bz - az * by;
-                float ny = az * bx - ax * bz;
-                float nz = ax * by - ay * bx;
-                normalise(nx, ny, nz);
+            D3D11RendererHelpers::EmitTerrainTriangleA(
+                wx0, wz0, wx1, wz1,
+                y00, y10, y01,
+                halfRange,
+                gradient,
+                triVerts);
 
-                float avgY = (y00 + y01 + y10) / 3.0f;
-                float r, g, b;
-                heightToColor(avgY, r, g, b);
-
-                Vertex v0{}; v0.x = wx0; v0.y = y00; v0.z = wz0; v0.nx = nx; v0.ny = ny; v0.nz = nz; v0.r = r; v0.g = g; v0.b = b; v0.a = 1.0f;
-                Vertex v1{}; v1.x = wx0; v1.y = y01; v1.z = wz1; v1.nx = nx; v1.ny = ny; v1.nz = nz; v1.r = r; v1.g = g; v1.b = b; v1.a = 1.0f;
-                Vertex v2{}; v2.x = wx1; v2.y = y10; v2.z = wz0; v2.nx = nx; v2.ny = ny; v2.nz = nz; v2.r = r; v2.g = g; v2.b = b; v2.a = 1.0f;
-                triVerts.push_back(v0);
-                triVerts.push_back(v1);
-                triVerts.push_back(v2);
-            }
-
-            // Triangle B: (x+1,z) → (x,z+1) → (x+1,z+1)
-            {
-                float ax = wx0 - wx1, ay = y01 - y10, az = wz1 - wz0; // edge0
-                float bx = wx1 - wx1, by = y11 - y10, bz = wz1 - wz0; // edge1
-                float nx = ay * bz - az * by;
-                float ny = az * bx - ax * bz;
-                float nz = ax * by - ay * bx;
-                normalise(nx, ny, nz);
-
-                float avgY = (y10 + y01 + y11) / 3.0f;
-                float r, g, b;
-                heightToColor(avgY, r, g, b);
-
-                Vertex v0{}; v0.x = wx1; v0.y = y10; v0.z = wz0; v0.nx = nx; v0.ny = ny; v0.nz = nz; v0.r = r; v0.g = g; v0.b = b; v0.a = 1.0f;
-                Vertex v1{}; v1.x = wx0; v1.y = y01; v1.z = wz1; v1.nx = nx; v1.ny = ny; v1.nz = nz; v1.r = r; v1.g = g; v1.b = b; v1.a = 1.0f;
-                Vertex v2{}; v2.x = wx1; v2.y = y11; v2.z = wz1; v2.nx = nx; v2.ny = ny; v2.nz = nz; v2.r = r; v2.g = g; v2.b = b; v2.a = 1.0f;
-                triVerts.push_back(v0);
-                triVerts.push_back(v1);
-                triVerts.push_back(v2);
-            }
+            D3D11RendererHelpers::EmitTerrainTriangleB(
+                wx0, wz0, wx1, wz1,
+                y10, y01, y11,
+                halfRange,
+                gradient,
+                triVerts);
         }
     }
 
@@ -680,39 +538,31 @@ bool D3D11Renderer::IsTerrainAvailable() const
 {
     return m_terrainAvailable;
 }
-void D3D11Renderer::DrawTerrainPatch()
+
+void D3D11Renderer::SetupGroundAndTerrainSceneConstants(float farPlane)
 {
-    using namespace DirectX;
-
-    XMMATRIX world = XMMatrixIdentity();
-
-    float lookDirX = cosf(cameraPitch) * sinf(cameraYaw);
-    float lookDirY = sinf(cameraPitch);
-    float lookDirZ = cosf(cameraPitch) * cosf(cameraYaw);
-
-    XMVECTOR cameraPosition = XMVectorSet(cameraX, cameraY, cameraZ, 1.0f);
-    XMVECTOR cameraTarget = XMVectorSet(cameraX + lookDirX, cameraY + lookDirY, cameraZ + lookDirZ, 1.0f);
-    XMVECTOR cameraUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-    XMMATRIX view = XMMatrixLookAtLH(cameraPosition, cameraTarget, cameraUp);
-    XMMATRIX projection = XMMatrixPerspectiveFovLH(
-        XM_PIDIV4,
-        (float)renderWidth / (float)renderHeight,
-        0.1f,
-        2000.0f
-    );
+    const float aspect = static_cast<float>(renderWidth) / static_cast<float>(renderHeight);
+    const D3D11RendererHelpers::SceneMatrices scene =
+        D3D11RendererHelpers::BuildSceneMatrices(
+            cameraX, cameraY, cameraZ,
+            cameraYaw, cameraPitch,
+            aspect, 0.1f, farPlane);
 
     TransformConstantBuffer cb{};
-    XMStoreFloat4x4(&cb.mvp, XMMatrixTranspose(world * view * projection));
-    XMStoreFloat4x4(&cb.world, XMMatrixTranspose(world));
+    XMStoreFloat4x4(&cb.mvp, XMMatrixTranspose(scene.world * scene.view * scene.projection));
+    XMStoreFloat4x4(&cb.world, XMMatrixTranspose(scene.world));
     context->UpdateSubresource(transformConstantBuffer, 0, nullptr, &cb, 0, 0);
     context->VSSetConstantBuffers(0, 1, &transformConstantBuffer);
 
     LightConstantBuffer lightCB{};
-    lightCB.lightDirection = DirectX::XMFLOAT4(0.5f, -1.0f, 0.5f, 0.0f);
-    lightCB.lightColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    D3D11RendererHelpers::BuildDefaultDirectionalLight(lightCB.lightDirection, lightCB.lightColor);
     context->UpdateSubresource(lightConstantBuffer, 0, nullptr, &lightCB, 0, 0);
     context->PSSetConstantBuffers(1, 1, &lightConstantBuffer);
+}
+
+void D3D11Renderer::DrawTerrainPatch()
+{
+    SetupGroundAndTerrainSceneConstants(2000.0f);
 
     context->IASetInputLayout(groundInputLayout);
     context->VSSetShader(groundVertexShader, nullptr, 0);
@@ -731,37 +581,7 @@ void D3D11Renderer::DrawTerrainPatch()
 
 void D3D11Renderer::DrawGroundPlane()
 {
-    using namespace DirectX;
-
-    XMMATRIX world = XMMatrixIdentity();
-
-    float lookDirX = cosf(cameraPitch) * sinf(cameraYaw);
-    float lookDirY = sinf(cameraPitch);
-    float lookDirZ = cosf(cameraPitch) * cosf(cameraYaw);
-
-    XMVECTOR cameraPosition = XMVectorSet(cameraX, cameraY, cameraZ, 1.0f);
-    XMVECTOR cameraTarget = XMVectorSet(cameraX + lookDirX, cameraY + lookDirY, cameraZ + lookDirZ, 1.0f);
-    XMVECTOR cameraUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-    XMMATRIX view = XMMatrixLookAtLH(cameraPosition, cameraTarget, cameraUp);
-    XMMATRIX projection = XMMatrixPerspectiveFovLH(
-        XM_PIDIV4,
-        (float)renderWidth / (float)renderHeight,
-        0.1f,
-        1000.0f
-    );
-
-    TransformConstantBuffer cb{};
-    XMStoreFloat4x4(&cb.mvp, XMMatrixTranspose(world * view * projection));
-    XMStoreFloat4x4(&cb.world, XMMatrixTranspose(world));
-    context->UpdateSubresource(transformConstantBuffer, 0, nullptr, &cb, 0, 0);
-    context->VSSetConstantBuffers(0, 1, &transformConstantBuffer);
-
-    LightConstantBuffer lightCB{};
-    lightCB.lightDirection = DirectX::XMFLOAT4(0.5f, -1.0f, 0.5f, 0.0f);
-    lightCB.lightColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    context->UpdateSubresource(lightConstantBuffer, 0, nullptr, &lightCB, 0, 0);
-    context->PSSetConstantBuffers(1, 1, &lightConstantBuffer);
+    SetupGroundAndTerrainSceneConstants(1000.0f);
 
     context->IASetInputLayout(groundInputLayout);
     context->VSSetShader(groundVertexShader, nullptr, 0);

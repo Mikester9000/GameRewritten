@@ -25,7 +25,7 @@ Acceptance:
 - Spawn starts in the center of cell (0,0)
 - Cell crossing still works
 
-[ ] 1.2 Remove unused default entry files
+[x] 1.2 Remove unused default entry files
 Goal:
 - Avoid confusion about which entry point is actually used.
 
@@ -42,7 +42,7 @@ Acceptance:
 - There is one clear real application entry path
 - No misleading Hello World stub remains in active build
 
-[ ] 1.3 Clean D3D11Renderer shutdown/resource handling
+[x] 1.3 Clean D3D11Renderer shutdown/resource handling
 Goal:
 - Reduce duplicate cleanup code and prevent missed releases.
 
@@ -86,7 +86,7 @@ Acceptance:
 - Main.cpp becomes easier to scan
 - New gameplay systems no longer default to being added directly to Main.cpp
 
-[ ] 2.2 Introduce small runtime coordinators
+[x] 2.2 Introduce small runtime coordinators
 Goal:
 - Create obvious homes for code that currently lands in Main.cpp.
 
@@ -106,7 +106,7 @@ Acceptance:
 3. PrimitiveRenderer and Runtime Actors
 ==================================================
 
-[ ] 3.1 Split static world instances from runtime instances
+[x] 3.1 Split static world instances from runtime instances
 Goal:
 - Allow moving actors without wiping authored world props.
 
@@ -125,7 +125,7 @@ Acceptance:
 - World-editor placed props remain stable
 - Runtime player visual can be refreshed every frame safely
 
-[ ] 3.2 Create actor folder structure
+[x] 3.2 Create actor folder structure
 Goal:
 - Prepare for player/enemy/NPC systems.
 
@@ -168,7 +168,7 @@ Acceptance:
 5. Coding Standards and Consistency
 ==================================================
 
-[ ] 5.1 Add and enforce .editorconfig
+[x] 5.1 Add and enforce .editorconfig
 Goal:
 - Keep formatting consistent across the project.
 
@@ -216,10 +216,10 @@ Acceptance:
 
 Do these first:
 1. Fix remaining hardcoded world-size assumptions
-2. Remove unused GameRewritten.cpp from active build
-3. Add .editorconfig
-4. Split PrimitiveRenderer into world/runtime instance buckets
-5. Start reducing Main.cpp
+2. Continue D3D11Renderer decomposition (triangle resources + shader setup + draw helpers)
+3. Start reducing Main.cpp
+4. Replace important magic numbers with named constants
+5. Add a lightweight test project for WorldGrid/parsing helpers
 
 When unsure what to do next:
 - Pick the first unchecked item in this file

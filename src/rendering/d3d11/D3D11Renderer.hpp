@@ -4,6 +4,7 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <string>
+#include "D3D11RendererHelpers.hpp"
 
 // A simple class for setting up and drawing with Direct3D 11.
 class D3D11Renderer
@@ -51,20 +52,25 @@ public:
     int GetRenderWidth() const { return renderWidth; }
     int GetRenderHeight() const { return renderHeight; }
 private:
-    struct Vertex { float x, y, z; float nx, ny, nz; float r, g, b, a; };
+    using Vertex = D3D11RendererHelpers::TerrainVertex;
     struct TransformConstantBuffer { DirectX::XMFLOAT4X4 mvp; DirectX::XMFLOAT4X4 world; };
+
+    bool CreateTriangleResources();
+    bool CreateRenderTarget();
+    bool CreateTerrainPatch();
+    void CreateGroundPlane();
+    void CreateGroundShaders();
+    void CreateSkyShaders();
+    void SetupGroundAndTerrainSceneConstants(float farPlane);
+    static HRESULT CompileShaderFromFile(const wchar_t* path, const char* entryPoint, const char* target, ID3DBlob** outBlob);
+
     float cameraX, cameraY, cameraZ;
     float cameraYaw, cameraPitch;
-    bool CreateTriangleResources();bool CreateRenderTarget();
-	bool CreateTerrainPatch();
-    void CreateGroundPlane();
-    static HRESULT CompileShaderFromFile(const wchar_t* path, const char* entryPoint, const char* target, ID3DBlob** outBlob);
     float cameraVelocityY; // Vertical velocity for jumping and gravity
     bool isGrounded;       // Whether the camera is on the ground
     int renderWidth;
     int renderHeight;
-    void CreateGroundShaders();
-	void CreateSkyShaders();
+
     std::vector<float> m_terrainHeights; // row-major [z * vertsX + x]
     int m_terrainVertsX = 0;
     int m_terrainVertsZ = 0;
