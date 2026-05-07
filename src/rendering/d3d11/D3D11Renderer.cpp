@@ -16,7 +16,7 @@ using namespace DirectX;
 namespace
 {
     // Placeholder texture bound to terrain/ground draw calls when a TextureCache is attached.
-    static constexpr const char* k_placeholderTexturePath = "Content/Textures/placeholder.png";
+    static const std::string k_placeholderTexturePath = "Content/Textures/placeholder.png";
     template <typename T>
     void SafeRelease(T*& resource)
     {
@@ -144,10 +144,9 @@ bool D3D11Renderer::Initialize(HWND windowHandle, int width, int height)
 
     hr = device->CreateDepthStencilView(depthTexture, nullptr, &depthView);
     if (FAILED(hr)) return false;
-    if (FAILED(hr))
-        return false;
 
     if (!CreateRenderTarget()) return false;
+    if (!CreateTriangleResources()) return false;
 	CreateGroundShaders();
 	CreateSkyShaders();
 
@@ -167,6 +166,7 @@ bool D3D11Renderer::Initialize(HWND windowHandle, int width, int height)
     }
 
     CreateGroundPlane();
+    if (!CreateTerrainPatch()) return false;
     return true;
 }
 

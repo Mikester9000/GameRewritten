@@ -20,8 +20,10 @@ static std::wstring NarrowToWide(const std::string& src)
     if (src.empty()) return {};
     const int needed = MultiByteToWideChar(CP_UTF8, 0, src.c_str(), -1, nullptr, 0);
     if (needed <= 0) return {};
+    // needed includes the null terminator; allocate needed-1 wide chars and
+    // pass needed-1 as the buffer count so the null stays in bounds.
     std::wstring wide(static_cast<size_t>(needed) - 1, L'\0');
-    MultiByteToWideChar(CP_UTF8, 0, src.c_str(), -1, &wide[0], needed);
+    MultiByteToWideChar(CP_UTF8, 0, src.c_str(), -1, &wide[0], needed - 1);
     return wide;
 }
 
@@ -68,6 +70,7 @@ ID3D11ShaderResourceView* TextureCache::Load(ID3D11Device* device, const std::st
     if (widePath.empty())
     {
         LOG_WARN("TextureCache::Load: failed to convert path to wide string: " + path);
+        m_cache[path] = nullptr; // cache the failure so we don't retry every frame
         return nullptr;
     }
 
