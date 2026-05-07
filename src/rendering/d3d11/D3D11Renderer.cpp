@@ -134,29 +134,28 @@ void D3D11Renderer::CreateGroundShaders()
 {
     ID3DBlob* vsBlob = nullptr;
     ID3DBlob* psBlob = nullptr;
+    auto failAndCleanup = [&](const char* message)
+        {
+            LOG_ERROR(message);
+            SafeRelease(vsBlob);
+            SafeRelease(psBlob);
+            SafeRelease(groundInputLayout);
+            SafeRelease(groundVertexShader);
+            SafeRelease(groundPixelShader);
+        };
 
     // Compile the ground vertex shader
     HRESULT hr = CompileShaderFromFile(L"Shaders/ground_vs.hlsl", "main", "vs_5_0", &vsBlob);
     if (FAILED(hr) || !vsBlob)
     {
-        LOG_ERROR("Failed to compile Shaders/ground_vs.hlsl");
-        SafeRelease(vsBlob);
-        SafeRelease(psBlob);
-        SafeRelease(groundInputLayout);
-        SafeRelease(groundVertexShader);
-        SafeRelease(groundPixelShader);
+        failAndCleanup("Failed to compile Shaders/ground_vs.hlsl");
         return;
     }
 
     hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &groundVertexShader);
     if (FAILED(hr) || !groundVertexShader)
     {
-        LOG_ERROR("Failed to create ground vertex shader");
-        SafeRelease(vsBlob);
-        SafeRelease(psBlob);
-        SafeRelease(groundInputLayout);
-        SafeRelease(groundVertexShader);
-        SafeRelease(groundPixelShader);
+        failAndCleanup("Failed to create ground vertex shader");
         return;
     }
 
@@ -164,24 +163,14 @@ void D3D11Renderer::CreateGroundShaders()
     hr = CompileShaderFromFile(L"Shaders/ground_ps.hlsl", "main", "ps_5_0", &psBlob);
     if (FAILED(hr) || !psBlob)
     {
-        LOG_ERROR("Failed to compile Shaders/ground_ps.hlsl");
-        SafeRelease(vsBlob);
-        SafeRelease(psBlob);
-        SafeRelease(groundInputLayout);
-        SafeRelease(groundVertexShader);
-        SafeRelease(groundPixelShader);
+        failAndCleanup("Failed to compile Shaders/ground_ps.hlsl");
         return;
     }
 
     hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &groundPixelShader);
     if (FAILED(hr) || !groundPixelShader)
     {
-        LOG_ERROR("Failed to create ground pixel shader");
-        SafeRelease(vsBlob);
-        SafeRelease(psBlob);
-        SafeRelease(groundInputLayout);
-        SafeRelease(groundVertexShader);
-        SafeRelease(groundPixelShader);
+        failAndCleanup("Failed to create ground pixel shader");
         return;
     }
 
@@ -199,12 +188,7 @@ void D3D11Renderer::CreateGroundShaders()
     );
     if (FAILED(hr) || !groundInputLayout)
     {
-        LOG_ERROR("Failed to create ground input layout");
-        SafeRelease(vsBlob);
-        SafeRelease(psBlob);
-        SafeRelease(groundInputLayout);
-        SafeRelease(groundVertexShader);
-        SafeRelease(groundPixelShader);
+        failAndCleanup("Failed to create ground input layout");
         return;
     }
 
