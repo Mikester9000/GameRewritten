@@ -303,6 +303,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
         // Clear dynamic/runtime visuals before rebuilding them for this frame.
         primRenderer.ClearRuntimeInstances();
+        // Rebuild the player visual in the runtime bucket without touching world props.
         playerActor.SubmitRuntimeVisual(camController, prefabLibrary, primRenderer);
 
         renderer.ClearScreen(r, g, b, 1.0f);

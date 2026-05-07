@@ -2,6 +2,7 @@
 
 namespace ActorCommon
 {
+// Asset Registry ID for the player's first runtime blockout prefab.
 inline constexpr const char* PLAYER_VISUAL_PREFAB_ID = "prefabs.player_hero_blockout";
 
 struct RuntimeActorPose

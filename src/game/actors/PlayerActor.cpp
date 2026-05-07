@@ -8,7 +8,7 @@ ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraControll
 {
     ActorCommon::RuntimeActorPose pose;
     pose.x = cameraController.GetPlayerX();
-    pose.y = cameraController.GetPlayerY() - cameraController.eyeOffset;
+    pose.y = cameraController.GetPlayerGroundY();
     pose.z = cameraController.GetPlayerZ();
     pose.yaw = cameraController.GetYaw();
     pose.scale = 1.0f;
