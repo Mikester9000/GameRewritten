@@ -12,6 +12,49 @@
 
 using namespace DirectX;
 
+namespace
+{
+    template <typename T>
+    void SafeRelease(T*& resource)
+    {
+        if (resource)
+        {
+            resource->Release();
+            resource = nullptr;
+        }
+    }
+
+    std::string WideToUtf8(const wchar_t* text)
+    {
+        if (!text)
+            return "<null>";
+
+        const int size = WideCharToMultiByte(CP_UTF8, 0, text, -1, nullptr, 0, nullptr, nullptr);
+        if (size <= 1)
+            return "<invalid>";
+
+        std::vector<char> buffer(static_cast<size_t>(size), '\0');
+        const int converted = WideCharToMultiByte(CP_UTF8, 0, text, -1, buffer.data(), size, nullptr, nullptr);
+        if (converted <= 0)
+            return "<conversion_failed>";
+        return std::string(buffer.data());
+    }
+
+    void CleanupGroundShaderSetupFailure(
+        ID3DBlob*& vsBlob,
+        ID3DBlob*& psBlob,
+        ID3D11InputLayout*& inputLayout,
+        ID3D11VertexShader*& vertexShader,
+        ID3D11PixelShader*& pixelShader)
+    {
+        SafeRelease(vsBlob);
+        SafeRelease(psBlob);
+        SafeRelease(inputLayout);
+        SafeRelease(vertexShader);
+        SafeRelease(pixelShader);
+    }
+}
+
 D3D11Renderer::D3D11Renderer()
     : renderWidth(0), renderHeight(0),
     device(nullptr), context(nullptr), swapChain(nullptr),
@@ -109,14 +152,38 @@ void D3D11Renderer::CreateGroundShaders()
     ID3DBlob* psBlob = nullptr;
 
     // Compile the ground vertex shader
-    HRESULT hr = D3DCompileFromFile(L"Shaders/ground_vs.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &vsBlob, nullptr);
-    if (FAILED(hr)) { LOG_ERROR("Failed to compile Shaders/ground_vs.hlsl"); }
-    device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &groundVertexShader);
+    HRESULT hr = CompileShaderFromFile(L"Shaders/ground_vs.hlsl", "main", "vs_5_0", &vsBlob);
+    if (FAILED(hr) || !vsBlob)
+    {
+        LOG_ERROR("Failed to compile Shaders/ground_vs.hlsl");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
+        return;
+    }
+
+    hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &groundVertexShader);
+    if (FAILED(hr) || !groundVertexShader)
+    {
+        LOG_ERROR("Failed to create ground vertex shader");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
+        return;
+    }
 
     // Compile the ground pixel shader
-    hr = D3DCompileFromFile(L"Shaders/ground_ps.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &psBlob, nullptr);
-    if (FAILED(hr)) { LOG_ERROR("Failed to compile Shaders/ground_ps.hlsl"); }
-    device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &groundPixelShader);
+    hr = CompileShaderFromFile(L"Shaders/ground_ps.hlsl", "main", "ps_5_0", &psBlob);
+    if (FAILED(hr) || !psBlob)
+    {
+        LOG_ERROR("Failed to compile Shaders/ground_ps.hlsl");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
+        return;
+    }
+
+    hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &groundPixelShader);
+    if (FAILED(hr) || !groundPixelShader)
+    {
+        LOG_ERROR("Failed to create ground pixel shader");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
+        return;
+    }
 
     // Create the input layout for the ground plane
     D3D11_INPUT_ELEMENT_DESC groundInputDesc[] = {
@@ -124,39 +191,53 @@ void D3D11Renderer::CreateGroundShaders()
         { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
-    device->CreateInputLayout(
+    hr = device->CreateInputLayout(
         groundInputDesc, 3,
         vsBlob->GetBufferPointer(),
         vsBlob->GetBufferSize(),
         &groundInputLayout
     );
+    if (FAILED(hr) || !groundInputLayout)
+    {
+        LOG_ERROR("Failed to create ground input layout");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
+        return;
+    }
 
-    if (vsBlob) vsBlob->Release();
-    if (psBlob) psBlob->Release();
+    SafeRelease(vsBlob);
+    SafeRelease(psBlob);
 }
 void D3D11Renderer::Shutdown()
 {
-    if (transformConstantBuffer) { transformConstantBuffer->Release(); transformConstantBuffer = nullptr; }
-    if (vertexBuffer) { vertexBuffer->Release(); vertexBuffer = nullptr; }
-    if (inputLayout) { inputLayout->Release(); inputLayout = nullptr; }
-    if (vertexShader) { vertexShader->Release(); vertexShader = nullptr; }
-    if (pixelShader) { pixelShader->Release(); pixelShader = nullptr; }
-    if (renderTargetView) { renderTargetView->Release(); renderTargetView = nullptr; }
-    if (swapChain) { swapChain->Release(); swapChain = nullptr; }
-    if (context) { context->Release(); context = nullptr; }
-    if (device) { device->Release(); device = nullptr; }
-    if (rasterizerState) { rasterizerState->Release(); rasterizerState = nullptr; }
-    if (depthView) { depthView->Release(); depthView = nullptr; }
-    if (depthTexture) { depthTexture->Release(); depthTexture = nullptr; }
-    if (indexBuffer) { indexBuffer->Release(); indexBuffer = nullptr; }
-    if (m_groundVertexBuffer) { m_groundVertexBuffer->Release(); m_groundVertexBuffer = nullptr; }
-    if (m_groundIndexBuffer) { m_groundIndexBuffer->Release(); m_groundIndexBuffer = nullptr; }
-    if (skyVertexShader) { skyVertexShader->Release(); skyVertexShader = nullptr; }
-    if (skyPixelShader) { skyPixelShader->Release(); skyPixelShader = nullptr; }
-    if (lightConstantBuffer) { lightConstantBuffer->Release(); lightConstantBuffer = nullptr; }
-    if (m_terrainPatchVertexBuffer) { m_terrainPatchVertexBuffer->Release(); m_terrainPatchVertexBuffer = nullptr; }
-    
-    // In Shutdown(), add:
+    SafeRelease(transformConstantBuffer);
+    SafeRelease(vertexBuffer);
+    SafeRelease(indexBuffer);
+
+    SafeRelease(inputLayout);
+    SafeRelease(groundInputLayout);
+    SafeRelease(skyInputLayout);
+
+    SafeRelease(vertexShader);
+    SafeRelease(pixelShader);
+    SafeRelease(groundVertexShader);
+    SafeRelease(groundPixelShader);
+    SafeRelease(skyVertexShader);
+    SafeRelease(skyPixelShader);
+
+    SafeRelease(lightConstantBuffer);
+
+    SafeRelease(m_groundVertexBuffer);
+    SafeRelease(m_groundIndexBuffer);
+    SafeRelease(m_terrainPatchVertexBuffer);
+
+    SafeRelease(rasterizerState);
+    SafeRelease(depthView);
+    SafeRelease(depthTexture);
+    SafeRelease(renderTargetView);
+    SafeRelease(swapChain);
+    SafeRelease(context);
+    SafeRelease(device);
+
     m_terrainHeights.clear();
     m_terrainAvailable = false;
 }
@@ -202,8 +283,8 @@ void D3D11Renderer::CreateSkyShaders()
 
     // No input layout needed for SV_VertexID trick
 
-    if (vsBlob) vsBlob->Release();
-    if (psBlob) psBlob->Release();
+    SafeRelease(vsBlob);
+    SafeRelease(psBlob);
 }
 
 void D3D11Renderer::DrawSky()
@@ -270,7 +351,7 @@ bool D3D11Renderer::CreateTerrainPatch()
 bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
 {
     // Release any existing GPU vertex buffer before rebuilding.
-    if (m_terrainPatchVertexBuffer) { m_terrainPatchVertexBuffer->Release(); m_terrainPatchVertexBuffer = nullptr; }
+    SafeRelease(m_terrainPatchVertexBuffer);
     m_terrainPatchVertexCount = 0;
     m_terrainAvailable = false;
     m_terrainHeights.clear();
@@ -549,11 +630,7 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
 
 void D3D11Renderer::ClearTerrainPatch()
 {
-    if (m_terrainPatchVertexBuffer)
-    {
-        m_terrainPatchVertexBuffer->Release();
-        m_terrainPatchVertexBuffer = nullptr;
-    }
+    SafeRelease(m_terrainPatchVertexBuffer);
     
     
     m_terrainHeights.clear();
@@ -806,7 +883,7 @@ bool D3D11Renderer::CreateRenderTarget()
         return false;
 
     hr = device->CreateRenderTargetView(backBuffer, nullptr, &renderTargetView);
-    backBuffer->Release();
+    SafeRelease(backBuffer);
 
     if (FAILED(hr))
         return false;
@@ -823,13 +900,13 @@ bool D3D11Renderer::CreateTriangleResources()
     if (FAILED(hr)) return false;
 
     hr = CompileShaderFromFile(L"Shaders/basic3d_ps.hlsl", "main", "ps_4_0", &psBlob);
-    if (FAILED(hr)) { vsBlob->Release(); return false; }
+    if (FAILED(hr)) { SafeRelease(vsBlob); return false; }
 
     hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vertexShader);
-    if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); return false; }
+    if (FAILED(hr)) { SafeRelease(vsBlob); SafeRelease(psBlob); return false; }
 
     hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &pixelShader);
-    if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); return false; }
+    if (FAILED(hr)) { SafeRelease(vsBlob); SafeRelease(psBlob); return false; }
 
     D3D11_INPUT_ELEMENT_DESC layout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -841,8 +918,8 @@ bool D3D11Renderer::CreateTriangleResources()
         vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
         &inputLayout);
 
-    vsBlob->Release();
-    psBlob->Release();
+    SafeRelease(vsBlob);
+    SafeRelease(psBlob);
     if (FAILED(hr)) return false;
 
     Vertex cubeVertices[] = {
@@ -967,6 +1044,29 @@ HRESULT D3D11Renderer::CompileShaderFromFile(const wchar_t* path, const char* en
         &errors
     );
 
-    if (errors) errors->Release();
+    if (FAILED(hr))
+    {
+        std::ostringstream message;
+        message << "Shader compile failed: path=" << WideToUtf8(path)
+            << ", entry=" << (entryPoint ? entryPoint : "<null>")
+            << ", target=" << (target ? target : "<null>");
+
+        if (errors && errors->GetBufferPointer() && errors->GetBufferSize() > 0)
+        {
+            size_t errorSize = static_cast<size_t>(errors->GetBufferSize());
+            const char* errorText = static_cast<const char*>(errors->GetBufferPointer());
+            while (errorSize > 0 && errorText[errorSize - 1] == '\0')
+            {
+                --errorSize;
+            }
+
+            message << ", errors="
+                << std::string(errorText, errorSize);
+        }
+
+        LOG_ERROR(message.str());
+    }
+
+    SafeRelease(errors);
     return hr;
 }

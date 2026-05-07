@@ -159,7 +159,7 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
         {
             cell->instances.clear();
             // Clear authored prefab parts from the primitive renderer.
-            if (m_primRenderer) m_primRenderer->ClearInstances();
+            if (m_primRenderer) m_primRenderer->ClearWorldInstances();
             // Repopulate procedural forest trees without the authored instances.
             if (cell->forestEnabled)
                 m_forest->Populate(renderer, cell->forestTreeCount,
@@ -257,7 +257,7 @@ bool WorldEditor::HandlePlacement(POINT screenPos,
     {
         const PrimitivePrefab* prefab = m_prefabLib->GetPrefab(m_selectedPrefabId);
         if (prefab)
-            m_primRenderer->AddInstance(*prefab, hitX, hitY, hitZ, inst.yaw, inst.scale);
+            m_primRenderer->AddWorldInstance(*prefab, hitX, hitY, hitZ, inst.yaw, inst.scale);
         else
             m_forest->AddInstance(renderer, hitX, hitY, hitZ, inst.scale); // fallback
     }
@@ -290,7 +290,7 @@ void WorldEditor::SpawnCellInstances(int cx, int cz, D3D11Renderer& renderer)
             const PrimitivePrefab* prefab = m_prefabLib->GetPrefab(inst.prefab);
             if (prefab)
             {
-                m_primRenderer->AddInstance(*prefab, inst.x, inst.y, inst.z, inst.yaw, inst.scale);
+                m_primRenderer->AddWorldInstance(*prefab, inst.x, inst.y, inst.z, inst.yaw, inst.scale);
                 continue;
             }
         }

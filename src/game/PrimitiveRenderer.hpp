@@ -15,11 +15,12 @@
 //   PrimitiveRenderer pr;
 //   pr.Initialize(renderer);            // call once after device is ready
 //   // when a prefab is placed or a cell is loaded:
-//   pr.AddInstance(prefab, x, y, z);
+//   pr.AddWorldInstance(prefab, x, y, z);
 //   // each frame:
+//   pr.ClearRuntimeInstances();         // rebuild runtime visuals for this frame
 //   pr.Draw(renderer);
 //   // on reload / clear:
-//   pr.ClearInstances();
+//   pr.ClearWorldInstances();
 //   // on shutdown:
 //   pr.Shutdown();
 
@@ -42,18 +43,42 @@ public:
     // Release all GPU resources.
     void Shutdown();
 
-    // Expand a prefab into render parts at the given world position.
+    // Expand a prefab into WORLD (authored/static) render parts at the given world position.
     // yaw   = Y-axis rotation in radians (0 = facing +Z).
     // scale = uniform scale applied on top of each part's own scale.
+    void AddWorldInstance(const PrimitivePrefab& prefab,
+                          float x, float y, float z,
+                          float yaw = 0.0f, float scale = 1.0f);
+
+    // Remove all WORLD instances (call on F5 reload or Clear button).
+    void ClearWorldInstances();
+
+    // Expand a prefab into RUNTIME (dynamic/per-frame) render parts.
+    void AddRuntimeInstance(const PrimitivePrefab& prefab,
+                            float x, float y, float z,
+                            float yaw = 0.0f, float scale = 1.0f);
+
+    // Remove all RUNTIME instances (typically called once per frame before rebuild).
+    void ClearRuntimeInstances();
+
+    // Compatibility wrappers for older call sites.
     void AddInstance(const PrimitivePrefab& prefab,
                      float x, float y, float z,
-                     float yaw = 0.0f, float scale = 1.0f);
-
-    // Remove all previously added instances (call on F5 reload or Clear button).
-    void ClearInstances();
+                     float yaw = 0.0f, float scale = 1.0f)
+    {
+        AddWorldInstance(prefab, x, y, z, yaw, scale);
+    }
+    void ClearInstances()
+    {
+        ClearWorldInstances();
+        ClearRuntimeInstances();
+    }
 
     // How many render parts are queued.
-    int GetPartCount() const { return static_cast<int>(m_parts.size()); }
+    int GetPartCount() const
+    {
+        return static_cast<int>(m_worldParts.size() + m_runtimeParts.size());
+    }
 
     // Draw all queued parts.  Call once per frame after setting camera state.
     void Draw(const D3D11Renderer& renderer);
@@ -70,7 +95,8 @@ private:
         bool  isTree; // selects tree shader vs default prim shader
     };
 
-    std::vector<DrawPart> m_parts;
+    std::vector<DrawPart> m_worldParts;
+    std::vector<DrawPart> m_runtimeParts;
 
     // D3D11 device/context (borrowed from the renderer — do not Release them).
     ID3D11Device*        m_device  = nullptr;
@@ -99,4 +125,10 @@ private:
     bool CreateShaders(const wchar_t* vsPath, const wchar_t* psPath,
                        ID3D11VertexShader** outVS, ID3D11PixelShader** outPS,
                        ID3DBlob** outVSBlob);
+
+    // Helper: expand prefab parts into the target storage bucket.
+    void AddInstanceToBucket(std::vector<DrawPart>& bucket,
+                             const PrimitivePrefab& prefab,
+                             float x, float y, float z,
+                             float yaw, float scale);
 };
