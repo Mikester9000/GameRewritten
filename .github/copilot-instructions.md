@@ -11,9 +11,10 @@
 ## Project Guidelines
 - Explicitly reference Game-Engine-for-Teaching as a source to selectively extract and simplify ideas and code; use its lesson-planning and teaching style while avoiding its current structure; enable selective reuse rather than wholesale copying. When recommending extractions, cite file paths and indicate required adaptations.
 - For each recommended extraction or lesson, provide beginner-friendly, incremental next steps toward the end goal: prioritize tasks, keep steps small, include runnable examples, and specify expected outcomes or acceptance criteria.
-- Tailor guidance to help the user rebuild parts of the Game-Engine-for-Teaching repository in their own way and to progress toward creating an FF15-like game/engine; recommend which pieces of code to pull and how to adapt them.
+- Tailor guidance to help the user rebuild parts of the Game-Engine-for-Teaching repository in their own way and to progress toward creating an engine with an FF7-style visual presentation and action-oriented gameplay inspired by FF15 and FF7 Remake; recommend which pieces of code to pull and how to adapt them.
+- Prefer a clean, extensible engine architecture: design for modularity, clear interfaces, plugin-friendly modules, and data-driven boundaries to ease future extension and refactoring.
 - Favor designs and code paths compatible with Direct3D 11 and low-spec GPUs (target GeForce GT 610). Optimize recommendations, shaders, and asset budgets to run on that hardware.
-- Aim for FF15-like visual and audio goals within GT610 limits: propose simplified rendering techniques, reduced-resolution assets, and audio compression/streaming strategies that emulate the look/sound without exceeding performance budgets.
+- Aim for FF7-style visual and audio goals with action-oriented gameplay influences from FF15 and FF7 Remake within GT610 limits: propose simplified rendering techniques, reduced-resolution assets, and audio compression/streaming strategies that emulate the look/sound and gameplay feel without exceeding performance budgets.
 - Use Game-Engine-for-Teaching as a reference source for lessons and code extraction; selectively rewrite and simplify its code into this project to achieve a fully working game engine.
 - Provide very simple, beginner-friendly, step-by-step explanations and explain every part plainly as if the user has no experience; refactor explanations and code to be human/child-like understandable.
 - Break tasks into small, incremental, focused steps and provide examples and runnable code when relevant.

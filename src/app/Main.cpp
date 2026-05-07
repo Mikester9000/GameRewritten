@@ -146,11 +146,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         primRenderer.ClearInstances();
         worldEditor.SpawnCellInstances(cell.cx, cell.cz, renderer);
     };
-
+    const float startupCellCenter = worldGrid.GetCellSize() * 0.5f;
     // Build terrain + instances for the startup cell (centre of grassland cell 0,0).
     {
+       
         int startCX = 0, startCZ = 0;
-        worldGrid.WorldToCell(200.0f, 200.0f, startCX, startCZ);
+        worldGrid.WorldToCell(startupCellCenter, startupCellCenter, startCX, startCZ);
         WorldCell* startCell = worldGrid.FindCell(startCX, startCZ);
         if (startCell)
             rebuildTerrainForCell(*startCell);
@@ -210,12 +211,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // --- Camera + player movement (now owned by CameraController) ---
     CameraController camController;
-    // Spawn in the centre of the grassland cell (0,0): world X=200, Z=200.
+    // Spawn in the centre of the grassland cell (0,0): world X=50, Z=50.
     // This keeps the player well inside the first terrain patch and away from
     // any cell-boundary void on the first frame.
-    camController.Init(200.0f, 0.0f, 200.0f, 0.0f, -0.5f);
+    camController.Init(startupCellCenter, 0.0f, startupCellCenter, 0.0f, -0.5f);
 
-    renderer.SetCameraPosition(200.0f, 0.0f, 200.0f);
+    renderer.SetCameraPosition(startupCellCenter, 0.0f, startupCellCenter);
     renderer.SetCameraRotation(0.0f, -0.5f);
     // Center the mouse before the loop
     RECT windowRect;

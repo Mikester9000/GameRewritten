@@ -1,0 +1,460 @@
+# Engine Roadmap
+# Target: FF7-style visuals + FF15 / FF7 Remake-inspired action gameplay
+
+This document is the working task list for the engine.
+Use it as the default "what should be done next?" reference.
+
+---
+## 0. Project Vision
+
+### Visual target
+- Stylized JRPG presentation
+- FF7-inspired readability and silhouettes
+- Simpler geometry and materials than modern AAA realism
+- Strong shape language over asset density
+- Low-poly / mid-poly friendly pipeline
+
+### Gameplay target
+- Real-time action combat
+- Responsive movement
+- Dodge / attack / combo flow
+- Enemy targeting and lock-on
+- Third-person camera
+- Party-system support later
+
+### Engine priority rule
+When choosing between two tasks:
+1. Prefer cleaner extensible architecture
+2. Prefer gameplay readability over rendering complexity
+3. Prefer systems that unlock future work
+4. Defer high-end rendering until actor/gameplay structure is stable
+
+---
+## 1. Immediate Fixes and Stability
+
+### 1.1 World startup consistency
+- [ ] Replace remaining hardcoded startup cell coordinates in `src/app/Main.cpp`
+- [ ] Change:
+  - `worldGrid.WorldToCell(200.0f, 200.0f, lastPlayerCX, lastPlayerCZ);`
+  - to use `startupCellCenter`
+- [ ] Audit other hardcoded `200.0f` / `400.0f` world assumptions
+- [ ] Acceptance:
+  - world loads correctly for different `cell_size`
+  - spawn works for `100`, `200`, or `400`
+
+### 1.2 Renderer cleanup pass
+- [ ] Add a safe COM-release helper in `src/rendering/d3d11/D3D11Renderer.cpp`
+- [ ] Release missing `groundInputLayout` in `Shutdown()`
+- [ ] Remove duplicated shader compile patterns where practical
+- [ ] Clean duplicate comments and formatting issues
+- [ ] Acceptance:
+  - no behavior changes
+  - cleaner shutdown
+  - fewer repeated code blocks
+
+### 1.3 Main loop cleanup
+- [ ] Reduce responsibilities in `src/app/Main.cpp`
+- [ ] Keep `Main.cpp` focused on:
+  - startup
+  - high-level update
+  - high-level render
+  - shutdown
+- [ ] Move runtime actor-specific logic out over time
+- [ ] Acceptance:
+  - `Main.cpp` stops being the default place for all gameplay features
+
+---
+## 2. Runtime Actor Foundation
+
+### 2.1 Split static world visuals from runtime visuals
+- [ ] Refactor `src/game/PrimitiveRenderer.hpp`
+- [ ] Add separate storage for:
+  - world/static instances
+  - runtime/dynamic instances
+- [ ] Add APIs such as:
+  - `ClearWorldInstances()`
+  - `AddWorldInstance(...)`
+  - `ClearRuntimeInstances()`
+  - `AddRuntimeInstance(...)`
+- [ ] Update draw path to render both groups
+- [ ] Acceptance:
+  - world editor placed props remain stable
+  - runtime player visual can update every frame without wiping world props
+
+### 2.2 Actor model direction
+- [ ] Introduce the concept of runtime actors
+- [ ] Planned actor categories:
+  - player
+  - enemy
+  - NPC
+  - interactable prop
+  - vehicle
+- [ ] Create a future home for actor code:
+  - `src/game/actors/`
+- [ ] Acceptance:
+  - the engine has a clear place for moving world entities
+
+---
+## 3. Player Character Visual
+
+### 3.1 First player visual: FF7-style blockout
+- [ ] Create `Content/Prefabs/player_hero_blockout.prefab.json`
+- [ ] Register it in `Content/AssetRegistry.json`
+- [ ] Design goals:
+  - chunky silhouette
+  - clear head / torso / arms / legs
+  - readable boots / hair block
+  - very low part count
+- [ ] Acceptance:
+  - visible third-person player character exists in-game
+
+### 3.2 Hook player visual into runtime rendering
+- [ ] Load the player prefab through `PrefabLibrary`
+- [ ] Add one runtime player instance every frame
+- [ ] Drive it from:
+  - `CameraController::GetPlayerX()`
+  - `CameraController::GetPlayerY()`
+  - `CameraController::GetPlayerZ()`
+  - `CameraController::GetYaw()`
+- [ ] Acceptance:
+  - character follows movement correctly
+  - world props are unaffected
+
+### 3.3 Camera/player relationship
+- [ ] Decide whether the camera should see the full character at all times
+- [ ] Tune:
+  - camera distance
+  - camera height
+  - player model scale
+- [ ] Add a rule to avoid camera clipping into the player mesh
+- [ ] Acceptance:
+  - character stays readable in gameplay view
+
+---
+## 4. Player Gameplay Structure
+
+### 4.1 Separate player logic from camera-only logic
+- [ ] Create a dedicated player runtime structure or class
+- [ ] Keep camera follow logic separate from player state
+- [ ] Move player-facing data out of `CameraController` over time
+- [ ] Acceptance:
+  - player and camera can evolve independently
+
+### 4.2 Player state machine
+- [ ] Add player states:
+  - idle
+  - move
+  - jump
+  - fall
+  - dodge
+  - attack
+  - stunned
+- [ ] Start simple with enum-based state flow
+- [ ] Acceptance:
+  - movement and action transitions are controlled deliberately, not ad hoc
+
+### 4.3 Movement improvements
+- [ ] Add acceleration / deceleration
+- [ ] Add turn smoothing
+- [ ] Add optional sprint
+- [ ] Add grounded checks that feel stable on slopes
+- [ ] Acceptance:
+  - movement feels action-oriented, not like a debug camera
+
+---
+## 5. Combat Foundation
+
+### 5.1 Basic melee attack loop
+- [ ] Add attack input handling
+- [ ] Add one light attack state
+- [ ] Add a simple attack timing window
+- [ ] Add a basic hit volume
+- [ ] Acceptance:
+  - player can trigger an attack and hit a test enemy
+
+### 5.2 Combo system
+- [ ] Add combo step tracking
+- [ ] Define:
+  - attack 1
+  - attack 2
+  - attack 3
+- [ ] Add timing windows for combo continuation
+- [ ] Acceptance:
+  - repeated attack input chains through a simple combo
+
+### 5.3 Dodge / evade
+- [ ] Add dodge input
+- [ ] Add short burst movement
+- [ ] Add temporary state lockout
+- [ ] Acceptance:
+  - player can use dodge to reposition during combat
+
+### 5.4 Lock-on system
+- [ ] Add target candidate search
+- [ ] Add nearest enemy target selection
+- [ ] Add camera bias toward locked target
+- [ ] Acceptance:
+  - combat can be played with and without lock-on
+
+---
+## 6. Enemy Foundation
+
+### 6.1 First enemy blockout
+- [ ] Create one enemy prefab blockout
+- [ ] Render it through runtime actor path
+- [ ] Acceptance:
+  - one enemy can exist in the world as a moving actor
+
+### 6.2 Enemy state machine
+- [ ] Add states:
+  - idle
+  - patrol
+  - chase
+  - attack
+  - hit
+  - dead
+- [ ] Acceptance:
+  - enemy behavior is readable and testable
+
+### 6.3 Enemy combat interaction
+- [ ] Add damage handling
+- [ ] Add hit reactions
+- [ ] Add simple health
+- [ ] Acceptance:
+  - player can defeat one enemy in a contained test
+
+---
+## 7. Rendering Upgrades Needed for the Target Style
+
+### 7.1 Primitive stage improvements
+- [ ] Keep primitive renderer for blockouts and early gameplay work
+- [ ] Improve silhouette readability with better part proportions
+- [ ] Add better tint control for runtime actors
+- [ ] Acceptance:
+  - blockout visuals are clean enough for systems work
+
+### 7.2 Character-friendly render path
+- [ ] Add a mesh rendering path beyond simple box prefabs
+- [ ] Planned requirements:
+  - vertex/index buffers
+  - mesh asset loading
+  - material support
+  - textured rendering
+- [ ] Acceptance:
+  - one imported character mesh can be drawn in place of the blockout prefab
+
+### 7.3 Lighting improvements
+- [ ] Improve directional lighting consistency
+- [ ] Add ambient term / basic fill lighting
+- [ ] Reduce harsh faceting where not desired
+- [ ] Acceptance:
+  - characters and terrain read clearly in all biomes
+
+### 7.4 Terrain shading improvements
+- [ ] Optionally move terrain to shared vertex normals for smoother look
+- [ ] Keep stylized color gradients
+- [ ] Acceptance:
+  - terrain supports the FF7-style presentation better than raw faceted noise
+
+---
+## 8. Asset Pipeline Upgrades
+
+### 8.1 Short-term content workflow
+- [ ] Continue using primitive prefab JSON for:
+  - player blockouts
+  - enemy blockouts
+  - props
+- [ ] Acceptance:
+  - fast iteration without complex toolchain work
+
+### 8.2 Mesh import pipeline
+- [ ] Add a model import solution
+- [ ] Current likely future options from docs:
+  - Assimp
+  - cgltf
+- [ ] Acceptance:
+  - one real character mesh can be imported and displayed
+
+### 8.3 Animation pipeline
+- [ ] Add skeletal animation runtime later
+- [ ] Future likely candidate from roadmap:
+  - Ozz Animation
+- [ ] Acceptance:
+  - one animated character can idle / move / attack
+
+---
+## 9. World and Level Support
+
+### 9.1 Roads and authored traversal paths
+- [ ] Add road authoring plan
+- [ ] Prefer:
+  - authored path / spline direction later
+  - terrain conforming under roads later
+- [ ] Acceptance:
+  - travel paths can be deliberately placed, not just implied by terrain
+
+### 9.2 Runtime interactables
+- [ ] Add simple interactable objects
+- [ ] Examples:
+  - chest
+  - switch
+  - sign
+  - save point
+- [ ] Acceptance:
+  - player can trigger world interactions
+
+### 9.3 Zone transitions
+- [ ] Keep world-cell streaming simple but stable
+- [ ] Make runtime actors survive or reload correctly across cells
+- [ ] Acceptance:
+  - gameplay remains coherent when crossing cell boundaries
+
+---
+## 10. Camera System Upgrades
+
+### 10.1 Action camera behavior
+- [ ] Improve camera follow smoothing
+- [ ] Add collision handling later
+- [ ] Add combat-aware framing
+- [ ] Acceptance:
+  - camera supports action gameplay rather than only exploration
+
+### 10.2 Lock-on camera
+- [ ] Reframe camera around player and target
+- [ ] Add target cycling later
+- [ ] Acceptance:
+  - lock-on feels deliberate and readable
+
+---
+## 11. UI and Feedback
+
+### 11.1 Gameplay HUD
+- [ ] Add simple HUD:
+  - HP
+  - target info
+  - combo / action feedback
+- [ ] Acceptance:
+  - basic combat information is visible
+
+### 11.2 Hit feedback
+- [ ] Add screen shake, hit flashes, or simple impact effects
+- [ ] Add damage text later if desired
+- [ ] Acceptance:
+  - attacks feel like they connect
+
+---
+## 12. Audio
+
+### 12.1 Action feedback audio
+- [ ] Add movement, attack, hit, and UI sounds
+- [ ] Acceptance:
+  - gameplay has readable audio response
+
+### 12.2 Music / ambience support
+- [ ] Add biome ambience and combat music switching later
+- [ ] Acceptance:
+  - exploration and combat states feel distinct
+
+---
+## 13. Performance and Platform Safety
+
+### 13.1 Keep GT610-friendly limits
+- [ ] Watch draw calls
+- [ ] Watch shader complexity
+- [ ] Avoid expensive post-processing
+- [ ] Acceptance:
+  - gameplay stays stable on target hardware
+
+### 13.2 Profiling milestones
+- [ ] Profile after each major system pass
+- [ ] Especially:
+  - runtime actors
+  - combat
+  - mesh rendering
+  - terrain changes
+- [ ] Acceptance:
+  - new features do not silently tank performance
+
+---
+## 14. Refactor Milestones
+
+### 14.1 Main loop reduction
+- [ ] Move player update logic out of `Main.cpp`
+- [ ] Move actor spawning logic out of `Main.cpp`
+- [ ] Keep only orchestration in `Main.cpp`
+- [ ] Acceptance:
+  - easier to reason about engine flow
+
+### 14.2 Renderer decomposition
+- [ ] Split large renderer responsibilities over time:
+  - terrain generation
+  - terrain drawing
+  - shader setup
+  - resource cleanup
+- [ ] Acceptance:
+  - `D3D11Renderer` becomes easier to extend safely
+
+### 14.3 Gameplay module organization
+- [ ] Add dedicated folders/classes for:
+  - actors
+  - combat
+  - camera
+  - interaction
+- [ ] Acceptance:
+  - future features have obvious homes
+
+---
+## 15. Suggested Execution Order
+
+### Phase A — do first
+- [ ] Fix remaining startup hardcoded cell coordinate
+- [ ] Split `PrimitiveRenderer` into world vs runtime instances
+- [ ] Add FF7-style player blockout prefab
+- [ ] Render player visual from runtime path
+
+### Phase B — next
+- [ ] Add player state machine
+- [ ] Add dodge and one attack
+- [ ] Add first enemy blockout
+- [ ] Add damage + health loop
+
+### Phase C — after combat prototype works
+- [ ] Add lock-on
+- [ ] Add combo chain
+- [ ] Add camera combat behavior
+- [ ] Add interactables
+
+### Phase D — presentation upgrade
+- [ ] Add mesh import
+- [ ] Add textured materials
+- [ ] Add character mesh rendering
+- [ ] Add animation runtime
+
+### Phase E — content/game expansion
+- [ ] Add more enemies
+- [ ] Add roads / traversal paths
+- [ ] Add quests / events / dialogue hooks
+- [ ] Add party-system support if desired
+
+---
+## 16. Next Task Rule
+
+If unsure what to do next, do the first unchecked item in this order:
+
+1. `PrimitiveRenderer` runtime/world split
+2. FF7-style player blockout prefab
+3. Player runtime rendering hookup
+4. Player state machine
+5. First attack
+6. First enemy
+7. Hit detection
+8. Lock-on
+
+---
+## 17. Current Best Next Step
+
+**Do this next:**
+- Split `PrimitiveRenderer` into world/static and runtime/dynamic instance buckets
+- Then add `prefabs.player_hero_blockout`
+
+That is the most useful next system unlock.

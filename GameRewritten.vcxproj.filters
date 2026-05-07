@@ -21,6 +21,55 @@
     <None Include="packages.config" />
     <None Include=".github\copilot-instructions.md" />
     <None Include="Shaders\triangle_ps.hlsl" />
+    <None Include="Content\AssetRegistry.json" />
+    <None Include="Content\Materials\default.material.json" />
+    <None Include="Content\Prefabs\tree.prefab.json" />
+    <None Include="Content\Prefabs\tree_oak.prefab.json" />
+    <None Include="Content\Prefabs\tree_pine.prefab.json" />
+    <None Include="Content\Prefabs\tree_birch.prefab.json" />
+    <None Include="Content\Prefabs\tree_dead.prefab.json" />
+    <None Include="Content\Prefabs\bush_small.prefab.json" />
+    <None Include="Content\Prefabs\bush_dense.prefab.json" />
+    <None Include="Content\Prefabs\rock_small.prefab.json" />
+    <None Include="Content\Prefabs\rock_medium.prefab.json" />
+    <None Include="Content\Prefabs\rock_large.prefab.json" />
+    <None Include="Content\Prefabs\rock_cluster.prefab.json" />
+    <None Include="Content\Prefabs\rock_mossy.prefab.json" />
+    <None Include="Content\Prefabs\signpost.prefab.json" />
+    <None Include="Content\Prefabs\fence_segment.prefab.json" />
+    <None Include="Content\Prefabs\marker_stone.prefab.json" />
+    <None Include="Content\Prefabs\crate.prefab.json" />
+    <None Include="Content\Prefabs\barrel.prefab.json" />
+    <None Include="Content\Prefabs\campfire_ring.prefab.json" />
+    <None Include="Content\Prefabs\tent_blockout.prefab.json" />
+    <None Include="Content\Prefabs\pillar.prefab.json" />
+    <None Include="Content\Prefabs\pillar_broken.prefab.json" />
+    <None Include="Content\Prefabs\low_wall.prefab.json" />
+    <None Include="Content\Prefabs\arch_blockout.prefab.json" />
+    <None Include="Content\Prefabs\well.prefab.json" />
+    <None Include="Content\Prefabs\flower_patch.prefab.json" />
+    <None Include="Content\Prefabs\grass_tuft.prefab.json" />
+    <None Include="Content\Prefabs\hill_marker.prefab.json" />
+    <None Include="Content\Prefabs\crystal_formation.prefab.json" />
+    <None Include="Content\Prefabs\fallen_log.prefab.json" />
+    <None Include="Content\Prefabs\mushroom_ring.prefab.json" />
+    <None Include="Content\Scenes\test.scene.json" />
+    <None Include="Content\World\world.json" />
+    <None Include="Content\World\cell_0_0.json" />
+    <None Include="docs\ASSET_REGISTRY.md" />
+    <None Include="docs\ASSETS.md" />
+    <None Include="docs\THIRD_PARTY.md" />
+    <None Include="docs\ROADMAP_VENDORING.md" />
+    <None Include="docs\WORLD_EDITOR.md" />
+    <None Include="docs\PREFABS_GUIDE.md" />
+    <None Include="third_party\imgui\LICENSE.txt" />
+    <None Include="third_party\nlohmann\LICENSE.txt" />
+    <None Include="third_party\tracy\LICENSE.txt" />
+    <None Include="third_party\DirectXTex\LICENSE.txt" />
+    <None Include="docs\Architecture.md" />
+    <None Include="docs\Workflow.md" />
+    <None Include="x64\.md" />
+    <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\app\Main.cpp">
@@ -42,6 +91,45 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\game\PrimitiveRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\AssetLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\AssetRegistry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\CameraController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\ImGuiLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\WorldEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\WorldGrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui\imgui_tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui\imgui_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui\backends\imgui_impl_win32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui\backends\imgui_impl_dx11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -67,6 +155,24 @@
     <ClInclude Include="src\game\PrimitiveRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\assets\AssetLoader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\AssetRegistry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\CameraController.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\ImGuiLayer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\WorldEditor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\WorldGrid.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ground_vs.hlsl" />
@@ -75,5 +181,12 @@
     <FxCompile Include="Shaders\sky_ps.hlsl" />
     <FxCompile Include="Shaders\basic3d_ps.hlsl" />
     <FxCompile Include="Shaders\basic3d_vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="docs\Development Roadmap.txt" />
+    <Text Include="docs\Engine Cleanup Checklist.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="x64\.xaml" />
   </ItemGroup>
 </Project>

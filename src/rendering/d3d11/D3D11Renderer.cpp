@@ -345,7 +345,7 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
                 + (h11 - h10 - h01 + h00) * tx * tz;
         };
 
-    // sampleHeight: stacks 4 octaves (big hills → fine detail).
+    
     // Each octave: double the frequency, half the amplitude.
         // sampleHeight: stacks 4 octaves (big hills → fine detail).
     // Rocky terrain uses a special diagonal mountain-range shape first,
