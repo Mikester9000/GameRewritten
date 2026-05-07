@@ -63,6 +63,8 @@ public:
 private:
     using Vertex = D3D11RendererHelpers::TerrainVertex;
     struct TransformConstantBuffer { DirectX::XMFLOAT4X4 mvp; DirectX::XMFLOAT4X4 world; };
+    // Matches HLSL LightCBuffer at register(b1); 32 bytes total.
+    // pad0 pads lightDir to a full float4 to follow D3D constant-buffer packing.
     struct LightCBuffer {
         float lightDirX, lightDirY, lightDirZ;
         float pad0;

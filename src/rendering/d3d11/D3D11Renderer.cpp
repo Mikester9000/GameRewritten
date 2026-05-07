@@ -706,13 +706,6 @@ void D3D11Renderer::UpdateLightConstantBuffer()
         return;
     }
 
-    if (!mapped.pData)
-    {
-        context->Unmap(m_lightCBuffer, 0);
-        LOG_WARN("D3D11Renderer: light constant buffer mapping returned null data.");
-        return;
-    }
-
     *static_cast<LightCBuffer*>(mapped.pData) = m_lightData;
     context->Unmap(m_lightCBuffer, 0);
 }

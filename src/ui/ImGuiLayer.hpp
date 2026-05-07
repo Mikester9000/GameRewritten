@@ -41,7 +41,12 @@ public:
 
     // The game loop sets these each frame so the debug overlay can display them.
     void SetFrameStats(float fps, float dt) { currentFPS = fps; currentDT = dt; }
-    void SetRendererRef(D3D11Renderer* renderer) { m_renderer = renderer; }
+    void SetRendererRef(D3D11Renderer* renderer)
+    {
+        if (m_renderer != renderer)
+            m_lightUiInitialized = false;
+        m_renderer = renderer;
+    }
     void SetCameraInfo(float x, float y, float z, float yaw, float pitch)
     {
         camX = x; camY = y; camZ = z; camYaw = yaw; camPitch = pitch;
