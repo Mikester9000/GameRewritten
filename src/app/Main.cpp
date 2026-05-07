@@ -211,7 +211,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // --- Camera + player movement (now owned by CameraController) ---
     CameraController camController;
-    // Spawn in the centre of grassland cell (0,0), derived from world cell size.
+    // Spawn in the center of grassland cell (0,0), derived from world cell size.
     // This keeps the player well inside the first terrain patch and away from
     // any cell-boundary void on the first frame.
     camController.Init(startupCellCenter, 0.0f, startupCellCenter, 0.0f, -0.5f);
@@ -242,7 +242,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasF5Down  = false;
     bool wasLButtonDown = false;
     // Track the cell the player was in last frame to detect cell-crossing.
-    // Initialize from the actual spawn position at the centre of cell (0,0).
+    // Initialize from the actual spawn position at the center of cell (0,0).
     int lastPlayerCX = 0, lastPlayerCZ = 0;
     worldGrid.WorldToCell(startupCellCenter, startupCellCenter, lastPlayerCX, lastPlayerCZ);
     // FPS smoothing accumulator.
