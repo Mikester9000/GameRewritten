@@ -140,13 +140,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     ThirdPartyBootstrap::InitializeAndRunSmokeTests();
     // ── End ThirdParty smoke tests ─────────────────────────────────────────
 
-    // Simple loop: process messages + render frames.
-    float t = 0.0f;
-
     // --- Camera + player movement (now owned by CameraController) ---
     CameraController camController;
     PlayerActor playerActor;
-    // Coordinates per-frame runtime actor visual submission.
     RuntimeScene runtimeScene(playerActor, primRenderer);
     // Spawn in the center of grassland cell (0,0), derived from world cell size.
     // This keeps the player well inside the first terrain patch and away from
@@ -164,6 +160,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     camController.SetCenterPoint(centerPoint);
 
     bool firstFrame = true;
+    float debugClearColorTime = 0.0f; // dev-only: drives the animated clear-color pulse
     FrameTiming::State frameTimingState;
     FrameTiming::Initialize(frameTimingState);
     InputEdge::State inputEdgeState;
@@ -183,6 +180,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         lastPlayerCX,
         lastPlayerCZ
     };
+    // Main game loop: process Win32 messages, update, draw, repeat.
     while (window.ProcessEvents())
     {
         float deltaTime = FrameTiming::BeginFrame(frameTimingState);
@@ -226,17 +224,16 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         // Show/hide system cursor and re-center mouse based on pause state.
         // Show cursor when paused OR when the World Editor is in placement mode.
-       
         const bool paused = imguiLayer.IsPauseMenuOpen();
         const bool editorActive = worldEditor.IsPlacementModeActive();
         const bool wantCursorVisible = paused || editorActive;
         CursorMode::ApplyCursorVisibility(cursorModeState, wantCursorVisible);
 
         // Animate the clear color so you can see it is updating.
-        t += deltaTime * 1.0f;
-        float r = 0.2f + 0.2f * sinf(t);
-        float g = 0.2f + 0.2f * sinf(t * 1.7f);
-        float b = 0.3f + 0.2f * sinf(t * 2.3f);
+        debugClearColorTime += deltaTime;
+        float r = 0.2f + 0.2f * sinf(debugClearColorTime);
+        float g = 0.2f + 0.2f * sinf(debugClearColorTime * 1.7f);
+        float b = 0.3f + 0.2f * sinf(debugClearColorTime * 2.3f);
 
         // --- Camera + movement (now handled by CameraController) ---
         // Movement: enabled as long as the pause menu is closed.
@@ -287,11 +284,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             renderer);
 
         // Pass camera info and FPS stats to ImGuiLayer for the debug overlay.
-        {
-            imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),
-                                     camController.GetYaw(),  camController.GetPitch());
-            imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
-        }
+        imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),
+                                 camController.GetYaw(),  camController.GetPitch());
+        imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
         runtimeScene.BeginFrame();
         runtimeScene.SubmitActors(camController, prefabLibrary);
@@ -300,10 +295,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         {
             GR_ZONE_SCOPED_N("Renderer Frame");
             renderer.DrawSky();
-            
-                
-            
-            
             // draw terrain/ground
             if (useTerrainPatch) renderer.DrawTerrainPatch();
             else renderer.DrawGroundPlane();
@@ -325,7 +316,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         GR_FRAME_MARK;
         Sleep(1); // tiny sleep so we don't peg CPU at 100%
     }
-    // before renderer.Shutdown();
     primRenderer.Shutdown();
     forest.Shutdown();
     imguiLayer.Shutdown();
