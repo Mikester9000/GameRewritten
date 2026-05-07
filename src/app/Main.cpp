@@ -242,7 +242,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasF5Down  = false;
     bool wasLButtonDown = false;
     // Track the cell the player was in last frame to detect cell-crossing.
-    // Initialise from the actual spawn position at the centre of cell (0,0).
+    // Initialize from the actual spawn position at the centre of cell (0,0).
     int lastPlayerCX = 0, lastPlayerCZ = 0;
     worldGrid.WorldToCell(startupCellCenter, startupCellCenter, lastPlayerCX, lastPlayerCZ);
     // FPS smoothing accumulator.
