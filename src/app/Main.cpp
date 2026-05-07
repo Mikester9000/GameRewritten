@@ -146,7 +146,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // --- Camera + player movement (now owned by CameraController) ---
     CameraController camController;
     PlayerActor playerActor;
-    // Coordinates per-frame runtime actor visual submission (player, future enemies, NPCs).
+    // Coordinates per-frame runtime actor visual submission.
     RuntimeScene runtimeScene(playerActor, primRenderer);
     // Spawn in the center of grassland cell (0,0), derived from world cell size.
     // This keeps the player well inside the first terrain patch and away from

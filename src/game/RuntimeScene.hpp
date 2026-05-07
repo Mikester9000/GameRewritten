@@ -18,6 +18,9 @@
 #include "actors/PlayerActor.hpp"
 #include "PrimitiveRenderer.hpp"
 
+// Forward-declared to avoid pulling CameraController's <windows.h> dependency
+// and PrefabLibrary's full definition into every file that includes RuntimeScene.
+// Both are used only in SubmitActors() parameters.
 class CameraController;
 class PrefabLibrary;
 
