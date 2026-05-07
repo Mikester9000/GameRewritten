@@ -15,6 +15,8 @@ using namespace DirectX;
 
 namespace
 {
+    // Placeholder texture bound to terrain/ground draw calls when a TextureCache is attached.
+    static constexpr const char* k_placeholderTexturePath = "Content/Textures/placeholder.png";
     template <typename T>
     void SafeRelease(T*& resource)
     {
@@ -159,7 +161,9 @@ bool D3D11Renderer::Initialize(HWND windowHandle, int width, int height)
         sd.ComparisonFunc = D3D11_COMPARISON_NEVER;
         sd.MinLOD         = 0.0f;
         sd.MaxLOD         = D3D11_FLOAT32_MAX;
-        device->CreateSamplerState(&sd, &m_textureSampler);
+        HRESULT samplerHr = device->CreateSamplerState(&sd, &m_textureSampler);
+        if (FAILED(samplerHr))
+            LOG_WARN("D3D11Renderer: failed to create texture sampler state.");
     }
 
     CreateGroundPlane();
@@ -580,7 +584,7 @@ void D3D11Renderer::DrawTerrainPatch()
     if (m_textureCache)
     {
         ID3D11ShaderResourceView* srv =
-            m_textureCache->Load(device, "Content/Textures/placeholder.png");
+            m_textureCache->Load(device, k_placeholderTexturePath);
         if (srv)
         {
             context->PSSetShaderResources(0, 1, &srv);
@@ -609,7 +613,7 @@ void D3D11Renderer::DrawGroundPlane()
     if (m_textureCache)
     {
         ID3D11ShaderResourceView* srv =
-            m_textureCache->Load(device, "Content/Textures/placeholder.png");
+            m_textureCache->Load(device, k_placeholderTexturePath);
         if (srv)
         {
             context->PSSetShaderResources(0, 1, &srv);
