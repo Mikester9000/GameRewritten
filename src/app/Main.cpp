@@ -453,6 +453,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                      camController.GetYaw(),  camController.GetPitch());
             imguiLayer.SetFrameStats(displayFPS, deltaTime);
         }
+        // Clear dynamic/runtime visuals before rebuilding them for this frame.
         primRenderer.ClearRuntimeInstances();
 
         renderer.ClearScreen(r, g, b, 1.0f);

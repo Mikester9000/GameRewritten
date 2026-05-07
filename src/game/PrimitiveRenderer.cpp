@@ -312,7 +312,7 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
             if (wantPS != activePS) { m_context->PSSetShader(wantPS, nullptr, 0); activePS = wantPS; }
 
             // Build world matrix: scale → rotate (Y axis) → translate to (world + offset).
-            // The offset was already rotated by yaw in AddInstanceToBucket, so rotation here
+            // The offset was already rotated by yaw in AddWorldInstance/AddRuntimeInstance, so rotation here
             // only affects cube faces/normals — matching placement orientation.
             XMMATRIX scaleMat = XMMatrixScaling(dp.scaleX, dp.scaleY, dp.scaleZ);
             XMMATRIX rotMat = XMMatrixRotationY(dp.yaw);
