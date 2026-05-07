@@ -143,7 +143,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         {
             forest.ClearInstances(); // remove trees from previous forested cell
         }
-        primRenderer.ClearInstances();
+        primRenderer.ClearWorldInstances();
         worldEditor.SpawnCellInstances(cell.cx, cell.cz, renderer);
     };
     const float startupCellCenter = worldGrid.GetCellSize() * 0.5f;
@@ -453,6 +453,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                      camController.GetYaw(),  camController.GetPitch());
             imguiLayer.SetFrameStats(displayFPS, deltaTime);
         }
+        primRenderer.ClearRuntimeInstances();
+
         renderer.ClearScreen(r, g, b, 1.0f);
         {
             GR_ZONE_SCOPED_N("Renderer Frame");

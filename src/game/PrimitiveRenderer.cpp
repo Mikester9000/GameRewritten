@@ -180,17 +180,19 @@ void PrimitiveRenderer::Shutdown()
     if (m_primVS)  { m_primVS->Release();  m_primVS  = nullptr; }
     if (m_treePS)  { m_treePS->Release();  m_treePS  = nullptr; }
     if (m_treeVS)  { m_treeVS->Release();  m_treeVS  = nullptr; }
-    m_parts.clear();
+    m_worldParts.clear();
+    m_runtimeParts.clear();
     m_device  = nullptr;
     m_context = nullptr;
 }
 
 // ---------------------------------------------------------------------------
-// AddInstance
+// AddInstanceToBucket
 // ---------------------------------------------------------------------------
-void PrimitiveRenderer::AddInstance(const PrimitivePrefab& prefab,
-                                     float x, float y, float z,
-                                     float yaw, float scale)
+void PrimitiveRenderer::AddInstanceToBucket(std::vector<DrawPart>& bucket,
+                                            const PrimitivePrefab& prefab,
+                                            float x, float y, float z,
+                                            float yaw, float scale)
 {
     bool isTree = (prefab.category == "tree");
 
@@ -217,16 +219,44 @@ void PrimitiveRenderer::AddInstance(const PrimitivePrefab& prefab,
         dp.b        = part.b;
         dp.a        = part.a;
         dp.isTree   = isTree;
-        m_parts.push_back(dp);
+        bucket.push_back(dp);
     }
 }
 
 // ---------------------------------------------------------------------------
-// ClearInstances
+// AddWorldInstance
 // ---------------------------------------------------------------------------
-void PrimitiveRenderer::ClearInstances()
+void PrimitiveRenderer::AddWorldInstance(const PrimitivePrefab& prefab,
+                                         float x, float y, float z,
+                                         float yaw, float scale)
 {
-    m_parts.clear();
+    AddInstanceToBucket(m_worldParts, prefab, x, y, z, yaw, scale);
+}
+
+// ---------------------------------------------------------------------------
+// ClearWorldInstances
+// ---------------------------------------------------------------------------
+void PrimitiveRenderer::ClearWorldInstances()
+{
+    m_worldParts.clear();
+}
+
+// ---------------------------------------------------------------------------
+// AddRuntimeInstance
+// ---------------------------------------------------------------------------
+void PrimitiveRenderer::AddRuntimeInstance(const PrimitivePrefab& prefab,
+                                           float x, float y, float z,
+                                           float yaw, float scale)
+{
+    AddInstanceToBucket(m_runtimeParts, prefab, x, y, z, yaw, scale);
+}
+
+// ---------------------------------------------------------------------------
+// ClearRuntimeInstances
+// ---------------------------------------------------------------------------
+void PrimitiveRenderer::ClearRuntimeInstances()
+{
+    m_runtimeParts.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -234,7 +264,7 @@ void PrimitiveRenderer::ClearInstances()
 // ---------------------------------------------------------------------------
 void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
 {
-    if (m_parts.empty() || !m_device || !m_context) return;
+    if ((m_worldParts.empty() && m_runtimeParts.empty()) || !m_device || !m_context) return;
 
     // Build camera matrices the same way Forest and the terrain renderer do.
     float camX, camY, camZ; renderer.GetCameraPosition(camX, camY, camZ);
@@ -271,37 +301,43 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
     ID3D11VertexShader* activeVS = nullptr;
     ID3D11PixelShader*  activePS = nullptr;
 
-    for (const auto& dp : m_parts)
+    auto drawParts = [&](const std::vector<DrawPart>& parts)
     {
-        // Select shader pair.
-        ID3D11VertexShader* wantVS = (dp.isTree && m_treeVS) ? m_treeVS : m_primVS;
-        ID3D11PixelShader*  wantPS = (dp.isTree && m_treePS) ? m_treePS : m_primPS;
-        if (wantVS != activeVS) { m_context->VSSetShader(wantVS, nullptr, 0); activeVS = wantVS; }
-        if (wantPS != activePS) { m_context->PSSetShader(wantPS, nullptr, 0); activePS = wantPS; }
+        for (const auto& dp : parts)
+        {
+            // Select shader pair.
+            ID3D11VertexShader* wantVS = (dp.isTree && m_treeVS) ? m_treeVS : m_primVS;
+            ID3D11PixelShader*  wantPS = (dp.isTree && m_treePS) ? m_treePS : m_primPS;
+            if (wantVS != activeVS) { m_context->VSSetShader(wantVS, nullptr, 0); activeVS = wantVS; }
+            if (wantPS != activePS) { m_context->PSSetShader(wantPS, nullptr, 0); activePS = wantPS; }
 
-        // Build world matrix: scale → rotate (Y axis) → translate to (world + offset).
-        // The offset was already rotated by yaw in AddInstance, so the rotation here
-        // only affects the cube faces/normals — matching how the part looks when placed.
-        XMMATRIX scaleMat  = XMMatrixScaling(dp.scaleX, dp.scaleY, dp.scaleZ);
-        XMMATRIX rotMat    = XMMatrixRotationY(dp.yaw);
-        XMMATRIX transMat  = XMMatrixTranslation(
-            dp.worldX + dp.offsetX,
-            dp.worldY + dp.offsetY,
-            dp.worldZ + dp.offsetZ);
-        XMMATRIX worldMat  = scaleMat * rotMat * transMat;
+            // Build world matrix: scale → rotate (Y axis) → translate to (world + offset).
+            // The offset was already rotated by yaw in AddInstanceToBucket, so rotation here
+            // only affects cube faces/normals — matching placement orientation.
+            XMMATRIX scaleMat = XMMatrixScaling(dp.scaleX, dp.scaleY, dp.scaleZ);
+            XMMATRIX rotMat = XMMatrixRotationY(dp.yaw);
+            XMMATRIX transMat = XMMatrixTranslation(
+                dp.worldX + dp.offsetX,
+                dp.worldY + dp.offsetY,
+                dp.worldZ + dp.offsetZ);
+            XMMATRIX worldMat = scaleMat * rotMat * transMat;
 
-        // Fill constant buffer.
-        PrimCB cb;
-        XMStoreFloat4x4(&cb.mvp,   XMMatrixTranspose(worldMat * view * proj));
-        XMStoreFloat4x4(&cb.world, XMMatrixTranspose(worldMat));
-        cb.tintColor  = { dp.r,      dp.g,      dp.b,      dp.a      };
-        cb.lightDir   = lightDir;
-        cb.lightColor = lightColor;
+            // Fill constant buffer.
+            PrimCB cb;
+            XMStoreFloat4x4(&cb.mvp, XMMatrixTranspose(worldMat * view * proj));
+            XMStoreFloat4x4(&cb.world, XMMatrixTranspose(worldMat));
+            cb.tintColor = { dp.r, dp.g, dp.b, dp.a };
+            cb.lightDir = lightDir;
+            cb.lightColor = lightColor;
 
-        m_context->UpdateSubresource(m_cb, 0, nullptr, &cb, 0, 0);
-        m_context->VSSetConstantBuffers(0, 1, &m_cb);
-        m_context->PSSetConstantBuffers(0, 1, &m_cb);
+            m_context->UpdateSubresource(m_cb, 0, nullptr, &cb, 0, 0);
+            m_context->VSSetConstantBuffers(0, 1, &m_cb);
+            m_context->PSSetConstantBuffers(0, 1, &m_cb);
 
-        m_context->DrawIndexed(m_indexCount, 0, 0);
-    }
+            m_context->DrawIndexed(m_indexCount, 0, 0);
+        }
+    };
+
+    drawParts(m_worldParts);
+    drawParts(m_runtimeParts);
 }
