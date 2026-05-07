@@ -1,10 +1,11 @@
 #pragma once
 // RuntimeScene.hpp
-// Coordinates per-frame runtime actor visual submission.
+// Coordinates per-frame runtime actor update and visual submission.
 //
 // Responsibility:
-//   Clear the runtime instance bucket at the start of each frame, then submit
-//   all registered actor visuals so the primitive renderer has fresh data.
+//   Update runtime actor state, clear the runtime instance bucket at the start
+//   of each frame, then submit all registered actor visuals so the primitive
+//   renderer has fresh data.
 //
 // Add new actor types (enemies, NPCs) by storing a reference and calling their
 // SubmitRuntimeVisual() inside SubmitActors().  Main.cpp stays untouched.
@@ -12,7 +13,7 @@
 // Usage:
 //   RuntimeScene scene(playerActor, primRenderer);
 //   // each frame:
-//   scene.BeginFrame();
+//   scene.BeginFrame(deltaTime);
 //   scene.SubmitActors(camController, prefabLibrary);
 
 #include "actors/PlayerActor.hpp"
@@ -30,7 +31,7 @@ public:
     RuntimeScene(PlayerActor& player, PrimitiveRenderer& primRenderer)
         : m_player(player), m_primRenderer(primRenderer) {}
 
-    // Clear all dynamic/runtime instance buckets.
+    // Update runtime actor state and clear all dynamic/runtime instance buckets.
     // Call once at the start of each frame before submitting actor visuals.
     void BeginFrame(float dt)
     {

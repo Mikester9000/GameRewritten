@@ -12,6 +12,8 @@ struct PlayerStats
     void Update(float dt)
     {
         atbCharge += atbChargeRate * dt;
+        if (atbCharge < 0.0f)
+            atbCharge = 0.0f;
         if (atbCharge > 1.0f)
             atbCharge = 1.0f;
     }
