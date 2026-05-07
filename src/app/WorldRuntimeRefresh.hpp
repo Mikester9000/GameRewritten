@@ -9,7 +9,7 @@
 #include "../ui/WorldEditor.hpp"
 #include "../world/WorldGrid.hpp"
 
-namespace world_refresh
+namespace WorldRuntimeRefresh
 {
 struct WorldRuntimeRefreshContext
 {
@@ -49,6 +49,8 @@ inline void RefreshCellVisuals(const WorldCell& cell, const WorldRuntimeRefreshC
     context.worldEditor.SpawnCellInstances(cell.cx, cell.cz, context.renderer);
 }
 
+// Returns the cell containing the world-space position, or nullptr if that
+// grid coordinate is outside the loaded world manifest.
 inline WorldCell* FindCellAtWorldPosition(WorldGrid& worldGrid, float worldX, float worldZ,
                                           int& outCX, int& outCZ)
 {
@@ -56,6 +58,8 @@ inline WorldCell* FindCellAtWorldPosition(WorldGrid& worldGrid, float worldX, fl
     return worldGrid.FindCell(outCX, outCZ);
 }
 
+// Returns the cell containing the player's current world position, or nullptr
+// if the player is currently outside any loaded world cell.
 inline WorldCell* FindCellForPlayerPosition(WorldGrid& worldGrid,
                                             const CameraController& camController,
                                             int& outCX, int& outCZ)

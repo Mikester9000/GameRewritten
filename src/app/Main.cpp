@@ -117,7 +117,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     WorldEditor worldEditor;
     worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
 
-    world_refresh::WorldRuntimeRefreshContext worldRuntimeRefresh{
+    WorldRuntimeRefresh::WorldRuntimeRefreshContext worldRuntimeRefresh{
         renderer,
         forest,
         primRenderer,
@@ -127,12 +127,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Build terrain + instances for the startup cell (centre of grassland cell 0,0).
     {
         int startCX = 0, startCZ = 0;
-        WorldCell* startCell = world_refresh::FindCellAtWorldPosition(worldGrid,
-                                                                      startupCellCenter,
-                                                                      startupCellCenter,
-                                                                      startCX, startCZ);
+        WorldCell* startCell = WorldRuntimeRefresh::FindCellAtWorldPosition(worldGrid,
+                                                                            startupCellCenter,
+                                                                            startupCellCenter,
+                                                                            startCX, startCZ);
         if (startCell)
-            world_refresh::RefreshCellVisuals(*startCell, worldRuntimeRefresh);
+            WorldRuntimeRefresh::RefreshCellVisuals(*startCell, worldRuntimeRefresh);
         else
             forest.Populate(renderer, 80, 50.0f); // fallback if no cell data
     }
@@ -291,11 +291,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             {
                 LOG_INFO("F5: WorldGrid reloaded OK — rebuilding terrain for active cell...");
                 int playerCX = 0, playerCZ = 0;
-                WorldCell* playerCell = world_refresh::FindCellForPlayerPosition(worldGrid, camController,
-                                                                                  playerCX, playerCZ);
+                WorldCell* playerCell = WorldRuntimeRefresh::FindCellForPlayerPosition(worldGrid, camController,
+                                                                                       playerCX, playerCZ);
                 if (playerCell)
                 {
-                    world_refresh::RefreshCellVisuals(*playerCell, worldRuntimeRefresh);
+                    WorldRuntimeRefresh::RefreshCellVisuals(*playerCell, worldRuntimeRefresh);
                     lastPlayerCX = playerCX;
                     lastPlayerCZ = playerCZ;
                     LOG_INFO("F5: terrain rebuilt and instances respawned.");
@@ -391,7 +391,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                        << ") -> (" << playerCX << "," << playerCZ
                        << ") biome=" << newCell->terrainBiome;
                     LOG_INFO(ss.str());
-                    world_refresh::RefreshCellVisuals(*newCell, worldRuntimeRefresh);
+                    WorldRuntimeRefresh::RefreshCellVisuals(*newCell, worldRuntimeRefresh);
                 }
                 lastPlayerCX = playerCX;
                 lastPlayerCZ = playerCZ;
@@ -413,6 +413,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             ScreenToClient(window.GetHandle(), &clickPos);
 
             // Determine the active cell from the player position.
+            // Use direct WorldToCell here because placement only needs coordinates,
+            // not a validated cell lookup.
             int activeCX = 0, activeCZ = 0;
             worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
                                   activeCX, activeCZ);
@@ -455,6 +457,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             imguiLayer.BeginFrame();
             // Draw the World Editor panel inside the ImGui frame.
             {
+                // Use direct WorldToCell here because the panel displays the current
+                // grid coordinates even when no loaded cell exists there.
                 int activeCX = 0, activeCZ = 0;
                 worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
                                       activeCX, activeCZ);
