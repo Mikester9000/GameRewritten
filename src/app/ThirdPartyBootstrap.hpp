@@ -25,7 +25,7 @@ inline void InitializeAndRunSmokeTests()
     if (tp::Physics::Init())
     {
         // Ground is created as a fixed reference body for the dynamic sphere smoke step.
-        // The returned body id is intentionally ignored in this one-shot smoke test.
+        // The returned ground id is intentionally ignored in this one-shot smoke test.
         tp::Physics::AddStaticGround(0.0f);
         tp::PhysicsBodyId dynamicSphereId = tp::Physics::AddDynamicSphere(0.0f, 5.0f, 0.0f, 0.5f, 1.0f);
 
