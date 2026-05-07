@@ -5,7 +5,6 @@
 #include <windows.h>
 #include <cmath>
 #include <cstdint>
-#include <algorithm> // for std::clamp
 #include <sstream>   // for std::ostringstream (cell crossing log)
 // --- Hacky but simple approach for day 1 ---
 // We include the .cpp files to avoid headers for now.
@@ -21,6 +20,13 @@
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
 #include "../world/WorldGrid.hpp"
+#include "FrameTiming.hpp"
+#include "InputEdgeState.hpp"
+#include "CursorModeController.hpp"
+#include "WorldEditorFrameOps.hpp"
+#include "WorldReloadFlow.hpp"
+#include "ThirdPartyBootstrap.hpp"
+#include "WorldRuntimeRefresh.hpp"
 #include <logger/Logger.hpp>
 // We defined the classes in the other .cpp files.
 // For this beginner seed, the simplest way is to forward-declare them here
@@ -33,16 +39,7 @@ extern "C" __declspec(dllimport) int __stdcall MessageBoxW(HWND, LPCWSTR, LPCWST
 
 
 
-// ThirdParty subsystem wrappers (from the ThirdParty static library)
-#include "tp_audio.hpp"
-#include "tp_physics.hpp"
-#include "tp_navigation.hpp"
-#include "tp_image.hpp"
-#include "tp_texture.hpp"
 #include "tp_tracy.hpp"
-
-// ImGui for WantCaptureMouse check
-#include "../../third_party/imgui/imgui.h"
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
@@ -116,45 +113,22 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     WorldEditor worldEditor;
     worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
 
-    // Helper: rebuild terrain mesh, repopulate forest, and respawn placed instances for a cell.
-    // Called on startup, F5, and whenever the player crosses into a new cell.
-    auto rebuildTerrainForCell = [&](const WorldCell& cell)
-    {
-        D3D11Renderer::TerrainParams tp;
-        tp.biome         = cell.terrainBiome;
-        tp.seed          = cell.terrainSeed;
-        tp.cellOriginX   = cell.OriginX();
-        tp.cellOriginZ   = cell.OriginZ();
-        tp.cellWorldSize = cell.cellSize;
-        tp.heightScale   = cell.terrainHeightScale;
-        tp.noiseFreq     = cell.terrainNoiseFreq;
-        tp.noiseFreq2    = cell.terrainNoiseFreq2;
-        if (cell.terrainEnabled)
-            renderer.RebuildTerrainPatch(tp);
-        else
-            renderer.ClearTerrainPatch(); // ensure previous cell's patch is removed
-
-        if (cell.forestEnabled)
-        {
-            forest.Populate(renderer, cell.forestTreeCount,
-                            cell.forestRadius, cell.CenterX(), cell.CenterZ());
-        }
-        else
-        {
-            forest.ClearInstances(); // remove trees from previous forested cell
-        }
-        primRenderer.ClearWorldInstances();
-        worldEditor.SpawnCellInstances(cell.cx, cell.cz, renderer);
+    WorldRefresh::RefreshContext cellRefreshContext{
+        renderer,
+        forest,
+        primRenderer,
+        worldEditor
     };
     const float startupCellCenter = worldGrid.GetCellSize() * 0.5f;
     // Build terrain + instances for the startup cell (centre of grassland cell 0,0).
     {
-       
         int startCX = 0, startCZ = 0;
-        worldGrid.WorldToCell(startupCellCenter, startupCellCenter, startCX, startCZ);
-        WorldCell* startCell = worldGrid.FindCell(startCX, startCZ);
+        WorldCell* startCell = WorldRefresh::FindCellAtWorldPosition(worldGrid,
+                                                                     startupCellCenter,
+                                                                     startupCellCenter,
+                                                                     startCX, startCZ);
         if (startCell)
-            rebuildTerrainForCell(*startCell);
+            WorldRefresh::RefreshCellVisuals(*startCell, cellRefreshContext);
         else
             forest.Populate(renderer, 80, 50.0f); // fallback if no cell data
     }
@@ -173,37 +147,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     }
 
     // ── ThirdParty subsystem smoke tests ──────────────────────────────────
-    // Audio: initialize the miniaudio engine (opens the default audio device).
-    tp::Audio::Init();
-
-    // Physics: initialize Jolt and run a quick one-step smoke test.
-    tp::PhysicsBodyId physGroundId, physSphereId;
-    if (tp::Physics::Init())
-    {
-        physGroundId = tp::Physics::AddStaticGround(0.0f);
-        physSphereId = tp::Physics::AddDynamicSphere(0.0f, 5.0f, 0.0f, 0.5f, 1.0f);
-        // Take one physics step so we know integration runs without crashing.
-        {
-            GR_ZONE_SCOPED_N("Physics Step");
-            tp::Physics::Step(1.0f / 60.0f);
-        }
-        float sx = 0.0f, sy = 0.0f, sz = 0.0f;
-        tp::Physics::GetBodyPosition(physSphereId, sx, sy, sz);
-        OutputDebugStringA("[Game] Physics smoke test: sphere stepped OK.\n");
-    }
-
-    // Navigation: init (navmesh build is deferred until level geometry is ready).
-    tp::Nav::Init();
-
-    // Image: attempt to load Content/Textures/placeholder.png (may not exist yet).
-    {
-        tp::Image img;
-        tp::Image::Load("Content/Textures/placeholder.png", img);
-        img.Free(); // safe to call even if load failed
-    }
-
-    // DirectXTex smoke test: load placeholder.png via DirectXTex and log metadata.
-    tp::Texture::SmokeTest();
+    ThirdPartyBootstrap::InitializeAndRunSmokeTests();
     // ── End ThirdParty smoke tests ─────────────────────────────────────────
 
     // Simple loop: process messages + render frames.
@@ -227,50 +171,28 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     camController.SetCenterPoint(centerPoint);
 
     bool firstFrame = true;
-    bool prevEditorActive = false;  // tracks previous frame's placement-mode state
-    LARGE_INTEGER perfFreq{};
-    QueryPerformanceFrequency(&perfFreq);
-
-    LARGE_INTEGER prevCounter{};
-    QueryPerformanceCounter(&prevCounter);
+    FrameTiming::State frameTimingState;
+    FrameTiming::Initialize(frameTimingState);
+    InputEdge::State inputEdgeState;
+    CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
-    bool wasTDown = false;
-    bool wasGDown = false;
-    // Toggle key edge-detection state (track previous frame state).
-    bool wasEscDown = false;
-    bool wasF1Down  = false;
-    bool wasF5Down  = false;
-    bool wasLButtonDown = false;
     // Track the cell the player was in last frame to detect cell-crossing.
     // Initialize from the actual spawn position at the center of cell (0,0).
     int lastPlayerCX = 0, lastPlayerCZ = 0;
     worldGrid.WorldToCell(startupCellCenter, startupCellCenter, lastPlayerCX, lastPlayerCZ);
-    // FPS smoothing accumulator.
-    float fpsAccum = 0.0f;
-    int   fpsFrames = 0;
-    float displayFPS = 0.0f; 
-    bool cursorVisible = false; // track actual cursor visibility state we requested
+    WorldReload::ReloadContext worldReloadContext{
+        registry,
+        worldGrid,
+        prefabLibrary,
+        worldEditor,
+        camController,
+        cellRefreshContext,
+        lastPlayerCX,
+        lastPlayerCZ
+    };
     while (window.ProcessEvents())
     {
-        LARGE_INTEGER currCounter{};
-        QueryPerformanceCounter(&currCounter);
-
-        float deltaTime = static_cast<float>(currCounter.QuadPart - prevCounter.QuadPart) /
-            static_cast<float>(perfFreq.QuadPart);
-        prevCounter = currCounter;
-
-        // Clamp to avoid huge spikes when app loses focus
-        deltaTime = std::clamp(deltaTime, 0.0f, 0.05f);
-        
-        // FPS calculation (smooth over ~0.5 s).
-        fpsAccum += deltaTime;
-        fpsFrames++;
-        if (fpsAccum >= 0.5f)
-        {
-            displayFPS = static_cast<float>(fpsFrames) / fpsAccum;
-            fpsAccum = 0.0f;
-            fpsFrames = 0;
-        }
+        float deltaTime = FrameTiming::BeginFrame(frameTimingState);
 
         // Check if the window is active
         if (GetForegroundWindow() != window.GetHandle()) {
@@ -280,55 +202,19 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // --- Toggle keys (edge-detect so they fire once per press) ---
 
         // Esc: toggle pause menu (was: exit the program).
-        bool escDown = (GetAsyncKeyState(VK_ESCAPE) & 0x8000) != 0;
-        if (escDown && !wasEscDown)
+        if (InputEdge::PollEscapePressed(inputEdgeState))
             imguiLayer.TogglePauseMenu();
-        wasEscDown = escDown;
 
         // F1: toggle debug overlay.
-        bool f1Down = (GetAsyncKeyState(VK_F1) & 0x8000) != 0;
-        if (f1Down && !wasF1Down)
+        if (InputEdge::PollF1Pressed(inputEdgeState))
             imguiLayer.ToggleDebugOverlay();
-        wasF1Down = f1Down;
 
         // F5: reload Asset Registry and World Grid without restarting.
         // Also rebuilds terrain + forest for the active cell and respawns instances.
-        bool f5Down = (GetAsyncKeyState(VK_F5) & 0x8000) != 0;
-        if (f5Down && !wasF5Down)
+        if (InputEdge::PollF5Pressed(inputEdgeState))
         {
-            LOG_INFO("F5: reloading Asset Registry and World Grid...");
-            bool regOk  = registry.Reload();    // safe: keeps old data on parse error
-            bool gridOk = worldGrid.Reload();   // safe: keeps old grid on parse error
-
-            if (regOk)
-            {
-                LOG_INFO("F5: AssetRegistry reloaded OK.");
-                prefabLibrary.Reload(registry);
-                worldEditor.RefreshPrefabList();
-            }
-            else
-                LOG_WARN("F5: AssetRegistry reload failed — keeping old registry.");
-
-            if (gridOk)
-            {
-                LOG_INFO("F5: WorldGrid reloaded OK — rebuilding terrain for active cell...");
-                int playerCX = 0, playerCZ = 0;
-                worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), playerCX, playerCZ);
-                WorldCell* playerCell = worldGrid.FindCell(playerCX, playerCZ);
-                if (playerCell)
-                {
-                    rebuildTerrainForCell(*playerCell);
-                    lastPlayerCX = playerCX;
-                    lastPlayerCZ = playerCZ;
-                    LOG_INFO("F5: terrain rebuilt and instances respawned.");
-                }
-            }
-            else
-            {
-                LOG_WARN("F5: WorldGrid reload failed — keeping old world grid.");
-            }
+            WorldReload::ReloadAssetsAndWorld(worldReloadContext);
         }
-        wasF5Down = f5Down;
 
         // Handle quit/resume signals from the UI.
         if (imguiLayer.WantsQuit())
@@ -338,15 +224,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // T / G — terrain toggle (only when not paused).
         if (!imguiLayer.IsPauseMenuOpen())
         {
-            bool tDown = (GetAsyncKeyState('T') & 0x8000) != 0;
-            if (tDown && !wasTDown)
+            if (InputEdge::PollTPressed(inputEdgeState))
                 useTerrainPatch = true;
-            wasTDown = tDown;
 
-            bool gDown = (GetAsyncKeyState('G') & 0x8000) != 0;
-            if (gDown && !wasGDown)
+            if (InputEdge::PollGPressed(inputEdgeState))
                 useTerrainPatch = false;
-            wasGDown = gDown;
         }
 
         // Show/hide system cursor and re-center mouse based on pause state.
@@ -355,20 +237,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         const bool paused = imguiLayer.IsPauseMenuOpen();
         const bool editorActive = worldEditor.IsPlacementModeActive();
         const bool wantCursorVisible = paused || editorActive;
-        if (wantCursorVisible != cursorVisible)
-        {
-            if (wantCursorVisible)
-            {
-                // Ensure visible regardless of current internal ShowCursor counter.
-                while (ShowCursor(TRUE) < 0) {}
-            }
-            else
-            {
-                // Ensure hidden regardless of current internal ShowCursor counter.
-                while (ShowCursor(FALSE) >= 0) {}
-            }
-            cursorVisible = wantCursorVisible;
-        }
+        CursorMode::ApplyCursorVisibility(cursorModeState, wantCursorVisible);
 
         // Animate the clear color so you can see it is updating.
         t += deltaTime * 1.0f;
@@ -387,13 +256,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         const bool allowMouseLook = !paused && !editorActive;
 
         // Detect the moment Placement Mode turns OFF so we can reset mouse baseline.
-        if (prevEditorActive && !editorActive)
-        {
-            // Re-center cursor and skip the first mouse-look delta to avoid a jump.
-            SetCursorPos(centerPoint.x, centerPoint.y);
-            firstFrame = true;
-        }
-        prevEditorActive = editorActive;
+        CursorMode::HandlePlacementModeTransition(cursorModeState, editorActive, centerPoint, firstFrame);
 
         camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
 
@@ -413,7 +276,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                        << ") -> (" << playerCX << "," << playerCZ
                        << ") biome=" << newCell->terrainBiome;
                     LOG_INFO(ss.str());
-                    rebuildTerrainForCell(*newCell);
+                    WorldRefresh::RefreshCellVisuals(*newCell, cellRefreshContext);
                 }
                 lastPlayerCX = playerCX;
                 lastPlayerCZ = playerCZ;
@@ -421,37 +284,20 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
 
         // --- Left-click placement ---
-        // Check ImGui::GetIO().WantCaptureMouse BEFORE BeginFrame for the
-        // value from the previous frame — correct for input processing.
-        bool lbDown = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
-        bool lbClicked = lbDown && !wasLButtonDown;
-        wasLButtonDown = lbDown;
-
-        if (lbClicked && editorActive && !ImGui::GetIO().WantCaptureMouse)
-        {
-            // Get cursor position in window client coordinates.
-            POINT clickPos;
-            GetCursorPos(&clickPos);
-            ScreenToClient(window.GetHandle(), &clickPos);
-
-            // Determine the active cell from the player position.
-            int activeCX = 0, activeCZ = 0;
-            worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
-                                   activeCX, activeCZ);
-
-            worldEditor.HandlePlacement(
-                clickPos,
-                static_cast<float>(renderer.GetRenderWidth()),
-                static_cast<float>(renderer.GetRenderHeight()),
-                camController, renderer,
-                activeCX, activeCZ);
-        }
+        WorldEditorFrameOps::HandlePlacementClick(
+            window.GetHandle(),
+            InputEdge::PollLeftButtonClicked(inputEdgeState),
+            editorActive,
+            worldEditor,
+            worldGrid,
+            camController,
+            renderer);
 
         // Pass camera info and FPS stats to ImGuiLayer for the debug overlay.
         {
             imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),
                                      camController.GetYaw(),  camController.GetPitch());
-            imguiLayer.SetFrameStats(displayFPS, deltaTime);
+            imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         }
         // Clear dynamic/runtime visuals before rebuilding them for this frame.
         primRenderer.ClearRuntimeInstances();
@@ -476,12 +322,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             // ImGui: begin frame, draw UI panels, then render ImGui draw data.
             imguiLayer.BeginFrame();
             // Draw the World Editor panel inside the ImGui frame.
-            {
-                int activeCX = 0, activeCZ = 0;
-                worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
-                                       activeCX, activeCZ);
-                worldEditor.DrawPanel(activeCX, activeCZ, renderer);
-            }
+            WorldEditorFrameOps::DrawEditorPanelForActiveCell(
+                worldEditor, worldGrid, camController, renderer);
             imguiLayer.EndFrame();
 
             renderer.PresentFrame();
@@ -493,9 +335,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     primRenderer.Shutdown();
     forest.Shutdown();
     imguiLayer.Shutdown();
-    tp::Nav::Shutdown();
-    tp::Physics::Shutdown();
-    tp::Audio::Shutdown();
+    ThirdPartyBootstrap::Shutdown();
     renderer.Shutdown();
     window.Close();
     return 0;
