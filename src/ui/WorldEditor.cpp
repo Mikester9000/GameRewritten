@@ -87,21 +87,31 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
         return;
     }
 
-    // --- Placement mode toggle ---
-    // Disable the checkbox (and force mode off) when no prefabs are registered,
-    // so clicks can't write instances referencing non-existent asset IDs.
+    // --- Editor mode toggles ---
     if (m_prefabIds.empty())
     {
         m_placementMode = false;
         ImGui::BeginDisabled();
     }
-    ImGui::Checkbox("Placement Mode", &m_placementMode);
+
+    if (ImGui::Checkbox("Placement Mode", &m_placementMode) && m_placementMode)
+        m_deleteMode = false;
+
     if (m_prefabIds.empty())
         ImGui::EndDisabled();
+
+    if (ImGui::Checkbox("Delete Mode", &m_deleteMode) && m_deleteMode)
+        m_placementMode = false;
+
     if (m_placementMode)
     {
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "(ACTIVE)");
+        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "(PLACE)");
+    }
+    else if (m_deleteMode)
+    {
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "(DELETE)");
     }
 
     ImGui::Separator();
@@ -172,7 +182,8 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
     }
 
     ImGui::Separator();
-    ImGui::TextDisabled("[LMB] click to place when Placement Mode is on");
+    ImGui::TextDisabled("[LMB] place when Placement Mode is on");
+    ImGui::TextDisabled("[LMB] delete when Delete Mode is on");
     ImGui::TextDisabled("[F5] to reload world + registry");
 
     ImGui::End();
@@ -181,13 +192,108 @@ void WorldEditor::DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer)
 // ---------------------------------------------------------------------------
 // HandlePlacement
 // ---------------------------------------------------------------------------
+bool WorldEditor::HandleDelete(POINT screenPos,
+    float vpW, float vpH,
+    const CameraController& cam,
+    D3D11Renderer& renderer,
+    int activeCX, int activeCZ)
+{
+    if (!m_deleteMode || !m_grid || !m_forest)
+        return false;
+
+    WorldCell* cell = m_grid->FindCell(activeCX, activeCZ);
+    if (!cell || cell->instances.empty())
+        return false;
+
+    // Build picking ray from screen position.
+    float ox, oy, oz, dx, dy, dz;
+    cam.ScreenPointToRay(static_cast<float>(screenPos.x),
+        static_cast<float>(screenPos.y),
+        vpW, vpH,
+        ox, oy, oz, dx, dy, dz);
+
+    // Reuse the same ground-hit logic as placement.
+    int bestIndex = -1;
+    float bestT = 1e30f;
+
+    for (size_t i = 0; i < cell->instances.size(); ++i)
+    {
+        const CellInstance& inst = cell->instances[i];
+
+        // Simple pick sphere around the instance.
+        const float pickRadius = (std::max)(1.5f, inst.scale * 2.5f);
+        const float sphereX = inst.x;
+        const float sphereY = inst.y + pickRadius;
+        const float sphereZ = inst.z;
+
+        // Ray-sphere intersection.
+        const float mx = ox - sphereX;
+        const float my = oy - sphereY;
+        const float mz = oz - sphereZ;
+
+        const float b = mx * dx + my * dy + mz * dz;
+        const float c = mx * mx + my * my + mz * mz - pickRadius * pickRadius;
+
+        // Ray origin outside sphere and pointing away.
+        if (c > 0.0f && b > 0.0f)
+            continue;
+
+        const float discriminant = b * b - c;
+        if (discriminant < 0.0f)
+            continue;
+
+        float t = -b - sqrtf(discriminant);
+        if (t < 0.0f)
+            t = 0.0f;
+
+        if (t < bestT)
+        {
+            bestT = t;
+            bestIndex = static_cast<int>(i);
+        }
+    }
+
+    if (bestIndex < 0)
+        return false;
+
+    const CellInstance removed = cell->instances[bestIndex];
+    cell->instances.erase(cell->instances.begin() + bestIndex);
+
+    // Rebuild authored visuals for the active cell so the deleted instance disappears.
+    if (cell->forestEnabled)
+    {
+        m_forest->Populate(renderer, cell->forestTreeCount,
+            cell->forestRadius, cell->CenterX(), cell->CenterZ());
+    }
+    else
+    {
+        m_forest->ClearInstances();
+    }
+
+    if (m_primRenderer)
+        m_primRenderer->ClearWorldInstances();
+
+    SpawnCellInstances(activeCX, activeCZ, renderer);
+
+    std::ostringstream ss;
+    ss << "WorldEditor: deleted '" << removed.prefab
+        << "' near (" << removed.x << ", " << removed.y << ", " << removed.z << ")";
+    LOG_INFO(ss.str());
+
+    return true;
+}
 bool WorldEditor::HandlePlacement(POINT screenPos,
                                    float vpW, float vpH,
                                    const CameraController& cam,
                                    D3D11Renderer& renderer,
                                    int activeCX, int activeCZ)
 {
-    if (!m_placementMode || !m_grid || !m_forest) return false;
+    if (!m_grid || !m_forest) return false;
+
+    if (m_deleteMode)
+        return HandleDelete(screenPos, vpW, vpH, cam, renderer, activeCX, activeCZ);
+
+    if (!m_placementMode) return false;
     if (m_prefabIds.empty() || m_selectedPrefabId.empty()) return false;
 
     // Build picking ray from screen position.

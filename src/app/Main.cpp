@@ -225,7 +225,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // Show/hide system cursor and re-center mouse based on pause state.
         // Show cursor when paused OR when the World Editor is in placement mode.
         const bool paused = imguiLayer.IsPauseMenuOpen();
-        const bool editorActive = worldEditor.IsPlacementModeActive();
+        const bool editorActive = worldEditor.IsEditorInteractionActive();
         const bool wantCursorVisible = paused || editorActive;
         CursorMode::ApplyCursorVisibility(cursorModeState, wantCursorVisible);
 
@@ -246,7 +246,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         const bool allowMouseLook = !paused && !editorActive;
 
         // Detect the moment Placement Mode turns OFF so we can reset mouse baseline.
-        CursorMode::HandlePlacementModeTransition(cursorModeState, editorActive, centerPoint, firstFrame);
+        CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
 
         camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
 

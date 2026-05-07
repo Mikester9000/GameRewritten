@@ -11,6 +11,9 @@
 // Use an include guard for WIN32_LEAN_AND_MEAN rather than unconditionally
 // redefining it here, to avoid macro-redefinition warnings when other
 // translation units (or build settings) have already defined it.
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -40,11 +43,12 @@ public:
     // playerCX/playerCZ = current grid cell the player is in (shown in the panel).
     void DrawPanel(int playerCX, int playerCZ, D3D11Renderer& renderer);
 
-    // Try to place an instance at the mouse click position.
+    // Handle a world-editor click.
+    // In Placement Mode: place a new instance.
+    // In Delete Mode: remove the clicked authored instance.
     // screenPos = client-space pixel coords of the click.
     // vpW/vpH   = viewport width/height (== render resolution).
-    // activeCX/activeCZ = grid cell to add the instance to.
-    // Returns true if placement succeeded.
+    // activeCX/activeCZ = grid cell to edit.
     bool HandlePlacement(POINT screenPos,
                          float vpW, float vpH,
                          const CameraController& cam,
@@ -58,11 +62,21 @@ public:
 
     // Returns true while Placement Mode is active.
     bool IsPlacementModeActive() const { return m_placementMode; }
+    bool IsEditorInteractionActive() const { return m_placementMode || m_deleteMode; }
+
+   
 
     // Re-read the prefab list from the AssetRegistry (call after reload).
     void RefreshPrefabList();
 
 private:
+    bool HandleDelete(POINT screenPos,
+        float vpW, float vpH,
+        const CameraController& cam,
+        D3D11Renderer& renderer,
+        int activeCX, int activeCZ);
+
+    bool m_deleteMode = false;
     bool m_placementMode = false;
 
     std::vector<std::string> m_prefabIds;   // IDs beginning with "prefabs." (sorted)

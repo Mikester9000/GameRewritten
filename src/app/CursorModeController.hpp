@@ -12,7 +12,7 @@ namespace CursorMode
 struct State
 {
     bool cursorVisible    = false;
-    bool prevEditorActive = false;
+    bool prevMouseLookEnabled = false;
 };
 
 inline void ApplyCursorVisibility(State& state, bool wantCursorVisible)
@@ -34,18 +34,19 @@ inline void ApplyCursorVisibility(State& state, bool wantCursorVisible)
     state.cursorVisible = wantCursorVisible;
 }
 
-inline void HandlePlacementModeTransition(State& state,
-                                          bool editorActive,
-                                          const POINT& centerPoint,
-                                          bool& inOutFirstFrame)
+inline void HandleMouseLookTransition(State& state,
+    bool allowMouseLook,
+    const POINT& centerPoint,
+    bool& inOutFirstFrame)
 {
-    // Detect the moment Placement Mode turns OFF so we can reset mouse baseline.
-    if (state.prevEditorActive && !editorActive)
+    // Detect the moment mouse-look turns ON again so the old cursor position
+    // does not create one large camera delta.
+    if (!state.prevMouseLookEnabled && allowMouseLook)
     {
-        // Re-center cursor and skip the first mouse-look delta to avoid a jump.
         SetCursorPos(centerPoint.x, centerPoint.y);
         inOutFirstFrame = true;
     }
-    state.prevEditorActive = editorActive;
+
+    state.prevMouseLookEnabled = allowMouseLook;
 }
 }
