@@ -193,6 +193,9 @@ void Forest::Draw(const D3D11Renderer& renderer)
     m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     m_context->VSSetShader(m_vs, nullptr, 0);
     m_context->PSSetShader(m_ps, nullptr, 0);
+    ID3D11Buffer* lightCBuffer = renderer.GetLightConstantBuffer();
+    if (lightCBuffer)
+        m_context->PSSetConstantBuffers(1, 1, &lightCBuffer);
 
     const float trunkNudge = -0.02f; // small downward tweak to ensure contact
 

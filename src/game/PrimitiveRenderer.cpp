@@ -291,6 +291,9 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
     m_context->IASetVertexBuffers(0, 1, &m_vb, &stride, &offset);
     m_context->IASetIndexBuffer(m_ib, DXGI_FORMAT_R16_UINT, 0);
     m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    ID3D11Buffer* lightCBuffer = renderer.GetLightConstantBuffer();
+    if (lightCBuffer)
+        m_context->PSSetConstantBuffers(1, 1, &lightCBuffer);
 
     // Fixed directional light (matches the sky gradient direction).
     // lightDir points FROM the light source toward the scene;

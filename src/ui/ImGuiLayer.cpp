@@ -5,6 +5,7 @@
 
 #include "ImGuiLayer.hpp"
 #include <Windows.h>
+#include "../rendering/d3d11/D3D11Renderer.hpp"
 
 // ImGui core + backends (vendored under third_party/)
 #include "../../third_party/imgui/imgui.h"
@@ -198,6 +199,27 @@ void ImGuiLayer::DrawDebugOverlay()
         ImGui::Text("Camera");
         ImGui::Text("  pos  (%.2f, %.2f, %.2f)", camX, camY, camZ);
         ImGui::Text("  yaw  %.3f  pitch %.3f", camYaw, camPitch);
+        if (m_renderer)
+        {
+            if (!m_lightUiInitialized)
+            {
+                m_renderer->GetSunDirection(m_sunDirX, m_sunDirY, m_sunDirZ);
+                m_ambientStrength = m_renderer->GetAmbientStrength();
+                m_lightUiInitialized = true;
+            }
+
+            ImGui::Separator();
+            ImGui::Text("Sun Light");
+            bool sunChanged = false;
+            sunChanged |= ImGui::SliderFloat("Sun Dir X", &m_sunDirX, -1.0f, 1.0f);
+            sunChanged |= ImGui::SliderFloat("Sun Dir Y", &m_sunDirY, -1.0f, 1.0f);
+            sunChanged |= ImGui::SliderFloat("Sun Dir Z", &m_sunDirZ, -1.0f, 1.0f);
+            if (sunChanged)
+                m_renderer->SetSunDirection(m_sunDirX, m_sunDirY, m_sunDirZ);
+
+            if (ImGui::SliderFloat("Ambient", &m_ambientStrength, 0.0f, 1.0f))
+                m_renderer->SetAmbientStrength(m_ambientStrength);
+        }
         ImGui::Separator();
         ImGui::TextDisabled("[F1] hide overlay");
     }

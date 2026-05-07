@@ -7,6 +7,8 @@
 #include <windows.h>
 #include <d3d11.h>
 
+class D3D11Renderer;
+
 class ImGuiLayer
 {
 public:
@@ -39,6 +41,7 @@ public:
 
     // The game loop sets these each frame so the debug overlay can display them.
     void SetFrameStats(float fps, float dt) { currentFPS = fps; currentDT = dt; }
+    void SetRendererRef(D3D11Renderer* renderer) { m_renderer = renderer; }
     void SetCameraInfo(float x, float y, float z, float yaw, float pitch)
     {
         camX = x; camY = y; camZ = z; camYaw = yaw; camPitch = pitch;
@@ -71,6 +74,12 @@ private:
 
     bool wantsQuit   = false;
     bool wantsResume = false;
+    D3D11Renderer* m_renderer = nullptr;
+    bool  m_lightUiInitialized = false;
+    float m_sunDirX = 0.0f;
+    float m_sunDirY = -1.0f;
+    float m_sunDirZ = 0.0f;
+    float m_ambientStrength = 0.25f;
 
     void DrawPauseMenu();
     void DrawDebugOverlay();
