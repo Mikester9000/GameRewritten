@@ -13,6 +13,7 @@
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../game/Forest.hpp"
 #include "../game/CameraController.hpp"
+#include "../game/actors/PlayerActor.hpp"
 #include "../game/PrefabLibrary.hpp"
 #include "../game/PrimitiveRenderer.hpp"
 #include "../ui/ImGuiLayer.hpp"
@@ -155,6 +156,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // --- Camera + player movement (now owned by CameraController) ---
     CameraController camController;
+    PlayerActor playerActor;
     // Spawn in the center of grassland cell (0,0), derived from world cell size.
     // This keeps the player well inside the first terrain patch and away from
     // any cell-boundary void on the first frame.
@@ -301,6 +303,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
         // Clear dynamic/runtime visuals before rebuilding them for this frame.
         primRenderer.ClearRuntimeInstances();
+        playerActor.SubmitRuntimeVisual(camController, prefabLibrary, primRenderer);
 
         renderer.ClearScreen(r, g, b, 1.0f);
         {
