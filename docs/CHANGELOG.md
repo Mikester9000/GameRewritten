@@ -1,2 +1,3 @@
+- 2026-05-07: Added `TextureCache` (DirectXTex-backed, SRV cache) and wired into `D3D11Renderer` terrain/ground draw paths.
 - 2026-05-07: Added header-only `PlayerStats` and wired per-frame passive ATB charge updates through `RuntimeScene`.
 - 2026-05-07: Added gameplay HUD overlay showing player HP/MP/ATB (with ATB READY indicator) and wired it into the ImGui frame path.

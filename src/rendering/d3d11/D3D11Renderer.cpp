@@ -15,6 +15,8 @@ using namespace DirectX;
 
 namespace
 {
+    // Placeholder texture bound to terrain/ground draw calls when a TextureCache is attached.
+    static const std::string k_placeholderTexturePath = "Content/Textures/placeholder.png";
     template <typename T>
     void SafeRelease(T*& resource)
     {
@@ -142,21 +144,30 @@ bool D3D11Renderer::Initialize(HWND windowHandle, int width, int height)
 
     hr = device->CreateDepthStencilView(depthTexture, nullptr, &depthView);
     if (FAILED(hr)) return false;
-    if (FAILED(hr))
-        return false;
 
     if (!CreateRenderTarget()) return false;
     if (!CreateTriangleResources()) return false;
 	CreateGroundShaders();
 	CreateSkyShaders();
-    
-    
 
-    
+    // Create a linear-wrap sampler for terrain texture binding (slot s0).
+    {
+        D3D11_SAMPLER_DESC sd = {};
+        sd.Filter         = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        sd.AddressU       = D3D11_TEXTURE_ADDRESS_WRAP;
+        sd.AddressV       = D3D11_TEXTURE_ADDRESS_WRAP;
+        sd.AddressW       = D3D11_TEXTURE_ADDRESS_WRAP;
+        sd.ComparisonFunc = D3D11_COMPARISON_NEVER;
+        sd.MinLOD         = 0.0f;
+        sd.MaxLOD         = D3D11_FLOAT32_MAX;
+        HRESULT samplerHr = device->CreateSamplerState(&sd, &m_textureSampler);
+        if (FAILED(samplerHr))
+            LOG_WARN("D3D11Renderer: failed to create texture sampler state.");
+    }
+
     CreateGroundPlane();
     if (!CreateTerrainPatch()) return false;
     return true;
-    
 }
 
 void D3D11Renderer::CreateGroundShaders()
@@ -242,6 +253,7 @@ void D3D11Renderer::Shutdown()
     SafeRelease(m_groundVertexBuffer);
     SafeRelease(m_groundIndexBuffer);
     SafeRelease(m_terrainPatchVertexBuffer);
+    SafeRelease(m_textureSampler);
 
     SafeRelease(rasterizerState);
     SafeRelease(depthView);
@@ -568,12 +580,22 @@ void D3D11Renderer::DrawTerrainPatch()
     context->VSSetShader(groundVertexShader, nullptr, 0);
     context->PSSetShader(groundPixelShader, nullptr, 0);
 
+    // Bind texture and sampler if a cache is attached.
+    if (m_textureCache)
+    {
+        ID3D11ShaderResourceView* srv =
+            m_textureCache->Load(device, k_placeholderTexturePath);
+        if (srv)
+        {
+            context->PSSetShaderResources(0, 1, &srv);
+            context->PSSetSamplers(0, 1, &m_textureSampler);
+        }
+    }
+
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
     context->IASetVertexBuffers(0, 1, &m_terrainPatchVertexBuffer, &stride, &offset);
-    
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    
     context->Draw(m_terrainPatchVertexCount, 0);
 }
 
@@ -586,6 +608,18 @@ void D3D11Renderer::DrawGroundPlane()
     context->IASetInputLayout(groundInputLayout);
     context->VSSetShader(groundVertexShader, nullptr, 0);
     context->PSSetShader(groundPixelShader, nullptr, 0);
+
+    // Bind texture and sampler if a cache is attached.
+    if (m_textureCache)
+    {
+        ID3D11ShaderResourceView* srv =
+            m_textureCache->Load(device, k_placeholderTexturePath);
+        if (srv)
+        {
+            context->PSSetShaderResources(0, 1, &srv);
+            context->PSSetSamplers(0, 1, &m_textureSampler);
+        }
+    }
 
     UINT stride = sizeof(Vertex);
     UINT offset = 0;

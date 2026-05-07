@@ -20,6 +20,7 @@
 #include "../ui/WorldEditor.hpp"
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
+#include "../assets/TextureCache.hpp"
 #include "../world/WorldGrid.hpp"
 #include "FrameTiming.hpp"
 #include "InputEdgeState.hpp"
@@ -48,6 +49,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         MessageBoxW(nullptr, L"Failed to initialize D3D11.", L"Error", 0);
         return 1;
     }
+
+    // --- Texture Cache ---
+    // Loads D3D11 textures via DirectXTex and caches SRVs by file path.
+    TextureCache textureCache;
+    renderer.SetTextureCache(&textureCache);
 
     // --- Asset Registry ---
     // Maps scoped IDs (e.g. "textures.placeholder") to file paths.
@@ -327,6 +333,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     forest.Shutdown();
     imguiLayer.Shutdown();
     ThirdPartyBootstrap::Shutdown();
+    textureCache.ReleaseAll();
     renderer.Shutdown();
     window.Close();
     return 0;

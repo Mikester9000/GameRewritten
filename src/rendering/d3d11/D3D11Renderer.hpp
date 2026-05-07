@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "D3D11RendererHelpers.hpp"
+#include "../../assets/TextureCache.hpp"
 
 // A simple class for setting up and drawing with Direct3D 11.
 class D3D11Renderer
@@ -51,6 +52,9 @@ public:
     ID3D11DeviceContext* GetContext() const;
     int GetRenderWidth() const { return renderWidth; }
     int GetRenderHeight() const { return renderHeight; }
+    // Attach a TextureCache so terrain draw calls can bind textures.
+    // Pass nullptr to detach.  The renderer does not own the cache.
+    void SetTextureCache(TextureCache* cache) { m_textureCache = cache; }
 private:
     using Vertex = D3D11RendererHelpers::TerrainVertex;
     struct TransformConstantBuffer { DirectX::XMFLOAT4X4 mvp; DirectX::XMFLOAT4X4 world; };
@@ -115,5 +119,7 @@ private:
     ID3D11Buffer* m_terrainPatchVertexBuffer = nullptr;
     UINT m_terrainPatchVertexCount = 0;
 
+    TextureCache* m_textureCache = nullptr;
+    ID3D11SamplerState* m_textureSampler = nullptr;
 
-};  
+};
