@@ -25,7 +25,7 @@
         "prefabs.barrel":            "Content/Prefabs/barrel.prefab.json",
         "prefabs.campfire_ring":     "Content/Prefabs/campfire_ring.prefab.json",
         "prefabs.tent_blockout":     "Content/Prefabs/tent_blockout.prefab.json",
-        "prefabs.player_hero_blockout":"Content/Prefabs/player_hero_blockout.prefab.json",
+        "prefabs.player_hero_blockout": "Content/Prefabs/player_hero_blockout.prefab.json",
         "prefabs.pillar":            "Content/Prefabs/pillar.prefab.json",
         "prefabs.pillar_broken":     "Content/Prefabs/pillar_broken.prefab.json",
         "prefabs.low_wall":          "Content/Prefabs/low_wall.prefab.json",
