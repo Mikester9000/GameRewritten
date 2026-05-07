@@ -9,9 +9,9 @@
 #include "../ui/WorldEditor.hpp"
 #include "../world/WorldGrid.hpp"
 
-namespace WorldRuntimeRefresh
+namespace WorldRefresh
 {
-struct WorldRuntimeRefreshContext
+struct RefreshContext
 {
     D3D11Renderer& renderer;
     Forest& forest;
@@ -19,7 +19,7 @@ struct WorldRuntimeRefreshContext
     WorldEditor& worldEditor;
 };
 
-inline void RefreshCellVisuals(const WorldCell& cell, const WorldRuntimeRefreshContext& context)
+inline void RefreshCellVisuals(const WorldCell& cell, const RefreshContext& context)
 {
     D3D11Renderer::TerrainParams tp;
     tp.biome         = cell.terrainBiome;

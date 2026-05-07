@@ -117,7 +117,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     WorldEditor worldEditor;
     worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
 
-    WorldRuntimeRefresh::WorldRuntimeRefreshContext worldRuntimeRefresh{
+    WorldRefresh::RefreshContext cellRefreshContext{
         renderer,
         forest,
         primRenderer,
@@ -127,12 +127,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Build terrain + instances for the startup cell (centre of grassland cell 0,0).
     {
         int startCX = 0, startCZ = 0;
-        WorldCell* startCell = WorldRuntimeRefresh::FindCellAtWorldPosition(worldGrid,
-                                                                            startupCellCenter,
-                                                                            startupCellCenter,
-                                                                            startCX, startCZ);
+        WorldCell* startCell = WorldRefresh::FindCellAtWorldPosition(worldGrid,
+                                                                     startupCellCenter,
+                                                                     startupCellCenter,
+                                                                     startCX, startCZ);
         if (startCell)
-            WorldRuntimeRefresh::RefreshCellVisuals(*startCell, worldRuntimeRefresh);
+            WorldRefresh::RefreshCellVisuals(*startCell, cellRefreshContext);
         else
             forest.Populate(renderer, 80, 50.0f); // fallback if no cell data
     }
@@ -291,11 +291,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             {
                 LOG_INFO("F5: WorldGrid reloaded OK — rebuilding terrain for active cell...");
                 int playerCX = 0, playerCZ = 0;
-                WorldCell* playerCell = WorldRuntimeRefresh::FindCellForPlayerPosition(worldGrid, camController,
-                                                                                       playerCX, playerCZ);
+                WorldCell* playerCell = WorldRefresh::FindCellForPlayerPosition(worldGrid, camController,
+                                                                                playerCX, playerCZ);
                 if (playerCell)
                 {
-                    WorldRuntimeRefresh::RefreshCellVisuals(*playerCell, worldRuntimeRefresh);
+                    WorldRefresh::RefreshCellVisuals(*playerCell, cellRefreshContext);
                     lastPlayerCX = playerCX;
                     lastPlayerCZ = playerCZ;
                     LOG_INFO("F5: terrain rebuilt and instances respawned.");
@@ -391,7 +391,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                        << ") -> (" << playerCX << "," << playerCZ
                        << ") biome=" << newCell->terrainBiome;
                     LOG_INFO(ss.str());
-                    WorldRuntimeRefresh::RefreshCellVisuals(*newCell, worldRuntimeRefresh);
+                    WorldRefresh::RefreshCellVisuals(*newCell, cellRefreshContext);
                 }
                 lastPlayerCX = playerCX;
                 lastPlayerCZ = playerCZ;
