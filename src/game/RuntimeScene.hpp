@@ -32,8 +32,9 @@ public:
 
     // Clear all dynamic/runtime instance buckets.
     // Call once at the start of each frame before submitting actor visuals.
-    void BeginFrame()
+    void BeginFrame(float dt)
     {
+        m_player.stats.Update(dt);
         m_primRenderer.ClearRuntimeInstances();
     }
 

@@ -288,7 +288,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                  camController.GetYaw(),  camController.GetPitch());
         imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
-        runtimeScene.BeginFrame();
+        runtimeScene.BeginFrame(deltaTime);
         runtimeScene.SubmitActors(camController, prefabLibrary);
 
         renderer.ClearScreen(r, g, b, 1.0f);
