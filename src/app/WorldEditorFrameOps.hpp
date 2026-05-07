@@ -32,7 +32,7 @@ inline void HandlePlacementClick(HWND windowHandle,
                                  const CameraController& camController,
                                  D3D11Renderer& renderer)
 {
-    // Read ImGui::GetIO().WantCaptureMouse before BeginFrame, matching the prior-frame capture state.
+    // Use ImGui::GetIO().WantCaptureMouse as input-capture state for this click-processing phase.
     if (!leftButtonClicked || !editorActive || ImGui::GetIO().WantCaptureMouse)
         return;
 

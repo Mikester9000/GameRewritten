@@ -25,8 +25,9 @@ inline void InitializeAndRunSmokeTests()
     if (tp::Physics::Init())
     {
         // Ground is created as a fixed reference body for the dynamic sphere smoke step.
+        // The returned body id is intentionally ignored in this one-shot smoke test.
         tp::Physics::AddStaticGround(0.0f);
-        tp::PhysicsBodyId physSphereId = tp::Physics::AddDynamicSphere(0.0f, 5.0f, 0.0f, 0.5f, 1.0f);
+        tp::PhysicsBodyId dynamicSphereId = tp::Physics::AddDynamicSphere(0.0f, 5.0f, 0.0f, 0.5f, 1.0f);
 
         // Take one physics step so we know integration runs without crashing.
         {
@@ -35,7 +36,7 @@ inline void InitializeAndRunSmokeTests()
         }
 
         float sx = 0.0f, sy = 0.0f, sz = 0.0f;
-        tp::Physics::GetBodyPosition(physSphereId, sx, sy, sz);
+        tp::Physics::GetBodyPosition(dynamicSphereId, sx, sy, sz);
         OutputDebugStringA("[Game] Physics smoke test: sphere stepped OK.\n");
     }
 
