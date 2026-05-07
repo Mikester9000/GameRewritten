@@ -94,7 +94,9 @@ Suggested future classes:
 - GameApp
 - WorldRuntime
 - PlayerActor
-- RuntimeScene
+- RuntimeScene  <-- first pass done: src/game/RuntimeScene.hpp coordinates
+                    per-frame runtime actor visual submission (player; add
+                    enemies/NPCs here as they are implemented)
 
 Acceptance:
 - New engine systems have a clear location

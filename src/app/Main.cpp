@@ -1,14 +1,12 @@
-// main.cpp
-// Creates the window, initializes D3D11, runs a simple game loop that clears the screen.
+// Main.cpp
+// Application entry point: initializes all engine systems, runs the main game loop,
+// and shuts everything down cleanly on exit.
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <cmath>
 #include <cstdint>
 #include <sstream>   // for std::ostringstream (cell crossing log)
-// --- Hacky but simple approach for day 1 ---
-// We include the .cpp files to avoid headers for now.
-// This is NOT how big projects do it, but it's a good beginner stepping stone.
 #include "../platform/win32/Win32Window.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../game/Forest.hpp"
@@ -16,6 +14,7 @@
 #include "../game/actors/PlayerActor.hpp"
 #include "../game/PrefabLibrary.hpp"
 #include "../game/PrimitiveRenderer.hpp"
+#include "../game/RuntimeScene.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../ui/WorldEditor.hpp"
 #include "../assets/AssetLoader.hpp"
@@ -29,16 +28,6 @@
 #include "ThirdPartyBootstrap.hpp"
 #include "WorldRuntimeRefresh.hpp"
 #include <logger/Logger.hpp>
-// We defined the classes in the other .cpp files.
-// For this beginner seed, the simplest way is to forward-declare them here
-// and rely on the linker. (Later we will convert to headers.)
-class Win32Window;
-class D3D11Renderer;
-
-// Tell the compiler these classes exist somewhere else.
-extern "C" __declspec(dllimport) int __stdcall MessageBoxW(HWND, LPCWSTR, LPCWSTR,unsigned int);
-
-
 
 #include "tp_tracy.hpp"
 
@@ -157,6 +146,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // --- Camera + player movement (now owned by CameraController) ---
     CameraController camController;
     PlayerActor playerActor;
+    // Coordinates per-frame runtime actor visual submission (player, future enemies, NPCs).
+    RuntimeScene runtimeScene(playerActor, primRenderer);
     // Spawn in the center of grassland cell (0,0), derived from world cell size.
     // This keeps the player well inside the first terrain patch and away from
     // any cell-boundary void on the first frame.
@@ -301,10 +292,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                      camController.GetYaw(),  camController.GetPitch());
             imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         }
-        // Clear dynamic/runtime visuals before rebuilding them for this frame.
-        primRenderer.ClearRuntimeInstances();
-        // Rebuild the player visual in the runtime bucket without touching world props.
-        playerActor.SubmitRuntimeVisual(camController, prefabLibrary, primRenderer);
+        // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
+        runtimeScene.BeginFrame();
+        runtimeScene.SubmitActors(camController, prefabLibrary);
 
         renderer.ClearScreen(r, g, b, 1.0f);
         {
