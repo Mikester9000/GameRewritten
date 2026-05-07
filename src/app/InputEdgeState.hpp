@@ -24,7 +24,7 @@ inline bool IsDown(int keyCode)
     return (GetAsyncKeyState(keyCode) & 0x8000) != 0;
 }
 
-inline bool ConsumePressed(bool isDown, bool& wasDown)
+inline bool PollEdgeAndUpdate(bool isDown, bool& wasDown)
 {
     bool pressed = isDown && !wasDown;
     wasDown = isDown;
@@ -33,31 +33,31 @@ inline bool ConsumePressed(bool isDown, bool& wasDown)
 
 inline bool PollEscapePressed(State& state)
 {
-    return ConsumePressed(IsDown(VK_ESCAPE), state.wasEscDown);
+    return PollEdgeAndUpdate(IsDown(VK_ESCAPE), state.wasEscDown);
 }
 
 inline bool PollF1Pressed(State& state)
 {
-    return ConsumePressed(IsDown(VK_F1), state.wasF1Down);
+    return PollEdgeAndUpdate(IsDown(VK_F1), state.wasF1Down);
 }
 
 inline bool PollF5Pressed(State& state)
 {
-    return ConsumePressed(IsDown(VK_F5), state.wasF5Down);
+    return PollEdgeAndUpdate(IsDown(VK_F5), state.wasF5Down);
 }
 
 inline bool PollTPressed(State& state)
 {
-    return ConsumePressed(IsDown('T'), state.wasTDown);
+    return PollEdgeAndUpdate(IsDown('T'), state.wasTDown);
 }
 
 inline bool PollGPressed(State& state)
 {
-    return ConsumePressed(IsDown('G'), state.wasGDown);
+    return PollEdgeAndUpdate(IsDown('G'), state.wasGDown);
 }
 
 inline bool PollLeftButtonClicked(State& state)
 {
-    return ConsumePressed(IsDown(VK_LBUTTON), state.wasLButtonDown);
+    return PollEdgeAndUpdate(IsDown(VK_LBUTTON), state.wasLButtonDown);
 }
 }

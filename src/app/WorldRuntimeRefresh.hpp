@@ -52,21 +52,21 @@ inline void RefreshCellVisuals(const WorldCell& cell, const RefreshContext& cont
 // Returns the cell containing the world-space position, or nullptr if that
 // grid coordinate is outside the loaded world manifest.
 inline WorldCell* FindCellAtWorldPosition(WorldGrid& worldGrid, float worldX, float worldZ,
-                                          int& outCX, int& outCZ)
+                                          int& outCellX, int& outCellZ)
 {
-    worldGrid.WorldToCell(worldX, worldZ, outCX, outCZ);
-    return worldGrid.FindCell(outCX, outCZ);
+    worldGrid.WorldToCell(worldX, worldZ, outCellX, outCellZ);
+    return worldGrid.FindCell(outCellX, outCellZ);
 }
 
 // Returns the cell containing the player's current world position, or nullptr
 // if the player is currently outside any loaded world cell.
 inline WorldCell* FindCellForPlayerPosition(WorldGrid& worldGrid,
                                             const CameraController& camController,
-                                            int& outCX, int& outCZ)
+                                            int& outCellX, int& outCellZ)
 {
     return FindCellAtWorldPosition(worldGrid,
                                    camController.GetPlayerX(),
                                    camController.GetPlayerZ(),
-                                   outCX, outCZ);
+                                   outCellX, outCellZ);
 }
 }

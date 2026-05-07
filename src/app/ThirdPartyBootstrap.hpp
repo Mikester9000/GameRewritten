@@ -25,6 +25,7 @@ inline void InitializeAndRunSmokeTests()
     if (tp::Physics::Init())
     {
         tp::PhysicsBodyId physGroundId = tp::Physics::AddStaticGround(0.0f);
+        // Ground is created as a fixed reference body for the dynamic sphere smoke step.
         tp::PhysicsBodyId physSphereId = tp::Physics::AddDynamicSphere(0.0f, 5.0f, 0.0f, 0.5f, 1.0f);
         (void)physGroundId;
 

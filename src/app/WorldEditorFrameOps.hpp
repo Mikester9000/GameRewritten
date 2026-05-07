@@ -18,10 +18,10 @@ namespace WorldEditorFrameOps
 {
 inline void GetActiveCellFromPlayer(const WorldGrid& worldGrid,
                                     const CameraController& camController,
-                                    int& outCX,
-                                    int& outCZ)
+                                    int& outCellX,
+                                    int& outCellZ)
 {
-    worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), outCX, outCZ);
+    worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), outCellX, outCellZ);
 }
 
 inline void HandlePlacementClick(HWND windowHandle,
