@@ -183,10 +183,13 @@ Renderer should not own gameplay decisions.
 
 ### Recommended future classes
 - `GameApp`
-- `PlayerActor`
 - `EnemyActor`
-- `RuntimeScene`
 - `CombatSystem`
+
+### Existing coordinator classes
+- `RuntimeScene` (`src/game/RuntimeScene.hpp`) — coordinates per-frame runtime actor
+  visual submission; add enemies and NPCs here as they are implemented
+- `PlayerActor` (`src/game/actors/PlayerActor.hpp`) — player runtime visual path
 
 ---
 

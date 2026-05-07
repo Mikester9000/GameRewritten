@@ -102,9 +102,11 @@ Examples:
 
 ### Preferred process
 1. add the data/logic in `src/game/`
-2. expose only the minimum needed to `src/app/Main.cpp`
-3. avoid putting long-term gameplay logic directly into `Main.cpp`
-4. if rendering is needed, pass the minimum render-facing data into the renderer
+2. if the feature involves a per-frame actor visual, register it in `RuntimeScene`
+   (`src/game/RuntimeScene.hpp`) rather than adding calls directly to `Main.cpp`
+3. expose only the minimum needed to `src/app/Main.cpp`
+4. avoid putting long-term gameplay logic directly into `Main.cpp`
+5. if rendering is needed, pass the minimum render-facing data into the renderer
 
 ### Acceptance
 - feature has a clear home
