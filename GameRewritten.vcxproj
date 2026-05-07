@@ -234,6 +234,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\app\Main.cpp" />
     <ClCompile Include="src\assets\AssetLoader.cpp" />
     <ClCompile Include="src\assets\AssetRegistry.cpp" />
+    <ClCompile Include="src\assets\TextureCache.cpp" />
     <ClCompile Include="src\game\CameraController.cpp" />
     <ClCompile Include="src\game\actors\PlayerActor.cpp" />
     <ClCompile Include="src\game\Forest.cpp" />
@@ -276,6 +277,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
   <ItemGroup>
     <ClInclude Include="src\assets\AssetLoader.hpp" />
     <ClInclude Include="src\assets\AssetRegistry.hpp" />
+    <ClInclude Include="src\assets\TextureCache.hpp" />
     <ClInclude Include="src\game\CameraController.hpp" />
     <ClInclude Include="src\game\actors\ActorCommon.hpp" />
     <ClInclude Include="src\game\actors\PlayerActor.hpp" />
