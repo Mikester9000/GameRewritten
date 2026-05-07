@@ -19,13 +19,13 @@ void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,
                                       const PrefabLibrary& prefabLibrary,
                                       PrimitiveRenderer& primitiveRenderer) const
 {
-    const PrimitivePrefab* playerVisualPrefab =
+    const PrimitivePrefab* visualPrefab =
         prefabLibrary.GetPrefab(ActorCommon::PLAYER_VISUAL_PREFAB_ID);
-    if (!playerVisualPrefab)
+    if (!visualPrefab)
         return;
 
     const ActorCommon::RuntimeActorPose pose = BuildRuntimePose(cameraController);
-    primitiveRenderer.AddRuntimeInstance(*playerVisualPrefab,
+    primitiveRenderer.AddRuntimeInstance(*visualPrefab,
                                          pose.x, pose.y, pose.z,
                                          pose.yaw, pose.scale);
 }
