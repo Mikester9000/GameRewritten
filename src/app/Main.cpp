@@ -15,6 +15,7 @@
 #include "../game/PrefabLibrary.hpp"
 #include "../game/PrimitiveRenderer.hpp"
 #include "../game/RuntimeScene.hpp"
+#include "../ui/GameHUD.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../ui/WorldEditor.hpp"
 #include "../assets/AssetLoader.hpp"
@@ -30,6 +31,7 @@
 #include <logger/Logger.hpp>
 
 #include "tp_tracy.hpp"
+#include <imgui.h>
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
@@ -100,6 +102,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     }
 
     // --- World Editor ---
+    GameHUD gameHud;
     WorldEditor worldEditor;
     worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
 
@@ -306,6 +309,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
             // ImGui: begin frame, draw UI panels, then render ImGui draw data.
             imguiLayer.BeginFrame();
+            if (!imguiLayer.IsPauseMenuOpen())
+            {
+                gameHud.Draw(playerActor.stats, ImGui::GetIO());
+            }
             // Draw the World Editor panel inside the ImGui frame.
             WorldEditorFrameOps::DrawEditorPanelForActiveCell(
                 worldEditor, worldGrid, camController, renderer);
