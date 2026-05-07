@@ -134,6 +134,7 @@ void D3D11Renderer::CreateGroundShaders()
 {
     ID3DBlob* vsBlob = nullptr;
     ID3DBlob* psBlob = nullptr;
+    // Cleanup is safe for partial initialization because SafeRelease(nullptr) is a no-op.
     auto failAndCleanup = [&](const char* message)
         {
             LOG_ERROR(message);
@@ -1041,10 +1042,15 @@ HRESULT D3D11Renderer::CompileShaderFromFile(const wchar_t* path, const char* en
 
         if (errors && errors->GetBufferPointer() && errors->GetBufferSize() > 0)
         {
+            size_t errorSize = static_cast<size_t>(errors->GetBufferSize());
+            const char* errorText = static_cast<const char*>(errors->GetBufferPointer());
+            if (errorSize > 0 && errorText[errorSize - 1] == '\0')
+            {
+                --errorSize;
+            }
+
             message << ", errors="
-                << std::string(
-                    static_cast<const char*>(errors->GetBufferPointer()),
-                    static_cast<size_t>(errors->GetBufferSize()));
+                << std::string(errorText, errorSize);
         }
 
         LOG_ERROR(message.str());
