@@ -1,6 +1,7 @@
 #include "D3D11RendererHelpers.hpp"
 
 #include <cmath>
+#include <cstdint>
 
 namespace D3D11RendererHelpers
 {
@@ -105,10 +106,10 @@ namespace D3D11RendererHelpers
 
     float HashNoise(int ix, int iz)
     {
-        int n = ix * 1619 + iz * 31337;
+        uint32_t n = static_cast<uint32_t>(ix) * 1619u + static_cast<uint32_t>(iz) * 31337u;
         n = (n << 13) ^ n;
-        n = n * (n * n * 15731 + 789221) + 1376312589;
-        return 1.0f - static_cast<float>(n & 0x7fffffff) / 1073741824.0f;
+        n = n * (n * n * 15731u + 789221u) + 1376312589u;
+        return 1.0f - static_cast<float>(n & 0x7fffffffu) / 1073741824.0f;
     }
 
     float SmoothNoise(float fx, float fz)

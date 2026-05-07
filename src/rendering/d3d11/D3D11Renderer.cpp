@@ -336,12 +336,6 @@ void D3D11Renderer::DrawSky()
 }
 void D3D11Renderer::CreateGroundPlane()
 {
-    struct Vertex {
-        float x, y, z;
-        float nx, ny, nz;
-        float r, g, b, a;
-    };
-
     Vertex vertices[] = {
         { -1000.0f, -1.0f, -1000.0f, 0.0f, 1.0f, 0.0f, 0.2f, 0.8f, 0.2f, 1.0f },
         {  1000.0f, -1.0f, -1000.0f, 0.0f, 1.0f, 0.0f, 0.2f, 0.8f, 0.2f, 1.0f },
@@ -441,7 +435,7 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
     // Each quad emits 6 private vertices (2 triangles × 3 verts).
     // Every triangle gets its own computed face normal — gives the PS2 faceted look.
     // Colour is based on the average height of the face centre.
-    std::vector<D3D11RendererHelpers::TerrainVertex> triVerts;
+    std::vector<Vertex> triVerts;
     triVerts.reserve(static_cast<size_t>(quadsX * quadsZ * 6));
 
     for (int z = 0; z < quadsZ; ++z)
@@ -480,7 +474,7 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
     // Upload unindexed vertices to GPU — no index buffer needed for flat shading.
     D3D11_BUFFER_DESC vbd{};
     vbd.Usage = D3D11_USAGE_DEFAULT;
-    vbd.ByteWidth = static_cast<UINT>(triVerts.size() * sizeof(D3D11RendererHelpers::TerrainVertex));
+    vbd.ByteWidth = static_cast<UINT>(triVerts.size() * sizeof(Vertex));
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     D3D11_SUBRESOURCE_DATA vinit{};
     vinit.pSysMem = triVerts.data();
@@ -574,7 +568,7 @@ void D3D11Renderer::DrawTerrainPatch()
     context->VSSetShader(groundVertexShader, nullptr, 0);
     context->PSSetShader(groundPixelShader, nullptr, 0);
 
-    UINT stride = sizeof(D3D11RendererHelpers::TerrainVertex);
+    UINT stride = sizeof(Vertex);
     UINT offset = 0;
     context->IASetVertexBuffers(0, 1, &m_terrainPatchVertexBuffer, &stride, &offset);
     

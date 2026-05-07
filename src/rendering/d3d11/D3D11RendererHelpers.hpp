@@ -24,6 +24,7 @@ namespace D3D11RendererHelpers
         float nx, ny, nz;
         float r, g, b, a;
     };
+    static_assert(sizeof(TerrainVertex) == 40, "TerrainVertex layout must stay 40 bytes for POSITION/NORMAL/COLOR input layout.");
 
     struct SceneMatrices
     {

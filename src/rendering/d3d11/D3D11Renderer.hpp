@@ -4,6 +4,7 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <string>
+#include "D3D11RendererHelpers.hpp"
 
 // A simple class for setting up and drawing with Direct3D 11.
 class D3D11Renderer
@@ -51,7 +52,7 @@ public:
     int GetRenderWidth() const { return renderWidth; }
     int GetRenderHeight() const { return renderHeight; }
 private:
-    struct Vertex { float x, y, z; float nx, ny, nz; float r, g, b, a; };
+    using Vertex = D3D11RendererHelpers::TerrainVertex;
     struct TransformConstantBuffer { DirectX::XMFLOAT4X4 mvp; DirectX::XMFLOAT4X4 world; };
 
     bool CreateTriangleResources();
