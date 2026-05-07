@@ -138,6 +138,97 @@
   - Update state only by applying input deltas and simulation updates inside the loop.
   - Skip the first-frame input delta (or clamp it to zero) to prevent sudden jumps when capturing initial input.
   - Document and enforce this pattern in code reviews and future changes to maintain clarity and reliability.
+ 
+  - ## Module Map (Source of Truth for Agents)
+- App entry point and frame loop: `src/app/Main.cpp`
+- Window creation (Win32): `src/platform/win32/`
+- D3D11 device, swap chain, draw calls: `src/rendering/d3d11/D3D11Renderer.cpp/hpp`
+- D3D11 helper utilities: `src/rendering/d3d11/D3D11RendererHelpers.cpp/hpp`
+- HLSL shaders: `Shaders/` — pairs named `<feature>_vs.hlsl` / `<feature>_ps.hlsl`
+- Camera + player movement + terrain snap: `src/game/CameraController.cpp/hpp`
+- Player actor visual: `src/game/actors/PlayerActor.cpp/hpp`
+- Actor shared types: `src/game/actors/ActorCommon.hpp`
+- Scene coordinator (owns actors, calls per-frame updates): `src/game/RuntimeScene.hpp`
+- Prefab definitions: `src/game/PrefabDef.hpp`
+- Prefab registry: `src/game/PrefabLibrary.cpp/hpp`
+- Multi-part box primitive renderer: `src/game/PrimitiveRenderer.cpp/hpp`
+- Forest/tree instancing: `src/game/Forest.cpp/hpp`
+- World grid (cell layout, biomes, terrain): `src/world/WorldGrid.cpp/hpp`
+- ImGui context, pause menu, debug overlay: `src/ui/ImGuiLayer.cpp/hpp`
+- World editor ImGui panel: `src/ui/WorldEditor.cpp/hpp`
+- Asset registry (ID → file path map): `src/assets/AssetRegistry` + `AssetLoader`
+- Frame timing: `src/app/FrameTiming.hpp`
+- Input edge detection: `src/app/InputEdgeState.hpp`
+- Cursor mode management: `src/app/CursorModeController.hpp`
+- World editor per-frame ops: `src/app/WorldEditorFrameOps.hpp`
+- World reload flow: `src/app/WorldReloadFlow.hpp`
+- World runtime refresh: `src/app/WorldRuntimeRefresh.hpp`
+- Third-party bootstrap + smoke tests: `src/app/ThirdPartyBootstrap.hpp`
+- Logging: `src/logger/Logger.hpp` — macros: `LOG_INFO`, `LOG_WARN`, `LOG_ERROR`
+
+## Third-Party Libraries Available (Do Not Re-Vendor)
+All are already vendored and initialized. Use their wrappers — do not call them directly unless a wrapper does not exist yet.
+- **ImGui** (`third_party/imgui/`) — UI. Init/shutdown owned by `ImGuiLayer`. Use `ImGui::*` calls inside `imguiLayer.BeginFrame()` / `imguiLayer.EndFrame()`.
+- **miniaudio** — Audio. Initialized via `tp::Audio::Init()` in `ThirdPartyBootstrap`. Wrapper surface in `ThirdParty/tp_audio.hpp`.
+- **Jolt Physics** — Physics. Initialized via `tp::Physics::Init()`. Wrapper surface in `ThirdParty/tp_physics.hpp`.
+- **Recast/Detour** — Navigation. Initialized via `tp::Nav::Init()`. Wrapper in `ThirdParty/tp_navigation.hpp`.
+- **DirectXTex** — Texture loading (.dds, .png). Smoke test via `tp::Texture::SmokeTest()`. Wrapper in `ThirdParty/tp_texture.hpp`.
+- **stb_image** — Image loading. Wrapper in `ThirdParty/tp_image.hpp`.
+- **Tracy** — CPU profiling. Use `GR_ZONE_SCOPED_N("label")` for zones and `GR_FRAME_MARK` at end of frame.
+
+## New Module Checklist
+Every new `.cpp/.hpp` pair must follow this checklist:
+1. Place files in the correct `src/<subsystem>/` folder matching their concern.
+2. Declare all member variables in the `.hpp` before using them in `.cpp`.
+3. Add `#pragma once` at the top of every `.hpp`.
+4. Use `LOG_INFO` / `LOG_WARN` / `LOG_ERROR` (from `logger/Logger.hpp`) — never `printf` or `OutputDebugStringA` in new code.
+5. Add the `.cpp` to `GameRewritten.vcxproj` and `GameRewritten.vcxproj.filters` — agents must include this step or the file will not compile.
+6. If the module owns GPU resources, add `Initialize(ID3D11Device*)` and `Shutdown()` methods and call them from `Main.cpp`.
+7. If the module has per-frame work, wire it into `Main.cpp` inside the `while (window.ProcessEvents())` loop in the correct order (update before draw).
+8. If the module draws ImGui, call it inside the existing `imguiLayer.BeginFrame()` / `imguiLayer.EndFrame()` block in `Main.cpp`.
+
+## Wiring Patterns (How to Hook Into the Frame Loop)
+Follow these exact patterns when adding new systems — do not invent new wiring approaches:
+
+**Adding a new actor type:**
+- Add files to `src/game/actors/`
+- Add an instance to `RuntimeScene.hpp` alongside `PlayerActor`
+- Call `Update(dt, renderer)` from `RuntimeScene::BeginFrame()` (or a new `RuntimeScene::Update()`)
+- Call `SubmitRuntimeVisual(prefabLibrary, primRenderer)` from `RuntimeScene::SubmitActors()`
+
+**Adding a new ImGui panel:**
+- Add files to `src/ui/`
+- Construct the panel object in `Main.cpp` before the loop
+- Call `panel.Draw(...)` inside the `imguiLayer.BeginFrame()` / `imguiLayer.EndFrame()` block
+- Guard with `if (!imguiLayer.IsPauseMenuOpen())` if it should hide when paused
+
+**Adding a new app-layer helper (frame ops, reload flows, etc.):**
+- Add a header-only `.hpp` to `src/app/` following the pattern of `WorldEditorFrameOps.hpp`
+- Call it from `Main.cpp` at the correct point in the frame (before or after `camController.Update`)
+
+**Adding a new audio call:**
+- Use `tp::Audio` via its wrapper in `ThirdParty/tp_audio.hpp`
+- Do not call miniaudio directly
+
+**Adding a new constant buffer to a shader:**
+- Declare the cbuffer struct in the `.hpp` of the owning renderer class
+- Create the D3D11 buffer in `Initialize()`, update it per-frame or on-change, bind it to the correct slot (b0 = per-object, b1 = per-scene/light, b2+ = per-pass)
+- Always match the slot number between C++ `VSSetConstantBuffers`/`PSSetConstantBuffers` and the HLSL `register(b#)`
+
+## File Placement Quick Reference
+| What you're adding | Where it goes |
+|---|---|
+| New actor (player, enemy, NPC) | `src/game/actors/` |
+| New game mechanic (combat, inventory) | `src/game/` or `src/game/<subsystem>/` |
+| New ImGui panel or HUD element | `src/ui/` |
+| New asset loader/cache | `src/assets/` |
+| New audio wrapper | `src/audio/` |
+| New physics/collision helper | `src/game/physics/` |
+| New app-layer frame helper | `src/app/` |
+| New platform abstraction | `src/platform/win32/` |
+| New D3D11 rendering feature | `src/rendering/d3d11/` |
+| New HLSL shader pair | `Shaders/` named `<feature>_vs.hlsl` + `<feature>_ps.hlsl` |
+| New content/data file | `Content/<type>/` (Textures, Audio, World, Prefabs, etc.) |
 
 ## Structure and Placement Rules
 - Group semantically related instructions under appropriate headings.
