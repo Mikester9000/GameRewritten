@@ -7,7 +7,7 @@
 namespace
 {
 constexpr float kHudOffsetX = 20.0f;
-constexpr float kHudOffsetBottom = 130.0f;
+constexpr float kHudBottomMargin = 20.0f;
 constexpr float kHudWidth = 220.0f;
 constexpr float kHudHeight = 110.0f;
 constexpr float kGaugeWidth = 120.0f;
@@ -23,7 +23,7 @@ float NormalizeValue(float value, float maxValue)
 
 void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io)
 {
-    ImGui::SetNextWindowPos(ImVec2(kHudOffsetX, io.DisplaySize.y - kHudOffsetBottom), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(kHudOffsetX, io.DisplaySize.y - kHudHeight - kHudBottomMargin), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(kHudWidth, kHudHeight), ImGuiCond_Always);
 
     const ImGuiWindowFlags flags =
@@ -44,13 +44,13 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io)
     ImGui::ProgressBar(NormalizeValue(stats.hp, stats.maxHp), kGaugeSize, "");
     ImGui::PopStyleColor();
     ImGui::SameLine();
-    ImGui::Text("HP  %d / %d", static_cast<int>(stats.hp), static_cast<int>(stats.maxHp));
+    ImGui::Text("HP  %.0f / %.0f", stats.hp, stats.maxHp);
 
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.1f, 0.3f, 0.9f, 1.0f));
     ImGui::ProgressBar(NormalizeValue(stats.mp, stats.maxMp), kGaugeSize, "");
     ImGui::PopStyleColor();
     ImGui::SameLine();
-    ImGui::Text("MP  %d / %d", static_cast<int>(stats.mp), static_cast<int>(stats.maxMp));
+    ImGui::Text("MP  %.0f / %.0f", stats.mp, stats.maxMp);
 
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.9f, 0.8f, 0.1f, 1.0f));
     ImGui::ProgressBar(NormalizeValue(stats.atbCharge, 1.0f), kGaugeSize, "");
