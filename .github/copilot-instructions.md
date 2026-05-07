@@ -2,7 +2,7 @@
 
 ## General Guidelines
 - Use imperative, concise language in all instructions.
-- Break tasks into incremental, hands-on steps.
+- Break tasks into incremental, hands-on steps; decompose code into small helper functions to avoid monolithic code.
 - Provide runnable examples and code when relevant.
 - Keep responses focused on software development.
 - Ensure edits and suggestions follow a logical, predictable, beginner-friendly structure: make each addition simple, clearly explained, and built on previous steps so a newcomer can follow the progression.
@@ -41,6 +41,7 @@
 ## Code Organization and Style
 - Keep code and project structure neat, orderly, and beginner-readable; write for easy comprehension by average readers, minimize code volume and duplication, and design for maintainability so future changes remain small and safe.
 - Keep files small and focused; prefer files under 2000 lines.
+- Decompose complex functions into small helper functions to improve readability and reduce monolithic code.
 - Assign ownership: make each new feature/module own its shaders and GPU resources; colocate shader files and GPU resource management with the owning module and document lifecycle responsibilities.
 - When adding new resources, declare matching member variables in the appropriate header before using them in .cpp to avoid undefined symbol or build errors.
 - Minimize overall code volume: prefer small, focused modules and simple APIs; avoid unnecessary layers and abstractions that add cognitive load.
@@ -75,6 +76,7 @@
 
 ## Refactoring and Change Process
 - Make changes in small, focused, and concise steps.
+- Prefer splitting large edits into helper refactors rather than monolithic changes; if safe, group related low-risk edits into larger combined tasks to reduce session usage.
 - Preserve the current project structure and existing naming conventions during refactors; avoid renames or moves unless necessary and document any changes with clear migration steps.
 - For every change provide exact insertion or replacement locations (repository path plus line numbers or function context), indicate whether the edit is an insertion, replacement, or deletion, and include a short rationale for the change.
 - Prefer minimal, non-breaking edits and avoid duplicate instructions across files or documentation.
@@ -175,6 +177,7 @@
 - Ask for conservative code changes first and optional progressive refinements in later drafts.
 - Provide minimal reproducible contexts (file snippets, exact paths, commands to run) to maximize output quality and reduce hallucination risk.
 - Prefer explicit examples, unit tests, or smoke-test scripts to validate suggested edits on D3D11/GT610.
+- Batch related LLM/agent requests into larger combined tasks when safe to reduce session usage; ensure each combined task still produces small, modular, reviewable edits and includes explicit checkpoints.
 
 ## Reliability and Testing Rules
 - Design systems to fail fast in development and degrade gracefully in production.
