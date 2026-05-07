@@ -4,6 +4,13 @@
 #include "../PrefabLibrary.hpp"
 #include "../PrimitiveRenderer.hpp"
 
+#include <string>
+
+namespace
+{
+const std::string kPlayerVisualPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+}
+
 ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraController& cameraController) const
 {
     ActorCommon::RuntimeActorPose pose;
@@ -20,7 +27,7 @@ void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,
                                       PrimitiveRenderer& primitiveRenderer) const
 {
     const PrimitivePrefab* visualPrefab =
-        prefabLibrary.GetPrefab(ActorCommon::PLAYER_VISUAL_PREFAB_ID);
+        prefabLibrary.GetPrefab(kPlayerVisualPrefabId);
     if (!visualPrefab)
         return;
 

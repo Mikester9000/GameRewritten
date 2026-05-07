@@ -106,7 +106,7 @@ void CameraController::Update(float dt, bool allowMovement, bool allowMouseLook,
         m_playerY += m_velocityY * dt;
 
         // Ground snap / terrain collision
-        float groundY = 0.0f;
+        float groundY = eyeOffset;
         if (renderer.IsTerrainAvailable())
             groundY = renderer.SampleTerrainHeight(m_playerX, m_playerZ) + eyeOffset;
 
