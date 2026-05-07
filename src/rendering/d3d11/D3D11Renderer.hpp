@@ -84,6 +84,7 @@ private:
     float m_terrainOriginX = 0.0f;   // world-space X of terrain mesh start
     float m_terrainOriginZ = 0.0f;   // world-space Z of terrain mesh start
     bool m_terrainAvailable = false;
+    std::string m_activeTerrainBiome = "grassland";
     struct LightConstantBuffer
     {
         DirectX::XMFLOAT4 lightDirection;
