@@ -34,8 +34,24 @@ namespace
             return "<invalid>";
 
         std::vector<char> buffer(static_cast<size_t>(size), '\0');
-        WideCharToMultiByte(CP_UTF8, 0, text, -1, buffer.data(), size, nullptr, nullptr);
+        const int converted = WideCharToMultiByte(CP_UTF8, 0, text, -1, buffer.data(), size, nullptr, nullptr);
+        if (converted <= 0)
+            return "<conversion_failed>";
         return std::string(buffer.data());
+    }
+
+    void CleanupGroundShaderSetupFailure(
+        ID3DBlob*& vsBlob,
+        ID3DBlob*& psBlob,
+        ID3D11InputLayout*& inputLayout,
+        ID3D11VertexShader*& vertexShader,
+        ID3D11PixelShader*& pixelShader)
+    {
+        SafeRelease(vsBlob);
+        SafeRelease(psBlob);
+        SafeRelease(inputLayout);
+        SafeRelease(vertexShader);
+        SafeRelease(pixelShader);
     }
 }
 
@@ -134,29 +150,21 @@ void D3D11Renderer::CreateGroundShaders()
 {
     ID3DBlob* vsBlob = nullptr;
     ID3DBlob* psBlob = nullptr;
-    // Cleanup is safe for partial initialization because SafeRelease(nullptr) is a no-op.
-    auto failAndCleanup = [&](const char* message)
-        {
-            LOG_ERROR(message);
-            SafeRelease(vsBlob);
-            SafeRelease(psBlob);
-            SafeRelease(groundInputLayout);
-            SafeRelease(groundVertexShader);
-            SafeRelease(groundPixelShader);
-        };
 
     // Compile the ground vertex shader
     HRESULT hr = CompileShaderFromFile(L"Shaders/ground_vs.hlsl", "main", "vs_5_0", &vsBlob);
     if (FAILED(hr) || !vsBlob)
     {
-        failAndCleanup("Failed to compile Shaders/ground_vs.hlsl");
+        LOG_ERROR("Failed to compile Shaders/ground_vs.hlsl");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
         return;
     }
 
     hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &groundVertexShader);
     if (FAILED(hr) || !groundVertexShader)
     {
-        failAndCleanup("Failed to create ground vertex shader");
+        LOG_ERROR("Failed to create ground vertex shader");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
         return;
     }
 
@@ -164,14 +172,16 @@ void D3D11Renderer::CreateGroundShaders()
     hr = CompileShaderFromFile(L"Shaders/ground_ps.hlsl", "main", "ps_5_0", &psBlob);
     if (FAILED(hr) || !psBlob)
     {
-        failAndCleanup("Failed to compile Shaders/ground_ps.hlsl");
+        LOG_ERROR("Failed to compile Shaders/ground_ps.hlsl");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
         return;
     }
 
     hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &groundPixelShader);
     if (FAILED(hr) || !groundPixelShader)
     {
-        failAndCleanup("Failed to create ground pixel shader");
+        LOG_ERROR("Failed to create ground pixel shader");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
         return;
     }
 
@@ -189,7 +199,8 @@ void D3D11Renderer::CreateGroundShaders()
     );
     if (FAILED(hr) || !groundInputLayout)
     {
-        failAndCleanup("Failed to create ground input layout");
+        LOG_ERROR("Failed to create ground input layout");
+        CleanupGroundShaderSetupFailure(vsBlob, psBlob, groundInputLayout, groundVertexShader, groundPixelShader);
         return;
     }
 
@@ -1044,7 +1055,7 @@ HRESULT D3D11Renderer::CompileShaderFromFile(const wchar_t* path, const char* en
         {
             size_t errorSize = static_cast<size_t>(errors->GetBufferSize());
             const char* errorText = static_cast<const char*>(errors->GetBufferPointer());
-            if (errorSize > 0 && errorText[errorSize - 1] == '\0')
+            while (errorSize > 0 && errorText[errorSize - 1] == '\0')
             {
                 --errorSize;
             }
