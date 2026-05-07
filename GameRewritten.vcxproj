@@ -200,6 +200,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <None Include="Content\Prefabs\barrel.prefab.json" />
     <None Include="Content\Prefabs\campfire_ring.prefab.json" />
     <None Include="Content\Prefabs\tent_blockout.prefab.json" />
+    <None Include="Content\Prefabs\player_hero_blockout.prefab.json" />
     <None Include="Content\Prefabs\pillar.prefab.json" />
     <None Include="Content\Prefabs\pillar_broken.prefab.json" />
     <None Include="Content\Prefabs\low_wall.prefab.json" />
@@ -234,6 +235,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\assets\AssetLoader.cpp" />
     <ClCompile Include="src\assets\AssetRegistry.cpp" />
     <ClCompile Include="src\game\CameraController.cpp" />
+    <ClCompile Include="src\game\actors\PlayerActor.cpp" />
     <ClCompile Include="src\game\Forest.cpp" />
     <ClCompile Include="src\game\PrefabLibrary.cpp" />
     <ClCompile Include="src\game\PrimitiveRenderer.cpp" />
@@ -273,6 +275,8 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\assets\AssetLoader.hpp" />
     <ClInclude Include="src\assets\AssetRegistry.hpp" />
     <ClInclude Include="src\game\CameraController.hpp" />
+    <ClInclude Include="src\game\actors\ActorCommon.hpp" />
+    <ClInclude Include="src\game\actors\PlayerActor.hpp" />
     <ClInclude Include="src\game\Forest.hpp" />
     <ClInclude Include="src\game\PrefabDef.hpp" />
     <ClInclude Include="src\game\PrefabLibrary.hpp" />

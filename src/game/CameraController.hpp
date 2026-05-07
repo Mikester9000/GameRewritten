@@ -70,6 +70,7 @@ public:
     // --- Accessors ---
     float GetPlayerX() const { return m_playerX; }
     float GetPlayerY() const { return m_playerY; }
+    float GetPlayerGroundY() const { return m_playerY - eyeOffset; }
     float GetPlayerZ() const { return m_playerZ; }
     float GetYaw()     const { return m_yaw; }
     float GetPitch()   const { return m_pitch; }

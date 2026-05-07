@@ -42,6 +42,7 @@
     <None Include="Content\Prefabs\barrel.prefab.json" />
     <None Include="Content\Prefabs\campfire_ring.prefab.json" />
     <None Include="Content\Prefabs\tent_blockout.prefab.json" />
+    <None Include="Content\Prefabs\player_hero_blockout.prefab.json" />
     <None Include="Content\Prefabs\pillar.prefab.json" />
     <None Include="Content\Prefabs\pillar_broken.prefab.json" />
     <None Include="Content\Prefabs\low_wall.prefab.json" />
@@ -100,6 +101,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\game\CameraController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\actors\PlayerActor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\ImGuiLayer.cpp">
@@ -162,6 +166,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\game\CameraController.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\actors\ActorCommon.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\actors\PlayerActor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\ImGuiLayer.hpp">
