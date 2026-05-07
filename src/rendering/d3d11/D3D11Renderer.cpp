@@ -23,6 +23,20 @@ namespace
             resource = nullptr;
         }
     }
+
+    std::string WideToUtf8(const wchar_t* text)
+    {
+        if (!text)
+            return "<null>";
+
+        const int size = WideCharToMultiByte(CP_UTF8, 0, text, -1, nullptr, 0, nullptr, nullptr);
+        if (size <= 1)
+            return "<invalid>";
+
+        std::vector<char> buffer(static_cast<size_t>(size), '\0');
+        WideCharToMultiByte(CP_UTF8, 0, text, -1, buffer.data(), size, nullptr, nullptr);
+        return std::string(buffer.data());
+    }
 }
 
 D3D11Renderer::D3D11Renderer()
@@ -122,14 +136,54 @@ void D3D11Renderer::CreateGroundShaders()
     ID3DBlob* psBlob = nullptr;
 
     // Compile the ground vertex shader
-    HRESULT hr = D3DCompileFromFile(L"Shaders/ground_vs.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &vsBlob, nullptr);
-    if (FAILED(hr)) { LOG_ERROR("Failed to compile Shaders/ground_vs.hlsl"); }
-    device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &groundVertexShader);
+    HRESULT hr = CompileShaderFromFile(L"Shaders/ground_vs.hlsl", "main", "vs_5_0", &vsBlob);
+    if (FAILED(hr) || !vsBlob)
+    {
+        LOG_ERROR("Failed to compile Shaders/ground_vs.hlsl");
+        SafeRelease(vsBlob);
+        SafeRelease(psBlob);
+        SafeRelease(groundInputLayout);
+        SafeRelease(groundVertexShader);
+        SafeRelease(groundPixelShader);
+        return;
+    }
+
+    hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &groundVertexShader);
+    if (FAILED(hr) || !groundVertexShader)
+    {
+        LOG_ERROR("Failed to create ground vertex shader");
+        SafeRelease(vsBlob);
+        SafeRelease(psBlob);
+        SafeRelease(groundInputLayout);
+        SafeRelease(groundVertexShader);
+        SafeRelease(groundPixelShader);
+        return;
+    }
 
     // Compile the ground pixel shader
-    hr = D3DCompileFromFile(L"Shaders/ground_ps.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &psBlob, nullptr);
-    if (FAILED(hr)) { LOG_ERROR("Failed to compile Shaders/ground_ps.hlsl"); }
-    device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &groundPixelShader);
+    hr = CompileShaderFromFile(L"Shaders/ground_ps.hlsl", "main", "ps_5_0", &psBlob);
+    if (FAILED(hr) || !psBlob)
+    {
+        LOG_ERROR("Failed to compile Shaders/ground_ps.hlsl");
+        SafeRelease(vsBlob);
+        SafeRelease(psBlob);
+        SafeRelease(groundInputLayout);
+        SafeRelease(groundVertexShader);
+        SafeRelease(groundPixelShader);
+        return;
+    }
+
+    hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &groundPixelShader);
+    if (FAILED(hr) || !groundPixelShader)
+    {
+        LOG_ERROR("Failed to create ground pixel shader");
+        SafeRelease(vsBlob);
+        SafeRelease(psBlob);
+        SafeRelease(groundInputLayout);
+        SafeRelease(groundVertexShader);
+        SafeRelease(groundPixelShader);
+        return;
+    }
 
     // Create the input layout for the ground plane
     D3D11_INPUT_ELEMENT_DESC groundInputDesc[] = {
@@ -137,12 +191,22 @@ void D3D11Renderer::CreateGroundShaders()
         { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
-    device->CreateInputLayout(
+    hr = device->CreateInputLayout(
         groundInputDesc, 3,
         vsBlob->GetBufferPointer(),
         vsBlob->GetBufferSize(),
         &groundInputLayout
     );
+    if (FAILED(hr) || !groundInputLayout)
+    {
+        LOG_ERROR("Failed to create ground input layout");
+        SafeRelease(vsBlob);
+        SafeRelease(psBlob);
+        SafeRelease(groundInputLayout);
+        SafeRelease(groundVertexShader);
+        SafeRelease(groundPixelShader);
+        return;
+    }
 
     SafeRelease(vsBlob);
     SafeRelease(psBlob);
@@ -983,6 +1047,24 @@ HRESULT D3D11Renderer::CompileShaderFromFile(const wchar_t* path, const char* en
         outBlob,
         &errors
     );
+
+    if (FAILED(hr))
+    {
+        std::ostringstream message;
+        message << "Shader compile failed: path=" << WideToUtf8(path)
+            << ", entry=" << (entryPoint ? entryPoint : "<null>")
+            << ", target=" << (target ? target : "<null>");
+
+        if (errors && errors->GetBufferPointer() && errors->GetBufferSize() > 0)
+        {
+            message << ", errors="
+                << std::string(
+                    static_cast<const char*>(errors->GetBufferPointer()),
+                    static_cast<size_t>(errors->GetBufferSize()));
+        }
+
+        LOG_ERROR(message.str());
+    }
 
     SafeRelease(errors);
     return hr;
