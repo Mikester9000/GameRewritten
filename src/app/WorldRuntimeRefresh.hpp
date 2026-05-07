@@ -9,7 +9,7 @@
 #include "../ui/WorldEditor.hpp"
 #include "../world/WorldGrid.hpp"
 
-namespace app
+namespace world_refresh
 {
 struct WorldRuntimeRefreshContext
 {

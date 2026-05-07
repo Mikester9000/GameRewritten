@@ -117,7 +117,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     WorldEditor worldEditor;
     worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
 
-    app::WorldRuntimeRefreshContext worldRuntimeRefresh{
+    world_refresh::WorldRuntimeRefreshContext worldRuntimeRefresh{
         renderer,
         forest,
         primRenderer,
@@ -127,12 +127,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Build terrain + instances for the startup cell (centre of grassland cell 0,0).
     {
         int startCX = 0, startCZ = 0;
-        WorldCell* startCell = app::FindCellAtWorldPosition(worldGrid,
-                                                            startupCellCenter,
-                                                            startupCellCenter,
-                                                            startCX, startCZ);
+        WorldCell* startCell = world_refresh::FindCellAtWorldPosition(worldGrid,
+                                                                      startupCellCenter,
+                                                                      startupCellCenter,
+                                                                      startCX, startCZ);
         if (startCell)
-            app::RefreshCellVisuals(*startCell, worldRuntimeRefresh);
+            world_refresh::RefreshCellVisuals(*startCell, worldRuntimeRefresh);
         else
             forest.Populate(renderer, 80, 50.0f); // fallback if no cell data
     }
@@ -222,9 +222,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Track the cell the player was in last frame to detect cell-crossing.
     // Initialize from the actual spawn position at the center of cell (0,0).
     int lastPlayerCX = 0, lastPlayerCZ = 0;
-    app::FindCellAtWorldPosition(worldGrid,
-                                 startupCellCenter, startupCellCenter,
-                                 lastPlayerCX, lastPlayerCZ);
+    worldGrid.WorldToCell(startupCellCenter, startupCellCenter, lastPlayerCX, lastPlayerCZ);
     // FPS smoothing accumulator.
     float fpsAccum = 0.0f;
     int   fpsFrames = 0;
@@ -293,11 +291,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             {
                 LOG_INFO("F5: WorldGrid reloaded OK — rebuilding terrain for active cell...");
                 int playerCX = 0, playerCZ = 0;
-                WorldCell* playerCell = app::FindCellForPlayerPosition(worldGrid, camController,
-                                                                       playerCX, playerCZ);
+                WorldCell* playerCell = world_refresh::FindCellForPlayerPosition(worldGrid, camController,
+                                                                                  playerCX, playerCZ);
                 if (playerCell)
                 {
-                    app::RefreshCellVisuals(*playerCell, worldRuntimeRefresh);
+                    world_refresh::RefreshCellVisuals(*playerCell, worldRuntimeRefresh);
                     lastPlayerCX = playerCX;
                     lastPlayerCZ = playerCZ;
                     LOG_INFO("F5: terrain rebuilt and instances respawned.");
@@ -381,10 +379,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // This gives hard biome borders with no loading screen.
         {
             int playerCX = 0, playerCZ = 0;
-            WorldCell* newCell = app::FindCellForPlayerPosition(worldGrid, camController,
-                                                                playerCX, playerCZ);
+            worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
+                                  playerCX, playerCZ);
             if (playerCX != lastPlayerCX || playerCZ != lastPlayerCZ)
             {
+                WorldCell* newCell = worldGrid.FindCell(playerCX, playerCZ);
                 if (newCell)
                 {
                     std::ostringstream ss;
@@ -392,7 +391,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                        << ") -> (" << playerCX << "," << playerCZ
                        << ") biome=" << newCell->terrainBiome;
                     LOG_INFO(ss.str());
-                    app::RefreshCellVisuals(*newCell, worldRuntimeRefresh);
+                    world_refresh::RefreshCellVisuals(*newCell, worldRuntimeRefresh);
                 }
                 lastPlayerCX = playerCX;
                 lastPlayerCZ = playerCZ;
@@ -415,7 +414,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
             // Determine the active cell from the player position.
             int activeCX = 0, activeCZ = 0;
-            app::FindCellForPlayerPosition(worldGrid, camController, activeCX, activeCZ);
+            worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
+                                  activeCX, activeCZ);
 
             worldEditor.HandlePlacement(
                 clickPos,
@@ -456,7 +456,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             // Draw the World Editor panel inside the ImGui frame.
             {
                 int activeCX = 0, activeCZ = 0;
-                app::FindCellForPlayerPosition(worldGrid, camController, activeCX, activeCZ);
+                worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
+                                      activeCX, activeCZ);
                 worldEditor.DrawPanel(activeCX, activeCZ, renderer);
             }
             imguiLayer.EndFrame();
