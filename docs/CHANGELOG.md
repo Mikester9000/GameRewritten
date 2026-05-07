@@ -1,0 +1,1 @@
+- 2026-05-07: Added header-only `PlayerStats` and wired per-frame passive ATB charge updates through `RuntimeScene`.

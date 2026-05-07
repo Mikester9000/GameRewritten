@@ -44,7 +44,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Jolt Physics (init only) | 🔧 | `ThirdPartyBootstrap` → `tp::Physics` |
 | Recast/Detour nav (init only) | 🔧 | `ThirdPartyBootstrap` → `tp::Nav` |
 | DirectXTex (smoke test only) | 🔧 | `ThirdPartyBootstrap` → `tp::Texture` |
-| Player stats (hp/mp/atb) | ❌ | — |
+| Player stats (hp/mp/atb) | ✅ | `src/game/actors/PlayerStats.hpp`, `src/game/actors/PlayerActor.hpp`, `src/game/RuntimeScene.hpp` |
 | Gameplay HUD | ❌ | — |
 | Texture cache | ❌ | — |
 | Directional lighting | ❌ | — |
