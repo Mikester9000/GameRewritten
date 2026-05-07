@@ -12,6 +12,19 @@
 
 using namespace DirectX;
 
+namespace
+{
+    template <typename T>
+    void SafeRelease(T*& resource)
+    {
+        if (resource)
+        {
+            resource->Release();
+            resource = nullptr;
+        }
+    }
+}
+
 D3D11Renderer::D3D11Renderer()
     : renderWidth(0), renderHeight(0),
     device(nullptr), context(nullptr), swapChain(nullptr),
@@ -131,32 +144,40 @@ void D3D11Renderer::CreateGroundShaders()
         &groundInputLayout
     );
 
-    if (vsBlob) vsBlob->Release();
-    if (psBlob) psBlob->Release();
+    SafeRelease(vsBlob);
+    SafeRelease(psBlob);
 }
 void D3D11Renderer::Shutdown()
 {
-    if (transformConstantBuffer) { transformConstantBuffer->Release(); transformConstantBuffer = nullptr; }
-    if (vertexBuffer) { vertexBuffer->Release(); vertexBuffer = nullptr; }
-    if (inputLayout) { inputLayout->Release(); inputLayout = nullptr; }
-    if (vertexShader) { vertexShader->Release(); vertexShader = nullptr; }
-    if (pixelShader) { pixelShader->Release(); pixelShader = nullptr; }
-    if (renderTargetView) { renderTargetView->Release(); renderTargetView = nullptr; }
-    if (swapChain) { swapChain->Release(); swapChain = nullptr; }
-    if (context) { context->Release(); context = nullptr; }
-    if (device) { device->Release(); device = nullptr; }
-    if (rasterizerState) { rasterizerState->Release(); rasterizerState = nullptr; }
-    if (depthView) { depthView->Release(); depthView = nullptr; }
-    if (depthTexture) { depthTexture->Release(); depthTexture = nullptr; }
-    if (indexBuffer) { indexBuffer->Release(); indexBuffer = nullptr; }
-    if (m_groundVertexBuffer) { m_groundVertexBuffer->Release(); m_groundVertexBuffer = nullptr; }
-    if (m_groundIndexBuffer) { m_groundIndexBuffer->Release(); m_groundIndexBuffer = nullptr; }
-    if (skyVertexShader) { skyVertexShader->Release(); skyVertexShader = nullptr; }
-    if (skyPixelShader) { skyPixelShader->Release(); skyPixelShader = nullptr; }
-    if (lightConstantBuffer) { lightConstantBuffer->Release(); lightConstantBuffer = nullptr; }
-    if (m_terrainPatchVertexBuffer) { m_terrainPatchVertexBuffer->Release(); m_terrainPatchVertexBuffer = nullptr; }
-    
-    // In Shutdown(), add:
+    SafeRelease(transformConstantBuffer);
+    SafeRelease(vertexBuffer);
+    SafeRelease(indexBuffer);
+
+    SafeRelease(inputLayout);
+    SafeRelease(groundInputLayout);
+    SafeRelease(skyInputLayout);
+
+    SafeRelease(vertexShader);
+    SafeRelease(pixelShader);
+    SafeRelease(groundVertexShader);
+    SafeRelease(groundPixelShader);
+    SafeRelease(skyVertexShader);
+    SafeRelease(skyPixelShader);
+
+    SafeRelease(lightConstantBuffer);
+
+    SafeRelease(m_groundVertexBuffer);
+    SafeRelease(m_groundIndexBuffer);
+    SafeRelease(m_terrainPatchVertexBuffer);
+
+    SafeRelease(rasterizerState);
+    SafeRelease(depthView);
+    SafeRelease(depthTexture);
+    SafeRelease(renderTargetView);
+    SafeRelease(swapChain);
+    SafeRelease(context);
+    SafeRelease(device);
+
     m_terrainHeights.clear();
     m_terrainAvailable = false;
 }
@@ -202,8 +223,8 @@ void D3D11Renderer::CreateSkyShaders()
 
     // No input layout needed for SV_VertexID trick
 
-    if (vsBlob) vsBlob->Release();
-    if (psBlob) psBlob->Release();
+    SafeRelease(vsBlob);
+    SafeRelease(psBlob);
 }
 
 void D3D11Renderer::DrawSky()
@@ -270,7 +291,7 @@ bool D3D11Renderer::CreateTerrainPatch()
 bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
 {
     // Release any existing GPU vertex buffer before rebuilding.
-    if (m_terrainPatchVertexBuffer) { m_terrainPatchVertexBuffer->Release(); m_terrainPatchVertexBuffer = nullptr; }
+    SafeRelease(m_terrainPatchVertexBuffer);
     m_terrainPatchVertexCount = 0;
     m_terrainAvailable = false;
     m_terrainHeights.clear();
@@ -549,11 +570,7 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
 
 void D3D11Renderer::ClearTerrainPatch()
 {
-    if (m_terrainPatchVertexBuffer)
-    {
-        m_terrainPatchVertexBuffer->Release();
-        m_terrainPatchVertexBuffer = nullptr;
-    }
+    SafeRelease(m_terrainPatchVertexBuffer);
     
     
     m_terrainHeights.clear();
@@ -806,7 +823,7 @@ bool D3D11Renderer::CreateRenderTarget()
         return false;
 
     hr = device->CreateRenderTargetView(backBuffer, nullptr, &renderTargetView);
-    backBuffer->Release();
+    SafeRelease(backBuffer);
 
     if (FAILED(hr))
         return false;
@@ -823,13 +840,13 @@ bool D3D11Renderer::CreateTriangleResources()
     if (FAILED(hr)) return false;
 
     hr = CompileShaderFromFile(L"Shaders/basic3d_ps.hlsl", "main", "ps_4_0", &psBlob);
-    if (FAILED(hr)) { vsBlob->Release(); return false; }
+    if (FAILED(hr)) { SafeRelease(vsBlob); return false; }
 
     hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vertexShader);
-    if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); return false; }
+    if (FAILED(hr)) { SafeRelease(vsBlob); SafeRelease(psBlob); return false; }
 
     hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &pixelShader);
-    if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); return false; }
+    if (FAILED(hr)) { SafeRelease(vsBlob); SafeRelease(psBlob); return false; }
 
     D3D11_INPUT_ELEMENT_DESC layout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -841,8 +858,8 @@ bool D3D11Renderer::CreateTriangleResources()
         vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
         &inputLayout);
 
-    vsBlob->Release();
-    psBlob->Release();
+    SafeRelease(vsBlob);
+    SafeRelease(psBlob);
     if (FAILED(hr)) return false;
 
     Vertex cubeVertices[] = {
@@ -967,6 +984,6 @@ HRESULT D3D11Renderer::CompileShaderFromFile(const wchar_t* path, const char* en
         &errors
     );
 
-    if (errors) errors->Release();
+    SafeRelease(errors);
     return hr;
 }
