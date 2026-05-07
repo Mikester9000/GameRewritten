@@ -24,6 +24,8 @@ struct ReloadContext
     int& lastPlayerCZ;
 };
 
+// Reloads registry and world grid in place. Both Reload() calls are resilient:
+// on failure they retain prior in-memory data, so runtime state remains usable.
 inline void ReloadAssetsAndWorld(ReloadContext& context)
 {
     LOG_INFO("F5: reloading Asset Registry and World Grid...");
