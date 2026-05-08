@@ -15,7 +15,8 @@ void CollisionWorld::ResolveMovement(float& x, float& y, float& z, float hw, flo
     AABB player = AABB::FromCenter(x, y, z, hw, hh, hd);
 
     // Keep this bounded to avoid pathological/infinite push loops in dense overlaps.
-    // If this cap is reached, the player remains at the last corrected position.
+    // Eight iterations is enough for our expected one-frame player movement against
+    // sparse authored blockers; if reached, we keep the last corrected position.
     static constexpr int MAX_SOLVER_ITERATIONS = 8;
     for (int iteration = 0; iteration < MAX_SOLVER_ITERATIONS; ++iteration)
     {

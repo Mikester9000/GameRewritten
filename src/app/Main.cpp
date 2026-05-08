@@ -295,7 +295,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
 
         // --- Left-click placement ---
-        const bool editedCellInstances = WorldEditorFrameOps::HandlePlacementClick(
+        const WorldEditorFrameOps::PlacementResult placementResult = WorldEditorFrameOps::HandlePlacementClick(
             window.GetHandle(),
             InputEdge::PollLeftButtonClicked(inputEdgeState),
             editorActive,
@@ -303,11 +303,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             worldGrid,
             camController,
             renderer);
-        if (editedCellInstances)
+        if (placementResult.editedCellInstances)
         {
-            int activeCX = 0, activeCZ = 0;
-            worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), activeCX, activeCZ);
-            WorldCell* activeCell = worldGrid.FindCell(activeCX, activeCZ);
+            WorldCell* activeCell = worldGrid.FindCell(placementResult.activeCellX, placementResult.activeCellZ);
             if (activeCell)
                 WorldRefresh::RefreshCellVisuals(*activeCell, cellRefreshContext);
         }
