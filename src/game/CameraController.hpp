@@ -84,6 +84,10 @@ public:
     float GetCamZ()    const { return m_camZ; }
 
 private:
+    static constexpr float PLAYER_COLLISION_HALF_WIDTH_X = 0.3f;
+    static constexpr float PLAYER_COLLISION_HALF_HEIGHT = 0.9f;
+    static constexpr float PLAYER_COLLISION_HALF_WIDTH_Z = 0.3f;
+
     float m_playerX = 0.0f, m_playerY = 0.0f, m_playerZ = -3.0f;
     float m_yaw = 0.0f, m_pitch = 0.0f;
     float m_camX = 0.0f, m_camY = 0.0f, m_camZ = 0.0f;

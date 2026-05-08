@@ -61,6 +61,7 @@ void CollisionWorld::ResolveMovement(float& x, float& y, float& z, float hw, flo
         }
         if (pushNegZ < bestMagnitude)
         {
+            bestMagnitude = pushNegZ;
             moveX = 0.0f;
             moveY = 0.0f;
             moveZ = -pushNegZ;

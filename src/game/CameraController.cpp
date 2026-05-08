@@ -118,7 +118,9 @@ void CameraController::Update(float dt, bool allowMovement, bool allowMouseLook,
         {
             m_collisionWorld->ResolveMovement(
                 m_playerX, m_playerY, m_playerZ,
-                0.3f, 0.9f, 0.3f);
+                PLAYER_COLLISION_HALF_WIDTH_X,
+                PLAYER_COLLISION_HALF_HEIGHT,
+                PLAYER_COLLISION_HALF_WIDTH_Z);
         }
 
         // Ground snap / terrain collision
