@@ -79,7 +79,7 @@ void CollisionWorld::ResolveMovement(float& x, float& y, float& z, float hw, flo
             z += moveZ;
             player = AABB::FromCenter(x, y, z, hw, hh, hd);
             correctedThisIteration = true;
-            break; // exit inner scan; outer loop then starts a fresh blocker scan
+            break; // exit inner scan; if correctedThisIteration stays true, next outer iteration restarts the full scan
         }
 
         if (!correctedThisIteration)
