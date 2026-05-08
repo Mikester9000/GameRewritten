@@ -7,8 +7,6 @@ cbuffer PerDraw : register(b0)
     float4x4 mvp;        // model-view-projection (pre-transposed)
     float4x4 world;      // world matrix (pre-transposed)
     float4   tintColor;  // per-instance color override
-    float4   lightDir;   // directional light direction (toward light, world space)
-    float4   lightColor; // directional light RGB (a unused)
 };
 
 struct VSIn

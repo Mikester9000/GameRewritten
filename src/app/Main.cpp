@@ -83,6 +83,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         MessageBoxW(nullptr, L"Failed to initialize ImGui.", L"Error", 0);
         return 1;
     }
+    imguiLayer.SetRendererRef(&renderer);
     // Forward Win32 messages to ImGui (mouse, keyboard, etc.).
     window.SetWndProcHook(&ImGuiLayer::WndProcHook);
 

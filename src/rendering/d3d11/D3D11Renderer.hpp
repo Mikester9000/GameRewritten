@@ -32,8 +32,12 @@ public:
 	void DrawSky();
     void SetCameraPosition(float x, float y, float z);
     void SetCameraRotation(float yaw, float pitch);
+    void SetSunDirection(float x, float y, float z);
+    void SetAmbientStrength(float a);
     void GetCameraPosition(float& x, float& y, float& z) const;
     void GetCameraRotation(float& yaw, float& pitch) const;
+    void GetSunDirection(float& x, float& y, float& z) const;
+    float GetAmbientStrength() const;
     void DrawGroundPlane();
     void DrawTerrainPatch();
     // Rebuild the terrain mesh from biome/seed parameters (called on cell transition or F5).
@@ -50,6 +54,7 @@ public:
     bool GetIsGrounded() const;
     ID3D11Device* GetDevice() const;
     ID3D11DeviceContext* GetContext() const;
+    ID3D11Buffer* GetLightConstantBuffer() const { return m_lightCBuffer; }
     int GetRenderWidth() const { return renderWidth; }
     int GetRenderHeight() const { return renderHeight; }
     // Attach a TextureCache so terrain draw calls can bind textures.
@@ -58,6 +63,16 @@ public:
 private:
     using Vertex = D3D11RendererHelpers::TerrainVertex;
     struct TransformConstantBuffer { DirectX::XMFLOAT4X4 mvp; DirectX::XMFLOAT4X4 world; };
+    // Matches HLSL LightCBuffer at register(b1); 32 bytes total.
+    // pad0 pads lightDir to a full float4 to follow D3D constant-buffer packing.
+    struct LightCBuffer {
+        float lightDirX, lightDirY, lightDirZ;
+        float pad0;
+        float lightColorR, lightColorG, lightColorB;
+        float ambientStrength;
+    };
+    static_assert(sizeof(LightCBuffer) == 32, "LightCBuffer must stay 32 bytes to match HLSL b1 packing.");
+    static_assert((sizeof(LightCBuffer) % 16) == 0, "LightCBuffer size must remain 16-byte aligned.");
 
     bool CreateTriangleResources();
     bool CreateRenderTarget();
@@ -84,15 +99,8 @@ private:
     float m_terrainOriginX = 0.0f;   // world-space X of terrain mesh start
     float m_terrainOriginZ = 0.0f;   // world-space Z of terrain mesh start
     bool m_terrainAvailable = false;
+    void UpdateLightConstantBuffer();
     std::string m_activeTerrainBiome = "grassland";
-    struct LightConstantBuffer
-    {
-        DirectX::XMFLOAT4 lightDirection;
-       
-        DirectX::XMFLOAT4 lightColor;
-       
-    };
- 
     ID3D11Buffer* m_groundVertexBuffer = nullptr;
     ID3D11Buffer* m_groundIndexBuffer = nullptr;
     UINT m_groundIndexCount = 0;
@@ -116,7 +124,8 @@ private:
     ID3D11VertexShader* skyVertexShader = nullptr;
     ID3D11PixelShader* skyPixelShader = nullptr;
     ID3D11InputLayout* skyInputLayout = nullptr;
-    ID3D11Buffer* lightConstantBuffer = nullptr;
+    ID3D11Buffer* m_lightCBuffer = nullptr;
+    LightCBuffer m_lightData = { 0.4f, -1.0f, 0.6f, 0.0f, 1.0f, 0.95f, 0.8f, 0.25f };
     ID3D11Buffer* m_terrainPatchVertexBuffer = nullptr;
     UINT m_terrainPatchVertexCount = 0;
 

@@ -1,10 +1,12 @@
 Texture2D diffuseTexture : register(t0);
 SamplerState diffuseSampler : register(s0);
 
-cbuffer Light : register(b1)
+cbuffer LightCBuffer : register(b1)
 {
-    float4 lightDirection;
-    float4 lightColor;
+    float3 lightDir;
+    float  pad0;
+    float3 lightColor;
+    float  ambientStrength;
 };
 
 struct PSInput
@@ -17,13 +19,11 @@ struct PSInput
 
 float4 main(PSInput input) : SV_TARGET
 {
-    float3 n = normalize(input.normal);
-    float3 l = normalize(-lightDirection.xyz);
-    float ndotl = saturate(dot(n, l));
-
+    float3 normalIn = input.normal;
+    float3 n = (dot(normalIn, normalIn) > 0.000001f) ? normalize(normalIn) : float3(0.0f, 1.0f, 0.0f);
+    float diff = saturate(dot(n, -lightDir));
     float3 texColor = diffuseTexture.Sample(diffuseSampler, input.uv).rgb;
     float3 baseColor = texColor * input.color.rgb;
-    float3 litColor = baseColor * (0.2f + 0.8f * ndotl) * lightColor.rgb;
-
+    float3 litColor = baseColor * (lightColor * diff + float3(ambientStrength, ambientStrength, ambientStrength));
     return float4(litColor, input.color.a);
 }

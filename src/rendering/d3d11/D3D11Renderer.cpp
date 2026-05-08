@@ -182,6 +182,20 @@ bool D3D11Renderer::Initialize(HWND windowHandle, int width, int height)
 
     CreateGroundPlane();
     if (!CreateTerrainPatch()) return false;
+
+    D3D11_BUFFER_DESC lightDesc{};
+    lightDesc.Usage = D3D11_USAGE_DYNAMIC;
+    lightDesc.ByteWidth = sizeof(LightCBuffer);
+    lightDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    lightDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    HRESULT lightHr = device->CreateBuffer(&lightDesc, nullptr, &m_lightCBuffer);
+    if (FAILED(lightHr))
+    {
+        LOG_ERROR("D3D11Renderer: failed to create light constant buffer.");
+        return false;
+    }
+
+    SetSunDirection(m_lightData.lightDirX, m_lightData.lightDirY, m_lightData.lightDirZ);
     return true;
 }
 
@@ -263,7 +277,7 @@ void D3D11Renderer::Shutdown()
     SafeRelease(skyVertexShader);
     SafeRelease(skyPixelShader);
 
-    SafeRelease(lightConstantBuffer);
+    SafeRelease(m_lightCBuffer);
 
     SafeRelease(m_groundVertexBuffer);
     SafeRelease(m_groundIndexBuffer);
@@ -582,11 +596,6 @@ void D3D11Renderer::SetupGroundAndTerrainSceneConstants(float farPlane)
     XMStoreFloat4x4(&cb.world, XMMatrixTranspose(scene.world));
     context->UpdateSubresource(transformConstantBuffer, 0, nullptr, &cb, 0, 0);
     context->VSSetConstantBuffers(0, 1, &transformConstantBuffer);
-
-    LightConstantBuffer lightCB{};
-    D3D11RendererHelpers::BuildDefaultDirectionalLight(lightCB.lightDirection, lightCB.lightColor);
-    context->UpdateSubresource(lightConstantBuffer, 0, nullptr, &lightCB, 0, 0);
-    context->PSSetConstantBuffers(1, 1, &lightConstantBuffer);
 }
 
 void D3D11Renderer::DrawTerrainPatch()
@@ -596,6 +605,7 @@ void D3D11Renderer::DrawTerrainPatch()
     context->IASetInputLayout(groundInputLayout);
     context->VSSetShader(groundVertexShader, nullptr, 0);
     context->PSSetShader(groundPixelShader, nullptr, 0);
+    context->PSSetConstantBuffers(1, 1, &m_lightCBuffer);
 
     // Bind texture and sampler if a cache is attached.
     if (m_textureCache)
@@ -625,6 +635,7 @@ void D3D11Renderer::DrawGroundPlane()
     context->IASetInputLayout(groundInputLayout);
     context->VSSetShader(groundVertexShader, nullptr, 0);
     context->PSSetShader(groundPixelShader, nullptr, 0);
+    context->PSSetConstantBuffers(1, 1, &m_lightCBuffer);
 
     // Bind texture and sampler if a cache is attached.
     if (m_textureCache)
@@ -659,6 +670,63 @@ void D3D11Renderer::SetCameraRotation(float yaw, float pitch)
     cameraYaw = yaw;
     cameraPitch = pitch;
 }
+
+void D3D11Renderer::SetSunDirection(float x, float y, float z)
+{
+    const float lenSq = (x * x) + (y * y) + (z * z);
+    if (lenSq < 0.000001f)
+    {
+        m_lightData.lightDirX = 0.0f;
+        m_lightData.lightDirY = -1.0f;
+        m_lightData.lightDirZ = 0.0f;
+    }
+    else
+    {
+        const float invLen = 1.0f / sqrtf(lenSq);
+        m_lightData.lightDirX = x * invLen;
+        m_lightData.lightDirY = y * invLen;
+        m_lightData.lightDirZ = z * invLen;
+    }
+    UpdateLightConstantBuffer();
+}
+
+void D3D11Renderer::SetAmbientStrength(float a)
+{
+    if (a < 0.0f) a = 0.0f;
+    if (a > 1.0f) a = 1.0f;
+    m_lightData.ambientStrength = a;
+    UpdateLightConstantBuffer();
+}
+
+void D3D11Renderer::GetSunDirection(float& x, float& y, float& z) const
+{
+    x = m_lightData.lightDirX;
+    y = m_lightData.lightDirY;
+    z = m_lightData.lightDirZ;
+}
+
+float D3D11Renderer::GetAmbientStrength() const
+{
+    return m_lightData.ambientStrength;
+}
+
+void D3D11Renderer::UpdateLightConstantBuffer()
+{
+    if (!context || !m_lightCBuffer)
+        return;
+
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    const HRESULT hr = context->Map(m_lightCBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    if (FAILED(hr))
+    {
+        LOG_WARN("D3D11Renderer: failed to map light constant buffer.");
+        return;
+    }
+
+    *static_cast<LightCBuffer*>(mapped.pData) = m_lightData;
+    context->Unmap(m_lightCBuffer, 0);
+}
+
 ID3D11Device* D3D11Renderer::GetDevice() const { return device; }
 ID3D11DeviceContext* D3D11Renderer::GetContext() const { return context; }
 
@@ -728,12 +796,7 @@ void D3D11Renderer::DrawRotatingTriangle(float deltaTime)
     XMStoreFloat4x4(&cb.world, XMMatrixTranspose(world));
     context->UpdateSubresource(transformConstantBuffer, 0, nullptr, &cb, 0, 0);
     context->VSSetConstantBuffers(0, 1, &transformConstantBuffer);
-
-    LightConstantBuffer lightCB{};
-    lightCB.lightDirection = DirectX::XMFLOAT4(0.5f, -1.0f, 0.5f, 0.0f);
-    lightCB.lightColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    context->UpdateSubresource(lightConstantBuffer, 0, nullptr, &lightCB, 0, 0);
-    context->PSSetConstantBuffers(1, 1, &lightConstantBuffer);
+    context->PSSetConstantBuffers(1, 1, &m_lightCBuffer);
 
     context->IASetInputLayout(inputLayout);
     context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
@@ -885,13 +948,6 @@ bool D3D11Renderer::CreateTriangleResources()
     hr = device->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer);
     if (FAILED(hr)) return false;
     
-    D3D11_BUFFER_DESC lightDesc{};
-    lightDesc.Usage = D3D11_USAGE_DEFAULT;
-    lightDesc.ByteWidth = sizeof(LightConstantBuffer);
-    lightDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-    hr = device->CreateBuffer(&lightDesc, nullptr, &lightConstantBuffer);
-    if (FAILED(hr)) return false;
     return true;
 }
 

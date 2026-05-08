@@ -7,8 +7,14 @@ cbuffer PerDraw : register(b0)
     float4x4 mvp;        // not used in PS, kept for alignment
     float4x4 world;      // not used in PS, kept for alignment
     float4   tintColor;  // per-instance RGBA color
-    float4   lightDir;   // directional light direction (world space, toward light)
-    float4   lightColor; // directional light RGB
+};
+
+cbuffer LightCBuffer : register(b1)
+{
+    float3 lightDir;
+    float  pad0;
+    float3 lightColor;
+    float  ambientStrength;
 };
 
 struct PSIn
@@ -21,12 +27,9 @@ struct PSIn
 float4 main(PSIn input) : SV_TARGET
 {
     float3 n    = normalize(input.worldNorm);
-    float3 l    = normalize(-lightDir.xyz); // direction toward the light
+    float3 l    = normalize(-lightDir); // direction toward the light
     float  diff = saturate(dot(n, l));
 
-    // Ambient + diffuse directional light.
-    float3 ambient  = tintColor.rgb * 0.25f;
-    float3 diffuse  = tintColor.rgb * diff * lightColor.rgb * 0.75f;
-
-    return float4(ambient + diffuse, tintColor.a);
+    float3 litColor = tintColor.rgb * (lightColor * diff + ambientStrength.xxx);
+    return float4(litColor, tintColor.a);
 }
