@@ -23,6 +23,7 @@
 #include "../assets/TextureCache.hpp"
 #include "../world/WorldGrid.hpp"
 #include "FrameTiming.hpp"
+#include "InputActionMap.hpp"
 #include "InputEdgeState.hpp"
 #include "CursorModeController.hpp"
 #include "WorldEditorFrameOps.hpp"
@@ -167,12 +168,17 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     ClientToScreen(window.GetHandle(), &centerPoint);
     SetCursorPos(centerPoint.x, centerPoint.y);
     camController.SetCenterPoint(centerPoint);
+    InputActionMap actionMap = InputActionMap::Default();
+    camController.SetInputActionMap(&actionMap);
 
     bool firstFrame = true;
     float debugClearColorTime = 0.0f; // dev-only: drives the animated clear-color pulse
     FrameTiming::State frameTimingState;
     FrameTiming::Initialize(frameTimingState);
     InputEdge::State inputEdgeState;
+    bool wasPauseActionDown = false;
+    bool wasDebugActionDown = false;
+    bool wasReloadActionDown = false;
     CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
     // Track the cell the player was in last frame to detect cell-crossing.
@@ -202,16 +208,16 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // --- Toggle keys (edge-detect so they fire once per press) ---
 
         // Esc: toggle pause menu (was: exit the program).
-        if (InputEdge::PollEscapePressed(inputEdgeState))
+        if (actionMap.IsPressed(InputAction::TogglePause, wasPauseActionDown))
             imguiLayer.TogglePauseMenu();
 
         // F1: toggle debug overlay.
-        if (InputEdge::PollF1Pressed(inputEdgeState))
+        if (actionMap.IsPressed(InputAction::ToggleDebug, wasDebugActionDown))
             imguiLayer.ToggleDebugOverlay();
 
         // F5: reload Asset Registry and World Grid without restarting.
         // Also rebuilds terrain + forest for the active cell and respawns instances.
-        if (InputEdge::PollF5Pressed(inputEdgeState))
+        if (actionMap.IsPressed(InputAction::ReloadAssets, wasReloadActionDown))
         {
             WorldReload::ReloadAssetsAndWorld(worldReloadContext);
         }
