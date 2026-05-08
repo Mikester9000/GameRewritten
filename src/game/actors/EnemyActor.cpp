@@ -8,6 +8,7 @@
 #include "../../rendering/d3d11/D3D11Renderer.hpp"
 
 #include <cmath>
+#include <string>
 
 void EnemyActor::Init(float startX, float startZ,
                       float wpAx, float wpAz,
@@ -41,15 +42,19 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer)
 
     if (dist < 0.5f)
     {
-        // Reached current waypoint — switch to the other one.
+        // Already at the waypoint — snap exactly and switch to the other one.
+        x = targetX;
+        z = targetZ;
         currentWaypoint = (currentWaypoint + 1) % 2;
     }
     else
     {
-        // Advance toward the waypoint at constant speed.
+        // Clamp the step to the remaining distance to prevent overshooting.
+        const float step    = moveSpeed * dt;
         const float invDist = 1.0f / dist;
-        x += dx * invDist * moveSpeed * dt;
-        z += dz * invDist * moveSpeed * dt;
+        const float move    = (step < dist) ? step : dist;
+        x += dx * invDist * move;
+        z += dz * invDist * move;
 
         // Face the direction of travel (yaw = 0 means facing +Z).
         yaw = atan2f(dx, dz);
@@ -66,8 +71,8 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
     if (isDead)
         return;
 
-    const PrimitivePrefab* visualPrefab =
-        prefabLibrary.GetPrefab(ActorCommon::PLAYER_VISUAL_PREFAB_ID);
+    static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+    const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
     if (!visualPrefab)
         return;
 
