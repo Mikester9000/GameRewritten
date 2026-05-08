@@ -1,0 +1,24 @@
+#pragma once
+
+#include <string>
+
+struct ImGuiIO;
+
+class DialogBox
+{
+public:
+    void Show(const std::string& speaker, const std::string& text);
+    void Dismiss();
+    bool IsOpen() const;
+    void Update(float dt);
+    void Draw(const ImGuiIO& io);
+
+private:
+    std::string m_speakerName;
+    std::string m_fullText;
+    std::string m_visibleText;
+    float m_charTimer = 0.0f;
+    float m_charInterval = 0.03f;
+    bool m_isOpen = false;
+    bool m_isComplete = false;
+};
