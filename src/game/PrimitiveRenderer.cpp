@@ -15,15 +15,13 @@ using namespace DirectX;
 
 // ---------------------------------------------------------------------------
 // Constant buffer layout (shared between VS and PS via slot b0).
-// Total = 64 + 64 + 16 + 16 + 16 = 176 bytes (multiple of 16 — valid for D3D11).
+// Total = 64 + 64 + 16 = 144 bytes (multiple of 16 — valid for D3D11).
 // ---------------------------------------------------------------------------
 struct PrimCB
 {
     XMFLOAT4X4 mvp;        // model-view-projection (row-major, transposed for HLSL)
     XMFLOAT4X4 world;      // world matrix (for normal transform + world-pos gradient)
     XMFLOAT4   tintColor;  // per-part RGBA color
-    XMFLOAT4   lightDir;   // directional light direction (world space, toward light)
-    XMFLOAT4   lightColor; // directional light RGB (a unused)
 };
 
 // ---------------------------------------------------------------------------
@@ -295,12 +293,6 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
     if (lightCBuffer)
         m_context->PSSetConstantBuffers(1, 1, &lightCBuffer);
 
-    // Fixed directional light (matches the sky gradient direction).
-    // lightDir points FROM the light source toward the scene;
-    // the shaders negate this to get the direction TOWARD the light.
-    XMFLOAT4 lightDir  { 0.5f, -0.8f, 0.3f, 0.0f };  // from-light direction (sun at top-left)
-    XMFLOAT4 lightColor{ 1.0f,  0.95f, 0.85f, 1.0f }; // warm sunlight
-
     ID3D11VertexShader* activeVS = nullptr;
     ID3D11PixelShader*  activePS = nullptr;
 
@@ -330,8 +322,6 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
             XMStoreFloat4x4(&cb.mvp, XMMatrixTranspose(worldMat * view * proj));
             XMStoreFloat4x4(&cb.world, XMMatrixTranspose(worldMat));
             cb.tintColor = { dp.r, dp.g, dp.b, dp.a };
-            cb.lightDir = lightDir;
-            cb.lightColor = lightColor;
 
             m_context->UpdateSubresource(m_cb, 0, nullptr, &cb, 0, 0);
             m_context->VSSetConstantBuffers(0, 1, &m_cb);

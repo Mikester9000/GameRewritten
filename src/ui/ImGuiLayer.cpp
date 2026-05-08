@@ -215,7 +215,10 @@ void ImGuiLayer::DrawDebugOverlay()
             sunChanged |= ImGui::SliderFloat("Sun Dir Y", &m_sunDirY, -1.0f, 1.0f);
             sunChanged |= ImGui::SliderFloat("Sun Dir Z", &m_sunDirZ, -1.0f, 1.0f);
             if (sunChanged)
+            {
                 m_renderer->SetSunDirection(m_sunDirX, m_sunDirY, m_sunDirZ);
+                m_renderer->GetSunDirection(m_sunDirX, m_sunDirY, m_sunDirZ);
+            }
 
             if (ImGui::SliderFloat("Ambient", &m_ambientStrength, 0.0f, 1.0f))
                 m_renderer->SetAmbientStrength(m_ambientStrength);

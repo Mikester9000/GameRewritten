@@ -71,6 +71,8 @@ private:
         float lightColorR, lightColorG, lightColorB;
         float ambientStrength;
     };
+    static_assert(sizeof(LightCBuffer) == 32, "LightCBuffer must stay 32 bytes to match HLSL b1 packing.");
+    static_assert((sizeof(LightCBuffer) % 16) == 0, "LightCBuffer size must remain 16-byte aligned.");
 
     bool CreateTriangleResources();
     bool CreateRenderTarget();
