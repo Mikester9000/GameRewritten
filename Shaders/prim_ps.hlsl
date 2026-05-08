@@ -30,6 +30,6 @@ float4 main(PSIn input) : SV_TARGET
     float3 l    = normalize(-lightDir); // direction toward the light
     float  diff = saturate(dot(n, l));
 
-    float3 litColor = tintColor.rgb * (lightColor * diff + float3(ambientStrength, ambientStrength, ambientStrength));
+    float3 litColor = tintColor.rgb * (lightColor * diff + ambientStrength.xxx);
     return float4(litColor, tintColor.a);
 }
