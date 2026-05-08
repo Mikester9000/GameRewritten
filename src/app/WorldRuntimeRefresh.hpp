@@ -77,6 +77,8 @@ inline void RefreshCellVisuals(const WorldCell& cell, const RefreshContext& cont
 
             // Conservative rotated-box -> AABB extents (uses absolute rotation terms
             // so the axis-aligned box fully contains the yaw-rotated primitive part).
+            // Trade-off: this can expand corner bounds and produce false-positive
+            // blocking near rotated-part corners.
             const float worldHalfX = absCosY * halfX + absSinY * halfZ;
             const float worldHalfZ = absSinY * halfX + absCosY * halfZ;
 
