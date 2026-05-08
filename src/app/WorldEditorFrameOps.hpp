@@ -24,7 +24,7 @@ inline void GetActiveCellFromPlayer(const WorldGrid& worldGrid,
     worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), outCellX, outCellZ);
 }
 
-inline void HandlePlacementClick(HWND windowHandle,
+inline bool HandlePlacementClick(HWND windowHandle,
                                  bool leftButtonClicked,
                                  bool editorActive,
                                  WorldEditor& worldEditor,
@@ -34,7 +34,7 @@ inline void HandlePlacementClick(HWND windowHandle,
 {
     // Use ImGui::GetIO().WantCaptureMouse as input-capture state for this click-processing phase.
     if (!leftButtonClicked || !editorActive || ImGui::GetIO().WantCaptureMouse)
-        return;
+        return false;
 
     // Get cursor position in window client coordinates.
     POINT clickPos{};
@@ -45,7 +45,7 @@ inline void HandlePlacementClick(HWND windowHandle,
     int activeCX = 0, activeCZ = 0;
     GetActiveCellFromPlayer(worldGrid, camController, activeCX, activeCZ);
 
-    worldEditor.HandlePlacement(
+    return worldEditor.HandlePlacement(
         clickPos,
         static_cast<float>(renderer.GetRenderWidth()),
         static_cast<float>(renderer.GetRenderHeight()),

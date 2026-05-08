@@ -295,7 +295,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
 
         // --- Left-click placement ---
-        WorldEditorFrameOps::HandlePlacementClick(
+        const bool editedCellInstances = WorldEditorFrameOps::HandlePlacementClick(
             window.GetHandle(),
             InputEdge::PollLeftButtonClicked(inputEdgeState),
             editorActive,
@@ -303,6 +303,14 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             worldGrid,
             camController,
             renderer);
+        if (editedCellInstances)
+        {
+            int activeCX = 0, activeCZ = 0;
+            worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), activeCX, activeCZ);
+            WorldCell* activeCell = worldGrid.FindCell(activeCX, activeCZ);
+            if (activeCell)
+                WorldRefresh::RefreshCellVisuals(*activeCell, cellRefreshContext);
+        }
 
         // Pass camera info and FPS stats to ImGuiLayer for the debug overlay.
         imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),
