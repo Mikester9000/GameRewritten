@@ -18,7 +18,9 @@ namespace WorldEditorFrameOps
 {
 struct PlacementResult
 {
+    // True when a click actually placed or deleted a cell instance.
     bool editedCellInstances = false;
+    // Active cell coordinates used for that click attempt.
     int activeCellX = 0;
     int activeCellZ = 0;
 };

@@ -17,6 +17,7 @@ void CollisionWorld::ResolveMovement(float& x, float& y, float& z, float hw, flo
     // Keep this bounded to avoid pathological/infinite push loops in dense overlaps.
     // Eight iterations is enough for our expected one-frame player movement against
     // sparse authored blockers; if reached, we keep the last corrected position.
+    // Each correction restarts blocker scanning on the next outer-loop pass.
     static constexpr int MAX_SOLVER_ITERATIONS = 8;
     for (int iteration = 0; iteration < MAX_SOLVER_ITERATIONS; ++iteration)
     {
