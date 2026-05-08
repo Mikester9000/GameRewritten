@@ -163,6 +163,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // This keeps the player well inside the first terrain patch and away from
     // any cell-boundary void on the first frame.
     camController.Init(startupCellCenter, 0.0f, startupCellCenter, 0.0f, -0.5f);
+    runtimeScene.InitEnemies(startupCellCenter, startupCellCenter);
 
     renderer.SetCameraPosition(startupCellCenter, 0.0f, startupCellCenter);
     renderer.SetCameraRotation(0.0f, -0.5f);
@@ -315,7 +316,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                  camController.GetYaw(),  camController.GetPitch());
         imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
-        runtimeScene.BeginFrame(deltaTime);
+        runtimeScene.BeginFrame(deltaTime, renderer);
         runtimeScene.SubmitActors(camController, prefabLibrary);
 
         renderer.ClearScreen(r, g, b, 1.0f);

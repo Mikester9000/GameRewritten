@@ -50,7 +50,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Directional lighting | ✅ | `src/rendering/d3d11/D3D11Renderer.cpp/hpp`, `Shaders/ground_ps.hlsl`, `Shaders/basic3d_ps.hlsl`, `Shaders/tree_ps.hlsl`, `src/ui/ImGuiLayer.cpp/hpp` |
 | Input action map | ✅ | `src/app/InputActionMap.hpp`, `src/app/Main.cpp`, `src/game/CameraController.cpp/hpp` |
 | AABB collision | ✅ | `src/game/physics/AABB.hpp`, `src/game/physics/CollisionWorld.cpp/hpp`, `src/game/CameraController.cpp/hpp`, `src/app/WorldRuntimeRefresh.hpp`, `src/app/Main.cpp` |
-| Enemy actor | ❌ | — |
+| Enemy actor | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Dialog box | ❌ | — |
 | Combat system | ❌ | — |
 | Audio manager | ❌ | — |
