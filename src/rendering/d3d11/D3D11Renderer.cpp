@@ -16,7 +16,22 @@ using namespace DirectX;
 namespace
 {
     // Placeholder texture bound to terrain/ground draw calls when a TextureCache is attached.
-    static const std::string k_placeholderTexturePath = "Content/Textures/placeholder.png";
+    static const std::string k_grasslandTexturePath = "Content/Textures/Grassland1.png";
+    static const std::string k_desertTexturePath = "Content/Textures/Desert1.png";
+    static const std::string k_rockyTexturePath = "Content/Textures/Mountain1.png";
+    static const std::string k_snowTexturePath = "Content/Textures/Snowy1.png";
+
+    const std::string& GetTerrainTexturePath(const std::string& biome)
+    {
+        if (biome == "desert")
+            return k_desertTexturePath;
+        if (biome == "rocky")
+            return k_rockyTexturePath;
+        if (biome == "snow")
+            return k_snowTexturePath;
+
+        return k_grasslandTexturePath;
+    }
     template <typename T>
     void SafeRelease(T*& resource)
     {
@@ -410,6 +425,7 @@ bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
     m_terrainPatchVertexCount = 0;
     m_terrainAvailable = false;
     m_terrainHeights.clear();
+    m_activeTerrainBiome = params.biome;
 
     // 100x100 quads — bold low-poly faces up close, reads as smooth terrain at distance.
     const int quadsX = 100;
@@ -519,6 +535,7 @@ void D3D11Renderer::ClearTerrainPatch()
     
     m_terrainHeights.clear();
     m_terrainAvailable = false;
+    m_activeTerrainBiome = "grassland";
 }
 
 float D3D11Renderer::SampleTerrainHeight(float worldX, float worldZ) const
@@ -593,8 +610,8 @@ void D3D11Renderer::DrawTerrainPatch()
     // Bind texture and sampler if a cache is attached.
     if (m_textureCache)
     {
-        ID3D11ShaderResourceView* srv =
-            m_textureCache->Load(device, k_placeholderTexturePath);
+        const std::string& texturePath = GetTerrainTexturePath(m_activeTerrainBiome);
+        ID3D11ShaderResourceView* srv = m_textureCache->Load(device, texturePath);
         if (srv)
         {
             context->PSSetShaderResources(0, 1, &srv);
@@ -623,8 +640,8 @@ void D3D11Renderer::DrawGroundPlane()
     // Bind texture and sampler if a cache is attached.
     if (m_textureCache)
     {
-        ID3D11ShaderResourceView* srv =
-            m_textureCache->Load(device, k_placeholderTexturePath);
+        const std::string& texturePath = GetTerrainTexturePath(m_activeTerrainBiome);
+        ID3D11ShaderResourceView* srv = m_textureCache->Load(device, texturePath);
         if (srv)
         {
             context->PSSetShaderResources(0, 1, &srv);

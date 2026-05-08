@@ -98,7 +98,7 @@ private:
     float m_terrainOriginZ = 0.0f;   // world-space Z of terrain mesh start
     bool m_terrainAvailable = false;
     void UpdateLightConstantBuffer();
-  
+    std::string m_activeTerrainBiome = "grassland";
     ID3D11Buffer* m_groundVertexBuffer = nullptr;
     ID3D11Buffer* m_groundIndexBuffer = nullptr;
     UINT m_groundIndexCount = 0;
