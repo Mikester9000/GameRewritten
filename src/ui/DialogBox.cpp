@@ -9,6 +9,7 @@ namespace
 constexpr float kMinDialogWidth = 460.0f;
 constexpr float kMaxDialogWidth = 980.0f;
 constexpr float kDialogHeight = 170.0f;
+constexpr float kDialogWidthScreenRatio = 0.7f;
 constexpr float kBottomMargin = 24.0f;
 constexpr ImVec4 kDialogBackgroundColor(0.05f, 0.05f, 0.08f, 0.82f);
 constexpr ImVec4 kSpeakerNameColor(1.0f, 0.9f, 0.35f, 1.0f);
@@ -51,7 +52,7 @@ void DialogBox::Update(float dt)
     if (!m_isOpen || m_isComplete)
         return;
 
-    if (dt <= 0.0f)
+    if (dt < 0.0f)
         return;
 
     m_charTimer += dt;
@@ -74,7 +75,7 @@ void DialogBox::Draw(const ImGuiIO& io)
     if (!m_isOpen)
         return;
 
-    const float width = std::clamp(io.DisplaySize.x * 0.7f, kMinDialogWidth, kMaxDialogWidth);
+    const float width = std::clamp(io.DisplaySize.x * kDialogWidthScreenRatio, kMinDialogWidth, kMaxDialogWidth);
     const float x = (io.DisplaySize.x - width) * 0.5f;
     const float y = io.DisplaySize.y - kDialogHeight - kBottomMargin;
 

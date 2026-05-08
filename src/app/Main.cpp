@@ -215,6 +215,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             continue; // Skip the loop if the window is not active
         }
 
+        // Temporary first-frame dialog line for feature smoke testing.
         if (firstFrame)
             dialogBox.Show("???", "The wind carries a strange scent from the east...");
 
