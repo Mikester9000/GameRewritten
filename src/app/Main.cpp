@@ -181,6 +181,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     camController.SetCollisionWorld(&collisionWorld);
 
     bool firstFrame = true;
+    bool dialogSmokeTestShown = false;
     float debugClearColorTime = 0.0f; // dev-only: drives the animated clear-color pulse
     FrameTiming::State frameTimingState;
     FrameTiming::Initialize(frameTimingState);
@@ -215,9 +216,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             continue; // Skip the loop if the window is not active
         }
 
-        // Temporary first-frame dialog line for feature smoke testing.
-        if (firstFrame)
+        // Temporary startup dialog line for feature smoke testing.
+        if (!dialogSmokeTestShown)
+        {
             dialogBox.Show("???", "The wind carries a strange scent from the east...");
+            dialogSmokeTestShown = true;
+        }
 
         dialogBox.Update(deltaTime);
 
