@@ -15,6 +15,7 @@
 #include "../game/PrefabLibrary.hpp"
 #include "../game/PrimitiveRenderer.hpp"
 #include "../game/RuntimeScene.hpp"
+#include "../game/physics/CollisionWorld.hpp"
 #include "../ui/GameHUD.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../ui/WorldEditor.hpp"
@@ -99,6 +100,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // primRendererPtr stays nullptr if initialization fails so WorldEditor falls
     // back to the legacy Forest cube renderer instead of queuing invisible parts.
     PrimitiveRenderer primRenderer;
+    CollisionWorld collisionWorld;
     PrimitiveRenderer* primRendererPtr = nullptr;
     if (primRenderer.Initialize(renderer))
     {
@@ -118,6 +120,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         renderer,
         forest,
         primRenderer,
+        prefabLibrary,
+        collisionWorld,
         worldEditor
     };
     const float startupCellCenter = worldGrid.GetCellSize() * 0.5f;
@@ -171,6 +175,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     camController.SetCenterPoint(centerPoint);
     InputActionMap actionMap = InputActionMap::Default();
     camController.SetInputActionMap(&actionMap);
+    camController.SetCollisionWorld(&collisionWorld);
 
     bool firstFrame = true;
     float debugClearColorTime = 0.0f; // dev-only: drives the animated clear-color pulse
@@ -290,7 +295,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
 
         // --- Left-click placement ---
-        WorldEditorFrameOps::HandlePlacementClick(
+        const WorldEditorFrameOps::PlacementResult placementResult = WorldEditorFrameOps::HandlePlacementClick(
             window.GetHandle(),
             InputEdge::PollLeftButtonClicked(inputEdgeState),
             editorActive,
@@ -298,6 +303,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             worldGrid,
             camController,
             renderer);
+        if (placementResult.editedCellInstances)
+        {
+            WorldCell* activeCell = worldGrid.FindCell(placementResult.activeCellX, placementResult.activeCellZ);
+            if (activeCell)
+                WorldRefresh::RefreshCellVisuals(*activeCell, cellRefreshContext);
+        }
 
         // Pass camera info and FPS stats to ImGuiLayer for the debug overlay.
         imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),

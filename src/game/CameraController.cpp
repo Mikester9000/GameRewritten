@@ -4,6 +4,7 @@
 #include "CameraController.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../app/InputActionMap.hpp"
+#include "physics/CollisionWorld.hpp"
 
 #include <cmath>
 #include <algorithm>
@@ -112,6 +113,15 @@ void CameraController::Update(float dt, bool allowMovement, bool allowMouseLook,
         if (m_velocityY < terminalVelocity) m_velocityY = terminalVelocity;
 
         m_playerY += m_velocityY * dt;
+
+        if (m_collisionWorld)
+        {
+            m_collisionWorld->ResolveMovement(
+                m_playerX, m_playerY, m_playerZ,
+                PLAYER_COLLISION_HALF_WIDTH_X,
+                PLAYER_COLLISION_HALF_HEIGHT,
+                PLAYER_COLLISION_HALF_WIDTH_Z);
+        }
 
         // Ground snap / terrain collision
         float groundY = eyeOffset;

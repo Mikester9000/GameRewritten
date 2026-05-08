@@ -16,6 +16,15 @@
 
 namespace WorldEditorFrameOps
 {
+struct PlacementResult
+{
+    // True when a click actually placed or deleted a cell instance.
+    bool editedCellInstances = false;
+    // Active cell coordinates used for that click attempt.
+    int activeCellX = 0;
+    int activeCellZ = 0;
+};
+
 inline void GetActiveCellFromPlayer(const WorldGrid& worldGrid,
                                     const CameraController& camController,
                                     int& outCellX,
@@ -24,17 +33,19 @@ inline void GetActiveCellFromPlayer(const WorldGrid& worldGrid,
     worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), outCellX, outCellZ);
 }
 
-inline void HandlePlacementClick(HWND windowHandle,
-                                 bool leftButtonClicked,
-                                 bool editorActive,
-                                 WorldEditor& worldEditor,
-                                 const WorldGrid& worldGrid,
-                                 const CameraController& camController,
-                                 D3D11Renderer& renderer)
+inline PlacementResult HandlePlacementClick(HWND windowHandle,
+                                            bool leftButtonClicked,
+                                            bool editorActive,
+                                            WorldEditor& worldEditor,
+                                            const WorldGrid& worldGrid,
+                                            const CameraController& camController,
+                                            D3D11Renderer& renderer)
 {
+    PlacementResult result{};
+
     // Use ImGui::GetIO().WantCaptureMouse as input-capture state for this click-processing phase.
     if (!leftButtonClicked || !editorActive || ImGui::GetIO().WantCaptureMouse)
-        return;
+        return result;
 
     // Get cursor position in window client coordinates.
     POINT clickPos{};
@@ -42,15 +53,15 @@ inline void HandlePlacementClick(HWND windowHandle,
     ScreenToClient(windowHandle, &clickPos);
 
     // Determine active grid coordinates from player position.
-    int activeCX = 0, activeCZ = 0;
-    GetActiveCellFromPlayer(worldGrid, camController, activeCX, activeCZ);
+    GetActiveCellFromPlayer(worldGrid, camController, result.activeCellX, result.activeCellZ);
 
-    worldEditor.HandlePlacement(
+    result.editedCellInstances = worldEditor.HandlePlacement(
         clickPos,
         static_cast<float>(renderer.GetRenderWidth()),
         static_cast<float>(renderer.GetRenderHeight()),
         camController, renderer,
-        activeCX, activeCZ);
+        result.activeCellX, result.activeCellZ);
+    return result;
 }
 
 inline void DrawEditorPanelForActiveCell(WorldEditor& worldEditor,
