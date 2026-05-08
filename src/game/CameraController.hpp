@@ -18,9 +18,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#include "../app/InputActionMap.hpp"
 
 class D3D11Renderer; // forward declaration
+struct InputActionMap; // forward declaration
 
 class CameraController
 {

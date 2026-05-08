@@ -5,6 +5,8 @@
 #endif
 #include <windows.h>
 
+#include <cstddef>
+#include <type_traits>
 #include <unordered_map>
 
 enum class InputAction
@@ -21,9 +23,18 @@ enum class InputAction
     ReloadAssets
 };
 
+struct InputActionHasher
+{
+    std::size_t operator()(InputAction action) const noexcept
+    {
+        using Underlying = std::underlying_type_t<InputAction>;
+        return static_cast<std::size_t>(static_cast<Underlying>(action));
+    }
+};
+
 struct InputActionMap
 {
-    std::unordered_map<InputAction, int> bindings;
+    std::unordered_map<InputAction, int, InputActionHasher> bindings;
 
     static InputActionMap Default()
     {

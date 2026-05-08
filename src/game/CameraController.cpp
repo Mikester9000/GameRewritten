@@ -3,6 +3,7 @@
 
 #include "CameraController.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
+#include "../app/InputActionMap.hpp"
 
 #include <cmath>
 #include <algorithm>
