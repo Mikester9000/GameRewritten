@@ -79,6 +79,13 @@ void CameraController::Update(float dt, bool allowMovement, bool allowMouseLook,
     // --- Movement + gravity (skip only when movement is explicitly blocked) ---
     if (allowMovement)
     {
+        const auto isHeld = [this](InputAction action, int fallbackKeyCode) -> bool
+        {
+            if (m_inputActionMap)
+                return m_inputActionMap->IsHeld(action);
+            return (GetAsyncKeyState(fallbackKeyCode) & 0x8000) != 0;
+        };
+
         float forwardX =  sinf(m_yaw);
         float forwardZ =  cosf(m_yaw);
         float rightX   =  cosf(m_yaw);
@@ -86,17 +93,17 @@ void CameraController::Update(float dt, bool allowMovement, bool allowMouseLook,
 
         float step = moveSpeed * dt;
 
-        if (GetAsyncKeyState('W') & 0x8000) { m_playerX += forwardX * step; m_playerZ += forwardZ * step; }
-        if (GetAsyncKeyState('S') & 0x8000) { m_playerX -= forwardX * step; m_playerZ -= forwardZ * step; }
-        if (GetAsyncKeyState('A') & 0x8000) { m_playerX -= rightX * step;   m_playerZ -= rightZ * step;   }
-        if (GetAsyncKeyState('D') & 0x8000) { m_playerX += rightX * step;   m_playerZ += rightZ * step;   }
+        if (isHeld(InputAction::MoveForward, 'W')) { m_playerX += forwardX * step; m_playerZ += forwardZ * step; }
+        if (isHeld(InputAction::MoveBack, 'S'))    { m_playerX -= forwardX * step; m_playerZ -= forwardZ * step; }
+        if (isHeld(InputAction::MoveLeft, 'A'))    { m_playerX -= rightX * step;   m_playerZ -= rightZ * step;   }
+        if (isHeld(InputAction::MoveRight, 'D'))   { m_playerX += rightX * step;   m_playerZ += rightZ * step;   }
 
         // Gravity + jumping
         if (!m_isGrounded)
         {
             m_velocityY += gravity * dt;
         }
-        else if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+        else if (isHeld(InputAction::Jump, VK_SPACE))
         {
             m_velocityY  = jumpVelocity;
             m_isGrounded = false;
