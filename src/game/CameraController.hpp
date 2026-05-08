@@ -21,6 +21,7 @@
 
 class D3D11Renderer; // forward declaration
 struct InputActionMap; // forward declaration
+class CollisionWorld; // forward declaration
 
 class CameraController
 {
@@ -48,6 +49,7 @@ public:
     // Set the screen centre point used for mouse-delta look.
     void SetCenterPoint(POINT center);
     void SetInputActionMap(const InputActionMap* inputActionMap) { m_inputActionMap = inputActionMap; }
+    void SetCollisionWorld(const CollisionWorld* collisionWorld) { m_collisionWorld = collisionWorld; }
 
     // Advance camera + player movement by one frame.
     // allowMovement  = true when WASD/jump/gravity should be processed.
@@ -89,6 +91,7 @@ private:
     bool  m_isGrounded = true;
     POINT m_centerPoint = {};
     const InputActionMap* m_inputActionMap = nullptr;
+    const CollisionWorld* m_collisionWorld = nullptr;
 
     // Recompute m_camX/Y/Z from player pos + yaw.
     void ComputeCamFromPlayer();
