@@ -4,6 +4,16 @@
 
 #include <algorithm>
 
+namespace
+{
+constexpr float kMinDialogWidth = 460.0f;
+constexpr float kMaxDialogWidth = 980.0f;
+constexpr float kDialogHeight = 170.0f;
+constexpr float kBottomMargin = 24.0f;
+constexpr ImVec4 kDialogBackgroundColor(0.05f, 0.05f, 0.08f, 0.82f);
+constexpr ImVec4 kSpeakerNameColor(1.0f, 0.9f, 0.35f, 1.0f);
+}
+
 void DialogBox::Show(const std::string& speaker, const std::string& text)
 {
     m_speakerName = speaker;
@@ -64,14 +74,13 @@ void DialogBox::Draw(const ImGuiIO& io)
     if (!m_isOpen)
         return;
 
-    const float width = std::clamp(io.DisplaySize.x * 0.7f, 460.0f, 980.0f);
-    const float height = 170.0f;
+    const float width = std::clamp(io.DisplaySize.x * 0.7f, kMinDialogWidth, kMaxDialogWidth);
     const float x = (io.DisplaySize.x - width) * 0.5f;
-    const float y = io.DisplaySize.y - height - 24.0f;
+    const float y = io.DisplaySize.y - kDialogHeight - kBottomMargin;
 
     ImGui::SetNextWindowPos(ImVec2(x, y), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.05f, 0.05f, 0.08f, 0.82f));
+    ImGui::SetNextWindowSize(ImVec2(width, kDialogHeight), ImGuiCond_Always);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, kDialogBackgroundColor);
 
     const ImGuiWindowFlags flags =
         ImGuiWindowFlags_NoTitleBar |
@@ -81,7 +90,7 @@ void DialogBox::Draw(const ImGuiIO& io)
 
     if (ImGui::Begin("##DialogBox", nullptr, flags))
     {
-        ImGui::TextColored(ImVec4(1.0f, 0.9f, 0.35f, 1.0f), "%s", m_speakerName.c_str());
+        ImGui::TextColored(kSpeakerNameColor, "%s", m_speakerName.c_str());
         ImGui::Separator();
 
         ImGui::PushTextWrapPos(0.0f);
