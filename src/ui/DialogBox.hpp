@@ -2,8 +2,11 @@
 
 #include <string>
 
-struct ImGuiIO;
 
+struct ImGuiIO;
+#ifdef DialogBox
+#undef DialogBox
+#endif
 class DialogBox
 {
 public:
