@@ -51,7 +51,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Input action map | ✅ | `src/app/InputActionMap.hpp`, `src/app/Main.cpp`, `src/game/CameraController.cpp/hpp` |
 | AABB collision | ✅ | `src/game/physics/AABB.hpp`, `src/game/physics/CollisionWorld.cpp/hpp`, `src/game/CameraController.cpp/hpp`, `src/app/WorldRuntimeRefresh.hpp`, `src/app/Main.cpp` |
 | Enemy actor | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
-| Dialog box | ❌ | — |
+| Dialog box | ✅ | `src/ui/DialogBox.cpp/hpp`, `src/app/Main.cpp` |
 | Combat system | ❌ | — |
 | Audio manager | ❌ | — |
 | Minimap | ❌ | — |

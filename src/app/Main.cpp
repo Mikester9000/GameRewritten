@@ -18,6 +18,7 @@
 #include "../game/physics/CollisionWorld.hpp"
 #include "../ui/GameHUD.hpp"
 #include "../ui/ImGuiLayer.hpp"
+#include "../ui/DialogBox.hpp"
 #include "../ui/WorldEditor.hpp"
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
@@ -114,6 +115,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // --- World Editor ---
     GameHUD gameHud;
     WorldEditor worldEditor;
+    DialogBox dialogBox;
     worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
 
     WorldRefresh::RefreshContext cellRefreshContext{
@@ -179,6 +181,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     camController.SetCollisionWorld(&collisionWorld);
 
     bool firstFrame = true;
+    bool dialogSmokeTestShown = false;
     float debugClearColorTime = 0.0f; // dev-only: drives the animated clear-color pulse
     FrameTiming::State frameTimingState;
     FrameTiming::Initialize(frameTimingState);
@@ -186,6 +189,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasPauseActionDown = false;
     bool wasDebugActionDown = false;
     bool wasReloadActionDown = false;
+    bool wasInteractActionDown = false;
     CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
     // Track the cell the player was in last frame to detect cell-crossing.
@@ -212,6 +216,15 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             continue; // Skip the loop if the window is not active
         }
 
+        // Temporary startup dialog line for feature smoke testing.
+        if (!dialogSmokeTestShown)
+        {
+            dialogBox.Show("???", "The wind carries a strange scent from the east...");
+            dialogSmokeTestShown = true;
+        }
+
+        dialogBox.Update(deltaTime);
+
         // --- Toggle keys (edge-detect so they fire once per press) ---
 
         // Esc: toggle pause menu (was: exit the program).
@@ -228,6 +241,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         {
             WorldReload::ReloadAssetsAndWorld(worldReloadContext);
         }
+
+        const bool interactPressed = actionMap.IsPressed(InputAction::Interact, wasInteractActionDown);
 
         // Handle quit/resume signals from the UI.
         if (imguiLayer.WantsQuit())
@@ -250,6 +265,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         const bool editorActive = worldEditor.IsEditorInteractionActive();
         const bool wantCursorVisible = paused || editorActive;
         CursorMode::ApplyCursorVisibility(cursorModeState, wantCursorVisible);
+
+        if (!paused && dialogBox.IsOpen() && interactPressed)
+            dialogBox.Dismiss();
 
         // Animate the clear color so you can see it is updating.
         debugClearColorTime += deltaTime;
@@ -337,6 +355,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             if (!imguiLayer.IsPauseMenuOpen())
             {
                 gameHud.Draw(playerActor.stats, ImGui::GetIO());
+                dialogBox.Draw(ImGui::GetIO());
             }
             // Draw the World Editor panel inside the ImGui frame.
             WorldEditorFrameOps::DrawEditorPanelForActiveCell(
