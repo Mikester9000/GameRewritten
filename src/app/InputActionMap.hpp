@@ -67,4 +67,9 @@ struct InputActionMap
         wasDown = isDown;
         return pressed;
     }
+
+    bool IsVirtualKeyHeld(int virtualKey) const
+    {
+        return (GetAsyncKeyState(virtualKey) & 0x8000) != 0;
+    }
 };

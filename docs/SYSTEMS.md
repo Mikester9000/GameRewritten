@@ -45,6 +45,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Recast/Detour nav (init only) | 🔧 | `ThirdPartyBootstrap` → `tp::Nav` |
 | DirectXTex (smoke test only) | 🔧 | `ThirdPartyBootstrap` → `tp::Texture` |
 | Player stats (hp/mp/atb) | ✅ | `src/game/actors/PlayerStats.hpp`, `src/game/actors/PlayerActor.hpp`, `src/game/RuntimeScene.hpp` |
+| Player action state machine | ✅ | `src/game/actors/PlayerActionState.hpp`, `src/game/actors/PlayerActor.cpp/hpp` |
 | Gameplay HUD | ✅ | `src/ui/GameHUD.hpp`, `src/ui/GameHUD.cpp`, `src/app/Main.cpp` |
 | Texture cache | ✅ | `src/assets/TextureCache.hpp`, `src/assets/TextureCache.cpp` |
 | Directional lighting | ✅ | `src/rendering/d3d11/D3D11Renderer.cpp/hpp`, `Shaders/ground_ps.hlsl`, `Shaders/basic3d_ps.hlsl`, `Shaders/tree_ps.hlsl`, `src/ui/ImGuiLayer.cpp/hpp` |

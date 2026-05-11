@@ -208,6 +208,9 @@
     <ClInclude Include="src\game\actors\ActorCommon.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\actors\PlayerActionState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\actors\PlayerActor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

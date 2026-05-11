@@ -14,7 +14,7 @@
 //   RuntimeScene scene(playerActor, primRenderer);
 //   scene.InitEnemies(spawnCenterX, spawnCenterZ);
 //   // each frame:
-//   scene.BeginFrame(deltaTime, renderer);
+//   scene.BeginFrame(deltaTime, actionMap, camController.IsGrounded(), attackPressed, renderer);
 //   scene.SubmitActors(camController, prefabLibrary);
 
 #include "actors/PlayerActor.hpp"
@@ -29,6 +29,7 @@
 // includes RuntimeScene.
 class D3D11Renderer;
 class PrefabLibrary;
+struct InputActionMap;
 
 class RuntimeScene
 {
@@ -53,9 +54,14 @@ public:
 
     // Update runtime actor state and clear all dynamic/runtime instance buckets.
     // Call once at the start of each frame before submitting actor visuals.
-    void BeginFrame(float dt, D3D11Renderer& renderer)
+    void BeginFrame(float dt,
+                    const InputActionMap& actionMap,
+                    bool isGrounded,
+                    bool attackPressed,
+                    D3D11Renderer& renderer)
     {
         m_player.stats.Update(dt);
+        m_player.Update(dt, actionMap, isGrounded, attackPressed);
         m_primRenderer.ClearRuntimeInstances();
 
         for (EnemyActor& enemy : m_enemies)

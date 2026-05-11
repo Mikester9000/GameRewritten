@@ -10,3 +10,4 @@
 - 2026-05-11: Added `AudioManager` wrapper for tp::Audio with BGM/SFX playback hooks, pause-menu BGM volume slider, and startup/combat audio wiring.
 - 2026-05-11: Added ImGui draw-list minimap overlay (top-right, 160x160) showing 5x5 nearby cells colored by biome, player position dot, and facing-direction arrow; hidden while pause menu is open.
 - 2026-05-11: Added high-level vision docs: moved UI_VISION.md to docs/, added docs/GRAPHICS_VISION.md and docs/COMBAT_VISION.md, cross-referenced from GAME_VISION_PLAN.md.
+- 2026-05-11: Track 12.1: Add PlayerActionState enum and state machine to PlayerActor
