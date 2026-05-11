@@ -5,6 +5,7 @@
 
 #include "ImGuiLayer.hpp"
 #include <Windows.h>
+#include "../audio/AudioManager.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 
 // ImGui core + backends (vendored under third_party/)
@@ -166,6 +167,12 @@ void ImGuiLayer::DrawPauseMenu()
             ImGui::Indent();
             static float mouseSpeed = 1.0f;
             ImGui::SliderFloat("Mouse Speed", &mouseSpeed, 0.1f, 5.0f);
+            if (m_audioManager)
+            {
+                float bgmVolume = m_audioManager->GetBGMVolume();
+                if (ImGui::SliderFloat("BGM Volume", &bgmVolume, 0.0f, 1.0f))
+                    m_audioManager->SetBGMVolume(bgmVolume);
+            }
             ImGui::Unindent();
         }
 

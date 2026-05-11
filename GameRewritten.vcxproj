@@ -180,6 +180,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <None Include="packages.config" />
     <!-- Content/ asset files (data-driven, loaded at runtime via AssetLoader) -->
     <None Include="Content\AssetRegistry.json" />
+    <None Include="Content\Audio\README.md" />
     <None Include="Content\Materials\default.material.json" />
     <None Include="Content\Prefabs\tree.prefab.json" />
     <None Include="Content\Prefabs\tree_oak.prefab.json" />
@@ -232,6 +233,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\app\Main.cpp" />
+    <ClCompile Include="src\audio\AudioManager.cpp" />
     <ClCompile Include="src\assets\AssetLoader.cpp" />
     <ClCompile Include="src\assets\AssetRegistry.cpp" />
     <ClCompile Include="src\assets\TextureCache.cpp" />
@@ -282,6 +284,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\assets\AssetLoader.hpp" />
     <ClInclude Include="src\assets\AssetRegistry.hpp" />
     <ClInclude Include="src\assets\TextureCache.hpp" />
+    <ClInclude Include="src\audio\AudioManager.hpp" />
     <ClInclude Include="src\game\CameraController.hpp" />
     <ClInclude Include="src\game\physics\AABB.hpp" />
     <ClInclude Include="src\game\physics\CollisionWorld.hpp" />
