@@ -49,7 +49,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Gameplay HUD | ✅ | `src/ui/GameHUD.hpp`, `src/ui/GameHUD.cpp`, `src/app/Main.cpp` |
 | Texture cache | ✅ | `src/assets/TextureCache.hpp`, `src/assets/TextureCache.cpp` |
 | Directional lighting | ✅ | `src/rendering/d3d11/D3D11Renderer.cpp/hpp`, `Shaders/ground_ps.hlsl`, `Shaders/basic3d_ps.hlsl`, `Shaders/tree_ps.hlsl`, `src/ui/ImGuiLayer.cpp/hpp` |
-| Input action map | ✅ | `src/app/InputActionMap.hpp` — Dodge (VK_SHIFT), LockOn (VK_TAB) added |
+| Input action map | ✅ | `src/app/InputActionMap.hpp`, `src/app/Main.cpp`, `src/game/CameraController.cpp/hpp` |
 | AABB collision | ✅ | `src/game/physics/AABB.hpp`, `src/game/physics/CollisionWorld.cpp/hpp`, `src/game/CameraController.cpp/hpp`, `src/app/WorldRuntimeRefresh.hpp`, `src/app/Main.cpp` |
 | Enemy actor | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Dialog box | ✅ | `src/ui/DialogBox.cpp/hpp`, `src/app/Main.cpp` |
