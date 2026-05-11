@@ -6,8 +6,9 @@
 
 #include <imgui.h>
 #include <cmath>
-#include <vector>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace
 {
@@ -21,10 +22,17 @@ constexpr float kCellPx     = kMapSize / static_cast<float>(kGridDim); // pixels
 // Return a fill color for a given biome name.
 ImU32 BiomeColor(const std::string& biome)
 {
-    if (biome == "grassland") return IM_COL32( 30,  90,  30, 220);
-    if (biome == "forest")    return IM_COL32( 50,  80,  20, 220);
-    if (biome == "desert")    return IM_COL32(210, 180, 100, 220);
-    // rocky, snow, or any unknown biome.
+    static const std::unordered_map<std::string, ImU32> kBiomeColors = {
+        { "grassland", IM_COL32( 30,  90,  30, 220) },
+        { "forest",    IM_COL32( 50,  80,  20, 220) },
+        { "desert",    IM_COL32(210, 180, 100, 220) },
+        { "rocky",     IM_COL32(120, 110, 100, 220) },
+        { "snow",      IM_COL32(220, 230, 240, 220) },
+    };
+    const auto it = kBiomeColors.find(biome);
+    if (it != kBiomeColors.end())
+        return it->second;
+    // Truly unknown biome name — not the same as an unloaded cell.
     return IM_COL32(100, 100, 110, 200);
 }
 
@@ -56,6 +64,9 @@ void Minimap::Draw(const WorldGrid& grid,
     ImGui::SetNextWindowPos(ImVec2(winX, winY), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(kMapSize, kMapSize), ImGuiCond_Always);
     ImGui::SetNextWindowBgAlpha(0.65f);
+    // Zero out window padding so the draw-list grid fills the full 160x160 area
+    // without clipping or misalignment caused by the default inner padding.
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
     const ImGuiWindowFlags flags =
         ImGuiWindowFlags_NoDecoration         |
@@ -64,7 +75,12 @@ void Minimap::Draw(const WorldGrid& grid,
         ImGuiWindowFlags_NoMove               |
         ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-    if (!ImGui::Begin("##Minimap", nullptr, flags))
+    const bool visible = ImGui::Begin("##Minimap", nullptr, flags);
+    // Always pop immediately after Begin so the stack stays balanced
+    // regardless of whether the window is visible or collapsed.
+    ImGui::PopStyleVar();
+
+    if (!visible)
     {
         ImGui::End();
         return;
