@@ -1,10 +1,19 @@
 #include "PlayerActor.hpp"
 
+#include "../../app/InputActionMap.hpp"
 #include "../CameraController.hpp"
 #include "../PrefabLibrary.hpp"
 #include "../PrimitiveRenderer.hpp"
 
 #include <string>
+
+namespace
+{
+bool IsDodgeHeld()
+{
+    return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+}
+}
 
 ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraController& cameraController) const
 {
@@ -15,6 +24,58 @@ ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraControll
     pose.yaw = cameraController.GetYaw();
     pose.scale = 1.0f;
     return pose;
+}
+
+void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded)
+{
+    (void)isGrounded;
+
+    stateTimer -= dt;
+    if (stateTimer < 0.0f)
+        stateTimer = 0.0f;
+
+    switch (state)
+    {
+    case PlayerActionState::Idle:
+    case PlayerActionState::Move:
+        if (input.IsHeld(InputAction::Attack) && stats.IsAtbReady())
+        {
+            TransitionTo(PlayerActionState::Attack1, 0.40f);
+        }
+        else if (IsDodgeHeld())
+        {
+            TransitionTo(PlayerActionState::Dodge, 0.35f);
+        }
+        break;
+
+    case PlayerActionState::Attack1:
+        if (stateTimer <= 0.0f)
+            TransitionTo(PlayerActionState::Idle, 0.0f);
+        break;
+
+    case PlayerActionState::Dodge:
+        if (stateTimer <= 0.0f)
+            TransitionTo(PlayerActionState::Idle, 0.0f);
+        break;
+
+    case PlayerActionState::Stunned:
+        if (stateTimer <= 0.0f)
+            TransitionTo(stats.hp > 0.0f ? PlayerActionState::Idle
+                                         : PlayerActionState::Dead, 0.0f);
+        break;
+
+    case PlayerActionState::Dead:
+        break;
+
+    default:
+        break;
+    }
+}
+
+void PlayerActor::TransitionTo(PlayerActionState next, float duration)
+{
+    state = next;
+    stateTimer = duration;
 }
 
 void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,

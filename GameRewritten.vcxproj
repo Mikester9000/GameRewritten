@@ -290,6 +290,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\game\physics\AABB.hpp" />
     <ClInclude Include="src\game\physics\CollisionWorld.hpp" />
     <ClInclude Include="src\game\actors\ActorCommon.hpp" />
+    <ClInclude Include="src\game\actors\PlayerActionState.hpp" />
     <ClInclude Include="src\game\actors\PlayerActor.hpp" />
     <ClInclude Include="src\game\actors\EnemyActor.hpp" />
     <ClInclude Include="src\game\combat\HitBox.hpp" />

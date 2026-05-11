@@ -346,7 +346,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
         // Stats (ATB charge) are updated inside BeginFrame, so check/consume ATB after it.
-        runtimeScene.BeginFrame(deltaTime, renderer);
+        const bool playerIsGrounded = true;
+        runtimeScene.BeginFrame(deltaTime, actionMap, playerIsGrounded, renderer);
 
         // F — player attack (ATB-gated, ignored while paused).
         // Runs after BeginFrame so the ATB readiness check uses the current frame's value.
