@@ -571,7 +571,7 @@ Additional planned scope:
 - Inventory system with item list and counts
 - Potion / heal item use with key bind
 - Status effects lite (Poisoned HP drain, Slowed move speed) with tint indicator
-- Ability / skill hotbar stub (reserved HUD space)
+- Ability / skill hotbar (functional)
 - MP cost on special attacks (future extension of ATB system)
 - Fast travel stub (named location list, no complex map UI)
 - Save / load system

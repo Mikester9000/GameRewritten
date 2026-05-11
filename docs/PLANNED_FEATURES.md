@@ -17,7 +17,6 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 ## Milestone 12 — Playable Combat Loop
 
 ### Core combat
-- [ ] Player action state machine
 - [ ] Dodge burst movement
 - [ ] 2-step combo chain
 - [ ] Lock-on targeting
