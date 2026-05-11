@@ -76,6 +76,7 @@ public:
     float GetPlayerY() const { return m_playerY; }
     float GetPlayerGroundY() const { return m_playerY - eyeOffset; }
     float GetPlayerZ() const { return m_playerZ; }
+    bool  IsGrounded() const { return m_isGrounded; }
     float GetYaw()     const { return m_yaw; }
     float GetPitch()   const { return m_pitch; }
     // Camera follow position (behind + above the player).

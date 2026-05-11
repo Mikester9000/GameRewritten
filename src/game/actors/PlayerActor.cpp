@@ -7,14 +7,6 @@
 
 #include <string>
 
-namespace
-{
-bool IsDodgeHeld()
-{
-    return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-}
-}
-
 ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraController& cameraController) const
 {
     ActorCommon::RuntimeActorPose pose;
@@ -28,11 +20,19 @@ ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraControll
 
 void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded)
 {
-    (void)isGrounded;
-
     stateTimer -= dt;
     if (stateTimer < 0.0f)
         stateTimer = 0.0f;
+
+    if (!isGrounded)
+    {
+        if (state == PlayerActionState::Idle || state == PlayerActionState::Move)
+            state = PlayerActionState::Fall;
+    }
+    else if (state == PlayerActionState::Fall)
+    {
+        state = PlayerActionState::Idle;
+    }
 
     switch (state)
     {
@@ -42,7 +42,7 @@ void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded)
         {
             TransitionTo(PlayerActionState::Attack1, 0.40f);
         }
-        else if (IsDodgeHeld())
+        else if (input.IsVirtualKeyHeld(VK_SHIFT))
         {
             TransitionTo(PlayerActionState::Dodge, 0.35f);
         }
