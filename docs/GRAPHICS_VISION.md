@@ -17,7 +17,7 @@ The goal is not photorealism. It is **readable, charming, low-cost stylization**
 |---|---|
 | FF7-inspired style | Simple geometry, palette-driven colors, strong silhouettes |
 | Action-RPG readability | Enemies, player, and hazards are instantly distinguishable |
-| GT610 constraint | ≤ 200 draw calls on Low, ≤ 512 MB GPU memory |
+| GT610 constraint | ≤ 100 draw calls per frame on Low (hard cap), ≤ 512 MB GPU memory |
 | D3D11 forward renderer | Single forward pass, no deferred pipeline, no heavy post |
 
 ---
@@ -58,11 +58,11 @@ Use a **single directional sun light** (diffuse + ambient) bound to the `LightCB
 ### Current shaders (do not replace)
 | Shader pair | Purpose |
 |---|---|
-| `sky_vs/ps.hlsl` | Gradient sky dome |
-| `ground_vs/ps.hlsl` | Terrain / ground plane |
-| `tree_vs/ps.hlsl` | Foliage instancing |
-| `prim_vs/ps.hlsl` | Box primitive rendering (actors, props) |
-| `basic3d_vs/ps.hlsl` | Generic 3D geometry |
+| `sky_vs.hlsl` + `sky_ps.hlsl` | Gradient sky dome |
+| `ground_vs.hlsl` + `ground_ps.hlsl` | Terrain / ground plane |
+| `tree_vs.hlsl` + `tree_ps.hlsl` | Foliage instancing |
+| `prim_vs.hlsl` + `prim_ps.hlsl` | Box primitive rendering (actors, props) |
+| `basic3d_vs.hlsl` + `basic3d_ps.hlsl` | Generic 3D geometry |
 
 ### Shader rules
 - Keep shaders simple: minimal branching, no large loops, few texture fetches per pixel.
@@ -82,7 +82,7 @@ The GT610 cannot sustain multiple fullscreen passes at 60 fps. Defer post-proces
 
 ---
 
-## Colour and Palette Direction
+## Color and Palette Direction
 
 - **Sky**: gradient from deep blue/indigo at horizon to lighter blue above.
 - **Terrain**: warm earth tones (brown, khaki, muted green). Avoid sharp grass green.

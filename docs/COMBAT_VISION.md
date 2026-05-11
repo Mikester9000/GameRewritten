@@ -54,10 +54,10 @@ No overengineered state machines. No elaborate networking. Just clean, readable,
 - Keep the ATB model simple — do not add multiple ATB bars early.
 
 ### Hitbox System
-- `HitBox`: position + radius + damage + lifetime (frames or seconds).
+- `HitBox`: world-space center (x/y/z) + AABB half-extents (halfX/halfY/halfZ) + damage + `framesToLive`.
 - `CombatSystem` owns all active hitboxes; tests overlap each frame.
-- Hitboxes are temporary (1–3 frames). No persistent hitbox actors.
-- Keep hit detection AABB or sphere only — no convex hull until needed.
+- Hitboxes are temporary (typically 2 frames). No persistent hitbox actors.
+- Current hit detection is AABB only — no sphere or convex hull until explicitly needed.
 
 ### Lock-On
 - One lock-on target at a time. Press Tab to toggle.
