@@ -56,7 +56,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Combat system | ✅ | `src/game/combat/HitBox.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Audio manager | ✅ | `src/audio/AudioManager.hpp`, `src/audio/AudioManager.cpp` |
 | Minimap | ✅ | `src/ui/Minimap.cpp/hpp` |
-| Dodge burst movement | ❌ | `src/game/CameraController.cpp/hpp` |
+| Dodge burst movement | ✅ | `src/game/CameraController.cpp/hpp` |
 | 2-step combo chain | ❌ | `src/game/combat/CombatSystem.cpp/hpp` |
 | Lock-on targeting | ❌ | `src/game/combat/Targeting.hpp` |
 | Enemy combat states (chase/attack/hit) | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |

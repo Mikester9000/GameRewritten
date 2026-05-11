@@ -50,6 +50,7 @@ public:
     void SetCenterPoint(POINT center);
     void SetInputActionMap(const InputActionMap* inputActionMap) { m_inputActionMap = inputActionMap; }
     void SetCollisionWorld(const CollisionWorld* collisionWorld) { m_collisionWorld = collisionWorld; }
+    void BeginDodge(float dirX, float dirZ);
 
     // Advance camera + player movement by one frame.
     // allowMovement  = true when WASD/jump/gravity should be processed.
@@ -83,6 +84,7 @@ public:
     float GetCamX()    const { return m_camX; }
     float GetCamY()    const { return m_camY; }
     float GetCamZ()    const { return m_camZ; }
+    bool  IsDodgeActive() const { return m_dodgeActive; }
 
 private:
     static constexpr float PLAYER_COLLISION_HALF_WIDTH_X = 0.3f;
@@ -94,6 +96,10 @@ private:
     float m_camX = 0.0f, m_camY = 0.0f, m_camZ = 0.0f;
     float m_velocityY  = 0.0f;
     bool  m_isGrounded = true;
+    float m_dodgeVelX = 0.0f;
+    float m_dodgeVelZ = 0.0f;
+    float m_dodgeTimer = 0.0f;
+    bool m_dodgeActive = false;
     POINT m_centerPoint = {};
     const InputActionMap* m_inputActionMap = nullptr;
     const CollisionWorld* m_collisionWorld = nullptr;

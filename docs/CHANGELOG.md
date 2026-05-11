@@ -13,3 +13,4 @@
 - 2026-05-11: Added high-level vision docs: moved UI_VISION.md to docs/, added docs/GRAPHICS_VISION.md and docs/COMBAT_VISION.md, cross-referenced from GAME_VISION_PLAN.md.
 - 2026-05-11: Track 12.1: Add PlayerActionState enum and state machine to PlayerActor
 - 2026-05-11: Track 12.2: Add Dodge and LockOn actions to InputActionMap with default key bindings
+- 2026-05-11: Track 12.3: Add dodge burst movement to CameraController (4 units over 0.35s, overrides WASD during burst)
