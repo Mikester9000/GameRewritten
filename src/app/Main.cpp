@@ -190,6 +190,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasDebugActionDown = false;
     bool wasReloadActionDown = false;
     bool wasInteractActionDown = false;
+    bool wasAttackActionDown = false;
     CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
     // Track the cell the player was in last frame to detect cell-crossing.
@@ -289,6 +290,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
 
         camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
+
+        // F — player attack (ATB-gated, ignored while paused).
+        if (!paused && actionMap.IsPressed(InputAction::Attack, wasAttackActionDown))
+            runtimeScene.TriggerPlayerAttack(camController);
 
         // --- Cell-crossing detection: rebuild terrain instantly on biome change ---
         // This gives hard biome borders with no loading screen.
