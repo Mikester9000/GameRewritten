@@ -19,6 +19,7 @@
 #include "../ui/GameHUD.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../ui/DialogBox.hpp"
+#include "../ui/Minimap.hpp"
 #include "../ui/WorldEditor.hpp"
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
@@ -117,6 +118,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     GameHUD gameHud;
     WorldEditor worldEditor;
     DialogBox dialogBox;
+    Minimap minimap;
     worldEditor.SetReferences(&registry, &worldGrid, &forest, &prefabLibrary, primRendererPtr);
 
     WorldRefresh::RefreshContext cellRefreshContext{
@@ -372,6 +374,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             {
                 gameHud.Draw(playerActor.stats, ImGui::GetIO());
                 dialogBox.Draw(ImGui::GetIO());
+                minimap.Draw(worldGrid,
+                             camController.GetPlayerX(), camController.GetPlayerZ(),
+                             camController.GetYaw(), ImGui::GetIO());
             }
             // Draw the World Editor panel inside the ImGui frame.
             WorldEditorFrameOps::DrawEditorPanelForActiveCell(
