@@ -14,7 +14,8 @@
 //   RuntimeScene scene(playerActor, primRenderer);
 //   scene.InitEnemies(spawnCenterX, spawnCenterZ);
 //   // each frame:
-//   scene.BeginFrame(deltaTime, actionMap, camController.IsGrounded(), attackPressed, renderer);
+//   scene.BeginPlayerFrame(deltaTime, actionMap, camController.IsGrounded(), attackPressed, camController);
+//   scene.BeginFrame(deltaTime, renderer);
 //   scene.SubmitActors(camController, prefabLibrary);
 
 #include "actors/PlayerActor.hpp"
@@ -22,6 +23,7 @@
 #include "PrimitiveRenderer.hpp"
 #include "combat/CombatSystem.hpp"
 #include "CameraController.hpp"
+#include "../app/InputActionMap.hpp"
 #include <cmath>
 #include <logger/Logger.hpp>
 
@@ -29,7 +31,6 @@
 // includes RuntimeScene.
 class D3D11Renderer;
 class PrefabLibrary;
-struct InputActionMap;
 
 class RuntimeScene
 {
@@ -52,16 +53,51 @@ public:
                           centerX + 10.0f, centerZ + 50.0f);
     }
 
-    // Update runtime actor state and clear all dynamic/runtime instance buckets.
-    // Call once at the start of each frame before submitting actor visuals.
-    void BeginFrame(float dt,
-                    const InputActionMap& actionMap,
-                    bool isGrounded,
-                    bool attackPressed,
-                    D3D11Renderer& renderer)
+    // Update player state and trigger one-shot dodge bursts before camera movement.
+    // This ordering avoids a one-frame latency before dodge movement starts.
+    void BeginPlayerFrame(float dt,
+                          const InputActionMap& actionMap,
+                          bool isGrounded,
+                          bool attackPressed,
+                          CameraController& camController)
     {
         m_player.stats.Update(dt);
         m_player.Update(dt, actionMap, isGrounded, attackPressed);
+
+        // Trigger the burst once when Dodge starts; IsDodgeActive prevents re-triggering each frame.
+        if (m_player.state == PlayerActionState::Dodge &&
+            m_player.stateTimer > 0.0f &&
+            !camController.IsDodgeActive())
+        {
+            const float yaw = camController.GetYaw();
+            const float forwardX = sinf(yaw);
+            const float forwardZ = cosf(yaw);
+            const float rightX = cosf(yaw);
+            const float rightZ = -sinf(yaw);
+
+            float dodgeDirX = 0.0f;
+            float dodgeDirZ = 0.0f;
+            if (actionMap.IsHeld(InputAction::MoveForward)) { dodgeDirX += forwardX; dodgeDirZ += forwardZ; }
+            if (actionMap.IsHeld(InputAction::MoveBack))    { dodgeDirX -= forwardX; dodgeDirZ -= forwardZ; }
+            if (actionMap.IsHeld(InputAction::MoveLeft))    { dodgeDirX -= rightX;   dodgeDirZ -= rightZ;   }
+            if (actionMap.IsHeld(InputAction::MoveRight))   { dodgeDirX += rightX;   dodgeDirZ += rightZ;   }
+
+            const float dirLenSq = (dodgeDirX * dodgeDirX) + (dodgeDirZ * dodgeDirZ);
+            if (dirLenSq <= 1e-6f)
+            {
+                dodgeDirX = forwardX;
+                dodgeDirZ = forwardZ;
+            }
+
+            camController.BeginDodge(dodgeDirX, dodgeDirZ);
+        }
+    }
+
+    // Update runtime actor state and clear all dynamic/runtime instance buckets.
+    // Call once each frame after BeginPlayerFrame(), before submitting actor visuals.
+    void BeginFrame(float dt, D3D11Renderer& renderer)
+    {
+
         m_primRenderer.ClearRuntimeInstances();
 
         for (EnemyActor& enemy : m_enemies)

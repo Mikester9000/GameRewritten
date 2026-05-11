@@ -4,6 +4,7 @@
 #include "CameraController.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../app/InputActionMap.hpp"
+#include "../logger/Logger.hpp"
 #include "physics/CollisionWorld.hpp"
 
 #include <cmath>
@@ -11,6 +12,35 @@
 #include <DirectXMath.h>
 
 using namespace DirectX;
+
+void CameraController::BeginDodge(float dirX, float dirZ)
+{
+    constexpr float kDodgeDuration = 0.35f;
+    constexpr float kDodgeDistance = 4.0f;
+    constexpr float kMinDirLenSq = 1e-6f;
+
+    float useDirX = dirX;
+    float useDirZ = dirZ;
+    const float dirLenSq = (useDirX * useDirX) + (useDirZ * useDirZ);
+    if (dirLenSq <= kMinDirLenSq)
+    {
+        useDirX = sinf(m_yaw);
+        useDirZ = cosf(m_yaw);
+    }
+    else
+    {
+        const float invLen = 1.0f / sqrtf(dirLenSq);
+        useDirX *= invLen;
+        useDirZ *= invLen;
+    }
+
+    const float dodgeSpeed = kDodgeDistance / kDodgeDuration;
+    m_dodgeVelX = useDirX * dodgeSpeed;
+    m_dodgeVelZ = useDirZ * dodgeSpeed;
+    m_dodgeTimer = kDodgeDuration;
+    m_dodgeActive = true;
+    LOG_INFO("CameraController: Dodge burst started.");
+}
 
 // ---------------------------------------------------------------------------
 // Init
@@ -93,12 +123,29 @@ void CameraController::Update(float dt, bool allowMovement, bool allowMouseLook,
         float rightX   =  cosf(m_yaw);
         float rightZ   = -sinf(m_yaw);
 
-        float step = moveSpeed * dt;
-
-        if (isHeld(InputAction::MoveForward, 'W')) { m_playerX += forwardX * step; m_playerZ += forwardZ * step; }
-        if (isHeld(InputAction::MoveBack, 'S'))    { m_playerX -= forwardX * step; m_playerZ -= forwardZ * step; }
-        if (isHeld(InputAction::MoveLeft, 'A'))    { m_playerX -= rightX * step;   m_playerZ -= rightZ * step;   }
-        if (isHeld(InputAction::MoveRight, 'D'))   { m_playerX += rightX * step;   m_playerZ += rightZ * step;   }
+        if (m_dodgeActive)
+        {
+            // TODO Track 12.6: apply invincibility window (~0.2s) during dodge burst
+            const float dodgeStepDt = std::min(dt, m_dodgeTimer);
+            m_playerX += m_dodgeVelX * dodgeStepDt;
+            m_playerZ += m_dodgeVelZ * dodgeStepDt;
+            m_dodgeTimer -= dt;
+            if (m_dodgeTimer <= 0.0f)
+            {
+                m_dodgeActive = false;
+                m_dodgeVelX = 0.0f;
+                m_dodgeVelZ = 0.0f;
+                LOG_INFO("CameraController: Dodge burst ended.");
+            }
+        }
+        else
+        {
+            float step = moveSpeed * dt;
+            if (isHeld(InputAction::MoveForward, 'W')) { m_playerX += forwardX * step; m_playerZ += forwardZ * step; }
+            if (isHeld(InputAction::MoveBack, 'S'))    { m_playerX -= forwardX * step; m_playerZ -= forwardZ * step; }
+            if (isHeld(InputAction::MoveLeft, 'A'))    { m_playerX -= rightX * step;   m_playerZ -= rightZ * step;   }
+            if (isHeld(InputAction::MoveRight, 'D'))   { m_playerX += rightX * step;   m_playerZ += rightZ * step;   }
+        }
 
         // Gravity + jumping
         if (!m_isGrounded)
