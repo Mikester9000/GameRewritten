@@ -8,6 +8,7 @@
 #include <d3d11.h>
 
 class D3D11Renderer;
+class AudioManager;
 
 class ImGuiLayer
 {
@@ -51,6 +52,7 @@ public:
     {
         camX = x; camY = y; camZ = z; camYaw = yaw; camPitch = pitch;
     }
+    void SetAudioManager(AudioManager* audioManager) { m_audioManager = audioManager; }
 
     // Returns true when the user chose "Quit" from the pause menu.
     bool WantsQuit() const { return wantsQuit; }
@@ -85,6 +87,7 @@ private:
     float m_sunDirY = -1.0f;
     float m_sunDirZ = 0.0f;
     float m_ambientStrength = 0.25f;
+    AudioManager* m_audioManager = nullptr;
 
     void DrawPauseMenu();
     void DrawDebugOverlay();

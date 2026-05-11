@@ -23,6 +23,7 @@
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
 #include "../assets/TextureCache.hpp"
+#include "../audio/AudioManager.hpp"
 #include "../world/WorldGrid.hpp"
 #include "FrameTiming.hpp"
 #include "InputActionMap.hpp"
@@ -155,6 +156,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // ── ThirdParty subsystem smoke tests ──────────────────────────────────
     ThirdPartyBootstrap::InitializeAndRunSmokeTests();
+    AudioManager audioManager;
+    // Current tp::Audio wrapper is one-shot only; this is non-looping startup BGM.
+    audioManager.PlayBGM("Content/Audio/bgm_field.ogg");
     // ── End ThirdParty smoke tests ─────────────────────────────────────────
 
     // --- Camera + player movement (now owned by CameraController) ---
@@ -169,6 +173,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     renderer.SetCameraPosition(startupCellCenter, 0.0f, startupCellCenter);
     renderer.SetCameraRotation(0.0f, -0.5f);
+    imguiLayer.SetAudioManager(&audioManager);
     // Center the mouse before the loop
     RECT windowRect;
     GetClientRect(window.GetHandle(), &windowRect);
@@ -343,8 +348,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         // F — player attack (ATB-gated, ignored while paused).
         // Runs after BeginFrame so the ATB readiness check uses the current frame's value.
-        if (!paused && attackPressed)
-            runtimeScene.TriggerPlayerAttack(camController);
+        if (!paused && attackPressed && runtimeScene.TriggerPlayerAttack(camController))
+            audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
 
         runtimeScene.SubmitActors(camController, prefabLibrary);
 
@@ -381,6 +386,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     primRenderer.Shutdown();
     forest.Shutdown();
     imguiLayer.Shutdown();
+    audioManager.Shutdown();
     ThirdPartyBootstrap::Shutdown();
     textureCache.ReleaseAll();
     renderer.Shutdown();

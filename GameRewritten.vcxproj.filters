@@ -22,6 +22,7 @@
     <None Include=".github\copilot-instructions.md" />
     <None Include="Shaders\triangle_ps.hlsl" />
     <None Include="Content\AssetRegistry.json" />
+    <None Include="Content\Audio\README.md" />
     <None Include="Content\Materials\default.material.json" />
     <None Include="Content\Prefabs\tree.prefab.json" />
     <None Include="Content\Prefabs\tree_oak.prefab.json" />
@@ -74,6 +75,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\app\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\AudioManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\win32\Win32Window.cpp">
@@ -184,6 +188,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\assets\TextureCache.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\AudioManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\game\CameraController.hpp">
