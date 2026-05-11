@@ -39,7 +39,8 @@ The result is a modern open-world action game that retains the charm of old-scho
 | Gameplay HUD (HP / MP / ATB bar) | ✅ Complete | `src/ui/GameHUD.*` |
 | Dialog box (typewriter reveal) | ✅ Complete | `src/ui/DialogBox.*` |
 | Biome minimap overlay | ✅ Complete | `src/ui/Minimap.*` |
-| Audio one-shot SFX / BGM stub | ✅ Complete | `src/audio/AudioManager.*`, `ThirdParty/src/tp_audio.*` |
+| Audio SFX one-shot playback | ✅ Complete | `src/audio/AudioManager.*`, `ThirdParty/src/tp_audio.*` |
+| Audio looping BGM / stop / volume | 🔧 Stub | `tp::Audio` exposes only `PlayOneShot`; true loop handle, stop, and runtime volume control are not implemented yet (Milestone 15) |
 | Tracy CPU profiling zones | ✅ Complete | `GR_ZONE_SCOPED_N`, `GR_FRAME_MARK` |
 | Jolt physics (initialised, raycast API) | 🔧 Stub | `ThirdParty/src/tp_physics.*` — no gameplay body yet |
 | Recast/Detour navmesh | 🔧 Stub | `ThirdParty/src/tp_navigation.*` — BuildFromMesh is TODO |
@@ -506,6 +507,7 @@ Example cel-shade HLSL (add to `prim_ps.hlsl`):
 
 ```hlsl
 // Quantise diffuse into 3 brightness steps (dark / mid / lit)
+// Very cheap on GT610 (one floor + one divide); can be toggled off via quality preset.
 float steps = 3.0f;
 float celDiff = floor(diff * steps) / steps;
 float3 litColor = tintColor.rgb * (lightColor * celDiff + ambientStrength.xxx);
