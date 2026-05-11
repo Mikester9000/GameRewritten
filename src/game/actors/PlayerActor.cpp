@@ -41,7 +41,7 @@ void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded,
         {
             TransitionTo(PlayerActionState::Attack1, 0.40f);
         }
-        else if (input.IsVirtualKeyHeld(VK_SHIFT))
+        else if (input.IsHeld(InputAction::Dodge))
         {
             TransitionTo(PlayerActionState::Dodge, 0.35f);
         }
