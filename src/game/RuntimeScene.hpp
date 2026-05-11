@@ -54,6 +54,7 @@ public:
     }
 
     // Update player state and trigger one-shot dodge bursts before camera movement.
+    // This ordering avoids a one-frame latency before dodge movement starts.
     void BeginPlayerFrame(float dt,
                           const InputActionMap& actionMap,
                           bool isGrounded,
@@ -93,7 +94,7 @@ public:
     }
 
     // Update runtime actor state and clear all dynamic/runtime instance buckets.
-    // Call once at the start of each frame before submitting actor visuals.
+    // Call once each frame after BeginPlayerFrame(), before submitting actor visuals.
     void BeginFrame(float dt, D3D11Renderer& renderer)
     {
 
