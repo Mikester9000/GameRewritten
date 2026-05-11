@@ -21,7 +21,7 @@ ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraControll
 
 void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded, bool attackPressed)
 {
-    stateTimer = std::max(0.0f, stateTimer - dt);
+    stateTimer = (std::max)(0.0f, stateTimer - dt);
 
     if (!isGrounded)
     {
