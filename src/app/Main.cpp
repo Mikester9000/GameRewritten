@@ -289,11 +289,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // Detect the moment Placement Mode turns OFF so we can reset mouse baseline.
         CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
 
-        camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
+        // F — edge-detect unconditionally to keep state consistent while paused.
+        const bool attackPressed = actionMap.IsPressed(InputAction::Attack, wasAttackActionDown);
 
-        // F — player attack (ATB-gated, ignored while paused).
-        if (!paused && actionMap.IsPressed(InputAction::Attack, wasAttackActionDown))
-            runtimeScene.TriggerPlayerAttack(camController);
+        camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
 
         // --- Cell-crossing detection: rebuild terrain instantly on biome change ---
         // This gives hard biome borders with no loading screen.
@@ -339,7 +338,14 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                  camController.GetYaw(),  camController.GetPitch());
         imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
+        // Stats (ATB charge) are updated inside BeginFrame, so check/consume ATB after it.
         runtimeScene.BeginFrame(deltaTime, renderer);
+
+        // F — player attack (ATB-gated, ignored while paused).
+        // Runs after BeginFrame so the ATB readiness check uses the current frame's value.
+        if (!paused && attackPressed)
+            runtimeScene.TriggerPlayerAttack(camController);
+
         runtimeScene.SubmitActors(camController, prefabLibrary);
 
         renderer.ClearScreen(r, g, b, 1.0f);

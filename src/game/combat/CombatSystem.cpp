@@ -37,6 +37,10 @@ void CombatSystem::Update(EnemyActor* enemies, int count)
     {
         --hb.framesToLive;
 
+        // Skip damage for expired hitboxes (guards against zero/negative framesToLive at spawn).
+        if (hb.framesToLive <= 0)
+            continue;
+
         for (int i = 0; i < count; ++i)
         {
             EnemyActor& enemy = enemies[i];
