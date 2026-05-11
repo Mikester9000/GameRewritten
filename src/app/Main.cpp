@@ -157,6 +157,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // ── ThirdParty subsystem smoke tests ──────────────────────────────────
     ThirdPartyBootstrap::InitializeAndRunSmokeTests();
     AudioManager audioManager;
+    // Current tp::Audio wrapper is one-shot only; this is non-looping startup BGM.
     audioManager.PlayBGM("Content/Audio/bgm_field.ogg");
     // ── End ThirdParty smoke tests ─────────────────────────────────────────
 

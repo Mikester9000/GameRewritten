@@ -5,7 +5,10 @@
 class AudioManager
 {
 public:
+    // Plays BGM via tp::Audio one-shot playback (non-looping in current wrapper).
     bool PlayBGM(const std::string& path);
+    // Clears AudioManager's tracked BGM state.
+    // Current tp::Audio wrapper does not support stopping an already-playing one-shot.
     void StopBGM();
     bool PlaySFX(const std::string& path);
 
@@ -23,5 +26,5 @@ private:
     float m_sfxVolume = 1.0f;
     bool m_loggedBgmVolumeLimit = false;
     bool m_loggedSfxVolumeLimit = false;
-    bool m_loggedStopLimit = false;
+    bool m_bgmRequested = false;
 };
