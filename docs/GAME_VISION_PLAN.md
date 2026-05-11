@@ -492,6 +492,24 @@ Once the micro-encounter loop is solid, expand the world feel:
 - **More enemy types**: reuse the state machine with different stats, speeds, prefab colors.
 - **Interaction actors**: simple NPC with a dialog trigger on `E`.
 
+Additional planned scope:
+
+- **Named NPC actors with name shown above dialog window**
+- **NPC wander behavior reusing patrol logic**
+- **NPC schedule stub tied to day/night cycle**
+- **Quest giver NPC with flag-based quest activation**
+- **Simple quest objective system with active objective list**
+- **Quest reward delivery (XP + item + dialog acknowledgment)**
+- **Dialog branching lite with yes/no choices that set flags**
+- **Merchant / shop NPC with classic FF-style shop window**
+- **Inn / rest NPC that charges currency to restore HP/MP fully**
+- **World event trigger zones (AABB zone check that triggers dialog, spawns enemies, or plays audio)**
+- **Treasure chest actor**
+- **Campfire / rest point actor**
+- **Fog of war on minimap (visited cell tracking)**
+- **Enemy respawn timer per spawn point**
+- **Enemy group spawning from cell JSON**
+
 ---
 
 ### Milestone 14 — Visual Polish (FF7-style)
@@ -502,6 +520,20 @@ Stay within GT610 constraints using simple per-vertex techniques:
 - **Palette-constrained tint**: a small 16-entry 1D texture maps palette IDs to colors per prefab part; this is the "old-school FF7 look" without any texture artist work.
 - **Cel-shading step**: quantize the diffuse term to 2–3 bands in the pixel shader.
 - **Screen shake**: simple camera offset buffer, applied in vertex shader via a cbuffer nudge.
+
+Additional planned scope:
+
+- **Wind effect on trees (vertex shader sin wave)**
+- **Weather system lite (fog depth fade + optional rain overlay)**
+- **Ambient particles (billboard dust/leaf quads)**
+- **Camera shake on impact**
+- **Letterbox bars on scripted events**
+- **Area name display on cell enter**
+- **Day/night cycle tint lerp**
+- **Biome transition fade**
+- **Enemy aggro indicator visual**
+- **Hit flash on enemy tint**
+- **Screen edge red flash on player damage**
 
 Example cel-shade HLSL (add to `prim_ps.hlsl`):
 
@@ -520,6 +552,32 @@ float3 litColor = tintColor.rgb * (lightColor * celDiff + ambientStrength.xxx);
 - **Looping BGM** — extend `tp::Audio` with `ma_sound` loop handle to support true music playback.
 - **Battle music trigger** — `AudioManager` switches tracks when an enemy enters Chase state.
 - **NPC voice line stubs** — `DialogBox` already exists; wire it to NPC interaction actors.
+
+Additional planned scope:
+
+- **Environmental ambient audio per biome**
+- **UI sound effects for menu navigation**
+- **Victory fanfare on encounter clear**
+- **Level up audio sting**
+- **Footstep audio variation per terrain type**
+- **Combo escalation hit sounds**
+- **Environmental interaction sounds (chest open, item pickup, area enter)**
+- **Dynamic audio volume zones based on biome or indoor/outdoor state**
+
+## Milestone 16 — Player Progression and World Systems
+
+- XP gain on enemy kill and level system
+- Stat growth on level up (HP max, MP max, ATB fill rate)
+- Inventory system with item list and counts
+- Potion / heal item use with key bind
+- Status effects lite (Poisoned HP drain, Slowed move speed) with tint indicator
+- Ability / skill hotbar (functional)
+- MP cost on special attacks (future extension of ATB system)
+- Fast travel stub (named location list, no complex map UI)
+- Save / load system
+- Settings persistence (resolution, volume, quality preset)
+- Quality preset enforcement (Low/Med/High changing draw distance, max enemies, effect quality)
+- Loading screen for world cell transitions
 
 ---
 

@@ -138,3 +138,21 @@ The final game should look like:
 - **Effects**: minimal but readable — bright flashes for combat hits, clear indicators for state changes.
 
 Achievable on a GT610 at 60 fps with disciplined draw-call and texture budgets.
+
+### Planned Visual and Camera Features
+
+- Wind effect on trees — gentle sway on tree instances via sine-wave offset in vertex shader for a very cheap world-alive effect.
+- Ambient particles — floating dust motes or leaves rendered as billboard quads in low counts for cheap atmosphere.
+- Weather system lite — simple rain or fog overlay where fog is depth fade in pixel shader and rain is a lightweight particle overlay.
+- Day/night cycle tint — sun color and ambient values lerp over time without requiring a new renderer path.
+- Biome transition fade — sky and fog colors lerp when crossing biome boundaries using existing biome values.
+- Landmark props — distinctive large prefab objects mark key world locations such as ruins, standing stones, and old signposts.
+- Destructible prop stub — simple HP value on prop actor swaps to a destroyed visual state when depleted.
+- Treasure chest actor — simple interactable prefab grants an item and remains in an open visual state once looted.
+- Campfire / rest point — interactable actor restores HP and MP and can double as a classic JRPG save point feel.
+- Camera shake on impact — brief random camera offset triggers when player takes a hit, heavy attacks land, or nearby enemies die.
+- Combat camera zoom — slight FOV reduction while locked on to an enemy via simple lerp on existing camera FOV.
+- Death camera effect — camera slowly pulls back or tilts while screen fades to dark on player defeat.
+- Cinematic event camera — scripted moments temporarily move camera to a fixed point and then return to player control.
+- Target framing adjustment — lock-on camera shifts to keep both player and target visible for over-the-shoulder composition.
+- Camera collision avoidance — camera moves forward to avoid terrain/wall clipping using simple player-to-camera raycast via existing Jolt API.

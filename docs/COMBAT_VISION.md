@@ -159,3 +159,31 @@ The final combat should feel like:
 - **Performance**: runs at 60 fps on GT610 with up to 4 enemies, within 100 draw calls on Low.
 
 Prefer fun and readable over technically sophisticated.
+
+### Planned Combat Feedback Features
+
+- Floating damage numbers — numbers pop above enemies on hit, float upward, fade out over ~1s; white for normal, yellow for combo hits, red for enemy hits on player, using an ImGui draw list implementation.
+- Hit flash on enemy — enemy primitive briefly flashes white/bright on taking damage by overriding tint color for 1-2 frames.
+- Screen edge red flash — screen edges pulse red briefly when player takes damage using an ImGui draw list overlay with zero performance cost.
+- Hit pause / hitstop — freeze all updates for 1-3 frames on a successful hit to make impacts feel weighty.
+- Miss indicator — "Miss" text floats up in gray/white when an attack misses or is dodged by reusing the floating number system.
+- Weak point damage — hitting enemy from behind deals bonus damage using a simple angle comparison between player facing and enemy facing.
+- Overkill indicator — "Overkill" text briefly appears if the killing blow deals significantly more than remaining HP via a simple threshold check.
+- Attack range indicator — subtle ground circle shows player attack range during the attack window and is hidden outside attack state.
+- Parry / counter window — very tight dodge timing triggers a parry state with a brief flash indicator and bonus damage on the next attack.
+- Stagger meter — hidden or visible float on EnemyActor fills as enemy takes hits, and when full, enemy enters extended vulnerable state (FF7 Remake pressure/stagger lite).
+- Block / guard state — enemy occasionally guards an attack, shows a "Blocked" indicator, and applies reduced damage.
+- Combo escalation audio — each combo step plays a slightly different or higher pitched hit sound.
+- On-hit sound variation — different hit sounds play for normal hit, critical hit, and miss.
+- Enemy aggro indicator — exclamation mark style visual appears above enemy head when they detect the player, tied to Chase state entry.
+- Enemy loot drop — on death, enemy spawns a pickup actor (potion or currency stub) at its position.
+- Elite enemy variant — occasional stronger enemy uses larger prefab scale, higher HP, different tint color, and bonus loot while reusing the same AI.
+- Ranged enemy type — enemy fires a simple projectile struct moving in a direction, with AABB check against player each frame.
+- Multiple enemy types / stat variation — reuse EnemyActor state machine with different speed, HP, attack range, prefab, and detection radius.
+- Enemy respawn timer — after clearing an area, enemies respawn after a configurable delay per spawn point.
+- Enemy group spawning — define spawn groups of 2-3 enemies that activate together from a single spawn point in cell JSON.
+
+### Planned Enemy Behaviour Extensions
+
+- Enemy patrol path variation — extend waypoint array to support 3-4 point patrol loops.
+- Enemy awareness radius visualization — debug toggle draws detection radius circle on ground plane in debug overlay only and remains hidden in release.
