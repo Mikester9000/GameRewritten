@@ -17,6 +17,8 @@ enum class InputAction
     MoveRight,
     Jump,
     Attack,
+    Dodge,
+    LockOn,
     Interact,
     TogglePause,
     ToggleDebug,
@@ -45,6 +47,8 @@ struct InputActionMap
         map.bindings[InputAction::MoveRight]    = 'D';
         map.bindings[InputAction::Jump]         = VK_SPACE;
         map.bindings[InputAction::Attack]       = 'F';
+        map.bindings[InputAction::Dodge]        = VK_SHIFT;
+        map.bindings[InputAction::LockOn]       = VK_TAB;
         map.bindings[InputAction::Interact]     = 'E';
         map.bindings[InputAction::TogglePause]  = VK_ESCAPE;
         map.bindings[InputAction::ToggleDebug]  = VK_F1;
