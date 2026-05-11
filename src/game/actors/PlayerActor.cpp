@@ -19,7 +19,7 @@ ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraControll
     return pose;
 }
 
-void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded)
+void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded, bool attackPressed)
 {
     stateTimer = std::max(0.0f, stateTimer - dt);
 
@@ -37,7 +37,7 @@ void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded)
     {
     case PlayerActionState::Idle:
     case PlayerActionState::Move:
-        if (input.IsHeld(InputAction::Attack) && stats.IsAtbReady())
+        if (attackPressed && stats.IsAtbReady())
         {
             TransitionTo(PlayerActionState::Attack1, 0.40f);
         }

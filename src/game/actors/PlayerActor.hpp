@@ -16,7 +16,7 @@ public:
     PlayerActionState state = PlayerActionState::Idle;
     float stateTimer = 0.0f;
 
-    void Update(float dt, const InputActionMap& input, bool isGrounded);
+    void Update(float dt, const InputActionMap& input, bool isGrounded, bool attackPressed);
 
     void SubmitRuntimeVisual(const CameraController& cameraController,
                              const PrefabLibrary& prefabLibrary,
