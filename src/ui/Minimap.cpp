@@ -108,8 +108,8 @@ void Minimap::Draw(const WorldGrid& grid,
     // Facing direction: forward = (sin(yaw), cos(yaw)) in world XZ.
     // On the minimap X maps to screen-right, Z maps to screen-down.
     const float arrowLen = kCellPx * 0.45f;
-    const float arrowDX  =  sinf(playerYaw) * arrowLen;
-    const float arrowDY  =  cosf(playerYaw) * arrowLen;
+    const float arrowDX  = sinf(playerYaw) * arrowLen;
+    const float arrowDY  = cosf(playerYaw) * arrowLen;
 
     // Direction line from player dot toward facing direction.
     draw->AddLine(
