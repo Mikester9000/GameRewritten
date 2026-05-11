@@ -598,6 +598,16 @@ Work these prompts in order — each one depends on the previous completing clea
 
 ---
 
+## Vision Docs Index
+
+| Doc | Focus |
+|---|---|
+| `docs/GRAPHICS_VISION.md` | FF7-style visuals, GT610 budgets, D3D11 shader/lighting rules |
+| `docs/COMBAT_VISION.md` | Action combat feel, lock-on, dodge, combo, enemy pressure, tuning |
+| `docs/UI_VISION.md` | Hybrid UI: modern action HUD + classic FF-style menus/dialog |
+
+---
+
 ## Quick-start checklist before each PR
 
 1. Read `docs/SYSTEMS.md` — do not re-implement a ✅ system.
