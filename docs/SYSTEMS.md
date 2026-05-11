@@ -56,3 +56,54 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Combat system | ✅ | `src/game/combat/HitBox.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Audio manager | ✅ | `src/audio/AudioManager.hpp`, `src/audio/AudioManager.cpp` |
 | Minimap | ✅ | `src/ui/Minimap.cpp/hpp` |
+| Player action state machine | ❌ | `src/game/actors/PlayerActionState.hpp`, `src/game/actors/PlayerActor.cpp/hpp` |
+| Dodge burst movement | ❌ | `src/game/CameraController.cpp/hpp` |
+| 2-step combo chain | ❌ | `src/game/combat/CombatSystem.cpp/hpp` |
+| Lock-on targeting | ❌ | `src/game/combat/Targeting.hpp` |
+| Enemy combat states (chase/attack/hit) | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Player damage intake + defeat reset | ❌ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp` |
+| Floating damage numbers | ❌ | `src/ui/DamageNumbers.cpp/hpp` |
+| Hit flash system | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Screen edge damage flash | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Hit pause / hitstop | ❌ | `src/game/RuntimeScene.hpp` |
+| Stagger meter | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Enemy attack telegraph | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Parry / counter window | ❌ | `src/game/actors/PlayerActor.cpp/hpp` |
+| Miss indicator | ❌ | `src/ui/DamageNumbers.cpp/hpp` |
+| Weak point damage | ❌ | `src/game/combat/CombatSystem.cpp/hpp` |
+| Combo counter display | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Area name display | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Notification toast system | ❌ | `src/ui/NotificationSystem.cpp/hpp` |
+| Letterbox event bars | ❌ | `src/ui/ImGuiLayer.cpp/hpp` |
+| Contextual button prompts | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Level up screen overlay | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Status screen | ❌ | `src/ui/StatusScreen.cpp/hpp` |
+| Map screen stub | ❌ | `src/ui/MapScreen.cpp/hpp` |
+| Tooltip system | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Saving indicator | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Death / defeat screen | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Low HP warning pulse | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Camera shake | ❌ | `src/game/CameraController.cpp/hpp` |
+| Combat camera zoom | ❌ | `src/game/CameraController.cpp/hpp` |
+| Camera collision avoidance | ❌ | `src/game/CameraController.cpp/hpp` |
+| Target framing adjustment | ❌ | `src/game/CameraController.cpp/hpp` |
+| Wind effect on trees | ❌ | `Shaders/tree_vs.hlsl` |
+| Weather system lite | ❌ | `src/world/WeatherSystem.cpp/hpp` |
+| Ambient particles | ❌ | `src/game/ParticleSystem.cpp/hpp` |
+| Day/night cycle | ❌ | `src/world/DayNightCycle.cpp/hpp` |
+| Biome transition fade | ❌ | `src/world/WorldGrid.cpp/hpp` |
+| Fog of war on minimap | ❌ | `src/ui/Minimap.cpp/hpp` |
+| World event trigger zones | ❌ | `src/game/world/EventZone.cpp/hpp` |
+| NPC actor | ❌ | `src/game/actors/NpcActor.cpp/hpp` |
+| Quest objective system | ❌ | `src/game/quest/QuestSystem.cpp/hpp` |
+| Treasure chest actor | ❌ | `src/game/actors/ChestActor.cpp/hpp` |
+| Campfire / rest point actor | ❌ | `src/game/actors/RestPointActor.cpp/hpp` |
+| Inventory system | ❌ | `src/game/inventory/Inventory.cpp/hpp` |
+| XP / level system | ❌ | `src/game/actors/PlayerStats.hpp` |
+| Status effects | ❌ | `src/game/actors/PlayerStats.hpp` |
+| Fast travel stub | ❌ | `src/game/world/FastTravel.cpp/hpp` |
+| Save / load system | ❌ | `src/app/SaveSystem.cpp/hpp` |
+| Quality preset enforcement | ❌ | `src/app/QualityPreset.cpp/hpp` |
+| Victory fanfare trigger | ❌ | `src/audio/AudioManager.cpp/hpp` |
+| Environmental ambient audio | ❌ | `src/audio/AudioManager.cpp/hpp` |
+| Looping BGM | ❌ | `src/audio/AudioManager.cpp/hpp` |

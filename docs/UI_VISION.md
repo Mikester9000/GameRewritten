@@ -294,3 +294,25 @@ The UI should support:
 ## Summary Statement
 
 **Use modern low-clutter action UI for real-time gameplay, and classic Final Fantasy-style framed windows for dialog, menus, and management screens.**
+
+### Planned UI Features
+
+- Area name display — area name fades in at top of screen when entering a new cell or zone, holds briefly, then fades out as a classic open-world cue.
+- Notification / toast system — small non-intrusive corner popups show events such as "Item obtained," "Quest updated," and "New area discovered," then fade out.
+- Letterbox bars on events — black letterbox bars appear at top and bottom during important dialog or scripted moments using simple ImGui overlay rectangles.
+- Damage type color coding — damage numbers use different colors for physical, magic, enemy-to-player, and healing events.
+- Contextual button prompts — small dynamic prompts appear by context, such as "F — Attack" near enemy, "E — Talk" near NPC, and "Tab — Lock On" near enemy in range.
+- Kill counter / encounter summary — simple end-of-encounter summary shows enemies defeated and damage dealt, with optional letter grade.
+- Level up screen overlay — brief full-screen announcement shows "Level Up!" and stat changes through a simple timed overlay.
+- Saving indicator — small "Saving..." text appears in a corner while saves occur to reduce player confusion.
+- Tooltip system stub — selecting or hovering an item shows name, effect, and value using a simple string pair on item definition.
+- Map screen stub — full screen map view on M key shows visited cells, current position, and discovered landmarks as an extension of minimap data.
+- Status screen — full screen player stat view shows HP/MP/ATB, level/XP, equipped items, and current status effects in classic FF status window style.
+- Ability / skill hotbar stub — reserve HUD space now for 2-4 skill slots to avoid later HUD redesign, without enabling functionality yet.
+- Crosshair / aim indicator — add a small subtle crosshair or dot at screen center with optional toggle.
+- Enemy name display on lock-on — enemy name appears above target HP bar when locked on using a single string field on EnemyActor.
+- Interaction range indicator — subtle ground pulse or highlight appears near interactable objects when player is in range.
+- Death / defeat screen — simple full-screen overlay appears when player HP reaches zero with "Defeated" text and respawn prompt.
+- Low HP warning pulse — HUD HP bar pulses red when player HP drops below 25% using elapsed-time ImGui animation.
+- Pause menu background dim — dark full-screen overlay behind pause menu reinforces an intentional classic FF-style pause feel.
+- Combo counter display — visible combo count builds during a chain and resets on miss or timeout for modern action HUD readability.
