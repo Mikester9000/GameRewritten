@@ -8,3 +8,4 @@
 - 2026-05-08: Added ImGui dialog box UI with typewriter text reveal, E-to-continue dismiss behavior, and main-loop wiring.
 - 2026-05-11: Added action combat system: ATB-gated player attack (F key) spawns a temporary hitbox 1.5 units forward, dealing 3 damage to overlapping enemies via CombatSystem.
 - 2026-05-11: Added `AudioManager` wrapper for tp::Audio with BGM/SFX playback hooks, pause-menu BGM volume slider, and startup/combat audio wiring.
+- 2026-05-11: Added ImGui draw-list minimap overlay (top-right, 160x160) showing 5x5 nearby cells colored by biome, player position dot, and facing-direction arrow; hidden while pause menu is open.

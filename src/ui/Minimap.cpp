@@ -1,0 +1,124 @@
+// Minimap.cpp
+// ImGui draw-list minimap showing nearby world cells, player position, and facing direction.
+
+#include "Minimap.hpp"
+#include "../world/WorldGrid.hpp"
+
+#include <imgui.h>
+#include <cmath>
+#include <vector>
+#include <string>
+
+namespace
+{
+// Layout constants.
+constexpr float kMapSize    = 160.0f;   // minimap window width and height
+constexpr float kMapPadding = 10.0f;    // gap from screen top-right edge
+constexpr int   kGridRadius = 2;        // 5x5 cell grid (radius 2 from player cell)
+constexpr int   kGridDim    = kGridRadius * 2 + 1; // 5
+constexpr float kCellPx     = kMapSize / static_cast<float>(kGridDim); // pixels per cell
+
+// Return a fill color for a given biome name.
+ImU32 BiomeColor(const std::string& biome)
+{
+    if (biome == "grassland") return IM_COL32( 30,  90,  30, 220);
+    if (biome == "forest")    return IM_COL32( 50,  80,  20, 220);
+    if (biome == "desert")    return IM_COL32(210, 180, 100, 220);
+    // rocky, snow, or any unknown biome.
+    return IM_COL32(100, 100, 110, 200);
+}
+
+// Find a cell matching (cx, cz) in a pre-fetched list, or nullptr if absent.
+const WorldCell* FindInList(const std::vector<WorldCell>& cells, int cx, int cz)
+{
+    for (const auto& c : cells)
+        if (c.cx == cx && c.cz == cz)
+            return &c;
+    return nullptr;
+}
+} // namespace
+
+void Minimap::Draw(const WorldGrid& grid,
+                   float playerX, float playerZ, float playerYaw,
+                   const ImGuiIO& io)
+{
+    // Determine the player's current cell.
+    int playerCX = 0, playerCZ = 0;
+    grid.WorldToCell(playerX, playerZ, playerCX, playerCZ);
+
+    // Fetch the 5x5 region of loaded cells around the player.
+    const std::vector<WorldCell> nearby = grid.GetActiveCells(playerCX, playerCZ, kGridRadius);
+
+    // Pin the window to the top-right corner.
+    const float winX = io.DisplaySize.x - kMapSize - kMapPadding;
+    const float winY = kMapPadding;
+
+    ImGui::SetNextWindowPos(ImVec2(winX, winY), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(kMapSize, kMapSize), ImGuiCond_Always);
+    ImGui::SetNextWindowBgAlpha(0.65f);
+
+    const ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoDecoration         |
+        ImGuiWindowFlags_NoInputs             |
+        ImGuiWindowFlags_NoNav                |
+        ImGuiWindowFlags_NoMove               |
+        ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+    if (!ImGui::Begin("##Minimap", nullptr, flags))
+    {
+        ImGui::End();
+        return;
+    }
+
+    ImDrawList* draw   = ImGui::GetWindowDrawList();
+    const ImVec2 origin = ImGui::GetWindowPos();
+
+    // Draw each cell in the 5x5 grid as a filled, bordered rectangle.
+    for (int row = 0; row < kGridDim; ++row)
+    {
+        for (int col = 0; col < kGridDim; ++col)
+        {
+            const int cx = playerCX + (col - kGridRadius);
+            const int cz = playerCZ + (row - kGridRadius);
+
+            const float x0 = origin.x + static_cast<float>(col) * kCellPx;
+            const float y0 = origin.y + static_cast<float>(row) * kCellPx;
+            const float x1 = x0 + kCellPx;
+            const float y1 = y0 + kCellPx;
+
+            const WorldCell* cell      = FindInList(nearby, cx, cz);
+            const ImU32      fillColor = cell
+                ? BiomeColor(cell->terrainBiome)
+                : IM_COL32(60, 60, 60, 160); // out-of-bounds / unloaded cell
+
+            draw->AddRectFilled(ImVec2(x0, y0), ImVec2(x1, y1), fillColor);
+            draw->AddRect(ImVec2(x0, y0), ImVec2(x1, y1), IM_COL32(0, 0, 0, 140));
+        }
+    }
+
+    // Compute the player's fractional position within their current cell (0..1).
+    const float cellSize = grid.GetCellSize();
+    const float fracX = (playerX - static_cast<float>(playerCX) * cellSize) / cellSize;
+    const float fracZ = (playerZ - static_cast<float>(playerCZ) * cellSize) / cellSize;
+
+    // Map to pixel coordinates. The player's cell occupies column/row kGridRadius.
+    const float playerPxX = origin.x + (static_cast<float>(kGridRadius) + fracX) * kCellPx;
+    const float playerPxY = origin.y + (static_cast<float>(kGridRadius) + fracZ) * kCellPx;
+
+    // Facing direction: forward = (sin(yaw), cos(yaw)) in world XZ.
+    // On the minimap X maps to screen-right, Z maps to screen-down.
+    const float arrowLen = kCellPx * 0.45f;
+    const float arrowDX  =  sinf(playerYaw) * arrowLen;
+    const float arrowDY  =  cosf(playerYaw) * arrowLen;
+
+    // Direction line from player dot toward facing direction.
+    draw->AddLine(
+        ImVec2(playerPxX, playerPxY),
+        ImVec2(playerPxX + arrowDX, playerPxY + arrowDY),
+        IM_COL32(255, 255, 255, 255), 2.0f);
+
+    // Player position dot drawn on top of the direction line.
+    draw->AddCircleFilled(ImVec2(playerPxX, playerPxY), 4.0f, IM_COL32(255, 255, 255, 255));
+
+    ImGui::End();
+}

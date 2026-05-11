@@ -54,4 +54,4 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Dialog box | ✅ | `src/ui/DialogBox.cpp/hpp`, `src/app/Main.cpp` |
 | Combat system | ✅ | `src/game/combat/HitBox.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Audio manager | ✅ | `src/audio/AudioManager.hpp`, `src/audio/AudioManager.cpp` |
-| Minimap | ❌ | — |
+| Minimap | ✅ | `src/ui/Minimap.cpp/hpp` |

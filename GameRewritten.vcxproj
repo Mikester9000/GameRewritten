@@ -252,6 +252,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\ui\GameHUD.cpp" />
     <ClCompile Include="src\ui\ImGuiLayer.cpp" />
     <ClCompile Include="src\ui\DialogBox.cpp" />
+    <ClCompile Include="src\ui\Minimap.cpp" />
     <ClCompile Include="src\ui\WorldEditor.cpp" />
     <ClCompile Include="src\world\WorldGrid.cpp" />
     <!-- Dear ImGui core (vendored, MIT licence) -->
@@ -304,6 +305,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\ui\GameHUD.hpp" />
     <ClInclude Include="src\ui\ImGuiLayer.hpp" />
     <ClInclude Include="src\ui\DialogBox.hpp" />
+    <ClInclude Include="src\ui\Minimap.hpp" />
     <ClInclude Include="src\ui\WorldEditor.hpp" />
     <ClInclude Include="src\world\WorldGrid.hpp" />
     
