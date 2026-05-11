@@ -298,6 +298,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         // F — edge-detect unconditionally to keep state consistent while paused.
         const bool attackPressed = actionMap.IsPressed(InputAction::Attack, wasAttackActionDown);
+        const bool playerIsGrounded = camController.IsGrounded();
+        runtimeScene.BeginPlayerFrame(deltaTime, actionMap, playerIsGrounded, attackPressed, camController);
 
         camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
 
@@ -345,12 +347,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                  camController.GetYaw(),  camController.GetPitch());
         imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
-        // Stats (ATB charge) are updated inside BeginFrame, so check/consume ATB after it.
-        const bool playerIsGrounded = camController.IsGrounded();
-        runtimeScene.BeginFrame(deltaTime, actionMap, playerIsGrounded, attackPressed, camController, renderer);
+        runtimeScene.BeginFrame(deltaTime, renderer);
 
         // F — player attack (ATB-gated, ignored while paused).
-        // Runs after BeginFrame so the ATB readiness check uses the current frame's value.
+        // Runs after BeginPlayerFrame so the ATB readiness check uses the current frame's value.
         if (!paused && attackPressed && runtimeScene.TriggerPlayerAttack(camController))
             audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
 

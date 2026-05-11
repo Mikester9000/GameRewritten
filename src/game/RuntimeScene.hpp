@@ -14,7 +14,8 @@
 //   RuntimeScene scene(playerActor, primRenderer);
 //   scene.InitEnemies(spawnCenterX, spawnCenterZ);
 //   // each frame:
-//   scene.BeginFrame(deltaTime, actionMap, camController.IsGrounded(), attackPressed, camController, renderer);
+//   scene.BeginPlayerFrame(deltaTime, actionMap, camController.IsGrounded(), attackPressed, camController);
+//   scene.BeginFrame(deltaTime, renderer);
 //   scene.SubmitActors(camController, prefabLibrary);
 
 #include "actors/PlayerActor.hpp"
@@ -52,14 +53,12 @@ public:
                           centerX + 10.0f, centerZ + 50.0f);
     }
 
-    // Update runtime actor state and clear all dynamic/runtime instance buckets.
-    // Call once at the start of each frame before submitting actor visuals.
-    void BeginFrame(float dt,
-                    const InputActionMap& actionMap,
-                    bool isGrounded,
-                    bool attackPressed,
-                    CameraController& camController,
-                    D3D11Renderer& renderer)
+    // Update player state and trigger one-shot dodge bursts before camera movement.
+    void BeginPlayerFrame(float dt,
+                          const InputActionMap& actionMap,
+                          bool isGrounded,
+                          bool attackPressed,
+                          CameraController& camController)
     {
         m_player.stats.Update(dt);
         m_player.Update(dt, actionMap, isGrounded, attackPressed);
@@ -91,6 +90,12 @@ public:
 
             camController.BeginDodge(dodgeDirX, dodgeDirZ);
         }
+    }
+
+    // Update runtime actor state and clear all dynamic/runtime instance buckets.
+    // Call once at the start of each frame before submitting actor visuals.
+    void BeginFrame(float dt, D3D11Renderer& renderer)
+    {
 
         m_primRenderer.ClearRuntimeInstances();
 
