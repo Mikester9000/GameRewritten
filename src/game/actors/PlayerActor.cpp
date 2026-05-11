@@ -5,6 +5,7 @@
 #include "../PrefabLibrary.hpp"
 #include "../PrimitiveRenderer.hpp"
 
+#include <algorithm>
 #include <string>
 
 ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraController& cameraController) const
@@ -20,18 +21,16 @@ ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraControll
 
 void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded)
 {
-    stateTimer -= dt;
-    if (stateTimer < 0.0f)
-        stateTimer = 0.0f;
+    stateTimer = std::max(0.0f, stateTimer - dt);
 
     if (!isGrounded)
     {
         if (state == PlayerActionState::Idle || state == PlayerActionState::Move)
-            state = PlayerActionState::Fall;
+            TransitionTo(PlayerActionState::Fall, 0.0f);
     }
     else if (state == PlayerActionState::Fall)
     {
-        state = PlayerActionState::Idle;
+        TransitionTo(PlayerActionState::Idle, 0.0f);
     }
 
     switch (state)
