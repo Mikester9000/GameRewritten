@@ -77,10 +77,10 @@ public:
 
     // Spawn a short-lived hitbox 1.5 units in front of the player using camera yaw.
     // Only triggers if ATB is full; resets ATB to 0 after spawning.
-    void TriggerPlayerAttack(const CameraController& camController)
+    bool TriggerPlayerAttack(const CameraController& camController)
     {
         if (!m_player.stats.IsAtbReady())
-            return;
+            return false;
 
         const float yaw = camController.GetYaw();
         const float px  = camController.GetPlayerX();
@@ -101,6 +101,7 @@ public:
         m_player.stats.atbCharge = 0.0f;
 
         LOG_INFO("RuntimeScene: Player attack triggered.");
+        return true;
     }
 
 private:

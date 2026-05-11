@@ -21,4 +21,7 @@ private:
 
     float m_bgmVolume = 1.0f;
     float m_sfxVolume = 1.0f;
+    bool m_loggedBgmVolumeLimit = false;
+    bool m_loggedSfxVolumeLimit = false;
+    bool m_loggedStopLimit = false;
 };

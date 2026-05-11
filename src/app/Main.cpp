@@ -347,13 +347,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         // F — player attack (ATB-gated, ignored while paused).
         // Runs after BeginFrame so the ATB readiness check uses the current frame's value.
-        if (!paused && attackPressed)
-        {
-            const bool attackWillTrigger = playerActor.stats.IsAtbReady();
-            runtimeScene.TriggerPlayerAttack(camController);
-            if (attackWillTrigger)
-                audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
-        }
+        if (!paused && attackPressed && runtimeScene.TriggerPlayerAttack(camController))
+            audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
 
         runtimeScene.SubmitActors(camController, prefabLibrary);
 

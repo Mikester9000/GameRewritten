@@ -22,6 +22,12 @@ bool AudioManager::PlayBGM(const std::string& path)
     if (m_bgmVolume <= 0.0f)
         return true;
 
+    if (m_bgmVolume < 1.0f && !m_loggedBgmVolumeLimit)
+    {
+        LOG_WARN("AudioManager: tp::Audio currently has no runtime volume control for one-shot playback; BGM volume acts as mute/unmute gate.");
+        m_loggedBgmVolumeLimit = true;
+    }
+
     if (!tp::Audio::PlayOneShot(path))
     {
         LOG_WARN("AudioManager: Failed to play BGM: " + path);
@@ -33,7 +39,11 @@ bool AudioManager::PlayBGM(const std::string& path)
 
 void AudioManager::StopBGM()
 {
-    // tp::Audio currently exposes one-shot playback only.
+    if (!m_loggedStopLimit)
+    {
+        LOG_WARN("AudioManager: StopBGM requested, but tp::Audio currently exposes one-shot playback only.");
+        m_loggedStopLimit = true;
+    }
 }
 
 bool AudioManager::PlaySFX(const std::string& path)
@@ -46,6 +56,12 @@ bool AudioManager::PlaySFX(const std::string& path)
 
     if (m_sfxVolume <= 0.0f)
         return true;
+
+    if (m_sfxVolume < 1.0f && !m_loggedSfxVolumeLimit)
+    {
+        LOG_WARN("AudioManager: tp::Audio currently has no runtime volume control for one-shot playback; SFX volume acts as mute/unmute gate.");
+        m_loggedSfxVolumeLimit = true;
+    }
 
     if (!tp::Audio::PlayOneShot(path))
     {
