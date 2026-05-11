@@ -61,7 +61,7 @@ public:
         for (EnemyActor& enemy : m_enemies)
             enemy.Update(dt, renderer);
 
-        m_combatSystem.Update(m_enemies, 2);
+        m_combatSystem.Update(m_enemies, kEnemyCount);
     }
 
     // Submit visual representations for all registered runtime actors.
@@ -104,8 +104,10 @@ public:
     }
 
 private:
+    static constexpr int kEnemyCount = 2;
+
     PlayerActor&       m_player;
     PrimitiveRenderer& m_primRenderer;
-    EnemyActor         m_enemies[2];
+    EnemyActor         m_enemies[kEnemyCount];
     CombatSystem       m_combatSystem;
 };
