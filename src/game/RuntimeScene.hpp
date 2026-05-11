@@ -52,42 +52,50 @@ public:
                           centerX + 10.0f, centerZ + 30.0f,
                           centerX + 10.0f, centerZ + 50.0f);
     }
+    float m_lastMoveDirX = 0.0f;
+    float m_lastMoveDirZ = 1.0f; // default facing forward
 
     // Update player state and trigger one-shot dodge bursts before camera movement.
     // This ordering avoids a one-frame latency before dodge movement starts.
     void BeginPlayerFrame(float dt,
-                          const InputActionMap& actionMap,
-                          bool isGrounded,
-                          bool attackPressed,
-                          CameraController& camController)
+        const InputActionMap& actionMap,
+        bool isGrounded,
+        bool attackPressed,
+        CameraController& camController)
     {
         m_player.stats.Update(dt);
         m_player.Update(dt, actionMap, isGrounded, attackPressed);
 
-        // Trigger the burst once when Dodge starts; IsDodgeActive prevents re-triggering each frame.
+        // Track last known movement direction so dodge can use it as fallback
+        const float yaw = camController.GetYaw();
+        const float forwardX = sinf(yaw);
+        const float forwardZ = cosf(yaw);
+        const float rightX = cosf(yaw);
+        const float rightZ = -sinf(yaw);
+
+        float moveDirX = 0.0f;
+        float moveDirZ = 0.0f;
+        if (actionMap.IsHeld(InputAction::MoveForward)) { moveDirX += forwardX; moveDirZ += forwardZ; }
+        if (actionMap.IsHeld(InputAction::MoveBack)) { moveDirX -= forwardX; moveDirZ -= forwardZ; }
+        if (actionMap.IsHeld(InputAction::MoveLeft)) { moveDirX -= rightX;   moveDirZ -= rightZ; }
+        if (actionMap.IsHeld(InputAction::MoveRight)) { moveDirX += rightX;   moveDirZ += rightZ; }
+
+        // Only update last move dir when the player is actually moving
+        const float moveLenSq = (moveDirX * moveDirX) + (moveDirZ * moveDirZ);
+        if (moveLenSq > 1e-6f)
+        {
+            m_lastMoveDirX = moveDirX;
+            m_lastMoveDirZ = moveDirZ;
+        }
+
+        // Trigger the burst once when Dodge starts
         if (m_player.state == PlayerActionState::Dodge &&
             m_player.stateTimer > 0.0f &&
             !camController.IsDodgeActive())
         {
-            const float yaw = camController.GetYaw();
-            const float forwardX = sinf(yaw);
-            const float forwardZ = cosf(yaw);
-            const float rightX = cosf(yaw);
-            const float rightZ = -sinf(yaw);
-
-            float dodgeDirX = 0.0f;
-            float dodgeDirZ = 0.0f;
-            if (actionMap.IsHeld(InputAction::MoveForward)) { dodgeDirX += forwardX; dodgeDirZ += forwardZ; }
-            if (actionMap.IsHeld(InputAction::MoveBack))    { dodgeDirX -= forwardX; dodgeDirZ -= forwardZ; }
-            if (actionMap.IsHeld(InputAction::MoveLeft))    { dodgeDirX -= rightX;   dodgeDirZ -= rightZ;   }
-            if (actionMap.IsHeld(InputAction::MoveRight))   { dodgeDirX += rightX;   dodgeDirZ += rightZ;   }
-
-            const float dirLenSq = (dodgeDirX * dodgeDirX) + (dodgeDirZ * dodgeDirZ);
-            if (dirLenSq <= 1e-6f)
-            {
-                dodgeDirX = forwardX;
-                dodgeDirZ = forwardZ;
-            }
+            // Use current input dir if held, otherwise use last known movement direction
+            float dodgeDirX = (moveLenSq > 1e-6f) ? moveDirX : m_lastMoveDirX;
+            float dodgeDirZ = (moveLenSq > 1e-6f) ? moveDirZ : m_lastMoveDirZ;
 
             camController.BeginDodge(dodgeDirX, dodgeDirZ);
         }
