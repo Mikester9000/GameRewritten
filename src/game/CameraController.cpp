@@ -27,11 +27,9 @@ void CameraController::BeginDodge(float dirX, float dirZ)
         useDirX = sinf(m_yaw);
         useDirZ = cosf(m_yaw);
     }
-
-    const float useLenSq = (useDirX * useDirX) + (useDirZ * useDirZ);
-    if (useLenSq > kMinDirLenSq)
+    else
     {
-        const float invLen = 1.0f / sqrtf(useLenSq);
+        const float invLen = 1.0f / sqrtf(dirLenSq);
         useDirX *= invLen;
         useDirZ *= invLen;
     }

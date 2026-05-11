@@ -64,6 +64,7 @@ public:
         m_player.stats.Update(dt);
         m_player.Update(dt, actionMap, isGrounded, attackPressed);
 
+        // Trigger the burst once when Dodge starts; IsDodgeActive prevents re-triggering each frame.
         if (m_player.state == PlayerActionState::Dodge &&
             m_player.stateTimer > 0.0f &&
             !camController.IsDodgeActive())
