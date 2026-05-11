@@ -31,8 +31,51 @@ void CombatSystem::SpawnHitBox(const HitBox& hitbox)
     m_activeHitBoxes.push_back(hitbox);
 }
 
-void CombatSystem::Update(EnemyActor* enemies, int count)
+void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int attackStep)
 {
+    HitBox hb;
+    hb.x = px + 1.5f * sinf(yaw);
+    hb.y = py;
+    hb.z = pz + 1.5f * cosf(yaw);
+    hb.halfY       = 1.0f;
+    hb.framesToLive = 2;
+
+    if (attackStep == 1)
+    {
+        hb.halfX   = 0.75f;
+        hb.halfZ   = 0.75f;
+        hb.damage  = 3;
+        comboStep  = 1;
+        comboTimer = kComboWindowSec;
+        LOG_INFO("CombatSystem: Combo step 1 triggered.");
+    }
+    else if (attackStep == 2)
+    {
+        hb.halfX   = 0.90f;
+        hb.halfZ   = 0.90f;
+        hb.damage  = 5;
+        comboStep  = 0;
+        comboTimer = 0.0f;
+        LOG_INFO("CombatSystem: Combo step 2 triggered — combo complete.");
+    }
+
+    SpawnHitBox(hb);
+}
+
+void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
+{
+    // Tick combo window timer.
+    if (comboTimer > 0.0f)
+    {
+        comboTimer -= dt;
+        if (comboTimer <= 0.0f)
+        {
+            comboTimer = 0.0f;
+            comboStep  = 0;
+            LOG_INFO("CombatSystem: Combo window expired.");
+        }
+    }
+
     for (HitBox& hb : m_activeHitBoxes)
     {
         --hb.framesToLive;

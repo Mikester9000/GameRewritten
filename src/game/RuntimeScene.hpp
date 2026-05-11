@@ -111,7 +111,7 @@ public:
         for (EnemyActor& enemy : m_enemies)
             enemy.Update(dt, renderer);
 
-        m_combatSystem.Update(m_enemies, kEnemyCount);
+        m_combatSystem.Update(dt, m_enemies, kEnemyCount);
     }
 
     // Submit visual representations for all registered runtime actors.
@@ -125,33 +125,41 @@ public:
             enemy.SubmitRuntimeVisual(prefabLibrary, m_primRenderer);
     }
 
-    // Spawn a short-lived hitbox 1.5 units in front of the player using camera yaw.
-    // Only triggers if ATB is full; resets ATB to 0 after spawning.
+    // Spawn a hitbox for the current combo step.
+    // Step 1 requires ATB; step 2 chains within the combo window, ATB not required.
+    // Returns true if an attack was triggered.
     bool TriggerPlayerAttack(const CameraController& camController)
     {
-        if (!m_player.stats.IsAtbReady())
-            return false;
-
         const float yaw = camController.GetYaw();
         const float px  = camController.GetPlayerX();
         const float py  = camController.GetPlayerGroundY() + 1.0f; // mid-body height
         const float pz  = camController.GetPlayerZ();
 
-        HitBox hb;
-        hb.x = px + 1.5f * sinf(yaw);
-        hb.y = py;
-        hb.z = pz + 1.5f * cosf(yaw);
-        hb.halfX = 0.75f;
-        hb.halfY = 1.0f;
-        hb.halfZ = 0.75f;
-        hb.damage = 3;
-        hb.framesToLive = 2;
+        if (m_combatSystem.comboStep == 0)
+        {
+            // Step 1 — requires ATB.
+            if (!m_player.stats.IsAtbReady())
+                return false;
 
-        m_combatSystem.SpawnHitBox(hb);
-        m_player.stats.atbCharge = 0.0f;
+            m_player.stats.atbCharge = 0.0f;
+            m_combatSystem.TriggerAttack(px, py, pz, yaw, 1);
+            m_player.state      = PlayerActionState::Attack1;
+            m_player.stateTimer = 0.40f;
+            LOG_INFO("RuntimeScene: Player attack step 1 triggered.");
+            return true;
+        }
+        else if (m_combatSystem.comboStep == 1 && m_combatSystem.comboTimer > 0.0f)
+        {
+            // Step 2 — ATB not required; chains within the combo window.
+            m_player.stats.atbCharge = 0.0f;
+            m_combatSystem.TriggerAttack(px, py, pz, yaw, 2);
+            m_player.state      = PlayerActionState::Attack2;
+            m_player.stateTimer = 0.40f;
+            LOG_INFO("RuntimeScene: Player attack step 2 triggered.");
+            return true;
+        }
 
-        LOG_INFO("RuntimeScene: Player attack triggered.");
-        return true;
+        return false;
     }
 
 private:

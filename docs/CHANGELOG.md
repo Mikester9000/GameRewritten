@@ -14,3 +14,4 @@
 - 2026-05-11: Track 12.1: Add PlayerActionState enum and state machine to PlayerActor
 - 2026-05-11: Track 12.2: Add Dodge and LockOn actions to InputActionMap with default key bindings
 - 2026-05-11: Track 12.3: Add dodge burst movement to CameraController (4 units over 0.35s, overrides WASD during burst)
+- 2026-05-11: Track 12.4: Replace single ATB attack with 2-step combo chain (step 1: 3 dmg, step 2: 5 dmg, 0.60s window)
