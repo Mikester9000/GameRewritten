@@ -239,6 +239,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\game\physics\CollisionWorld.cpp" />
     <ClCompile Include="src\game\actors\PlayerActor.cpp" />
     <ClCompile Include="src\game\actors\EnemyActor.cpp" />
+    <ClCompile Include="src\game\combat\CombatSystem.cpp" />
     <ClCompile Include="src\game\Forest.cpp" />
     <ClCompile Include="src\game\PrefabLibrary.cpp" />
     <ClCompile Include="src\game\PrimitiveRenderer.cpp" />
@@ -287,6 +288,8 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\game\actors\ActorCommon.hpp" />
     <ClInclude Include="src\game\actors\PlayerActor.hpp" />
     <ClInclude Include="src\game\actors\EnemyActor.hpp" />
+    <ClInclude Include="src\game\combat\HitBox.hpp" />
+    <ClInclude Include="src\game\combat\CombatSystem.hpp" />
     <ClInclude Include="src\game\Forest.hpp" />
     <ClInclude Include="src\game\PrefabDef.hpp" />
     <ClInclude Include="src\game\PrefabLibrary.hpp" />

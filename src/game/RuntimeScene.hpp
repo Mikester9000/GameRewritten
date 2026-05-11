@@ -20,10 +20,13 @@
 #include "actors/PlayerActor.hpp"
 #include "actors/EnemyActor.hpp"
 #include "PrimitiveRenderer.hpp"
+#include "combat/CombatSystem.hpp"
+#include "CameraController.hpp"
+#include <cmath>
+#include <logger/Logger.hpp>
 
-// Forward-declared to avoid pulling their full headers (and <windows.h> / d3d11.h)
-// into every file that includes RuntimeScene.
-class CameraController;
+// Forward-declared to avoid pulling their full headers into every file that
+// includes RuntimeScene.
 class D3D11Renderer;
 class PrefabLibrary;
 
@@ -57,6 +60,8 @@ public:
 
         for (EnemyActor& enemy : m_enemies)
             enemy.Update(dt, renderer);
+
+        m_combatSystem.Update(m_enemies, kEnemyCount);
     }
 
     // Submit visual representations for all registered runtime actors.
@@ -70,8 +75,39 @@ public:
             enemy.SubmitRuntimeVisual(prefabLibrary, m_primRenderer);
     }
 
+    // Spawn a short-lived hitbox 1.5 units in front of the player using camera yaw.
+    // Only triggers if ATB is full; resets ATB to 0 after spawning.
+    void TriggerPlayerAttack(const CameraController& camController)
+    {
+        if (!m_player.stats.IsAtbReady())
+            return;
+
+        const float yaw = camController.GetYaw();
+        const float px  = camController.GetPlayerX();
+        const float py  = camController.GetPlayerGroundY() + 1.0f; // mid-body height
+        const float pz  = camController.GetPlayerZ();
+
+        HitBox hb;
+        hb.x = px + 1.5f * sinf(yaw);
+        hb.y = py;
+        hb.z = pz + 1.5f * cosf(yaw);
+        hb.halfX = 0.75f;
+        hb.halfY = 1.0f;
+        hb.halfZ = 0.75f;
+        hb.damage = 3;
+        hb.framesToLive = 2;
+
+        m_combatSystem.SpawnHitBox(hb);
+        m_player.stats.atbCharge = 0.0f;
+
+        LOG_INFO("RuntimeScene: Player attack triggered.");
+    }
+
 private:
+    static constexpr int kEnemyCount = 2;
+
     PlayerActor&       m_player;
     PrimitiveRenderer& m_primRenderer;
-    EnemyActor         m_enemies[2];
+    EnemyActor         m_enemies[kEnemyCount];
+    CombatSystem       m_combatSystem;
 };

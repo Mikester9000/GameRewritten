@@ -115,6 +115,9 @@
     <ClCompile Include="src\game\actors\EnemyActor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\combat\CombatSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\ui\GameHUD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -199,6 +202,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\game\actors\EnemyActor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\combat\HitBox.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\combat\CombatSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\GameHUD.hpp">

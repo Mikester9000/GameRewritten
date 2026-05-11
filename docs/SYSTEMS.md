@@ -52,6 +52,6 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | AABB collision | ✅ | `src/game/physics/AABB.hpp`, `src/game/physics/CollisionWorld.cpp/hpp`, `src/game/CameraController.cpp/hpp`, `src/app/WorldRuntimeRefresh.hpp`, `src/app/Main.cpp` |
 | Enemy actor | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Dialog box | ✅ | `src/ui/DialogBox.cpp/hpp`, `src/app/Main.cpp` |
-| Combat system | ❌ | — |
+| Combat system | ✅ | `src/game/combat/HitBox.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Audio manager | ❌ | — |
 | Minimap | ❌ | — |
