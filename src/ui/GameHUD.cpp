@@ -18,6 +18,8 @@ const ImVec2 kGaugeSize(kGaugeWidth, 0.0f);
 constexpr float kLowHpThreshold = 0.25f;
 // Pulse frequency in Hz (cycles per second).
 constexpr float kPulseFrequency = 3.0f;
+// Full circle in radians (2π).
+constexpr float kTwoPi = 6.28318530f;
 // Maximum alpha of the screen-edge pulse overlay (0-255).
 constexpr int kPulseMaxAlpha = 140;
 // Width of each screen-edge warning bar in pixels.
@@ -33,7 +35,7 @@ float NormalizeValue(float value, float maxValue)
 void DrawLowHpPulse(const ImGuiIO& io, float totalTime)
 {
     // Pulse brightness oscillates between 0 and kPulseMaxAlpha.
-    float t = 0.5f + 0.5f * sinf(totalTime * kPulseFrequency * 6.28318f);
+    float t = 0.5f + 0.5f * sinf(totalTime * kPulseFrequency * kTwoPi);
     int alpha = static_cast<int>(t * static_cast<float>(kPulseMaxAlpha));
     ImU32 color = IM_COL32(200, 20, 20, alpha);
 

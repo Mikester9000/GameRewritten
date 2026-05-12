@@ -295,6 +295,9 @@ private:
     static constexpr float kPlayerHitHalfX = 0.5f;
     static constexpr float kPlayerHitHalfY = 1.0f;
     static constexpr float kPlayerHitHalfZ = 0.5f;
+    // Eye-to-body-center offset: body center sits this many units below the
+    // eye-level Y stored in m_playerY.
+    static constexpr float kPlayerBodyCenterOffset = 0.5f;
 
     PlayerActor&       m_player;
     PrimitiveRenderer& m_primRenderer;
@@ -321,7 +324,7 @@ private:
     // m_playerY is the camera eye level; body center is shifted down by 0.5 units.
     bool HitBoxOverlapsPlayer(const HitBox& hb) const
     {
-        float bodyY = m_playerY - 0.5f;
+        float bodyY = m_playerY - kPlayerBodyCenterOffset;
         float dx = fabsf(m_playerX - hb.x);
         float dy = fabsf(bodyY     - hb.y);
         float dz = fabsf(m_playerZ - hb.z);
