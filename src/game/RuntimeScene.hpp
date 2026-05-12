@@ -66,6 +66,10 @@ public:
         m_player.stats.Update(dt);
         m_player.Update(dt, actionMap, isGrounded, attackPressed);
 
+        // Store player position for enemy AI (used next BeginFrame call).
+        m_playerX = camController.GetPlayerX();
+        m_playerZ = camController.GetPlayerZ();
+
         // Track last known movement direction so dodge can use it as fallback
         const float yaw = camController.GetYaw();
         const float forwardX = sinf(yaw);
@@ -109,9 +113,29 @@ public:
         m_primRenderer.ClearRuntimeInstances();
 
         for (EnemyActor& enemy : m_enemies)
-            enemy.Update(dt, renderer);
+            enemy.Update(dt, renderer, m_playerX, m_playerZ);
 
         m_combatSystem.Update(dt, m_enemies, kEnemyCount);
+
+        // Check for any enemy attack hitboxes spawned this frame.
+        for (EnemyActor& enemy : m_enemies)
+        {
+            if (enemy.pendingAttack)
+            {
+                enemy.pendingAttack = false;
+                HitBox hb;
+                hb.x      = enemy.x;
+                hb.y      = enemy.y + 1.0f;
+                hb.z      = enemy.z;
+                hb.halfX  = 1.2f;
+                hb.halfY  = 1.0f;
+                hb.halfZ  = 1.2f;
+                hb.damage = 2;
+                hb.framesToLive = 3;
+                m_pendingEnemyDamage += hb.damage;
+                LOG_INFO("RuntimeScene: Enemy attack hitbox spawned.");
+            }
+        }
     }
 
     // Submit visual representations for all registered runtime actors.
@@ -173,6 +197,20 @@ public:
         return false;
     }
 
+    // Returns accumulated enemy damage since the last call; clears the counter.
+    // Track 12.6 will call this to apply damage to the player.
+    int ConsumePendingEnemyDamage()
+    {
+        int d = m_pendingEnemyDamage;
+        m_pendingEnemyDamage = 0;
+        return d;
+    }
+
+    // Read-only accessors for debug visualization and future systems.
+    const CombatSystem& GetCombatSystem() const { return m_combatSystem; }
+    const EnemyActor*   GetEnemies()      const { return m_enemies; }
+    int                 GetEnemyCount()   const { return kEnemyCount; }
+
 private:
     static constexpr int kEnemyCount = 2;
 
@@ -180,4 +218,11 @@ private:
     PrimitiveRenderer& m_primRenderer;
     EnemyActor         m_enemies[kEnemyCount];
     CombatSystem       m_combatSystem;
+
+    // Player position cached from BeginPlayerFrame; fed to enemy Update() calls.
+    float m_playerX = 0.0f;
+    float m_playerZ = 0.0f;
+
+    // Damage from enemy attacks this frame; consumed by Track 12.6 player damage.
+    int m_pendingEnemyDamage = 0;
 };

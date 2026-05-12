@@ -59,7 +59,8 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Dodge burst movement | ✅ | `src/game/CameraController.cpp/hpp` |
 | 2-step combo chain | ✅ | `src/game/combat/CombatSystem.cpp/hpp`, `src/game/RuntimeScene.hpp` |
 | Lock-on targeting | ❌ | `src/game/combat/Targeting.hpp` |
-| Enemy combat states (chase/attack/hit) | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Enemy combat states (chase/attack/hit) | ✅ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/actors/EnemyState.hpp` |
+| Enemy awareness radius visualization   | ✅ | `src/ui/ImGuiLayer.cpp/hpp` |
 | Player damage intake + defeat reset | ❌ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp` |
 | Floating damage numbers | ❌ | `src/ui/DamageNumbers.cpp/hpp` |
 | Hit flash system | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |

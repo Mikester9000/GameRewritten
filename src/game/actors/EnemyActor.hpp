@@ -1,9 +1,10 @@
 #pragma once
 // EnemyActor.hpp
-// A basic patrol enemy that walks between two waypoints and renders using
-// the existing primitive/prefab system.  No combat logic yet.
+// A patrol enemy with a combat state machine (Patrol/Chase/Attack/Hit/Dead).
+// Terrain-snaps Y each frame via the renderer.
 
 #include "ActorCommon.hpp"
+#include "EnemyState.hpp"
 
 class D3D11Renderer;
 class PrefabLibrary;
@@ -12,6 +13,11 @@ class PrimitiveRenderer;
 class EnemyActor
 {
 public:
+    // Detection and engagement radius constants.
+    static constexpr float kDetectRadius = 18.0f;  // begin chasing
+    static constexpr float kAttackRadius =  2.5f;  // begin attack wind-up
+    static constexpr float kLeashRadius  = 27.0f;  // return to patrol
+
     // World-space position.
     float x = 0.0f;
     float y = 0.0f;
@@ -33,6 +39,11 @@ public:
     float waypointZ[2] = {};
     int   currentWaypoint = 0;
 
+    // Combat state machine.
+    EnemyState state       = EnemyState::Patrol;
+    float      stateTimer  = 0.0f;
+    bool       pendingAttack = false;
+
     // Set starting position and patrol waypoints.
     // y is terrain-snapped on the first Update call.
     void Init(float startX, float startZ,
@@ -40,13 +51,21 @@ public:
               float wpBx, float wpBz,
               int   startHp = 10);
 
-    // Move toward the current waypoint, snap Y to terrain, face direction of travel.
-    // Skips all logic when isDead is true.
-    void Update(float dt, D3D11Renderer& renderer);
+    // Advance state machine, move, snap Y to terrain.
+    // playerX/playerZ are the current player world-space XZ position.
+    void Update(float dt, D3D11Renderer& renderer,
+                float playerX, float playerZ);
+
+    // Apply incoming damage; triggers Hit stagger or Dead transition.
+    void OnHit(int damage);
 
     // Expand the enemy visual into the runtime primitive bucket.
     // Reuses the player blockout prefab as a temporary enemy blockout.
     // Does nothing when isDead is true.
     void SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
                              PrimitiveRenderer&   primitiveRenderer) const;
+
+private:
+    // Change state immediately and set the state-duration timer.
+    void TransitionTo(EnemyState next, float duration);
 };

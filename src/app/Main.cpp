@@ -382,6 +382,24 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             // Draw the World Editor panel inside the ImGui frame.
             WorldEditorFrameOps::DrawEditorPanelForActiveCell(
                 worldEditor, worldGrid, camController, renderer);
+            // Combat debug overlay (hitboxes, radii, state labels).
+            if (imguiLayer.showCombatDebug)
+            {
+                imguiLayer.DrawCombatDebug(
+                    runtimeScene.GetCombatSystem(),
+                    runtimeScene.GetEnemies(),
+                    runtimeScene.GetEnemyCount(),
+                    camController.GetPlayerX(),
+                    camController.GetPlayerGroundY() + 1.0f,
+                    camController.GetPlayerZ(),
+                    camController.GetCamX(),
+                    camController.GetCamY(),
+                    camController.GetCamZ(),
+                    camController.GetYaw(),
+                    camController.GetPitch(),
+                    static_cast<float>(window.GetWidth()),
+                    static_cast<float>(window.GetHeight()));
+            }
             imguiLayer.EndFrame();
 
             renderer.PresentFrame();
