@@ -44,6 +44,7 @@ public:
 
     // Recent hit records are valid for the current frame only.
     // They are reset at the start of each Update() call.
+    // Always pair this pointer with GetRecentEnemyHitCount().
     const EnemyHitRecord* GetRecentEnemyHits() const
     { return m_recentEnemyHits; }
 

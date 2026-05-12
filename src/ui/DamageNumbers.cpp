@@ -14,6 +14,12 @@ void DamageNumbers::Reset()
 
 void DamageNumbers::Spawn(int damage, float worldX, float worldY, float worldZ)
 {
+    if (damage < 0)
+    {
+        LOG_WARN("DamageNumbers: received negative damage value; clamping to zero.");
+        damage = 0;
+    }
+
     Entry* slot = nullptr;
 
     for (Entry& entry : m_entries)
@@ -39,11 +45,6 @@ void DamageNumbers::Spawn(int damage, float worldX, float worldY, float worldZ)
     slot->x = worldX;
     slot->y = worldY;
     slot->z = worldZ;
-    if (damage < 0)
-    {
-        LOG_WARN("DamageNumbers: received negative damage value; clamping to zero.");
-        damage = 0;
-    }
     slot->damage = damage;
     slot->ageSec = 0.0f;
 }
