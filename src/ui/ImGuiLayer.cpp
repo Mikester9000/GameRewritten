@@ -10,7 +10,6 @@
 #include "../game/actors/EnemyActor.hpp"
 #include "../game/actors/EnemyState.hpp"
 #include "../game/combat/CombatSystem.hpp"
-#include "ScreenProjection.hpp"
 
 // ImGui core + backends (vendored under third_party/)
 #include "../../third_party/imgui/imgui.h"
@@ -22,6 +21,66 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
     HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+// ---------------------------------------------------------------------------
+// World-to-screen projection helper for debug overlays.
+// Mirrors the renderer's view transform (yaw then pitch, 45-degree FOV).
+// Returns false if the point is behind the camera.
+// ---------------------------------------------------------------------------
+#include <DirectXMath.h>
+using namespace DirectX;
+
+static bool WorldToScreen(
+    float wx, float wy, float wz,
+    float camX, float camY, float camZ,
+    float yaw, float pitch,
+    float vpW, float vpH,
+    float& outSx, float& outSy)
+{
+    // Build the exact same look direction the renderer uses
+    float lookDirX = cosf(pitch) * sinf(yaw);
+    float lookDirY = sinf(pitch);
+    float lookDirZ = cosf(pitch) * cosf(yaw);
+
+    XMVECTOR camPos = XMVectorSet(camX, camY, camZ, 1.0f);
+    XMVECTOR camTarget = XMVectorSet(camX + lookDirX,
+        camY + lookDirY,
+        camZ + lookDirZ, 1.0f);
+    XMVECTOR camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+    // Match renderer exactly — LookAtLH, 45 degree FOV, near 0.1, far 2000
+    XMMATRIX view = XMMatrixLookAtLH(camPos, camTarget, camUp);
+    XMMATRIX proj = XMMatrixPerspectiveFovLH(
+        XM_PIDIV4,
+        vpW / vpH,
+        0.1f, 2000.0f);
+
+    // DirectXMath uses row vectors: clip = worldPos * view * proj
+    // XMMatrixMultiply(A,B) = A*B, XMVector4Transform(v,M) = v*M
+    // NO transpose needed here
+    XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+
+    XMVECTOR worldPos = XMVectorSet(wx, wy, wz, 1.0f);
+    XMVECTOR clip = XMVector4Transform(worldPos, viewProj);
+
+    // W check — behind camera
+    float w = XMVectorGetW(clip);
+    if (w <= 0.0f)
+        return false;
+
+    // Perspective divide to NDC
+    float ndcX = XMVectorGetX(clip) / w;
+    float ndcY = XMVectorGetY(clip) / w;
+
+    // NDC to screen pixels
+    outSx = (ndcX + 1.0f) * 0.5f * vpW;
+    outSy = (1.0f - ndcY) * 0.5f * vpH;
+
+    // Cull if off screen
+    if (outSx < -50.0f || outSx > vpW + 50.0f) return false;
+    if (outSy < -50.0f || outSy > vpH + 50.0f) return false;
+
+    return true;
+}
 static void DrawProjectedAabb(
     ImDrawList* dl,
     float centerX, float centerY, float centerZ,
