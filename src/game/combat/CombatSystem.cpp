@@ -98,19 +98,12 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
             if (!HitBoxOverlapsEnemy(hb, enemy))
                 continue;
 
-            enemy.hp -= hb.damage;
-
             std::ostringstream ss;
             ss << "CombatSystem: Hit enemy " << i
-               << " for " << hb.damage
-               << " damage. HP remaining: " << enemy.hp;
+               << " for " << hb.damage << " damage.";
             LOG_INFO(ss.str());
 
-            if (enemy.hp <= 0)
-            {
-                enemy.isDead = true;
-                LOG_INFO("CombatSystem: Enemy " + std::to_string(i) + " defeated.");
-            }
+            enemy.OnHit(hb.damage);
         }
     }
 

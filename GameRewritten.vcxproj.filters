@@ -217,6 +217,9 @@
     <ClInclude Include="src\game\actors\EnemyActor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\actors\EnemyState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\combat\HitBox.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

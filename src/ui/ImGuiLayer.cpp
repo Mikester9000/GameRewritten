@@ -1,22 +1,73 @@
 // ImGuiLayer.cpp
 // Manages Dear ImGui context, Win32 + D3D11 backends, and draws the in-game UI.
 // Esc  → toggle pause menu (Resume / Options / Quit)
-// F1   → toggle debug overlay (FPS, dt, camera)
+// F1   → toggle debug overlay (FPS, dt, camera, combat debug toggle)
 
 #include "ImGuiLayer.hpp"
 #include <Windows.h>
 #include "../audio/AudioManager.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
+#include "../game/actors/EnemyActor.hpp"
+#include "../game/actors/EnemyState.hpp"
+#include "../game/combat/CombatSystem.hpp"
 
 // ImGui core + backends (vendored under third_party/)
 #include "../../third_party/imgui/imgui.h"
 #include "../../third_party/imgui/backends/imgui_impl_win32.h"
 #include "../../third_party/imgui/backends/imgui_impl_dx11.h"
 
-
 #include "logger/Logger.hpp"
+#include <cmath>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
     HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+// ---------------------------------------------------------------------------
+// World-to-screen projection helper for debug overlays.
+// Mirrors the renderer's view transform (yaw then pitch, 45-degree FOV).
+// Returns false if the point is behind the camera.
+// ---------------------------------------------------------------------------
+static bool WorldToScreen(
+    float wx, float wy, float wz,
+    float camX, float camY, float camZ,
+    float yaw, float pitch,
+    float vpW, float vpH,
+    float& outSx, float& outSy)
+{
+    // Translate relative to camera.
+    float dx = wx - camX;
+    float dy = wy - camY;
+    float dz = wz - camZ;
+
+    // Rotate by yaw (Y axis).
+    float cosY = cosf(-yaw);
+    float sinY = sinf(-yaw);
+    float rx =  dx * cosY + dz * sinY;
+    float ry =  dy;
+    float rz = -dx * sinY + dz * cosY;
+
+    // Rotate by pitch (X axis).
+    float cosP = cosf(-pitch);
+    float sinP = sinf(-pitch);
+    float fx = rx;
+    float fy =  ry * cosP - rz * sinP;
+    float fz =  ry * sinP + rz * cosP;
+
+    // Clip anything behind the near plane.
+    if (fz <= 0.1f)
+        return false;
+
+    // Project — matches XMMatrixPerspectiveFovLH(XM_PIDIV4, vpW/vpH, ...) used by renderer.
+    // For vertical FOV, fovScale applies to Y directly. For X, we divide by aspect
+    // so that a world point at the same NDC distance maps to a smaller screen-x fraction
+    // on widescreen viewports (matching the GPU perspective divide).
+    static constexpr float kPi = 3.14159265f;
+    float aspect   = vpW / vpH;
+    float fovScale = 1.0f / tanf(kPi / 8.0f); // tan(fovY/2) for 45-degree vertical FOV
+    outSx = (vpW * 0.5f) + (fx / fz) / aspect * fovScale * (vpW * 0.5f);
+    outSy = (vpH * 0.5f) - (fy / fz) * fovScale * (vpH * 0.5f);
+    return true;
+}
+
 ImGuiLayer::ImGuiLayer() = default;
 
 bool ImGuiLayer::Initialize(HWND hwnd,
@@ -232,7 +283,165 @@ void ImGuiLayer::DrawDebugOverlay()
                 m_renderer->SetAmbientStrength(m_ambientStrength);
         }
         ImGui::Separator();
+        ImGui::Checkbox("Show Combat Debug", &showCombatDebug);
+        ImGui::Separator();
         ImGui::TextDisabled("[F1] hide overlay");
     }
     ImGui::End();
+}
+
+// ---------------------------------------------------------------------------
+// DrawCombatDebug — screen-space debug overlay for hitboxes, enemy radii,
+// and enemy combat state labels.  Uses ImGui foreground draw list so it
+// renders on top of everything with zero GPU overhead when off.
+// ---------------------------------------------------------------------------
+void ImGuiLayer::DrawCombatDebug(
+    const CombatSystem& combatSystem,
+    const EnemyActor*   enemies,
+    int                 enemyCount,
+    float camX,    float camY,    float camZ,
+    float yaw,     float pitch,
+    float vpW,     float vpH)
+{
+    if (!showCombatDebug)
+        return;
+    if (!ImGui::GetCurrentContext())
+        return;
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+
+    // --- Active player hitboxes (red outlined rectangles) ---
+    for (const HitBox& hb : combatSystem.GetActiveHitBoxes())
+    {
+        float sx, sy;
+        if (!WorldToScreen(hb.x, hb.y, hb.z, camX, camY, camZ, yaw, pitch, vpW, vpH, sx, sy))
+            continue;
+
+        // Estimate screen half-extents by projecting offset points.
+        // We project a right-edge and a top-edge point, then measure horizontal
+        // and vertical distances from center.  The cross-axis components
+        // (rightEdgeScreenY and topEdgeScreenX) are byproducts of the projection
+        // and not needed for the width/height calculation.
+        float srx;
+        [[maybe_unused]] float rightEdgeScreenY;
+        [[maybe_unused]] float topEdgeScreenX;
+        float sty;
+        bool hasRight = WorldToScreen(hb.x + hb.halfX, hb.y, hb.z,
+                                      camX, camY, camZ, yaw, pitch, vpW, vpH,
+                                      srx, rightEdgeScreenY);
+        bool hasTop   = WorldToScreen(hb.x, hb.y + hb.halfY, hb.z,
+                                      camX, camY, camZ, yaw, pitch, vpW, vpH,
+                                      topEdgeScreenX, sty);
+        float hw = hasRight ? fabsf(srx - sx) : 18.0f;
+        float hh = hasTop   ? fabsf(sty - sy) : 28.0f;
+
+        dl->AddRect(ImVec2(sx - hw, sy - hh), ImVec2(sx + hw, sy + hh),
+                    IM_COL32(255, 50, 50, 220), 0.0f, 0, 2.0f);
+        dl->AddText(ImVec2(sx - 10.0f, sy - hh - 16.0f),
+                    IM_COL32(255, 50, 50, 255), "ATK");
+    }
+
+    // --- Per-enemy overlays ---
+    static constexpr int kCirclePoints = 8;
+    static constexpr float kTwoPi = 6.28318f;
+
+    for (int i = 0; i < enemyCount; ++i)
+    {
+        const EnemyActor& e = enemies[i];
+
+        // Skip dead enemies — they have no relevant radii or state to show.
+        if (e.isDead)
+            continue;
+
+        // Project enemy position for state label and "!" indicator.
+        float ex, ey;
+        const bool enemyVisible = WorldToScreen(e.x, e.y + 2.2f, e.z,
+                                                camX, camY, camZ,
+                                                yaw, pitch, vpW, vpH, ex, ey);
+
+        // --- Detection radius — yellow circle approximation ---
+        {
+            float prevSx = 0.0f, prevSy = 0.0f;
+            bool prevVisible = false;
+            for (int p = 0; p <= kCirclePoints; ++p)
+            {
+                float angle = (p % kCirclePoints) * kTwoPi / kCirclePoints;
+                float px2   = e.x + EnemyActor::kDetectRadius * sinf(angle);
+                float pz2   = e.z + EnemyActor::kDetectRadius * cosf(angle);
+                float sx2, sy2;
+                bool vis = WorldToScreen(px2, e.y, pz2,
+                                         camX, camY, camZ,
+                                         yaw, pitch, vpW, vpH, sx2, sy2);
+                if (p > 0 && prevVisible && vis)
+                {
+                    dl->AddLine(ImVec2(prevSx, prevSy), ImVec2(sx2, sy2),
+                                IM_COL32(230, 220, 30, 160), 1.0f);
+                }
+                prevSx      = sx2;
+                prevSy      = sy2;
+                prevVisible = vis;
+            }
+        }
+
+        // "DETECT" label above enemy.
+        if (enemyVisible)
+        {
+            dl->AddText(ImVec2(ex - 22.0f, ey - 32.0f),
+                        IM_COL32(230, 220, 30, 200), "DETECT");
+        }
+
+        // --- Attack radius — orange circle approximation ---
+        {
+            float prevSx = 0.0f, prevSy = 0.0f;
+            bool prevVisible = false;
+            for (int p = 0; p <= kCirclePoints; ++p)
+            {
+                float angle = (p % kCirclePoints) * kTwoPi / kCirclePoints;
+                float px2   = e.x + EnemyActor::kAttackRadius * sinf(angle);
+                float pz2   = e.z + EnemyActor::kAttackRadius * cosf(angle);
+                float sx2, sy2;
+                bool vis = WorldToScreen(px2, e.y, pz2,
+                                         camX, camY, camZ,
+                                         yaw, pitch, vpW, vpH, sx2, sy2);
+                if (p > 0 && prevVisible && vis)
+                {
+                    dl->AddLine(ImVec2(prevSx, prevSy), ImVec2(sx2, sy2),
+                                IM_COL32(255, 160, 40, 180), 1.5f);
+                }
+                prevSx      = sx2;
+                prevSy      = sy2;
+                prevVisible = vis;
+            }
+        }
+
+        if (!enemyVisible)
+            continue;
+
+        // --- State label ---
+        const char* stateStr  = "PATROL";
+        ImU32       stateCol  = IM_COL32(255, 255, 255, 240);
+
+        switch (e.state)
+        {
+            case EnemyState::Patrol: stateStr = "PATROL"; stateCol = IM_COL32(255, 255, 255, 240); break;
+            case EnemyState::Chase:  stateStr = "CHASE";  stateCol = IM_COL32(230, 220, 30,  240); break;
+            case EnemyState::Attack: stateStr = "ATTACK"; stateCol = IM_COL32(255, 160, 40,  240); break;
+            case EnemyState::Hit:    stateStr = "HIT";    stateCol = IM_COL32(255, 80,  80,  240); break;
+            case EnemyState::Dead:   stateStr = "DEAD";   stateCol = IM_COL32(150, 150, 150, 200); break;
+        }
+
+        dl->AddText(ImVec2(ex - 18.0f, ey), stateCol, stateStr);
+
+        // --- Pending attack indicator ---
+        if (e.pendingAttack)
+        {
+            float bsx, bsy;
+            if (WorldToScreen(e.x, e.y + 3.0f, e.z,
+                              camX, camY, camZ, yaw, pitch, vpW, vpH, bsx, bsy))
+            {
+                dl->AddText(ImVec2(bsx - 4.0f, bsy),
+                            IM_COL32(255, 30, 30, 255), "!");
+            }
+        }
+    }
 }

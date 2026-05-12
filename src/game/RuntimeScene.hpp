@@ -102,16 +102,41 @@ public:
     }
 
     // Update runtime actor state and clear all dynamic/runtime instance buckets.
-    // Call once each frame after BeginPlayerFrame(), before submitting actor visuals.
-    void BeginFrame(float dt, D3D11Renderer& renderer)
+    // playerX/playerZ must be the player's current position AFTER camController.Update()
+    // has run this frame, so enemy AI sees an up-to-date position.
+    // Call once each frame after camController.Update(), before submitting actor visuals.
+    void BeginFrame(float dt, D3D11Renderer& renderer,
+                    float playerX, float playerZ)
     {
+        // Cache the up-to-date player position for enemy AI.
+        m_playerX = playerX;
+        m_playerZ = playerZ;
 
         m_primRenderer.ClearRuntimeInstances();
 
         for (EnemyActor& enemy : m_enemies)
-            enemy.Update(dt, renderer);
+            enemy.Update(dt, renderer, m_playerX, m_playerZ);
 
         m_combatSystem.Update(dt, m_enemies, kEnemyCount);
+
+        // Check for any enemy attack hitboxes spawned this frame.
+        for (EnemyActor& enemy : m_enemies)
+        {
+            if (enemy.pendingAttack)
+            {
+                enemy.pendingAttack = false;
+                HitBox hb;
+                hb.x      = enemy.x;
+                hb.y      = enemy.y + 1.0f;
+                hb.z      = enemy.z;
+                hb.halfX  = kEnemyAttackHalfX;
+                hb.halfY  = kEnemyAttackHalfY;
+                hb.halfZ  = kEnemyAttackHalfZ;
+                hb.damage = kEnemyAttackDamage;
+                hb.framesToLive = kEnemyAttackFrameLifetime;
+                m_pendingEnemyDamage += hb.damage;
+            }
+        }
     }
 
     // Submit visual representations for all registered runtime actors.
@@ -173,11 +198,41 @@ public:
         return false;
     }
 
+    // Returns accumulated enemy damage since the last call; clears the counter.
+    // Track 12.6 will call this to apply damage to the player.
+    int ConsumePendingEnemyDamage()
+    {
+        int d = m_pendingEnemyDamage;
+        m_pendingEnemyDamage = 0;
+        return d;
+    }
+
+    // Read-only accessors for debug visualization and future systems.
+    const CombatSystem& GetCombatSystem() const { return m_combatSystem; }
+    const EnemyActor*   GetEnemies()      const { return m_enemies; }
+    int                 GetEnemyCount()   const { return kEnemyCount; }
+
 private:
     static constexpr int kEnemyCount = 2;
+
+    // Enemy attack hitbox parameters — used when building the spawn-time hitbox.
+    // Track 12.6 will add actual AABB collision against the player position.
+    static constexpr float kEnemyAttackHalfX        = 1.2f;
+    static constexpr float kEnemyAttackHalfY        = 1.0f;
+    static constexpr float kEnemyAttackHalfZ        = 1.2f;
+    static constexpr int   kEnemyAttackDamage       = 2;
+    static constexpr int   kEnemyAttackFrameLifetime = 3;
 
     PlayerActor&       m_player;
     PrimitiveRenderer& m_primRenderer;
     EnemyActor         m_enemies[kEnemyCount];
     CombatSystem       m_combatSystem;
+
+    // Player position updated each frame in BeginFrame (after camController.Update()).
+    float m_playerX = 0.0f;
+    float m_playerZ = 0.0f;
+
+    // Damage accumulated from enemy attacks this frame.
+    // Track 12.6 will read and clear this to apply AABB-tested player damage.
+    int m_pendingEnemyDamage = 0;
 };

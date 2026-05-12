@@ -20,7 +20,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [x] Dodge burst movement
 - [x] 2-step combo chain
 - [ ] Lock-on targeting
-- [ ] Enemy combat states (chase / attack / hit)
+- [x] Enemy combat states (chase / attack / hit)
 - [ ] Player damage intake and defeat reset
 - [ ] Combat HUD expansion (target HP bar, combo step)
 - [ ] GT610 budget debug counters
@@ -83,6 +83,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Parry / counter window
 - [ ] Overkill indicator
 - [ ] Attack range indicator
+- [x] Enemy awareness radius visualization
 - [ ] Block / guard state
 - [ ] Hit pause / hitstop (if not done in M12)
 

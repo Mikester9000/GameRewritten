@@ -347,7 +347,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                  camController.GetYaw(),  camController.GetPitch());
         imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
-        runtimeScene.BeginFrame(deltaTime, renderer);
+        // Pass current player XZ (post camController.Update) so enemy AI is up-to-date.
+        runtimeScene.BeginFrame(deltaTime, renderer,
+                                camController.GetPlayerX(),
+                                camController.GetPlayerZ());
 
         // F — player attack (ATB-gated, ignored while paused).
         // Runs after BeginPlayerFrame so the ATB readiness check uses the current frame's value.
@@ -382,6 +385,21 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             // Draw the World Editor panel inside the ImGui frame.
             WorldEditorFrameOps::DrawEditorPanelForActiveCell(
                 worldEditor, worldGrid, camController, renderer);
+            // Combat debug overlay (hitboxes, radii, state labels).
+            if (imguiLayer.showCombatDebug)
+            {
+                imguiLayer.DrawCombatDebug(
+                    runtimeScene.GetCombatSystem(),
+                    runtimeScene.GetEnemies(),
+                    runtimeScene.GetEnemyCount(),
+                    camController.GetCamX(),
+                    camController.GetCamY(),
+                    camController.GetCamZ(),
+                    camController.GetYaw(),
+                    camController.GetPitch(),
+                    static_cast<float>(window.GetWidth()),
+                    static_cast<float>(window.GetHeight()));
+            }
             imguiLayer.EndFrame();
 
             renderer.PresentFrame();

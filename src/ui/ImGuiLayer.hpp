@@ -63,6 +63,21 @@ public:
     // Reset transient flags — call once after reading them each frame.
     void ClearFrameFlags() { wantsQuit = false; wantsResume = false; }
 
+    // Draw hitbox AABBs, enemy detection/attack radii, and state labels as
+    // a screen-space overlay using ImGui's foreground draw list.
+    // Call inside the ImGui frame (between BeginFrame and EndFrame).
+    // Does nothing when showCombatDebug is false.
+    void DrawCombatDebug(
+        const class CombatSystem& combatSystem,
+        const class EnemyActor*   enemies,
+        int                       enemyCount,
+        float camX,    float camY,    float camZ,
+        float yaw,     float pitch,
+        float vpW,     float vpH);
+
+    // Toggled by the checkbox inside DrawDebugOverlay.
+    bool showCombatDebug = false;
+
     // Static WndProc hook — pass to Win32Window::SetWndProcHook() after Initialize().
     // This forwards Win32 messages to the ImGui Win32 backend so ImGui receives
     // mouse clicks, keyboard input, etc.

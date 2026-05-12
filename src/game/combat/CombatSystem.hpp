@@ -30,6 +30,10 @@ public:
     // Call once per frame from RuntimeScene::BeginFrame.
     void Update(float dt, EnemyActor* enemies, int count);
 
+    // Read-only access to active hitboxes for debug visualization.
+    const std::vector<HitBox>& GetActiveHitBoxes() const
+    { return m_activeHitBoxes; }
+
 private:
     static constexpr float kComboWindowSec = 0.60f;
 
