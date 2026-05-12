@@ -127,11 +127,11 @@ public:
                 hb.x      = enemy.x;
                 hb.y      = enemy.y + 1.0f;
                 hb.z      = enemy.z;
-                hb.halfX  = 1.2f;
-                hb.halfY  = 1.0f;
-                hb.halfZ  = 1.2f;
-                hb.damage = 2;
-                hb.framesToLive = 3;
+                hb.halfX  = kEnemyAttackHalfX;
+                hb.halfY  = kEnemyAttackHalfY;
+                hb.halfZ  = kEnemyAttackHalfZ;
+                hb.damage = kEnemyAttackDamage;
+                hb.framesToLive = kEnemyAttackFrameLifetime;
                 m_pendingEnemyDamage += hb.damage;
                 LOG_INFO("RuntimeScene: Enemy attack hitbox spawned.");
             }
@@ -214,6 +214,14 @@ public:
 private:
     static constexpr int kEnemyCount = 2;
 
+    // Enemy attack hitbox parameters — used when building the spawn-time hitbox.
+    // Track 12.6 will add actual AABB collision against the player position.
+    static constexpr float kEnemyAttackHalfX        = 1.2f;
+    static constexpr float kEnemyAttackHalfY        = 1.0f;
+    static constexpr float kEnemyAttackHalfZ        = 1.2f;
+    static constexpr int   kEnemyAttackDamage       = 2;
+    static constexpr int   kEnemyAttackFrameLifetime = 3;
+
     PlayerActor&       m_player;
     PrimitiveRenderer& m_primRenderer;
     EnemyActor         m_enemies[kEnemyCount];
@@ -223,6 +231,7 @@ private:
     float m_playerX = 0.0f;
     float m_playerZ = 0.0f;
 
-    // Damage from enemy attacks this frame; consumed by Track 12.6 player damage.
+    // Damage accumulated from enemy attacks this frame.
+    // Track 12.6 will read and clear this to apply AABB-tested player damage.
     int m_pendingEnemyDamage = 0;
 };
