@@ -315,16 +315,20 @@ void ImGuiLayer::DrawCombatDebug(
             continue;
 
         // Estimate screen half-extents by projecting offset points.
-        // sry (right-edge screen Y) and stx (top-edge screen X) are unused —
-        // we only need srx for width and sty for height.
+        // We project a right-edge and a top-edge point, then measure horizontal
+        // and vertical distances from center.  The cross-axis components
+        // (rightEdgeScreenY and topEdgeScreenX) are byproducts of the projection
+        // and not needed for the width/height calculation.
         float srx;
-        [[maybe_unused]] float sry;
-        [[maybe_unused]] float stx;
+        [[maybe_unused]] float rightEdgeScreenY;
+        [[maybe_unused]] float topEdgeScreenX;
         float sty;
         bool hasRight = WorldToScreen(hb.x + hb.halfX, hb.y, hb.z,
-                                      camX, camY, camZ, yaw, pitch, vpW, vpH, srx, sry);
+                                      camX, camY, camZ, yaw, pitch, vpW, vpH,
+                                      srx, rightEdgeScreenY);
         bool hasTop   = WorldToScreen(hb.x, hb.y + hb.halfY, hb.z,
-                                      camX, camY, camZ, yaw, pitch, vpW, vpH, stx, sty);
+                                      camX, camY, camZ, yaw, pitch, vpW, vpH,
+                                      topEdgeScreenX, sty);
         float hw = hasRight ? fabsf(srx - sx) : 18.0f;
         float hh = hasTop   ? fabsf(sty - sy) : 28.0f;
 
