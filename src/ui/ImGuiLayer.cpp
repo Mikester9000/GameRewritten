@@ -26,6 +26,9 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 // Mirrors the renderer's view transform (yaw then pitch, 45-degree FOV).
 // Returns false if the point is behind the camera.
 // ---------------------------------------------------------------------------
+#include <DirectXMath.h>
+using namespace DirectX;
+
 static bool WorldToScreen(
     float wx, float wy, float wz,
     float camX, float camY, float camZ,
@@ -33,38 +36,49 @@ static bool WorldToScreen(
     float vpW, float vpH,
     float& outSx, float& outSy)
 {
-    // Translate relative to camera.
-    float dx = wx - camX;
-    float dy = wy - camY;
-    float dz = wz - camZ;
+    // Build the exact same look direction the renderer uses
+    float lookDirX = cosf(pitch) * sinf(yaw);
+    float lookDirY = sinf(pitch);
+    float lookDirZ = cosf(pitch) * cosf(yaw);
 
-    // Rotate by yaw (Y axis).
-    float cosY = cosf(-yaw);
-    float sinY = sinf(-yaw);
-    float rx =  dx * cosY + dz * sinY;
-    float ry =  dy;
-    float rz = -dx * sinY + dz * cosY;
+    XMVECTOR camPos = XMVectorSet(camX, camY, camZ, 1.0f);
+    XMVECTOR camTarget = XMVectorSet(camX + lookDirX,
+        camY + lookDirY,
+        camZ + lookDirZ, 1.0f);
+    XMVECTOR camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-    // Rotate by pitch (X axis).
-    float cosP = cosf(-pitch);
-    float sinP = sinf(-pitch);
-    float fx = rx;
-    float fy =  ry * cosP - rz * sinP;
-    float fz =  ry * sinP + rz * cosP;
+    // Match renderer exactly — LookAtLH, 45 degree FOV, near 0.1, far 2000
+    XMMATRIX view = XMMatrixLookAtLH(camPos, camTarget, camUp);
+    XMMATRIX proj = XMMatrixPerspectiveFovLH(
+        XM_PIDIV4,
+        vpW / vpH,
+        0.1f, 2000.0f);
 
-    // Clip anything behind the near plane.
-    if (fz <= 0.1f)
+    // DirectXMath uses row vectors: clip = worldPos * view * proj
+    // XMMatrixMultiply(A,B) = A*B, XMVector4Transform(v,M) = v*M
+    // NO transpose needed here
+    XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+
+    XMVECTOR worldPos = XMVectorSet(wx, wy, wz, 1.0f);
+    XMVECTOR clip = XMVector4Transform(worldPos, viewProj);
+
+    // W check — behind camera
+    float w = XMVectorGetW(clip);
+    if (w <= 0.0f)
         return false;
 
-    // Project — matches XMMatrixPerspectiveFovLH(XM_PIDIV4, vpW/vpH, ...) used by renderer.
-    // For vertical FOV, fovScale applies to Y directly. For X, we divide by aspect
-    // so that a world point at the same NDC distance maps to a smaller screen-x fraction
-    // on widescreen viewports (matching the GPU perspective divide).
-    static constexpr float kPi = 3.14159265f;
-    float aspect   = vpW / vpH;
-    float fovScale = 1.0f / tanf(kPi / 8.0f); // tan(fovY/2) for 45-degree vertical FOV
-    outSx = (vpW * 0.5f) + (fx / fz) / aspect * fovScale * (vpW * 0.5f);
-    outSy = (vpH * 0.5f) - (fy / fz) * fovScale * (vpH * 0.5f);
+    // Perspective divide to NDC
+    float ndcX = XMVectorGetX(clip) / w;
+    float ndcY = XMVectorGetY(clip) / w;
+
+    // NDC to screen pixels
+    outSx = (ndcX + 1.0f) * 0.5f * vpW;
+    outSy = (1.0f - ndcY) * 0.5f * vpH;
+
+    // Cull if off screen
+    if (outSx < -50.0f || outSx > vpW + 50.0f) return false;
+    if (outSy < -50.0f || outSy > vpH + 50.0f) return false;
+
     return true;
 }
 static void DrawProjectedAabb(
