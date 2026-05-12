@@ -6,6 +6,7 @@
 #include <logger/Logger.hpp>
 #include <algorithm>
 #include <cstdio>
+#include <cfloat>
 
 void DamageNumbers::Reset()
 {
@@ -96,9 +97,15 @@ void DamageNumbers::Draw(float camX, float camY, float camZ,
         char text[16]{};
         std::snprintf(text, sizeof(text), "%d", entry.damage);
 
-        const ImVec2 textSize = ImGui::CalcTextSize(text);
-        drawList->AddText(ImVec2(sx - textSize.x * 0.5f, sy),
-                          IM_COL32(255, 255, 255, alpha),
-                          text);
+        const float fontSize = 33.0f;
+        ImFont* font = ImGui::GetFont();
+        const ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+
+        drawList->AddText(
+            font,
+            fontSize,
+            ImVec2(sx - textSize.x * 0.5f, sy),
+            IM_COL32(255, 255, 255, alpha),
+            text);
     }
 }
