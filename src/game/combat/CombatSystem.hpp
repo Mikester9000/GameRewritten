@@ -11,7 +11,7 @@ class EnemyActor; // forward declare — full definition only needed in CombatSy
 class CombatSystem
 {
 public:
-    // Combo state — 0 = no active combo, 1 = first hit landed (window open).
+    // Combo state — 0 = no active combo, 1 = step 1 triggered (window open).
     int   comboStep  = 0;
     // Seconds remaining to chain the next combo hit.
     float comboTimer = 0.0f;

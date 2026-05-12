@@ -33,6 +33,12 @@ void CombatSystem::SpawnHitBox(const HitBox& hitbox)
 
 void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int attackStep)
 {
+    if (attackStep != 1 && attackStep != 2)
+    {
+        LOG_WARN("CombatSystem: TriggerAttack called with unsupported attackStep " + std::to_string(attackStep) + " — ignored.");
+        return;
+    }
+
     HitBox hb;
     hb.x = px + 1.5f * sinf(yaw);
     hb.y = py;

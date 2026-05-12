@@ -137,7 +137,12 @@ public:
 
         if (m_combatSystem.comboStep == 0)
         {
-            // Step 1 — requires ATB.
+            // Step 1 — only allowed from Idle or Move while grounded; requires ATB.
+            const PlayerActionState s = m_player.state;
+            if (s != PlayerActionState::Idle && s != PlayerActionState::Move)
+                return false;
+            if (!camController.IsGrounded())
+                return false;
             if (!m_player.stats.IsAtbReady())
                 return false;
 
@@ -150,7 +155,13 @@ public:
         }
         else if (m_combatSystem.comboStep == 1 && m_combatSystem.comboTimer > 0.0f)
         {
-            // Step 2 — ATB not required; chains within the combo window.
+            // Step 2 — allowed from Attack1, Idle, or Move during the combo window; ATB not required.
+            const PlayerActionState s = m_player.state;
+            if (s != PlayerActionState::Attack1 &&
+                s != PlayerActionState::Idle    &&
+                s != PlayerActionState::Move)
+                return false;
+
             m_player.stats.atbCharge = 0.0f;
             m_combatSystem.TriggerAttack(px, py, pz, yaw, 2);
             m_player.state      = PlayerActionState::Attack2;
