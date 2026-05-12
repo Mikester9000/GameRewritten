@@ -61,7 +61,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Lock-on targeting | ❌ | `src/game/combat/Targeting.hpp` |
 | Enemy combat states (chase/attack/hit) | ✅ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/actors/EnemyState.hpp` |
 | Enemy awareness radius visualization   | ✅ | `src/ui/ImGuiLayer.cpp/hpp` |
-| Player damage intake + defeat reset | ❌ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp` |
+| Player damage intake + defeat reset | ✅ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp`, `src/game/CameraController.cpp/hpp` |
 | Floating damage numbers | ✅ | `src/ui/DamageNumbers.cpp/hpp` |
 | Hit flash system | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Screen edge damage flash | ❌ | `src/ui/GameHUD.cpp/hpp` |
@@ -82,7 +82,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Tooltip system | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Saving indicator | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Death / defeat screen | ❌ | `src/ui/GameHUD.cpp/hpp` |
-| Low HP warning pulse | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Low HP warning pulse | ✅ | `src/ui/GameHUD.cpp/hpp` |
 | Camera shake | ❌ | `src/game/CameraController.cpp/hpp` |
 | Combat camera zoom | ❌ | `src/game/CameraController.cpp/hpp` |
 | Camera collision avoidance | ❌ | `src/game/CameraController.cpp/hpp` |

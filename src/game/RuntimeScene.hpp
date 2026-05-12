@@ -13,9 +13,10 @@
 // Usage:
 //   RuntimeScene scene(playerActor, primRenderer);
 //   scene.InitEnemies(spawnCenterX, spawnCenterZ);
+//   scene.SetDamageNumbers(&damageNumbers);   // optional: enables floating numbers
 //   // each frame:
 //   scene.BeginPlayerFrame(deltaTime, actionMap, camController.IsGrounded(), attackPressed, camController);
-//   scene.BeginFrame(deltaTime, renderer);
+//   scene.BeginFrame(deltaTime, renderer, playerX, playerY, playerZ);
 //   scene.SubmitActors(camController, prefabLibrary);
 
 #include "actors/PlayerActor.hpp"
@@ -24,7 +25,9 @@
 #include "combat/CombatSystem.hpp"
 #include "CameraController.hpp"
 #include "../app/InputActionMap.hpp"
+#include "../ui/DamageNumbers.hpp"
 #include <cmath>
+#include <string>
 #include <logger/Logger.hpp>
 
 // Forward-declared to avoid pulling their full headers into every file that
@@ -39,9 +42,13 @@ public:
         : m_player(player), m_primRenderer(primRenderer) {}
 
     // Place two patrol enemies near the player's spawn center.
+    // Stores the spawn center for later player respawns.
     // Call once after camController.Init().
     void InitEnemies(float centerX, float centerZ)
     {
+        m_spawnCenterX = centerX;
+        m_spawnCenterZ = centerZ;
+
         // Enemy 0 patrols east-west; starts at the midpoint of the route.
         m_enemies[0].Init(centerX + 20.0f, centerZ + 10.0f,
                           centerX + 10.0f, centerZ + 10.0f,
@@ -52,6 +59,11 @@ public:
                           centerX + 10.0f, centerZ + 30.0f,
                           centerX + 10.0f, centerZ + 50.0f);
     }
+
+    // Provide a DamageNumbers instance so RuntimeScene can spawn floating
+    // hit numbers directly. Call once after construction, before the loop.
+    void SetDamageNumbers(DamageNumbers* dn) { m_damageNumbers = dn; }
+
     float m_lastMoveDirX = 0.0f;
     float m_lastMoveDirZ = 1.0f; // default facing forward
 
@@ -102,14 +114,16 @@ public:
     }
 
     // Update runtime actor state and clear all dynamic/runtime instance buckets.
-    // playerX/playerZ must be the player's current position AFTER camController.Update()
+    // playerX/Y/Z must be the player's current position AFTER camController.Update()
     // has run this frame, so enemy AI sees an up-to-date position.
+    // playerY is the eye-level Y (CameraController::GetPlayerY()).
     // Call once each frame after camController.Update(), before submitting actor visuals.
     void BeginFrame(float dt, D3D11Renderer& renderer,
-                    float playerX, float playerZ)
+                    float playerX, float playerY, float playerZ)
     {
-        // Cache the up-to-date player position for enemy AI.
+        // Cache the up-to-date player position for enemy AI and AABB checks.
         m_playerX = playerX;
+        m_playerY = playerY;
         m_playerZ = playerZ;
 
         m_primRenderer.ClearRuntimeInstances();
@@ -119,22 +133,74 @@ public:
 
         m_combatSystem.Update(dt, m_enemies, kEnemyCount);
 
-        // Check for any enemy attack hitboxes spawned this frame.
+        // Spawn floating damage numbers for player hits on enemies this frame.
+        // This was previously done in Main.cpp; now RuntimeScene owns the wiring.
+        if (m_damageNumbers)
+        {
+            const CombatSystem::EnemyHitRecord* hits = m_combatSystem.GetRecentEnemyHits();
+            int hitCount = m_combatSystem.GetRecentEnemyHitCount();
+            for (int i = 0; i < hitCount; ++i)
+                m_damageNumbers->Spawn(hits[i].damage, hits[i].x, hits[i].y, hits[i].z);
+        }
+
+        // Check for enemy attack hitboxes spawned this frame.
+        // Fix 2: Test the hitbox against the player AABB before accumulating damage.
+        // Fix 3: Damage is consumed and applied here instead of being left for Main.cpp.
         for (EnemyActor& enemy : m_enemies)
         {
-            if (enemy.pendingAttack)
-            {
-                enemy.pendingAttack = false;
-                HitBox hb;
-                hb.x      = enemy.x;
-                hb.y      = enemy.y + 1.0f;
-                hb.z      = enemy.z;
-                hb.halfX  = kEnemyAttackHalfX;
-                hb.halfY  = kEnemyAttackHalfY;
-                hb.halfZ  = kEnemyAttackHalfZ;
-                hb.damage = kEnemyAttackDamage;
-                hb.framesToLive = kEnemyAttackFrameLifetime;
+            if (!enemy.pendingAttack)
+                continue;
+
+            enemy.pendingAttack = false;
+
+            HitBox hb;
+            hb.x           = enemy.x;
+            hb.y           = enemy.y + 1.0f;
+            hb.z           = enemy.z;
+            hb.halfX       = kEnemyAttackHalfX;
+            hb.halfY       = kEnemyAttackHalfY;
+            hb.halfZ       = kEnemyAttackHalfZ;
+            hb.damage      = kEnemyAttackDamage;
+            hb.framesToLive = kEnemyAttackFrameLifetime;
+
+            // Only deal damage if the attack hitbox overlaps the player's body.
+            if (HitBoxOverlapsPlayer(hb))
                 m_pendingEnemyDamage += hb.damage;
+        }
+
+        // Apply accumulated enemy damage to the player.
+        int totalDamage = m_pendingEnemyDamage;
+        m_pendingEnemyDamage = 0;
+
+        if (totalDamage > 0 &&
+            m_player.state != PlayerActionState::Dead &&
+            m_player.state != PlayerActionState::Dodge) // dodge grants invincibility
+        {
+            m_player.stats.TakeDamage(totalDamage);
+
+            if (m_player.stats.IsDead())
+            {
+                // Restore stats and signal Main.cpp to teleport the camera.
+                m_player.stats.hp         = m_player.stats.maxHp;
+                m_player.stats.mp         = m_player.stats.maxMp;
+                m_player.stats.atbCharge  = 0.0f;
+                m_player.state            = PlayerActionState::Idle;
+                m_player.stateTimer       = 0.0f;
+                m_wantsRespawn            = true;
+                LOG_INFO("RuntimeScene: Player defeated — respawning.");
+            }
+            else
+            {
+                m_player.state      = PlayerActionState::Stunned;
+                m_player.stateTimer = 0.30f;
+                std::string msg = "RuntimeScene: Player hit for ";
+                msg += std::to_string(totalDamage);
+                msg += " damage (HP ";
+                msg += std::to_string(static_cast<int>(m_player.stats.hp));
+                msg += " / ";
+                msg += std::to_string(static_cast<int>(m_player.stats.maxHp));
+                msg += ").";
+                LOG_INFO(msg);
             }
         }
     }
@@ -198,14 +264,16 @@ public:
         return false;
     }
 
-    // Returns accumulated enemy damage since the last call; clears the counter.
-    // Track 12.6 will call this to apply damage to the player.
-    int ConsumePendingEnemyDamage()
-    {
-        int d = m_pendingEnemyDamage;
-        m_pendingEnemyDamage = 0;
-        return d;
-    }
+    // Returns true when the player was defeated this frame and needs to be
+    // teleported back to spawn. Call once per frame after BeginFrame().
+    bool WantsRespawn() const { return m_wantsRespawn; }
+
+    // Spawn X/Z coordinates for player respawn (set from InitEnemies center).
+    float GetRespawnX() const { return m_spawnCenterX; }
+    float GetRespawnZ() const { return m_spawnCenterZ; }
+
+    // Clear the respawn flag after Main.cpp has handled the teleport.
+    void ClearRespawnFlag() { m_wantsRespawn = false; }
 
     // Read-only accessors for debug visualization and future systems.
     const CombatSystem& GetCombatSystem() const { return m_combatSystem; }
@@ -215,24 +283,50 @@ public:
 private:
     static constexpr int kEnemyCount = 2;
 
-    // Enemy attack hitbox parameters — used when building the spawn-time hitbox.
-    // Track 12.6 will add actual AABB collision against the player position.
+    // Enemy attack hitbox parameters.
     static constexpr float kEnemyAttackHalfX        = 1.2f;
     static constexpr float kEnemyAttackHalfY        = 1.0f;
     static constexpr float kEnemyAttackHalfZ        = 1.2f;
     static constexpr int   kEnemyAttackDamage       = 2;
     static constexpr int   kEnemyAttackFrameLifetime = 3;
 
+    // Player body AABB half-extents used for incoming damage checks.
+    // Slightly larger than the movement collision box for fair hit detection.
+    static constexpr float kPlayerHitHalfX = 0.5f;
+    static constexpr float kPlayerHitHalfY = 1.0f;
+    static constexpr float kPlayerHitHalfZ = 0.5f;
+
     PlayerActor&       m_player;
     PrimitiveRenderer& m_primRenderer;
     EnemyActor         m_enemies[kEnemyCount];
     CombatSystem       m_combatSystem;
+    DamageNumbers*     m_damageNumbers = nullptr;
 
     // Player position updated each frame in BeginFrame (after camController.Update()).
     float m_playerX = 0.0f;
+    float m_playerY = 0.0f; // eye-level Y from CameraController::GetPlayerY()
     float m_playerZ = 0.0f;
 
-    // Damage accumulated from enemy attacks this frame.
-    // Track 12.6 will read and clear this to apply AABB-tested player damage.
+    // Spawn center stored from InitEnemies() for player respawn.
+    float m_spawnCenterX = 0.0f;
+    float m_spawnCenterZ = 0.0f;
+
+    // Set true when the player dies; cleared by Main.cpp after the camera teleport.
+    bool m_wantsRespawn = false;
+
+    // Accumulated damage from enemy attacks this frame (AABB-tested).
     int m_pendingEnemyDamage = 0;
+
+    // Returns true if the given hitbox overlaps the player's body AABB.
+    // m_playerY is the camera eye level; body center is shifted down by 0.5 units.
+    bool HitBoxOverlapsPlayer(const HitBox& hb) const
+    {
+        float bodyY = m_playerY - 0.5f;
+        float dx = fabsf(m_playerX - hb.x);
+        float dy = fabsf(bodyY     - hb.y);
+        float dz = fabsf(m_playerZ - hb.z);
+        return (dx < kPlayerHitHalfX + hb.halfX) &&
+               (dy < kPlayerHitHalfY + hb.halfY) &&
+               (dz < kPlayerHitHalfZ + hb.halfZ);
+    }
 };

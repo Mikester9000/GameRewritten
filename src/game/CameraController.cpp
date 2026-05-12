@@ -13,6 +13,28 @@
 
 using namespace DirectX;
 
+// ---------------------------------------------------------------------------
+// ResetToSpawn
+// ---------------------------------------------------------------------------
+void CameraController::ResetToSpawn(float x, float y, float z, float yaw, float pitch)
+{
+    m_playerX    = x;
+    m_playerY    = y;
+    m_playerZ    = z;
+    m_yaw        = yaw;
+    m_pitch      = pitch;
+    m_velocityY  = 0.0f;
+    m_isGrounded = true;
+    m_dodgeVelX  = 0.0f;
+    m_dodgeVelZ  = 0.0f;
+    m_dodgeTimer = 0.0f;
+    m_dodgeActive = false;
+    ComputeCamFromPlayer();
+}
+
+// ---------------------------------------------------------------------------
+// BeginDodge
+// ---------------------------------------------------------------------------
 void CameraController::BeginDodge(float dirX, float dirZ)
 {
     constexpr float kDodgeDuration = 0.35f;

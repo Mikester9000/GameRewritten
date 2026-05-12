@@ -174,6 +174,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // any cell-boundary void on the first frame.
     camController.Init(startupCellCenter, 0.0f, startupCellCenter, 0.0f, -0.5f);
     runtimeScene.InitEnemies(startupCellCenter, startupCellCenter);
+    runtimeScene.SetDamageNumbers(&damageNumbers);
 
     renderer.SetCameraPosition(startupCellCenter, 0.0f, startupCellCenter);
     renderer.SetCameraRotation(0.0f, -0.5f);
@@ -348,21 +349,27 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),
                                  camController.GetYaw(),  camController.GetPitch());
         imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
-        // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
-        // Pass current player XZ (post camController.Update) so enemy AI is up-to-date.
+        // Rebuild runtime actor visuals for this frame (player, enemies).
+        // Pass current player XYZ (post camController.Update) so enemy AI is up-to-date.
         runtimeScene.BeginFrame(deltaTime, renderer,
                                 camController.GetPlayerX(),
+                                camController.GetPlayerY(),
                                 camController.GetPlayerZ());
 
-        const CombatSystem& combatSystem = runtimeScene.GetCombatSystem();
-        if (!paused)
+        // Respawn the player at the spawn point after defeat.
+        // RuntimeScene resets stats; Main handles the camera teleport.
+        if (runtimeScene.WantsRespawn())
         {
-            for (int hitIndex = 0; hitIndex < combatSystem.GetRecentEnemyHitCount(); ++hitIndex)
-            {
-                const CombatSystem::EnemyHitRecord& hit = combatSystem.GetRecentEnemyHits()[hitIndex];
-                damageNumbers.Spawn(hit.damage, hit.x, hit.y, hit.z);
-            }
+            camController.ResetToSpawn(
+                runtimeScene.GetRespawnX(), 0.0f, runtimeScene.GetRespawnZ(),
+                0.0f, -0.5f);
+            runtimeScene.ClearRespawnFlag();
+            firstFrame = true; // suppress camera jump caused by cursor warp after teleport
         }
+
+        const CombatSystem& combatSystem = runtimeScene.GetCombatSystem();
+
+        // Update floating damage numbers (only when unpaused; spawning is done inside BeginFrame).
         if (!paused)
             damageNumbers.Update(deltaTime);
 
@@ -390,7 +397,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             imguiLayer.BeginFrame();
             if (!imguiLayer.IsPauseMenuOpen())
             {
-                gameHud.Draw(playerActor.stats, ImGui::GetIO());
+                gameHud.Draw(playerActor.stats, ImGui::GetIO(), debugClearColorTime);
                 damageNumbers.Draw(camController.GetCamX(),
                                    camController.GetCamY(),
                                    camController.GetCamZ(),
