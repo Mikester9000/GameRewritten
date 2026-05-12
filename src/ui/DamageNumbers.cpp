@@ -2,6 +2,7 @@
 
 #include "ScreenProjection.hpp"
 
+#include <logger/Logger.hpp>
 #include <algorithm>
 #include <cstdio>
 
@@ -38,7 +39,12 @@ void DamageNumbers::Spawn(int damage, float worldX, float worldY, float worldZ)
     slot->x = worldX;
     slot->y = worldY;
     slot->z = worldZ;
-    slot->damage = std::max(0, damage);
+    if (damage < 0)
+    {
+        LOG_WARN("DamageNumbers: received negative damage value; clamping to zero.");
+        damage = 0;
+    }
+    slot->damage = damage;
     slot->ageSec = 0.0f;
 }
 

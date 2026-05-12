@@ -36,8 +36,8 @@ inline bool WorldToScreen(
     if (aspect <= 0.0f)
         return false;
 
-    float fovScale = 1.0f / std::tan(DirectX::XM_PIDIV4 * 0.5f);
-    outSx = (vpW * 0.5f) + (fx / fz) / aspect * fovScale * (vpW * 0.5f);
-    outSy = (vpH * 0.5f) - (fy / fz) * fovScale * (vpH * 0.5f);
+    static const float kFovScale = 1.0f / std::tan(DirectX::XM_PIDIV4 * 0.5f);
+    outSx = (vpW * 0.5f) + (fx / fz) / aspect * kFovScale * (vpW * 0.5f);
+    outSy = (vpH * 0.5f) - (fy / fz) * kFovScale * (vpH * 0.5f);
     return true;
 }
