@@ -66,10 +66,6 @@ public:
         m_player.stats.Update(dt);
         m_player.Update(dt, actionMap, isGrounded, attackPressed);
 
-        // Store player position for enemy AI (used next BeginFrame call).
-        m_playerX = camController.GetPlayerX();
-        m_playerZ = camController.GetPlayerZ();
-
         // Track last known movement direction so dodge can use it as fallback
         const float yaw = camController.GetYaw();
         const float forwardX = sinf(yaw);
@@ -106,9 +102,15 @@ public:
     }
 
     // Update runtime actor state and clear all dynamic/runtime instance buckets.
-    // Call once each frame after BeginPlayerFrame(), before submitting actor visuals.
-    void BeginFrame(float dt, D3D11Renderer& renderer)
+    // playerX/playerZ must be the player's current position AFTER camController.Update()
+    // has run this frame, so enemy AI sees an up-to-date position.
+    // Call once each frame after camController.Update(), before submitting actor visuals.
+    void BeginFrame(float dt, D3D11Renderer& renderer,
+                    float playerX, float playerZ)
     {
+        // Cache the up-to-date player position for enemy AI.
+        m_playerX = playerX;
+        m_playerZ = playerZ;
 
         m_primRenderer.ClearRuntimeInstances();
 
@@ -133,7 +135,6 @@ public:
                 hb.damage = kEnemyAttackDamage;
                 hb.framesToLive = kEnemyAttackFrameLifetime;
                 m_pendingEnemyDamage += hb.damage;
-                LOG_INFO("RuntimeScene: Enemy attack hitbox spawned.");
             }
         }
     }
@@ -227,7 +228,7 @@ private:
     EnemyActor         m_enemies[kEnemyCount];
     CombatSystem       m_combatSystem;
 
-    // Player position cached from BeginPlayerFrame; fed to enemy Update() calls.
+    // Player position updated each frame in BeginFrame (after camController.Update()).
     float m_playerX = 0.0f;
     float m_playerZ = 0.0f;
 

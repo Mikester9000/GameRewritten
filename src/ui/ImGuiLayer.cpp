@@ -56,10 +56,14 @@ static bool WorldToScreen(
     if (fz <= 0.1f)
         return false;
 
-    // Project — matches the 45-degree FOV used by the renderer.
+    // Project — matches XMMatrixPerspectiveFovLH(XM_PIDIV4, vpW/vpH, ...) used by renderer.
+    // For vertical FOV, fovScale applies to Y directly. For X, we divide by aspect
+    // so that a world point at the same NDC distance maps to a smaller screen-x fraction
+    // on widescreen viewports (matching the GPU perspective divide).
     static constexpr float kPi = 3.14159265f;
-    float fovScale = 1.0f / tanf(kPi / 8.0f); // tan(FOV/2) for 45 deg
-    outSx = (vpW * 0.5f) + (fx / fz) * fovScale * (vpH * 0.5f);
+    float aspect   = vpW / vpH;
+    float fovScale = 1.0f / tanf(kPi / 8.0f); // tan(fovY/2) for 45-degree vertical FOV
+    outSx = (vpW * 0.5f) + (fx / fz) / aspect * fovScale * (vpW * 0.5f);
     outSy = (vpH * 0.5f) - (fy / fz) * fovScale * (vpH * 0.5f);
     return true;
 }
@@ -295,7 +299,6 @@ void ImGuiLayer::DrawCombatDebug(
     const CombatSystem& combatSystem,
     const EnemyActor*   enemies,
     int                 enemyCount,
-    float playerX, float playerY, float playerZ,
     float camX,    float camY,    float camZ,
     float yaw,     float pitch,
     float vpW,     float vpH)

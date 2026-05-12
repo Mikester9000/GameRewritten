@@ -71,7 +71,6 @@ public:
         const class CombatSystem& combatSystem,
         const class EnemyActor*   enemies,
         int                       enemyCount,
-        float playerX, float playerY, float playerZ,
         float camX,    float camY,    float camZ,
         float yaw,     float pitch,
         float vpW,     float vpH);

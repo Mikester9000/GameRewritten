@@ -347,7 +347,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                  camController.GetYaw(),  camController.GetPitch());
         imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
         // Rebuild runtime actor visuals for this frame (player, future enemies, NPCs).
-        runtimeScene.BeginFrame(deltaTime, renderer);
+        // Pass current player XZ (post camController.Update) so enemy AI is up-to-date.
+        runtimeScene.BeginFrame(deltaTime, renderer,
+                                camController.GetPlayerX(),
+                                camController.GetPlayerZ());
 
         // F — player attack (ATB-gated, ignored while paused).
         // Runs after BeginPlayerFrame so the ATB readiness check uses the current frame's value.
@@ -389,9 +392,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                     runtimeScene.GetCombatSystem(),
                     runtimeScene.GetEnemies(),
                     runtimeScene.GetEnemyCount(),
-                    camController.GetPlayerX(),
-                    camController.GetPlayerGroundY() + 1.0f,
-                    camController.GetPlayerZ(),
                     camController.GetCamX(),
                     camController.GetCamY(),
                     camController.GetCamZ(),
