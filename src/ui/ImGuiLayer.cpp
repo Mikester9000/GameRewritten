@@ -67,7 +67,63 @@ static bool WorldToScreen(
     outSy = (vpH * 0.5f) - (fy / fz) * fovScale * (vpH * 0.5f);
     return true;
 }
+static void DrawProjectedAabb(
+    ImDrawList* dl,
+    float centerX, float centerY, float centerZ,
+    float halfX, float halfY, float halfZ,
+    float camX, float camY, float camZ,
+    float yaw, float pitch,
+    float vpW, float vpH,
+    ImU32 color,
+    float thickness)
+{
+    struct ScreenPoint
+    {
+        float x = 0.0f;
+        float y = 0.0f;
+        bool  visible = false;
+    };
 
+    ScreenPoint pts[8];
+
+    const float minX = centerX - halfX;
+    const float maxX = centerX + halfX;
+    const float minY = centerY - halfY;
+    const float maxY = centerY + halfY;
+    const float minZ = centerZ - halfZ;
+    const float maxZ = centerZ + halfZ;
+
+    pts[0].visible = WorldToScreen(minX, minY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[0].x, pts[0].y);
+    pts[1].visible = WorldToScreen(maxX, minY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[1].x, pts[1].y);
+    pts[2].visible = WorldToScreen(maxX, maxY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[2].x, pts[2].y);
+    pts[3].visible = WorldToScreen(minX, maxY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[3].x, pts[3].y);
+
+    pts[4].visible = WorldToScreen(minX, minY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[4].x, pts[4].y);
+    pts[5].visible = WorldToScreen(maxX, minY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[5].x, pts[5].y);
+    pts[6].visible = WorldToScreen(maxX, maxY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[6].x, pts[6].y);
+    pts[7].visible = WorldToScreen(minX, maxY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[7].x, pts[7].y);
+
+    const int edges[][2] =
+    {
+        {0, 1}, {1, 2}, {2, 3}, {3, 0},
+        {4, 5}, {5, 6}, {6, 7}, {7, 4},
+        {0, 4}, {1, 5}, {2, 6}, {3, 7}
+    };
+
+    for (const auto& edge : edges)
+    {
+        const int a = edge[0];
+        const int b = edge[1];
+        if (!pts[a].visible || !pts[b].visible)
+            continue;
+
+        dl->AddLine(
+            ImVec2(pts[a].x, pts[a].y),
+            ImVec2(pts[b].x, pts[b].y),
+            color,
+            thickness);
+    }
+}
 ImGuiLayer::ImGuiLayer() = default;
 
 bool ImGuiLayer::Initialize(HWND hwnd,
@@ -310,35 +366,26 @@ void ImGuiLayer::DrawCombatDebug(
 
     ImDrawList* dl = ImGui::GetForegroundDrawList();
 
-    // --- Active player hitboxes (red outlined rectangles) ---
+    // --- Active player hitboxes (red projected wire boxes) ---
     for (const HitBox& hb : combatSystem.GetActiveHitBoxes())
     {
+        DrawProjectedAabb(
+            dl,
+            hb.x, hb.y, hb.z,
+            hb.halfX, hb.halfY, hb.halfZ,
+            camX, camY, camZ,
+            yaw, pitch,
+            vpW, vpH,
+            IM_COL32(255, 50, 50, 220),
+            2.0f);
+
         float sx, sy;
-        if (!WorldToScreen(hb.x, hb.y, hb.z, camX, camY, camZ, yaw, pitch, vpW, vpH, sx, sy))
-            continue;
-
-        // Estimate screen half-extents by projecting offset points.
-        // We project a right-edge and a top-edge point, then measure horizontal
-        // and vertical distances from center.  The cross-axis components
-        // (rightEdgeScreenY and topEdgeScreenX) are byproducts of the projection
-        // and not needed for the width/height calculation.
-        float srx;
-        [[maybe_unused]] float rightEdgeScreenY;
-        [[maybe_unused]] float topEdgeScreenX;
-        float sty;
-        bool hasRight = WorldToScreen(hb.x + hb.halfX, hb.y, hb.z,
-                                      camX, camY, camZ, yaw, pitch, vpW, vpH,
-                                      srx, rightEdgeScreenY);
-        bool hasTop   = WorldToScreen(hb.x, hb.y + hb.halfY, hb.z,
-                                      camX, camY, camZ, yaw, pitch, vpW, vpH,
-                                      topEdgeScreenX, sty);
-        float hw = hasRight ? fabsf(srx - sx) : 18.0f;
-        float hh = hasTop   ? fabsf(sty - sy) : 28.0f;
-
-        dl->AddRect(ImVec2(sx - hw, sy - hh), ImVec2(sx + hw, sy + hh),
-                    IM_COL32(255, 50, 50, 220), 0.0f, 0, 2.0f);
-        dl->AddText(ImVec2(sx - 10.0f, sy - hh - 16.0f),
-                    IM_COL32(255, 50, 50, 255), "ATK");
+        if (WorldToScreen(hb.x, hb.y + hb.halfY + 0.2f, hb.z,
+            camX, camY, camZ, yaw, pitch, vpW, vpH, sx, sy))
+        {
+            dl->AddText(ImVec2(sx - 10.0f, sy - 16.0f),
+                IM_COL32(255, 50, 50, 255), "ATK");
+        }
     }
 
     // --- Per-enemy overlays ---
@@ -353,11 +400,22 @@ void ImGuiLayer::DrawCombatDebug(
         if (e.isDead)
             continue;
 
+        // Draw a projected world-space body box so the enemy feels anchored in the world.
+        DrawProjectedAabb(
+            dl,
+            e.x, e.y + 1.0f, e.z,
+            0.6f, 1.0f, 0.6f,
+            camX, camY, camZ,
+            yaw, pitch,
+            vpW, vpH,
+            IM_COL32(80, 200, 255, 180),
+            1.5f);
+
         // Project enemy position for state label and "!" indicator.
         float ex, ey;
         const bool enemyVisible = WorldToScreen(e.x, e.y + 2.2f, e.z,
-                                                camX, camY, camZ,
-                                                yaw, pitch, vpW, vpH, ex, ey);
+            camX, camY, camZ,
+            yaw, pitch, vpW, vpH, ex, ey);
 
         // --- Detection radius — yellow circle approximation ---
         {
@@ -366,19 +424,19 @@ void ImGuiLayer::DrawCombatDebug(
             for (int p = 0; p <= kCirclePoints; ++p)
             {
                 float angle = (p % kCirclePoints) * kTwoPi / kCirclePoints;
-                float px2   = e.x + EnemyActor::kDetectRadius * sinf(angle);
-                float pz2   = e.z + EnemyActor::kDetectRadius * cosf(angle);
+                float px2 = e.x + EnemyActor::kDetectRadius * sinf(angle);
+                float pz2 = e.z + EnemyActor::kDetectRadius * cosf(angle);
                 float sx2, sy2;
                 bool vis = WorldToScreen(px2, e.y, pz2,
-                                         camX, camY, camZ,
-                                         yaw, pitch, vpW, vpH, sx2, sy2);
+                    camX, camY, camZ,
+                    yaw, pitch, vpW, vpH, sx2, sy2);
                 if (p > 0 && prevVisible && vis)
                 {
                     dl->AddLine(ImVec2(prevSx, prevSy), ImVec2(sx2, sy2),
-                                IM_COL32(230, 220, 30, 160), 1.0f);
+                        IM_COL32(230, 220, 30, 160), 1.0f);
                 }
-                prevSx      = sx2;
-                prevSy      = sy2;
+                prevSx = sx2;
+                prevSy = sy2;
                 prevVisible = vis;
             }
         }
@@ -387,7 +445,7 @@ void ImGuiLayer::DrawCombatDebug(
         if (enemyVisible)
         {
             dl->AddText(ImVec2(ex - 22.0f, ey - 32.0f),
-                        IM_COL32(230, 220, 30, 200), "DETECT");
+                IM_COL32(230, 220, 30, 200), "DETECT");
         }
 
         // --- Attack radius — orange circle approximation ---
@@ -397,19 +455,19 @@ void ImGuiLayer::DrawCombatDebug(
             for (int p = 0; p <= kCirclePoints; ++p)
             {
                 float angle = (p % kCirclePoints) * kTwoPi / kCirclePoints;
-                float px2   = e.x + EnemyActor::kAttackRadius * sinf(angle);
-                float pz2   = e.z + EnemyActor::kAttackRadius * cosf(angle);
+                float px2 = e.x + EnemyActor::kAttackRadius * sinf(angle);
+                float pz2 = e.z + EnemyActor::kAttackRadius * cosf(angle);
                 float sx2, sy2;
                 bool vis = WorldToScreen(px2, e.y, pz2,
-                                         camX, camY, camZ,
-                                         yaw, pitch, vpW, vpH, sx2, sy2);
+                    camX, camY, camZ,
+                    yaw, pitch, vpW, vpH, sx2, sy2);
                 if (p > 0 && prevVisible && vis)
                 {
                     dl->AddLine(ImVec2(prevSx, prevSy), ImVec2(sx2, sy2),
-                                IM_COL32(255, 160, 40, 180), 1.5f);
+                        IM_COL32(255, 160, 40, 180), 1.5f);
                 }
-                prevSx      = sx2;
-                prevSy      = sy2;
+                prevSx = sx2;
+                prevSy = sy2;
                 prevVisible = vis;
             }
         }
@@ -418,16 +476,16 @@ void ImGuiLayer::DrawCombatDebug(
             continue;
 
         // --- State label ---
-        const char* stateStr  = "PATROL";
-        ImU32       stateCol  = IM_COL32(255, 255, 255, 240);
+        const char* stateStr = "PATROL";
+        ImU32       stateCol = IM_COL32(255, 255, 255, 240);
 
         switch (e.state)
         {
-            case EnemyState::Patrol: stateStr = "PATROL"; stateCol = IM_COL32(255, 255, 255, 240); break;
-            case EnemyState::Chase:  stateStr = "CHASE";  stateCol = IM_COL32(230, 220, 30,  240); break;
-            case EnemyState::Attack: stateStr = "ATTACK"; stateCol = IM_COL32(255, 160, 40,  240); break;
-            case EnemyState::Hit:    stateStr = "HIT";    stateCol = IM_COL32(255, 80,  80,  240); break;
-            case EnemyState::Dead:   stateStr = "DEAD";   stateCol = IM_COL32(150, 150, 150, 200); break;
+        case EnemyState::Patrol: stateStr = "PATROL"; stateCol = IM_COL32(255, 255, 255, 240); break;
+        case EnemyState::Chase:  stateStr = "CHASE";  stateCol = IM_COL32(230, 220, 30, 240); break;
+        case EnemyState::Attack: stateStr = "ATTACK"; stateCol = IM_COL32(255, 160, 40, 240); break;
+        case EnemyState::Hit:    stateStr = "HIT";    stateCol = IM_COL32(255, 80, 80, 240); break;
+        case EnemyState::Dead:   stateStr = "DEAD";   stateCol = IM_COL32(150, 150, 150, 200); break;
         }
 
         dl->AddText(ImVec2(ex - 18.0f, ey), stateCol, stateStr);
@@ -437,10 +495,10 @@ void ImGuiLayer::DrawCombatDebug(
         {
             float bsx, bsy;
             if (WorldToScreen(e.x, e.y + 3.0f, e.z,
-                              camX, camY, camZ, yaw, pitch, vpW, vpH, bsx, bsy))
+                camX, camY, camZ, yaw, pitch, vpW, vpH, bsx, bsy))
             {
                 dl->AddText(ImVec2(bsx - 4.0f, bsy),
-                            IM_COL32(255, 30, 30, 255), "!");
+                    IM_COL32(255, 30, 30, 255), "!");
             }
         }
     }

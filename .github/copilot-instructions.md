@@ -50,7 +50,7 @@
 - Vendor external dependencies with permissive free licenses suitable for commercial release (e.g., MIT, BSD, Apache-2.0); prefer vendoring (in-repo copies) or pinned submodules, include license files and attribution, and avoid permissive-incompatible dependencies.
 - Organize related files into clear folders and name files to convey purpose.
 - Use consistent formatting and naming conventions across the project.
-- Prefer simple, explicit constructs over clever/compact ones to aid learning.
+- Prefer simple, explicit constructs and an old-school coding style over clever, compact, or highly abstract patterns to aid learning: favor straightforward loops and conditionals, explicit state and control flow, minimal metaprogramming, and clear step-by-step logic.
 - Prefer shader code and rendering utilities that are easy to understand and test on D3D11 hardware.
 - Prefer explicit configuration for hardware capability checks and fallback paths.
 - Structure code changes so each edit is simple, logically ordered, and explicitly documented to help beginners edit, debug, and understand the codebase.

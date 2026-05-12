@@ -37,13 +37,13 @@ void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded,
     {
     case PlayerActionState::Idle:
     case PlayerActionState::Move:
-        if (attackPressed && stats.IsAtbReady())
-        {
-            TransitionTo(PlayerActionState::Attack1, 0.40f);
-        }
-        else if (input.IsHeld(InputAction::Dodge))
+        if (input.IsHeld(InputAction::Dodge))
         {
             TransitionTo(PlayerActionState::Dodge, 0.35f);
+        }
+        else if (attackPressed)
+        {
+            // Attack start is handled by RuntimeScene::TriggerPlayerAttack().
         }
         break;
 
