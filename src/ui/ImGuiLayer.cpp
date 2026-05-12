@@ -10,6 +10,7 @@
 #include "../game/actors/EnemyActor.hpp"
 #include "../game/actors/EnemyState.hpp"
 #include "../game/combat/CombatSystem.hpp"
+#include "ScreenProjection.hpp"
 
 // ImGui core + backends (vendored under third_party/)
 #include "../../third_party/imgui/imgui.h"
@@ -21,52 +22,6 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
     HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-// ---------------------------------------------------------------------------
-// World-to-screen projection helper for debug overlays.
-// Mirrors the renderer's view transform (yaw then pitch, 45-degree FOV).
-// Returns false if the point is behind the camera.
-// ---------------------------------------------------------------------------
-static bool WorldToScreen(
-    float wx, float wy, float wz,
-    float camX, float camY, float camZ,
-    float yaw, float pitch,
-    float vpW, float vpH,
-    float& outSx, float& outSy)
-{
-    // Translate relative to camera.
-    float dx = wx - camX;
-    float dy = wy - camY;
-    float dz = wz - camZ;
-
-    // Rotate by yaw (Y axis).
-    float cosY = cosf(-yaw);
-    float sinY = sinf(-yaw);
-    float rx =  dx * cosY + dz * sinY;
-    float ry =  dy;
-    float rz = -dx * sinY + dz * cosY;
-
-    // Rotate by pitch (X axis).
-    float cosP = cosf(-pitch);
-    float sinP = sinf(-pitch);
-    float fx = rx;
-    float fy =  ry * cosP - rz * sinP;
-    float fz =  ry * sinP + rz * cosP;
-
-    // Clip anything behind the near plane.
-    if (fz <= 0.1f)
-        return false;
-
-    // Project — matches XMMatrixPerspectiveFovLH(XM_PIDIV4, vpW/vpH, ...) used by renderer.
-    // For vertical FOV, fovScale applies to Y directly. For X, we divide by aspect
-    // so that a world point at the same NDC distance maps to a smaller screen-x fraction
-    // on widescreen viewports (matching the GPU perspective divide).
-    static constexpr float kPi = 3.14159265f;
-    float aspect   = vpW / vpH;
-    float fovScale = 1.0f / tanf(kPi / 8.0f); // tan(fovY/2) for 45-degree vertical FOV
-    outSx = (vpW * 0.5f) + (fx / fz) / aspect * fovScale * (vpW * 0.5f);
-    outSy = (vpH * 0.5f) - (fy / fz) * fovScale * (vpH * 0.5f);
-    return true;
-}
 static void DrawProjectedAabb(
     ImDrawList* dl,
     float centerX, float centerY, float centerZ,

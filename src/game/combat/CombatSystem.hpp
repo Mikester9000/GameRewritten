@@ -11,6 +11,14 @@ class EnemyActor; // forward declare — full definition only needed in CombatSy
 class CombatSystem
 {
 public:
+    struct EnemyHitRecord
+    {
+        float x = 0.0f;
+        float y = 0.0f;
+        float z = 0.0f;
+        int   damage = 0;
+    };
+
     // Combo state — 0 = no active combo, 1 = step 1 triggered (window open).
     int   comboStep  = 0;
     // Seconds remaining to chain the next combo hit.
@@ -34,8 +42,17 @@ public:
     const std::vector<HitBox>& GetActiveHitBoxes() const
     { return m_activeHitBoxes; }
 
+    const EnemyHitRecord* GetRecentEnemyHits() const
+    { return m_recentEnemyHits; }
+
+    int GetRecentEnemyHitCount() const
+    { return m_recentEnemyHitCount; }
+
 private:
     static constexpr float kComboWindowSec = 0.60f;
+    static constexpr int   kMaxRecentEnemyHits = 32;
 
     std::vector<HitBox> m_activeHitBoxes;
+    EnemyHitRecord m_recentEnemyHits[kMaxRecentEnemyHits]{};
+    int m_recentEnemyHitCount = 0;
 };

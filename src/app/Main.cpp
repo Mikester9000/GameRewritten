@@ -17,6 +17,7 @@
 #include "../game/RuntimeScene.hpp"
 #include "../game/physics/CollisionWorld.hpp"
 #include "../ui/GameHUD.hpp"
+#include "../ui/DamageNumbers.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../ui/DialogBox.hpp"
 #include "../ui/Minimap.hpp"
@@ -116,6 +117,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // --- World Editor ---
     GameHUD gameHud;
+    DamageNumbers damageNumbers;
     WorldEditor worldEditor;
     DialogBox dialogBox;
     Minimap minimap;
@@ -352,6 +354,15 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                 camController.GetPlayerX(),
                                 camController.GetPlayerZ());
 
+        const CombatSystem& combatSystem = runtimeScene.GetCombatSystem();
+        for (int hitIndex = 0; hitIndex < combatSystem.GetRecentEnemyHitCount(); ++hitIndex)
+        {
+            const CombatSystem::EnemyHitRecord& hit = combatSystem.GetRecentEnemyHits()[hitIndex];
+            damageNumbers.Spawn(hit.damage, hit.x, hit.y, hit.z);
+        }
+        if (!paused)
+            damageNumbers.Update(deltaTime);
+
         // F — player attack (ATB-gated, ignored while paused).
         // Runs after BeginPlayerFrame so the ATB readiness check uses the current frame's value.
         if (!paused && attackPressed && runtimeScene.TriggerPlayerAttack(camController))
@@ -377,6 +388,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             if (!imguiLayer.IsPauseMenuOpen())
             {
                 gameHud.Draw(playerActor.stats, ImGui::GetIO());
+                damageNumbers.Draw(camController.GetCamX(),
+                                   camController.GetCamY(),
+                                   camController.GetCamZ(),
+                                   camController.GetYaw(),
+                                   camController.GetPitch(),
+                                   static_cast<float>(window.GetWidth()),
+                                   static_cast<float>(window.GetHeight()));
                 dialogBox.Draw(ImGui::GetIO());
                 minimap.Draw(worldGrid,
                              camController.GetPlayerX(), camController.GetPlayerZ(),
