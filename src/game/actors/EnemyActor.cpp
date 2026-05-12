@@ -52,7 +52,7 @@ void EnemyActor::OnHit(int damage)
     }
     else
     {
-        TransitionTo(EnemyState::Hit, 0.30f);
+        TransitionTo(EnemyState::Hit, kHitStaggerDuration);
     }
     LOG_INFO("EnemyActor: Took " + std::to_string(damage) +
              " damage. HP remaining: " + std::to_string(hp));
@@ -125,7 +125,7 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
 
         if (distToPlayer < kAttackRadius)
         {
-            TransitionTo(EnemyState::Attack, 0.60f);
+            TransitionTo(EnemyState::Attack, kAttackWindUpDuration);
             LOG_INFO("EnemyActor: In attack range — winding up.");
         }
         else if (distToPlayer > kLeashRadius)

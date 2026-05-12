@@ -57,7 +57,8 @@ static bool WorldToScreen(
         return false;
 
     // Project — matches the 45-degree FOV used by the renderer.
-    float fovScale = 1.0f / tanf(3.14159f / 8.0f); // tan(FOV/2) for 45 deg
+    static constexpr float kPi = 3.14159265f;
+    float fovScale = 1.0f / tanf(kPi / 8.0f); // tan(FOV/2) for 45 deg
     outSx = (vpW * 0.5f) + (fx / fz) * fovScale * (vpH * 0.5f);
     outSy = (vpH * 0.5f) - (fy / fz) * fovScale * (vpH * 0.5f);
     return true;
@@ -314,14 +315,14 @@ void ImGuiLayer::DrawCombatDebug(
             continue;
 
         // Estimate screen half-extents by projecting offset points.
-        float srx, sry, stx, sty;
+        // sry and stx are unused (we only need the cross-axis components).
+        [[maybe_unused]] float srx, sry, stx, sty;
         bool hasRight = WorldToScreen(hb.x + hb.halfX, hb.y, hb.z,
                                       camX, camY, camZ, yaw, pitch, vpW, vpH, srx, sry);
         bool hasTop   = WorldToScreen(hb.x, hb.y + hb.halfY, hb.z,
                                       camX, camY, camZ, yaw, pitch, vpW, vpH, stx, sty);
         float hw = hasRight ? fabsf(srx - sx) : 18.0f;
         float hh = hasTop   ? fabsf(sty - sy) : 28.0f;
-        (void)sry; (void)stx; // screen Y of right-edge and screen X of top-edge are unused
 
         dl->AddRect(ImVec2(sx - hw, sy - hh), ImVec2(sx + hw, sy + hh),
                     IM_COL32(255, 50, 50, 220), 0.0f, 0, 2.0f);

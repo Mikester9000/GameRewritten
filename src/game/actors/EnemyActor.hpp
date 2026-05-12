@@ -18,6 +18,10 @@ public:
     static constexpr float kAttackRadius =  2.5f;  // begin attack wind-up
     static constexpr float kLeashRadius  = 27.0f;  // return to patrol
 
+    // State duration constants (seconds).
+    static constexpr float kAttackWindUpDuration = 0.60f;  // wind-up before dealing damage
+    static constexpr float kHitStaggerDuration   = 0.30f;  // stagger after taking a hit
+
     // World-space position.
     float x = 0.0f;
     float y = 0.0f;
