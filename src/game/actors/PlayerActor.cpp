@@ -52,6 +52,11 @@ void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded,
             TransitionTo(PlayerActionState::Idle, 0.0f);
         break;
 
+    case PlayerActionState::Attack2:
+        if (stateTimer <= 0.0f)
+            TransitionTo(PlayerActionState::Idle, 0.0f);
+        break;
+
     case PlayerActionState::Dodge:
         if (stateTimer <= 0.0f)
             TransitionTo(PlayerActionState::Idle, 0.0f);

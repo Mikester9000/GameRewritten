@@ -18,7 +18,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 
 ### Core combat
 - [x] Dodge burst movement
-- [ ] 2-step combo chain
+- [x] 2-step combo chain
 - [ ] Lock-on targeting
 - [ ] Enemy combat states (chase / attack / hit)
 - [ ] Player damage intake and defeat reset

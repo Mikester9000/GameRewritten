@@ -57,7 +57,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Audio manager | ✅ | `src/audio/AudioManager.hpp`, `src/audio/AudioManager.cpp` |
 | Minimap | ✅ | `src/ui/Minimap.cpp/hpp` |
 | Dodge burst movement | ✅ | `src/game/CameraController.cpp/hpp` |
-| 2-step combo chain | ❌ | `src/game/combat/CombatSystem.cpp/hpp` |
+| 2-step combo chain | ✅ | `src/game/combat/CombatSystem.cpp/hpp`, `src/game/RuntimeScene.hpp` |
 | Lock-on targeting | ❌ | `src/game/combat/Targeting.hpp` |
 | Enemy combat states (chase/attack/hit) | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Player damage intake + defeat reset | ❌ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp` |
