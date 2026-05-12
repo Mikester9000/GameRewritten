@@ -6,6 +6,7 @@ class DamageNumbers
 {
 public:
     void Reset();
+    // Negative values are clamped to zero and logged as a warning.
     void Spawn(int damage, float worldX, float worldY, float worldZ);
     void Update(float dt);
     void Draw(float camX, float camY, float camZ,
