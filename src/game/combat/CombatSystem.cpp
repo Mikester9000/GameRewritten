@@ -15,6 +15,7 @@
 static constexpr float ENEMY_HALF_X = 0.5f;
 static constexpr float ENEMY_HALF_Y = 1.0f;
 static constexpr float ENEMY_HALF_Z = 0.5f;
+static constexpr float DAMAGE_NUMBER_Y_OFFSET = 2.2f; // spawn above enemy head
 
 static bool HitBoxOverlapsEnemy(const HitBox& hb, const EnemyActor& enemy)
 {
@@ -70,6 +71,8 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
 
 void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
 {
+    m_recentEnemyHitCount = 0;
+
     // Tick combo window timer.
     if (comboTimer > 0.0f)
     {
@@ -104,6 +107,15 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
             LOG_INFO(ss.str());
 
             enemy.OnHit(hb.damage);
+
+            if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
+            {
+                EnemyHitRecord& hit = m_recentEnemyHits[m_recentEnemyHitCount++];
+                hit.x = enemy.x;
+                hit.y = enemy.y + DAMAGE_NUMBER_Y_OFFSET;
+                hit.z = enemy.z;
+                hit.damage = hb.damage;
+            }
         }
     }
 

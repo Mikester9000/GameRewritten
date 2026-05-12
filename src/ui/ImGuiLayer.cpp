@@ -27,7 +27,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 // Returns false if the point is behind the camera.
 // ---------------------------------------------------------------------------
 #include <DirectXMath.h>
-using namespace DirectX;
 
 static bool WorldToScreen(
     float wx, float wy, float wz,
@@ -41,35 +40,35 @@ static bool WorldToScreen(
     float lookDirY = sinf(pitch);
     float lookDirZ = cosf(pitch) * cosf(yaw);
 
-    XMVECTOR camPos = XMVectorSet(camX, camY, camZ, 1.0f);
-    XMVECTOR camTarget = XMVectorSet(camX + lookDirX,
+    DirectX::XMVECTOR camPos = DirectX::XMVectorSet(camX, camY, camZ, 1.0f);
+    DirectX::XMVECTOR camTarget = DirectX::XMVectorSet(camX + lookDirX,
         camY + lookDirY,
         camZ + lookDirZ, 1.0f);
-    XMVECTOR camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    DirectX::XMVECTOR camUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
     // Match renderer exactly — LookAtLH, 45 degree FOV, near 0.1, far 2000
-    XMMATRIX view = XMMatrixLookAtLH(camPos, camTarget, camUp);
-    XMMATRIX proj = XMMatrixPerspectiveFovLH(
-        XM_PIDIV4,
+    DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(camPos, camTarget, camUp);
+    DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(
+        DirectX::XM_PIDIV4,
         vpW / vpH,
         0.1f, 2000.0f);
 
     // DirectXMath uses row vectors: clip = worldPos * view * proj
     // XMMatrixMultiply(A,B) = A*B, XMVector4Transform(v,M) = v*M
     // NO transpose needed here
-    XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+    DirectX::XMMATRIX viewProj = DirectX::XMMatrixMultiply(view, proj);
 
-    XMVECTOR worldPos = XMVectorSet(wx, wy, wz, 1.0f);
-    XMVECTOR clip = XMVector4Transform(worldPos, viewProj);
+    DirectX::XMVECTOR worldPos = DirectX::XMVectorSet(wx, wy, wz, 1.0f);
+    DirectX::XMVECTOR clip = DirectX::XMVector4Transform(worldPos, viewProj);
 
     // W check — behind camera
-    float w = XMVectorGetW(clip);
+    float w = DirectX::XMVectorGetW(clip);
     if (w <= 0.0f)
         return false;
 
     // Perspective divide to NDC
-    float ndcX = XMVectorGetX(clip) / w;
-    float ndcY = XMVectorGetY(clip) / w;
+    float ndcX = DirectX::XMVectorGetX(clip) / w;
+    float ndcY = DirectX::XMVectorGetY(clip) / w;
 
     // NDC to screen pixels
     outSx = (ndcX + 1.0f) * 0.5f * vpW;

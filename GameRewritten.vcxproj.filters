@@ -125,6 +125,9 @@
     <ClCompile Include="src\ui\GameHUD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ui\DamageNumbers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\ui\ImGuiLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -229,7 +232,13 @@
     <ClInclude Include="src\ui\GameHUD.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ui\DamageNumbers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\ui\ImGuiLayer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\ScreenProjection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\DialogBox.hpp">
