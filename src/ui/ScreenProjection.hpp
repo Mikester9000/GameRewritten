@@ -1,8 +1,9 @@
 #pragma once
 
-#include <DirectXMath.h>
 #include <cmath>
 
+namespace ScreenProjection
+{
 inline bool WorldToScreen(
     float wx, float wy, float wz,
     float camX, float camY, float camZ,
@@ -14,14 +15,14 @@ inline bool WorldToScreen(
     float dy = wy - camY;
     float dz = wz - camZ;
 
-    float cosY = std::cos(-yaw);
-    float sinY = std::sin(-yaw);
+    float cosY = cosf(-yaw);
+    float sinY = sinf(-yaw);
     float rx = dx * cosY + dz * sinY;
     float ry = dy;
     float rz = -dx * sinY + dz * cosY;
 
-    float cosP = std::cos(-pitch);
-    float sinP = std::sin(-pitch);
+    float cosP = cosf(-pitch);
+    float sinP = sinf(-pitch);
     float fx = rx;
     float fy = ry * cosP - rz * sinP;
     float fz = ry * sinP + rz * cosP;
@@ -38,3 +39,4 @@ inline bool WorldToScreen(
     outSy = (vpH * 0.5f) - (fy / fz) * kFovScale * (vpH * 0.5f);
     return true;
 }
+} // namespace ScreenProjection

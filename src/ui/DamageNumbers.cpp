@@ -2,6 +2,7 @@
 
 #include "ScreenProjection.hpp"
 
+#include "../../third_party/imgui/imgui.h"
 #include <logger/Logger.hpp>
 #include <algorithm>
 #include <cstdio>
@@ -82,9 +83,9 @@ void DamageNumbers::Draw(float camX, float camY, float camZ,
 
         float sx = 0.0f;
         float sy = 0.0f;
-        if (!WorldToScreen(entry.x, entry.y, entry.z,
-                           camX, camY, camZ, yaw, pitch,
-                           vpW, vpH, sx, sy))
+        if (!ScreenProjection::WorldToScreen(entry.x, entry.y, entry.z,
+                                             camX, camY, camZ, yaw, pitch,
+                                             vpW, vpH, sx, sy))
         {
             continue;
         }

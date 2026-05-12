@@ -355,10 +355,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                 camController.GetPlayerZ());
 
         const CombatSystem& combatSystem = runtimeScene.GetCombatSystem();
-        for (int hitIndex = 0; hitIndex < combatSystem.GetRecentEnemyHitCount(); ++hitIndex)
+        if (!paused)
         {
-            const CombatSystem::EnemyHitRecord& hit = combatSystem.GetRecentEnemyHits()[hitIndex];
-            damageNumbers.Spawn(hit.damage, hit.x, hit.y, hit.z);
+            for (int hitIndex = 0; hitIndex < combatSystem.GetRecentEnemyHitCount(); ++hitIndex)
+            {
+                const CombatSystem::EnemyHitRecord& hit = combatSystem.GetRecentEnemyHits()[hitIndex];
+                damageNumbers.Spawn(hit.damage, hit.x, hit.y, hit.z);
+            }
         }
         if (!paused)
             damageNumbers.Update(deltaTime);
