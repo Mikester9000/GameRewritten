@@ -33,7 +33,7 @@ inline bool WorldToScreen(
         return false;
 
     float aspect = vpW / vpH;
-    static constexpr float kFovScale = 2.41421356f; // 1 / tan(fovY/2), fovY = 45° (so tan(22.5°))
+    static constexpr float kFovScale = 2.41421356f; // 1 / tan(fovY/2), fovY = 45° (1 / tan(22.5°))
     outSx = (vpW * 0.5f) + (fx / fz) / aspect * kFovScale * (vpW * 0.5f);
     outSy = (vpH * 0.5f) - (fy / fz) * kFovScale * (vpH * 0.5f);
     return true;
