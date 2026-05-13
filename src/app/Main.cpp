@@ -282,6 +282,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         if (!paused)
         {
             const EnemyActor* lockedTarget = runtimeScene.GetLockedTarget();
+            // Apply lock-on bias before free-look input so mouse deltas and
+            // lock framing blend together in one camera update path.
             if (lockedTarget)
                 camController.BiasYawTowardTarget(lockedTarget->x, lockedTarget->z, deltaTime);
         }
