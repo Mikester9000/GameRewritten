@@ -19,8 +19,8 @@ constexpr float kLockOnYawBiasSpeed = 8.0f;
 
 float WrapAngle(float angle)
 {
-    constexpr float kPi = 3.14159265f;
-    constexpr float kTwoPi = 6.28318530f;
+    constexpr float kPi = DirectX::XM_PI;
+    constexpr float kTwoPi = DirectX::XM_2PI;
 
     while (angle > kPi)  angle -= kTwoPi;
     while (angle < -kPi) angle += kTwoPi;

@@ -5,6 +5,7 @@
 class Targeting
 {
 public:
+    // Lock range in world units. Keep this comfortably beyond enemy detect radius.
     static constexpr float kLockRadius = 25.0f;
 
     bool isLocked = false;

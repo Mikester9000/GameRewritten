@@ -30,6 +30,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 
 namespace
 {
+// Visual tuning for lock marker readability at 720p/1080p:
+// marker is placed above enemy torso/head and "LOCK" is centered above it.
 constexpr float kLockMarkerHeightOffset = 2.8f;
 constexpr float kLockMarkerCircleRadius = 14.0f;
 constexpr int   kLockMarkerCircleSegments = 24;
