@@ -32,6 +32,7 @@ void EnemyActor::Init(float startX, float startZ,
     stateTimer   = 0.0f;
     pendingAttack = false;
     pendingAttackHitBox = HitBox{};
+    pendingAttackHitBox.framesToLive = 0;
 }
 
 void EnemyActor::TransitionTo(EnemyState next, float duration)
@@ -142,6 +143,7 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
         {
             pendingAttack = true;
             pendingAttackHitBox = HitBox{};
+            pendingAttackHitBox.framesToLive = 0;
             TransitionTo(EnemyState::Chase, 0.0f);
             LOG_INFO("EnemyActor: Attack released.");
         }

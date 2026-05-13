@@ -34,25 +34,28 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
             continue;
 
         HitBox& hitBox = enemy.pendingAttackHitBox;
-        hitBox.x = enemy.x;
-        hitBox.y = enemy.y + 1.0f;
-        hitBox.z = enemy.z;
-        hitBox.halfX = kEnemyAttackHalfX;
-        hitBox.halfY = kEnemyAttackHalfY;
-        hitBox.halfZ = kEnemyAttackHalfZ;
-        hitBox.damage = kEnemyAttackDamage;
-        // framesToLive not set -- this hitbox is tested immediately and discarded.
+        if (hitBox.framesToLive <= 0)
+        {
+            hitBox.x = enemy.x;
+            hitBox.y = enemy.y + 1.0f;
+            hitBox.z = enemy.z;
+            hitBox.halfX = kEnemyAttackHalfX;
+            hitBox.halfY = kEnemyAttackHalfY;
+            hitBox.halfZ = kEnemyAttackHalfZ;
+            hitBox.damage = kEnemyAttackDamage;
+            hitBox.framesToLive = 2;
+            hitBox.hasHitPlayer = false;
+        }
 
-        if (hitBox.hasHitPlayer)
-            continue;
-
-        if (HitBoxOverlapsPlayer(hitBox))
+        if (!hitBox.hasHitPlayer && HitBoxOverlapsPlayer(hitBox))
         {
             m_pendingEnemyDamage += hitBox.damage;
             hitBox.hasHitPlayer = true;
         }
 
-        enemy.pendingAttack = false;
+        --hitBox.framesToLive;
+        if (hitBox.framesToLive <= 0 || hitBox.hasHitPlayer)
+            enemy.pendingAttack = false;
     }
 
     // Apply accumulated enemy damage to the player.
