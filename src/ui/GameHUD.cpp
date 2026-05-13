@@ -4,6 +4,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
+
+#include "../game/actors/EnemyActor.hpp"
 
 namespace
 {
@@ -24,6 +27,22 @@ constexpr float kTwoPi = 6.28318530f;
 constexpr int kPulseMaxAlpha = 140;
 // Width of each screen-edge warning bar in pixels.
 constexpr float kEdgeBarThickness = 28.0f;
+
+// --- Target info panel ---
+constexpr float kTargetPanelW       = 280.0f;
+constexpr float kTargetPanelPadX    =  10.0f;
+constexpr float kTargetPanelPadY    =   8.0f;
+constexpr float kTargetBarH         =   9.0f;
+constexpr float kTargetBarGap       =   4.0f;
+// Gap between bottom edge of panel and the screen edge.
+constexpr float kTargetMarginBottom =  24.0f;
+
+// --- Combo step indicator ---
+constexpr float kComboPanelW      = 150.0f;
+constexpr float kComboPanelH      =  28.0f;
+constexpr float kComboSquareSize  =  12.0f;
+// Extra gap above the target panel so the two panels never overlap.
+constexpr float kComboGapAbove    =  10.0f;
 
 float NormalizeValue(float value, float maxValue)
 {
@@ -53,7 +72,7 @@ void DrawLowHpPulse(const ImGuiIO& io, float pulseTime)
     // Right bar
     dl->AddRectFilled(ImVec2(screenW - th, th), ImVec2(screenW, screenH - th), color);
 }
-}
+} // namespace
 
 void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
 {
@@ -122,4 +141,126 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
     // Draw screen-edge danger pulse when HP is critically low.
     if (isLowHp)
         DrawLowHpPulse(io, m_lowHpPulseTime);
+}
+
+void GameHUD::DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io)
+{
+    if (!target) return;
+
+    // Calculate panel height from the current font size so it scales correctly.
+    const float fontH  = ImGui::GetFontSize();
+    const float panelH = kTargetPanelPadY + fontH + kTargetBarGap + kTargetBarH + kTargetPanelPadY;
+    const float posX   = (io.DisplaySize.x - kTargetPanelW) * 0.5f;
+    const float posY   = io.DisplaySize.y - panelH - kTargetMarginBottom;
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+
+    // Dark navy background — classic FF7R command-panel style.
+    dl->AddRectFilled(ImVec2(posX, posY),
+                      ImVec2(posX + kTargetPanelW, posY + panelH),
+                      IM_COL32(6, 8, 24, 215), 3.0f);
+
+    // Thin bright-blue accent line at the top of the panel.
+    dl->AddRectFilled(ImVec2(posX, posY),
+                      ImVec2(posX + kTargetPanelW, posY + 2.0f),
+                      IM_COL32(70, 130, 240, 255));
+
+    // Subtle border so the panel reads cleanly against the scene.
+    dl->AddRect(ImVec2(posX, posY),
+                ImVec2(posX + kTargetPanelW, posY + panelH),
+                IM_COL32(50, 60, 100, 180), 3.0f);
+
+    // --- Name row ---
+    const float nameY = posY + kTargetPanelPadY;
+    dl->AddText(ImVec2(posX + kTargetPanelPadX, nameY),
+                IM_COL32(220, 220, 230, 255), target->name);
+
+    // HP numbers right-aligned on the same row.
+    char hpText[32];
+    std::snprintf(hpText, sizeof(hpText), "%d / %d", target->hp, target->maxHp);
+    const ImVec2 hpTextSize = ImGui::CalcTextSize(hpText);
+    dl->AddText(ImVec2(posX + kTargetPanelW - kTargetPanelPadX - hpTextSize.x, nameY),
+                IM_COL32(190, 195, 210, 255), hpText);
+
+    // --- HP bar ---
+    const float barX   = posX + kTargetPanelPadX;
+    const float barY   = nameY + fontH + kTargetBarGap;
+    const float barW   = kTargetPanelW - kTargetPanelPadX * 2.0f;
+    const float hpFrac = (target->maxHp > 0)
+        ? std::clamp(static_cast<float>(target->hp) / static_cast<float>(target->maxHp), 0.0f, 1.0f)
+        : 0.0f;
+    const float filledW = barW * hpFrac;
+
+    // Color transitions green → orange → red as HP falls (matches FF7R damage feedback).
+    ImU32 barColor;
+    if      (hpFrac > 0.50f) barColor = IM_COL32( 50, 200,  80, 255);
+    else if (hpFrac > 0.25f) barColor = IM_COL32(220, 155,  25, 255);
+    else                     barColor = IM_COL32(215,  35,  35, 255);
+
+    // Bar track (dark background).
+    dl->AddRectFilled(ImVec2(barX, barY),
+                      ImVec2(barX + barW, barY + kTargetBarH),
+                      IM_COL32(28, 28, 48, 255), 2.0f);
+
+    // Bar fill.
+    if (filledW > 0.0f)
+        dl->AddRectFilled(ImVec2(barX, barY),
+                          ImVec2(barX + filledW, barY + kTargetBarH),
+                          barColor, 2.0f);
+
+    // Bar border.
+    dl->AddRect(ImVec2(barX, barY),
+                ImVec2(barX + barW, barY + kTargetBarH),
+                IM_COL32(70, 75, 110, 200), 2.0f);
+}
+
+void GameHUD::DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io)
+{
+    // Only show while the combo window is open after the first hit.
+    if (comboStep == 0 || comboTimer <= 0.0f) return;
+
+    // Position the combo panel centred and sitting just above the target panel area.
+    const float fontH   = ImGui::GetFontSize();
+    const float targetH = kTargetPanelPadY + fontH + kTargetBarGap + kTargetBarH + kTargetPanelPadY;
+    const float posX    = (io.DisplaySize.x - kComboPanelW) * 0.5f;
+    const float posY    = io.DisplaySize.y - targetH - kTargetMarginBottom - kComboGapAbove - kComboPanelH;
+
+    // Fade the panel softly as the combo window runs out.
+    const float fade     = (comboWindowSec > 0.0f)
+        ? std::clamp(comboTimer / comboWindowSec, 0.0f, 1.0f)
+        : 1.0f;
+    const int   bgAlpha  = static_cast<int>(190.0f * fade);
+    const int   fgAlpha  = static_cast<int>(255.0f * fade);
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+
+    // Background.
+    dl->AddRectFilled(ImVec2(posX, posY),
+                      ImVec2(posX + kComboPanelW, posY + kComboPanelH),
+                      IM_COL32(6, 8, 24, bgAlpha), 3.0f);
+    dl->AddRect(ImVec2(posX, posY),
+                ImVec2(posX + kComboPanelW, posY + kComboPanelH),
+                IM_COL32(50, 60, 100, bgAlpha), 3.0f);
+
+    // Step squares — filled yellow for landed hit, open outline for next available input.
+    const float squareY = posY + (kComboPanelH - kComboSquareSize) * 0.5f;
+    const float sq1X    = posX + 10.0f;
+    const float sq2X    = sq1X + kComboSquareSize + 6.0f;
+
+    // Step 1 filled (already landed).
+    dl->AddRectFilled(ImVec2(sq1X, squareY),
+                      ImVec2(sq1X + kComboSquareSize, squareY + kComboSquareSize),
+                      IM_COL32(255, 200, 40, fgAlpha), 2.0f);
+
+    // Step 2 open outline (next hit available).
+    dl->AddRect(ImVec2(sq2X, squareY),
+                ImVec2(sq2X + kComboSquareSize, squareY + kComboSquareSize),
+                IM_COL32(140, 140, 160, fgAlpha), 2.0f);
+
+    // "COMBO" label to the right of the squares.
+    const char* label     = "COMBO";
+    const ImVec2 labelSz  = ImGui::CalcTextSize(label);
+    dl->AddText(ImVec2(sq2X + kComboSquareSize + 8.0f,
+                       posY + (kComboPanelH - labelSz.y) * 0.5f),
+                IM_COL32(220, 180, 50, fgAlpha), label);
 }

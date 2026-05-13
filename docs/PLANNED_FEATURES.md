@@ -19,10 +19,10 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 ### Core combat
 - [x] Dodge burst movement
 - [x] 2-step combo chain
-- [ ] Lock-on targeting
+- [x] Lock-on targeting
 - [x] Enemy combat states (chase / attack / hit)
-- [ ] Player damage intake and defeat reset
-- [ ] Combat HUD expansion (target HP bar, combo step)
+- [x] Player damage intake and defeat reset
+- [x] Combat HUD expansion (target HP bar, combo step)
 - [ ] GT610 budget debug counters
 
 ### Combat resource system
@@ -33,24 +33,24 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [x] Limit Break gauge (fills from taking damage)
 - [x] Limit Break move (5x damage finisher when gauge full)
 - [x] MP passive regeneration (2.0f per second)
-- [ ] Tactical Pause (hold Tab — 15% time scale, command menu)
-- [ ] Tactical Pause Magic submenu stub
-- [ ] Tactical Pause Items submenu stub
-- [ ] Tactical Pause Ally submenu stub
+- [x] Tactical Pause (hold Tab — 15% time scale, command menu)
+- [x] Tactical Pause Magic submenu stub
+- [x] Tactical Pause Items submenu stub
+- [x] Tactical Pause Ally submenu stub
 - [x] Lock-on moved to Q so Tab is free for Tactical Pause
 
 ### Combat feedback
-- [ ] Floating damage numbers
+- [x] Floating damage numbers
 - [ ] Hit flash on enemy
 - [ ] Screen edge red flash on player damage
 - [ ] Hit pause / hitstop
 - [ ] Miss indicator
-- [ ] Combo counter display
+- [x] Combo counter display
 - [ ] Enemy aggro indicator
-- [ ] Low HP warning pulse
+- [x] Low HP warning pulse
 - [ ] Death / defeat screen
 - [ ] Contextual button prompts
-- [ ] Enemy name display on lock-on
+- [x] Enemy name display on lock-on
 
 ---
 

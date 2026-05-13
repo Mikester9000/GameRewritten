@@ -67,6 +67,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Player damage intake + defeat reset | ✅ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp`, `src/game/CameraController.cpp/hpp` |
 | Floating damage numbers | ✅ | `src/ui/DamageNumbers.cpp/hpp` |
 | Tactical Pause (hold Tab) | ✅ | `src/ui/TacticalPauseMenu.cpp/hpp`, `src/app/Main.cpp` |
+| Combat HUD expansion (target info + combo step) | ✅ | `src/ui/GameHUD.hpp`, `src/ui/GameHUD.cpp`, `src/app/Main.cpp` |
 | Hit flash system | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Screen edge damage flash | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Hit pause / hitstop | ❌ | `src/game/RuntimeScene.hpp` |
@@ -75,7 +76,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Parry / counter window | ❌ | `src/game/actors/PlayerActor.cpp/hpp` |
 | Miss indicator | ❌ | `src/ui/DamageNumbers.cpp/hpp` |
 | Weak point damage | ❌ | `src/game/combat/CombatSystem.cpp/hpp` |
-| Combo counter display | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Combo counter display | ✅ | `src/ui/GameHUD.cpp/hpp` |
 | Area name display | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Notification toast system | ❌ | `src/ui/NotificationSystem.cpp/hpp` |
 | Letterbox event bars | ❌ | `src/ui/ImGuiLayer.cpp/hpp` |

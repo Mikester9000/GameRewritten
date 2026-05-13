@@ -418,6 +418,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             if (!imguiLayer.IsPauseMenuOpen())
             {
                 gameHud.Draw(playerActor.stats, ImGui::GetIO(), deltaTime);
+                gameHud.DrawTargetInfo(runtimeScene.GetLockedTarget(), ImGui::GetIO());
+                gameHud.DrawComboIndicator(runtimeScene.GetCombatSystem().comboStep,
+                                           runtimeScene.GetCombatSystem().comboTimer,
+                                           CombatSystem::kComboWindowSec,
+                                           ImGui::GetIO());
                 if (tacticalPauseHeld)
                 {
                     const TacticalCommand tacticalCmd = tacticalPauseMenu.Draw(playerActor.stats, ImGui::GetIO());
