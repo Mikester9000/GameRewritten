@@ -35,7 +35,7 @@ No overengineered state machines. No elaborate networking. Just clean, readable,
 ### Combat loop overview
 1. Player is near an enemy.
 2. Player presses lock-on — camera shifts to frame the target.
-3. Player attacks (F key, ATB gated) — spawns a hitbox 1.5 units forward.
+3. Player attacks (F key, always free) — spawns a hitbox 1.5 units forward.
 4. Hit registers — enemy takes damage, brief flash feedback.
 5. Combo window: player can press F again within 0.6 s to extend the chain (up to 2–3 hits).
 6. Enemy retaliates: chases player, attacks on close range.
@@ -47,11 +47,32 @@ No overengineered state machines. No elaborate networking. Just clean, readable,
 
 ## Systems
 
-### ATB (Active Time Bar)
-- Fills passively over time.
-- Required for the first hit in a combo.
-- Resets on each hit in the combo chain.
-- Keep the ATB model simple — do not add multiple ATB bars early.
+### Combat Resource System
+- **Attacks are always free** — no resource gates the basic combo chain.
+- Three separate independent bars:
+  - **HP** — health, restored by potions and rest points
+  - **MP** — magic cost, each spell costs MP, regenerates at `2.0f/sec` passively
+  - **Surge** — replaces ATB, fills from combat, spent on finishers only
+- Surge fill rates:
+  - Hit landed on enemy: `+30%`
+  - Hit taken from enemy: `+10%`
+  - Skilled dodge near attack: `+15%`
+  - Passive time fill fallback: `+4% per second`
+- Surge is spent on **Surge Strike** (`3x` damage finisher).
+- Surge is never spent on magic or items — those use MP and inventory.
+- **Limit Break** is a separate gauge, fills only when the player takes damage (`+20% per hit`).
+- When full, Limit Break move is available (`5x` damage, screen flash).
+- Surge rewards aggression. Limit Break rewards survival. Both are FF7 DNA.
+
+### Tactical Pause
+- Hold `Tab` to slow time to `15%` speed and open a command menu:
+  - `[ Surge Strike ] [ Magic ▶ ] [ Items ▶ ] [ Ally ▶ ]`
+- Surge Strike is greyed out if Surge is not full.
+- Magic shows spell list with MP costs (stub until Milestone 16).
+- Items shows inventory list (stub until Milestone 16).
+- Ally shows party commands (stub until party members are added in Milestone 13+).
+- Releasing `Tab` closes the menu and resumes normal speed.
+- Style: classic FF command menu look — dark panel, chunky text.
 
 ### Hitbox System
 - `HitBox`: world-space center (x/y/z) + AABB half-extents (halfX/halfY/halfZ) + damage + `framesToLive`.
@@ -73,7 +94,7 @@ No overengineered state machines. No elaborate networking. Just clean, readable,
 - Gate behind `PlayerActionState::Dodge` to prevent dodge-spam.
 
 ### Combo Chain
-- 2-step chain: hit → window → hit → ATB reset.
+- 2-step chain: hit → window → hit.
 - Combo window: 0.6 s after first hit to land the second.
 - Each hit in chain increases hitbox damage slightly (step 1: base, step 2: base × 1.5).
 - Visual/audio feedback distinguishes step 1 and step 2 hits.
@@ -92,7 +113,8 @@ Use a simple enum `EnemyState { Patrol, Chase, Attack, Hit, Dead }` — no compl
 ## Readability Rules
 
 The player must always understand:
-- Whether they can attack (ATB bar state).
+- Whether they can attack (basic attacks are always available).
+- Whether Surge Strike or Limit Break is available (Surge / Limit bar state).
 - Which enemy is locked on (targeting indicator).
 - When they successfully hit (visual + audio feedback).
 - When they take damage (HP bar change + screen flash).
@@ -114,7 +136,14 @@ If any of these are unclear, fix the feedback before adding new mechanics.
 | Dodge cooldown | 0.8 s |
 | Combo window | 0.6 s |
 | Lock-on range | 20 world units |
-| ATB fill time (full bar) | ~3 s passive |
+| Surge gain per hit landed | 30% |
+| Surge gain per hit taken | 10% |
+| Surge passive fill | 4% per second |
+| Surge Strike multiplier | 3x |
+| Limit Break gain per hit | 20% |
+| Limit Break multiplier | 5x |
+| Tactical Pause time scale | 0.15x |
+| MP passive regen | 2.0f per second |
 
 Adjust values based on feel during playtesting. Document changes here.
 
