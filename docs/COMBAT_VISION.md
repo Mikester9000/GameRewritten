@@ -67,6 +67,9 @@ No overengineered state machines. No elaborate networking. Just clean, readable,
 ### Tactical Pause
 - Hold `Tab` to slow time to `15%` speed and open a command menu:
   - `[ Surge Strike ] [ Magic ▶ ] [ Items ▶ ] [ Ally ▶ ]`
+- Input split with lock-on:
+  - Tap `Tab` (press and release under ~0.25 s): toggle lock-on
+  - Hold `Tab` (>= ~0.25 s): open Tactical Pause and suppress lock-on toggle
 - Surge Strike is greyed out if Surge is not full.
 - Magic shows spell list with MP costs (stub until Milestone 16).
 - Items shows inventory list (stub until Milestone 16).
@@ -81,7 +84,7 @@ No overengineered state machines. No elaborate networking. Just clean, readable,
 - Current hit detection is AABB only — no sphere or convex hull until explicitly needed.
 
 ### Lock-On
-- One lock-on target at a time. Press Tab to toggle.
+- One lock-on target at a time. Tap `Tab` to toggle.
 - Camera biases toward target — does not fully snap, just softly pulls.
 - Attack direction overrides input direction when locked on.
 - Lock-on breaks if target dies or leaves range (~20 units).
@@ -154,7 +157,7 @@ Adjust values based on feel during playtesting. Document changes here.
 Follow this order to build combat incrementally without breaking existing systems:
 
 1. **Player action state machine** — add `PlayerActionState` enum and wire through `RuntimeScene`.
-2. **Lock-on targeting** — add `Targeting` class, Tab key toggle, camera bias.
+2. **Lock-on targeting** — add `Targeting` class, tap-Tab toggle, camera bias.
 3. **Dodge burst movement** — extend `CameraController` with dodge velocity and invincibility flag.
 4. **2-step combo chain** — extend `CombatSystem` with combo step tracking and window timer.
 5. **Enemy chase / attack states** — extend `EnemyActor` with `EnemyState` transitions.

@@ -24,7 +24,6 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Player damage intake and defeat reset
 - [ ] Combat HUD expansion (target HP bar, combo step)
 - [ ] GT610 budget debug counters
-- [ ] Battle music transition on Chase state
 
 ### Combat resource system
 - [ ] Remove ATB gate from basic attacks (always free)
@@ -38,6 +37,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Tactical Pause Magic submenu stub
 - [ ] Tactical Pause Items submenu stub
 - [ ] Tactical Pause Ally submenu stub
+- [ ] Tab input split: tap Tab = Lock-on, hold Tab (>=0.25s) = Tactical Pause
 
 ### Combat feedback
 - [ ] Floating damage numbers
@@ -142,6 +142,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 ## Milestone 15 — Audio and Narrative
 
 - [ ] Looping BGM
+- [ ] Battle music transition on Chase state
 - [ ] Victory fanfare on encounter clear
 - [ ] Level up audio sting
 - [ ] Environmental ambient audio per biome

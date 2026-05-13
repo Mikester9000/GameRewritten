@@ -473,6 +473,7 @@ if (targeting.GetTarget())
 #### Track 12.7b — Tactical Pause
 
 - Hold `Tab` slows time to `15%`.
+- Input disambiguation: tap `Tab` toggles lock-on; hold `Tab` (>= `0.25 s`) opens Tactical Pause and suppresses lock-on toggle.
 - Command menu with four stubs: Surge Strike, Magic, Items, Ally.
 - Magic/Items/Ally show "Coming soon" until their milestones.
 - Styled as dark FF-style panel with chunky text.
