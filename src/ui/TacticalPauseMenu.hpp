@@ -1,17 +1,20 @@
 #pragma once
 // TacticalPauseMenu.hpp
 // Draws the FF-style Tactical Pause command panel while Tab is held.
-// Slows gameplay to 0.15x speed and presents four commands:
-//   Surge Strike (active when Surge is full), Magic, Items, Ally (stubs).
+// Returns the command activated this frame so Main.cpp can execute it.
 
 struct PlayerStats;
 struct ImGuiIO;
 
+// Commands that can be activated from the Tactical Pause panel.
+// None means no command was chosen this frame.
+enum class TacticalCommand { None, SurgeStrike };
+
 class TacticalPauseMenu
 {
 public:
-    // Draw the command panel for this frame.
+    // Draw the command panel for this frame. Returns the selected command (if any).
     // Call inside an active ImGui frame (between BeginFrame / EndFrame).
     // Only call while Tab is held — the caller controls open/close.
-    void Draw(const PlayerStats& stats, const ImGuiIO& io);
+    TacticalCommand Draw(const PlayerStats& stats, const ImGuiIO& io);
 };

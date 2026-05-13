@@ -296,7 +296,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             // Apply lock-on bias before free-look input so mouse deltas and
             // lock framing blend together in one camera update path.
             if (lockedTarget)
-                camController.BiasYawTowardTarget(lockedTarget->x, lockedTarget->z, deltaTime);
+                camController.BiasYawTowardTarget(lockedTarget->x, lockedTarget->z, scaledDt);
         }
 
         const bool allowMovement = !paused;
@@ -351,7 +351,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                 camController.GetPlayerY(),
                                 camController.GetPlayerZ());
 
-        if (!paused && lockOnPressed)
+        if (!paused && lockOnPressed && !tacticalPauseHeld)
         {
             runtimeScene.ToggleLockOn();
         }
@@ -368,7 +368,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             firstFrame = true;
         }
 
-        if (!paused && attackPressed)
+        if (!paused && attackPressed && !tacticalPauseHeld)
         {
             // --- Attack priority: Limit Break → Surge Strike → Normal combo ---
             // Try each in order; stop at the first one that fires.
@@ -419,7 +419,14 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             {
                 gameHud.Draw(playerActor.stats, ImGui::GetIO(), deltaTime);
                 if (tacticalPauseHeld)
-                    tacticalPauseMenu.Draw(playerActor.stats, ImGui::GetIO());
+                {
+                    const TacticalCommand tacticalCmd = tacticalPauseMenu.Draw(playerActor.stats, ImGui::GetIO());
+                    if (tacticalCmd == TacticalCommand::SurgeStrike)
+                    {
+                        runtimeScene.TriggerSurgeStrike(camController);
+                        audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
+                    }
+                }
                 runtimeScene.damageNumbers.Draw(camController.GetCamX(),
                                                 camController.GetCamY(),
                                                 camController.GetCamZ(),

@@ -11,50 +11,58 @@
 namespace
 {
 // Panel dimensions and position.
-constexpr float kPanelWidth  = 280.0f;
-constexpr float kPanelHeight = 210.0f;
+constexpr float kPanelWidth  = 300.0f;
+constexpr float kPanelHeight = 215.0f;
+
+// Hint column width (right side of the 2-column command table).
+constexpr float kHintColumnWidth  = 115.0f;
 
 // Style — deep indigo/dark-blue panel matching Style Family B (classic RPG window).
 constexpr ImVec4 kBackgroundColor (0.04f, 0.04f, 0.12f, 0.92f);
 constexpr ImVec4 kTitleColor      (1.00f, 0.90f, 0.35f, 1.00f); // gold, matches DialogBox speaker
-constexpr ImVec4 kReadyColor      (1.00f, 0.95f, 0.60f, 1.00f); // warm yellow — surge ready
+constexpr ImVec4 kReadyColor      (1.00f, 0.95f, 0.60f, 1.00f); // warm yellow — tints surge-ready row
 constexpr ImVec4 kHintColor       (0.50f, 0.50f, 0.55f, 1.00f); // muted grey hint text
 
-// UTF-8 encoding of the right-pointing triangle ▶ used in stub menu entries.
-constexpr const char* kArrowSymbol  = "\xe2\x96\xb6";
-constexpr const char* kMagicLabel   = "  Magic   \xe2\x96\xb6";
-constexpr const char* kItemsLabel   = "  Items   \xe2\x96\xb6";
-constexpr const char* kAllyLabel    = "  Ally    \xe2\x96\xb6";
+// Labels for stub commands. ▶ (U+25B6) encoded as UTF-8 \xe2\x96\xb6.
+constexpr const char* kMagicLabel = "  Magic   \xe2\x96\xb6";
+constexpr const char* kItemsLabel = "  Items   \xe2\x96\xb6";
+constexpr const char* kAllyLabel  = "  Ally    \xe2\x96\xb6";
 
-// Width passed to Selectable so it fills the panel column.
-constexpr float kSelectableWidth = -1.0f;
-constexpr float kSelectableHeight = 28.0f;
+constexpr float kSelectableHeight      = 28.0f;
+// In ImGui, passing 0.0f as width to Selectable means "stretch to fill the current column".
+constexpr float kSelectableStretchWidth = 0.0f;
 
-// Draw one command row.
-// label      — display text for the command (e.g. "Surge Strike").
-// available  — when false the row is greyed out and non-interactive.
-// suffix     — small annotation drawn to the right (e.g. "Surge not full", "Coming soon").
-void DrawCommandRow(const char* label, bool available, const char* suffix)
+// Draw one command row inside the active two-column table.
+// Column 0: selectable label. Column 1: greyed hint text.
+// Returns true if the row was activated (clicked or Enter pressed) this frame.
+// available — when false the row is greyed out and non-interactive.
+// suffix    — short annotation in the hint column (pass nullptr for none).
+bool DrawCommandRow(const char* label, bool available, const char* suffix)
 {
+    ImGui::TableNextRow(ImGuiTableRowFlags_None, kSelectableHeight);
+    ImGui::TableSetColumnIndex(0);
+
     if (!available)
         ImGui::BeginDisabled();
 
-    ImGui::Selectable(label, false, ImGuiSelectableFlags_None,
-                      ImVec2(kSelectableWidth, kSelectableHeight));
+    const bool activated = ImGui::Selectable(label, false, ImGuiSelectableFlags_None,
+                                             ImVec2(kSelectableStretchWidth, kSelectableHeight));
 
     if (!available)
         ImGui::EndDisabled();
 
+    ImGui::TableSetColumnIndex(1);
     if (suffix && suffix[0] != '\0')
-    {
-        ImGui::SameLine();
         ImGui::TextDisabled("%s", suffix);
-    }
+
+    return activated;
 }
 } // namespace
 
-void TacticalPauseMenu::Draw(const PlayerStats& stats, const ImGuiIO& io)
+TacticalCommand TacticalPauseMenu::Draw(const PlayerStats& stats, const ImGuiIO& io)
 {
+    TacticalCommand selectedCommand = TacticalCommand::None;
+
     // --- Position: centred on screen ---
     const float posX = (io.DisplaySize.x - kPanelWidth)  * 0.5f;
     const float posY = (io.DisplaySize.y - kPanelHeight) * 0.5f;
@@ -78,7 +86,7 @@ void TacticalPauseMenu::Draw(const PlayerStats& stats, const ImGuiIO& io)
     if (!opened)
     {
         ImGui::End();
-        return;
+        return selectedCommand;
     }
 
     // --- Title ---
@@ -86,19 +94,31 @@ void TacticalPauseMenu::Draw(const PlayerStats& stats, const ImGuiIO& io)
     ImGui::Separator();
     ImGui::Spacing();
 
-    // --- Surge Strike ---
-    // Enabled only when the Surge gauge is full; otherwise greyed out.
-    const bool surgeReady = stats.IsSurgeReady();
-    const char* surgeSuffix = surgeReady ? nullptr : "(Surge not full)";
-    DrawCommandRow("  Surge Strike", surgeReady, surgeSuffix);
+    // --- Command table: two columns so label and hint never overlap ---
+    // Column 0 stretches to fill available space; column 1 is fixed for hints.
+    if (ImGui::BeginTable("##cmds", 2, ImGuiTableFlags_None))
+    {
+        ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("##hint",  ImGuiTableColumnFlags_WidthFixed, kHintColumnWidth);
 
-    ImGui::Spacing();
+        // Surge Strike — tinted warm yellow when ready to signal interactivity.
+        const bool surgeReady = stats.IsSurgeReady();
+        if (surgeReady)
+            ImGui::PushStyleColor(ImGuiCol_Text, kReadyColor);
 
-    // --- Stub commands ---
-    // Magic, Items, and Ally are reserved for later milestones.
-    DrawCommandRow(kMagicLabel, false, "Coming soon");
-    DrawCommandRow(kItemsLabel, false, "Coming soon");
-    DrawCommandRow(kAllyLabel,  false, "Coming soon");
+        if (DrawCommandRow("  Surge Strike", surgeReady, surgeReady ? nullptr : "(Surge not full)"))
+            selectedCommand = TacticalCommand::SurgeStrike;
+
+        if (surgeReady)
+            ImGui::PopStyleColor();
+
+        // Stub commands — reserved for later milestones.
+        DrawCommandRow(kMagicLabel, false, "Coming soon");
+        DrawCommandRow(kItemsLabel, false, "Coming soon");
+        DrawCommandRow(kAllyLabel,  false, "Coming soon");
+
+        ImGui::EndTable();
+    }
 
     // --- Footer hint ---
     ImGui::Spacing();
@@ -107,4 +127,5 @@ void TacticalPauseMenu::Draw(const PlayerStats& stats, const ImGuiIO& io)
     ImGui::TextColored(kHintColor, "Release Tab to resume");
 
     ImGui::End();
+    return selectedCommand;
 }
