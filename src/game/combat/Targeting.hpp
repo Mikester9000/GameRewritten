@@ -16,7 +16,14 @@ public:
             return;
         }
 
-        EnemyActor* nextTarget = FindNearestAliveEnemyInRange(enemies, count, playerX, playerZ, m_target);
+        // Cycling is deterministic nearest-selection each press.
+        // If the current lock is invalid, reacquire using normal nearest-target rules.
+        // If the current lock is valid, pick the nearest other valid target.
+        const bool hasValidCurrentTarget = IsTargetValid(m_target, playerX, playerZ);
+        const EnemyActor* excludedTarget = hasValidCurrentTarget ? m_target : nullptr;
+
+        EnemyActor* nextTarget = FindNearestAliveEnemyInRange(
+            enemies, count, playerX, playerZ, excludedTarget);
         if (nextTarget)
         {
             m_target = nextTarget;
