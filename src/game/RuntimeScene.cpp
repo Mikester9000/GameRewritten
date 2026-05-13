@@ -20,11 +20,17 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
 
     m_combatSystem.Update(dt, m_enemies, kEnemyCount);
 
-    // Spawn floating damage numbers for player hits on enemies this frame.
+    // Fill Surge from hits landed this frame and spawn floating damage numbers.
+    // Heavy hits (damage >= 5, i.e. combo step 2 or Surge Strike level) reward more Surge
+    // than light jabs so skilled play builds the bar faster.
     const CombatSystem::EnemyHitRecord* hitRecords = m_combatSystem.GetRecentEnemyHits();
     int hitCount = m_combatSystem.GetRecentEnemyHitCount();
     for (int i = 0; i < hitCount; ++i)
+    {
+        const float surgeGain = (hitRecords[i].damage >= 5) ? 0.40f : 0.30f;
+        m_player.stats.AddSurge(surgeGain);
         damageNumbers.Spawn(hitRecords[i].damage, hitRecords[i].x, hitRecords[i].y, hitRecords[i].z);
+    }
 
     // Check for enemy attack hitboxes spawned this frame.
     // Test each hitbox against the player AABB before accumulating damage.
@@ -70,13 +76,11 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
 
         if (m_player.stats.IsDead())
         {
-            // Restore stats and signal Main.cpp to teleport the camera.
-            m_player.stats.hp        = m_player.stats.maxHp;
-            m_player.stats.mp        = m_player.stats.maxMp;
-            m_player.stats.surgeCharge = 0.0f;
-            m_player.state           = PlayerActionState::Idle;
-            m_player.stateTimer      = 0.0f;
-            m_wantsRespawn           = true;
+            // Restore all stats and signal Main.cpp to teleport the camera.
+            m_player.stats.Reset();
+            m_player.state      = PlayerActionState::Idle;
+            m_player.stateTimer = 0.0f;
+            m_wantsRespawn      = true;
             LOG_INFO("RuntimeScene: Player defeated — respawning.");
         }
         else

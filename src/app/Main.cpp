@@ -340,8 +340,28 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             firstFrame = true;
         }
 
-        if (!paused && attackPressed && runtimeScene.TriggerPlayerAttack(camController))
-            audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
+        if (!paused && attackPressed)
+        {
+            // --- Attack priority: Limit Break → Surge Strike → Normal combo ---
+            // Try each in order; stop at the first one that fires.
+            bool attackHandled = false;
+
+            // Priority 1: Limit Break (Shift held + F pressed while Limit is full).
+            // InputAction::Dodge is bound to VK_SHIFT — we reuse it here as the modifier key.
+            if (!attackHandled && actionMap.IsHeld(InputAction::Dodge))
+                attackHandled = runtimeScene.TriggerLimitBreak(camController);
+
+            // Priority 2: Surge Strike (F pressed while Surge is full).
+            if (!attackHandled)
+                attackHandled = runtimeScene.TriggerSurgeStrike(camController);
+
+            // Priority 3: Normal two-step combo (always free).
+            if (!attackHandled)
+                attackHandled = runtimeScene.TriggerPlayerAttack(camController);
+
+            if (attackHandled)
+                audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
+        }
 
         // --- 8. Actor visuals ---
         // Submit all actor visual data to the primitive renderer.

@@ -44,7 +44,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Jolt Physics (init only) | 🔧 | `ThirdPartyBootstrap` → `tp::Physics` |
 | Recast/Detour nav (init only) | 🔧 | `ThirdPartyBootstrap` → `tp::Nav` |
 | DirectXTex (smoke test only) | 🔧 | `ThirdPartyBootstrap` → `tp::Texture` |
-| Player stats (hp/mp/surge) | ✅ | `src/game/actors/PlayerStats.hpp`, `src/game/actors/PlayerActor.hpp`, `src/game/RuntimeScene.hpp` |
+| Player stats (hp/mp/surge/limit) | ✅ | `src/game/actors/PlayerStats.hpp` — Surge fills from hits, Limit fills from damage taken |
 | Player action state machine | ✅ | `src/game/actors/PlayerActionState.hpp`, `src/game/actors/PlayerActor.cpp/hpp` |
 | Gameplay HUD | ✅ | `src/ui/GameHUD.hpp`, `src/ui/GameHUD.cpp`, `src/app/Main.cpp` |
 | Texture cache | ✅ | `src/assets/TextureCache.hpp`, `src/assets/TextureCache.cpp` |
@@ -58,6 +58,9 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Minimap | ✅ | `src/ui/Minimap.cpp/hpp` |
 | Dodge burst movement | ✅ | `src/game/CameraController.cpp/hpp` |
 | 2-step combo chain | ✅ | `src/game/combat/CombatSystem.cpp/hpp`, `src/game/RuntimeScene.hpp` |
+| Surge Strike | ✅ | `src/game/RuntimeScene.hpp`, `src/game/combat/CombatSystem.cpp` |
+| Limit Break gauge + move | ✅ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp`, `src/game/combat/CombatSystem.cpp` |
+| MP passive regeneration | ✅ | `src/game/actors/PlayerStats.hpp` |
 | Lock-on targeting | ❌ | `src/game/combat/Targeting.hpp` |
 | Enemy combat states (chase/attack/hit) | ✅ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/actors/EnemyState.hpp` |
 | Enemy awareness radius visualization   | ✅ | `src/ui/ImGuiLayer.cpp/hpp` |

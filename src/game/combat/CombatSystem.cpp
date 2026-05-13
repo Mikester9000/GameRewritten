@@ -34,38 +34,69 @@ void CombatSystem::SpawnHitBox(const HitBox& hitbox)
 
 void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int attackStep)
 {
-    if (attackStep != 1 && attackStep != 2)
+    if (attackStep < 1 || attackStep > 4)
     {
         LOG_WARN("CombatSystem: TriggerAttack called with unsupported attackStep " + std::to_string(attackStep) + " — ignored.");
         return;
     }
 
     HitBox hitBox;
-    hitBox.x = px + 1.5f * sinf(yaw);
-    hitBox.y = py;
-    hitBox.z = pz + 1.5f * cosf(yaw);
     hitBox.halfY = 1.0f;
-    hitBox.framesToLive = 2;
 
     if (attackStep == 1)
     {
+        // Light combo opener — small hitbox, 1.5 units forward.
+        hitBox.x = px + 1.5f * sinf(yaw);
+        hitBox.z = pz + 1.5f * cosf(yaw);
         hitBox.halfX = 0.75f;
         hitBox.halfZ = 0.75f;
         hitBox.damage = 3;
+        hitBox.framesToLive = 2;
         comboStep  = 1;
         comboTimer = kComboWindowSec;
         LOG_INFO("CombatSystem: Combo step 1 triggered.");
     }
     else if (attackStep == 2)
     {
+        // Heavy combo finisher — wider hitbox, 1.5 units forward.
+        hitBox.x = px + 1.5f * sinf(yaw);
+        hitBox.z = pz + 1.5f * cosf(yaw);
         hitBox.halfX = 0.90f;
         hitBox.halfZ = 0.90f;
         hitBox.damage = 5;
+        hitBox.framesToLive = 2;
         comboStep  = 0;
         comboTimer = 0.0f;
         LOG_INFO("CombatSystem: Combo step 2 triggered — combo complete.");
     }
+    else if (attackStep == 3)
+    {
+        // Surge Strike — larger hitbox, 2.0 units forward, resets combo.
+        hitBox.x = px + 2.0f * sinf(yaw);
+        hitBox.z = pz + 2.0f * cosf(yaw);
+        hitBox.halfX = 1.0f;
+        hitBox.halfZ = 1.0f;
+        hitBox.damage = 15;
+        hitBox.framesToLive = 3;
+        comboStep  = 0;
+        comboTimer = 0.0f;
+        LOG_INFO("CombatSystem: Surge Strike triggered.");
+    }
+    else if (attackStep == 4)
+    {
+        // Limit Break — biggest hitbox, 2.5 units forward, resets combo.
+        hitBox.x = px + 2.5f * sinf(yaw);
+        hitBox.z = pz + 2.5f * cosf(yaw);
+        hitBox.halfX = 1.2f;
+        hitBox.halfZ = 1.2f;
+        hitBox.damage = 25;
+        hitBox.framesToLive = 4;
+        comboStep  = 0;
+        comboTimer = 0.0f;
+        LOG_INFO("CombatSystem: Limit Break triggered.");
+    }
 
+    hitBox.y = py;
     SpawnHitBox(hitBox);
 }
 
