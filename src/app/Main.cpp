@@ -420,6 +420,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             if (attackHandled)
             {
                 constexpr float kMissConfirmDelaySec = 0.17f;
+                constexpr float kMissIndicatorForwardOffset = 1.8f;
+                constexpr float kMissIndicatorHeightOffset = 2.8f;
                 const EnemyActor* lockedTarget = runtimeScene.GetLockedTarget();
                 float attackYaw = camController.GetYaw();
 
@@ -432,9 +434,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                         attackYaw = atan2f(toTargetX, toTargetZ);
                 }
 
-                pendingMissWorldX = camController.GetPlayerX() + sinf(attackYaw) * 1.8f;
-                pendingMissWorldY = camController.GetPlayerGroundY() + 2.8f;
-                pendingMissWorldZ = camController.GetPlayerZ() + cosf(attackYaw) * 1.8f;
+                pendingMissWorldX = camController.GetPlayerX() + sinf(attackYaw) * kMissIndicatorForwardOffset;
+                pendingMissWorldY = camController.GetPlayerGroundY() + kMissIndicatorHeightOffset;
+                pendingMissWorldZ = camController.GetPlayerZ() + cosf(attackYaw) * kMissIndicatorForwardOffset;
                 pendingMissTimerSec = kMissConfirmDelaySec;
                 pendingMissIndicator = true;
                 audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
