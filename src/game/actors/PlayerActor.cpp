@@ -37,7 +37,9 @@ void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded,
     {
     case PlayerActionState::Idle:
     case PlayerActionState::Move:
-        if (input.IsHeld(InputAction::Dodge))
+        // If Shift+F is pressed together, the combat system handles it as a Limit Break.
+        // Only start a dodge when Shift is held without an attack input.
+        if (input.IsHeld(InputAction::Dodge) && !attackPressed)
         {
             TransitionTo(PlayerActionState::Dodge, 0.35f);
         }

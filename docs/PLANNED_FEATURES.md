@@ -28,7 +28,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 ### Combat resource system
 - [x] Remove ATB gate from basic attacks (always free)
 - [x] Rename ATB to Surge on HUD
-- [x] Surge fills from hits landed, hits taken, skilled dodge, passive time
+- [x] Surge fills from hits landed and passive time
 - [x] Surge Strike action (F while Surge full — 3x damage)
 - [x] Limit Break gauge (fills from taking damage)
 - [x] Limit Break move (5x damage finisher when gauge full)
