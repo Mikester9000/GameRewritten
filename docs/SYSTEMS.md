@@ -61,7 +61,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Surge Strike | ✅ | `src/game/RuntimeScene.hpp`, `src/game/combat/CombatSystem.cpp` |
 | Limit Break gauge + move | ✅ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp`, `src/game/combat/CombatSystem.cpp` |
 | MP passive regeneration | ✅ | `src/game/actors/PlayerStats.hpp` |
-| Lock-on targeting | ❌ | `src/game/combat/Targeting.hpp` |
+| Lock-on targeting | ✅ | `src/game/combat/Targeting.hpp`, `src/game/RuntimeScene.hpp`, `src/game/CameraController.cpp/hpp`, `src/app/Main.cpp` |
 | Enemy combat states (chase/attack/hit) | ✅ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/actors/EnemyState.hpp` |
 | Enemy awareness radius visualization   | ✅ | `src/ui/ImGuiLayer.cpp/hpp` |
 | Player damage intake + defeat reset | ✅ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp`, `src/game/CameraController.cpp/hpp` |

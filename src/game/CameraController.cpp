@@ -13,6 +13,36 @@
 
 using namespace DirectX;
 
+namespace
+{
+constexpr float kLockOnYawBiasSpeed = 8.0f;
+
+float WrapAngle(float angle)
+{
+    constexpr float kPi = DirectX::XM_PI;
+    constexpr float kTwoPi = DirectX::XM_2PI;
+
+    while (angle > kPi)  angle -= kTwoPi;
+    while (angle < -kPi) angle += kTwoPi;
+    return angle;
+}
+}
+
+void CameraController::BiasYawTowardTarget(float targetX, float targetZ, float dt)
+{
+    if (dt <= 0.0f)
+        return;
+
+    const float toTargetX = targetX - m_playerX;
+    const float toTargetZ = targetZ - m_playerZ;
+    const float targetYaw = atan2f(toTargetX, toTargetZ);
+    const float yawDelta = WrapAngle(targetYaw - m_yaw);
+    // Large dt values intentionally clamp to a direct snap so lock-on can recover
+    // quickly after long frame stalls or pauses.
+    const float blend = std::clamp(kLockOnYawBiasSpeed * dt, 0.0f, 1.0f);
+    m_yaw = WrapAngle(m_yaw + (yawDelta * blend));
+}
+
 // ---------------------------------------------------------------------------
 // ResetToSpawn
 // ---------------------------------------------------------------------------

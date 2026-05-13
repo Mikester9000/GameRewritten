@@ -19,6 +19,7 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
         enemy.Update(dt, renderer, m_playerX, m_playerZ);
 
     m_combatSystem.Update(dt, m_enemies, kEnemyCount);
+    m_targeting.RefreshLock(m_playerX, m_playerZ);
 
     // Fill Surge from hits landed this frame and spawn floating damage numbers.
     // Heavy hits (damage >= 5, i.e. combo step 2 or Surge Strike level) reward more Surge

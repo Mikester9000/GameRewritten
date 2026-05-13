@@ -28,6 +28,18 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 // ---------------------------------------------------------------------------
 #include <DirectXMath.h>
 
+namespace
+{
+// Visual tuning for lock marker readability at 720p/1080p:
+// marker is placed above enemy torso/head and "LOCK" is centered above it.
+constexpr float kLockMarkerHeightOffset = 2.8f;
+constexpr float kLockMarkerCircleRadius = 14.0f;
+constexpr int   kLockMarkerCircleSegments = 24;
+constexpr float kLockMarkerCircleThickness = 2.0f;
+constexpr float kLockMarkerTextOffsetX = -22.0f;
+constexpr float kLockMarkerTextOffsetY = -30.0f;
+}
+
 static bool WorldToScreen(
     float wx, float wy, float wz,
     float camX, float camY, float camZ,
@@ -515,4 +527,32 @@ void ImGuiLayer::DrawCombatDebug(
             }
         }
     }
+}
+
+void ImGuiLayer::DrawLockOnMarker(
+    const EnemyActor* target,
+    float camX, float camY, float camZ,
+    float yaw,  float pitch,
+    float vpW,  float vpH)
+{
+    if (!target || target->isDead)
+        return;
+    if (!ImGui::GetCurrentContext())
+        return;
+
+    float sx = 0.0f;
+    float sy = 0.0f;
+    if (!WorldToScreen(target->x, target->y + kLockMarkerHeightOffset, target->z,
+                       camX, camY, camZ, yaw, pitch, vpW, vpH, sx, sy))
+    {
+        return;
+    }
+
+    ImDrawList* drawList = ImGui::GetForegroundDrawList();
+    const ImU32 lockColor = IM_COL32(255, 220, 80, 255);
+
+    drawList->AddCircle(ImVec2(sx, sy), kLockMarkerCircleRadius, lockColor,
+                        kLockMarkerCircleSegments, kLockMarkerCircleThickness);
+    drawList->AddText(ImVec2(sx + kLockMarkerTextOffsetX, sy + kLockMarkerTextOffsetY),
+                      lockColor, "LOCK");
 }
