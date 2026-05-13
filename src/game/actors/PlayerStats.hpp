@@ -6,19 +6,21 @@ struct PlayerStats
     float maxHp = 100.0f;
     float mp = 50.0f;
     float maxMp = 50.0f;
-    float atbCharge = 0.0f;      // range 0.0f - 1.0f
-    float atbChargeRate = 0.12f; // units per second
+    // Surge charge in range 0.0 - 1.0. Full bar = ready to spend.
+    // Fills passively each frame. Future: also fills from landing hits.
+    float surgeCharge = 0.0f;
+    float surgeChargeRate = 0.12f;
 
     void Update(float dt)
     {
-        atbCharge += atbChargeRate * dt;
-        if (atbCharge < 0.0f)
-            atbCharge = 0.0f;
-        if (atbCharge > 1.0f)
-            atbCharge = 1.0f;
+        surgeCharge += surgeChargeRate * dt;
+        if (surgeCharge < 0.0f)
+            surgeCharge = 0.0f;
+        if (surgeCharge > 1.0f)
+            surgeCharge = 1.0f;
     }
 
-    bool IsAtbReady() const { return atbCharge >= 1.0f; }
+    bool IsSurgeReady() const { return surgeCharge >= 1.0f; }
 
     // Reduce HP by amount; clamps to zero. Safe to call with zero or positive values only.
     void TakeDamage(int amount)

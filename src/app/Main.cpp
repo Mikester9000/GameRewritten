@@ -4,7 +4,6 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <cmath>
 #include <cstdint>
 #include <sstream>   // for std::ostringstream (cell crossing log)
 #include "../platform/win32/Win32Window.hpp"
@@ -17,7 +16,6 @@
 #include "../game/RuntimeScene.hpp"
 #include "../game/physics/CollisionWorld.hpp"
 #include "../ui/GameHUD.hpp"
-#include "../ui/DamageNumbers.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../ui/DialogBox.hpp"
 #include "../ui/Minimap.hpp"
@@ -117,7 +115,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // --- World Editor ---
     GameHUD gameHud;
-    DamageNumbers damageNumbers;
     WorldEditor worldEditor;
     DialogBox dialogBox;
     Minimap minimap;
@@ -174,7 +171,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // any cell-boundary void on the first frame.
     camController.Init(startupCellCenter, 0.0f, startupCellCenter, 0.0f, -0.5f);
     runtimeScene.InitEnemies(startupCellCenter, startupCellCenter);
-    runtimeScene.SetDamageNumbers(&damageNumbers);
 
     renderer.SetCameraPosition(startupCellCenter, 0.0f, startupCellCenter);
     renderer.SetCameraRotation(0.0f, -0.5f);
@@ -192,7 +188,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     bool firstFrame = true;
     bool dialogSmokeTestShown = false;
-    float debugClearColorTime = 0.0f; // dev-only: drives the animated clear-color pulse
     FrameTiming::State frameTimingState;
     FrameTiming::Initialize(frameTimingState);
     InputEdge::State inputEdgeState;
@@ -220,14 +215,24 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Main game loop: process Win32 messages, update, draw, repeat.
     while (window.ProcessEvents())
     {
+        // --- 1. Frame timing ---
+        // Establish deltaTime for this frame. Everything else uses it.
         float deltaTime = FrameTiming::BeginFrame(frameTimingState);
 
-        // Check if the window is active
-        if (GetForegroundWindow() != window.GetHandle()) {
-            continue; // Skip the loop if the window is not active
-        }
+        // --- 2. Input ---
+        // Read all input for this frame. No logic yet — just read state.
+        const bool pausePressed = actionMap.IsPressed(InputAction::TogglePause, wasPauseActionDown);
+        const bool debugPressed = actionMap.IsPressed(InputAction::ToggleDebug, wasDebugActionDown);
+        const bool reloadPressed = actionMap.IsPressed(InputAction::ReloadAssets, wasReloadActionDown);
+        const bool interactPressed = actionMap.IsPressed(InputAction::Interact, wasInteractActionDown);
+        const bool attackPressed = actionMap.IsPressed(InputAction::Attack, wasAttackActionDown);
 
-        // Temporary startup dialog line for feature smoke testing.
+        // --- 3. UI state ---
+        // Apply pause, cursor visibility, dialog update.
+        // Determines what is allowed in the steps below.
+        if (GetForegroundWindow() != window.GetHandle())
+            continue;
+
         if (!dialogSmokeTestShown)
         {
             dialogBox.Show("???", "The wind carries a strange scent from the east...");
@@ -236,32 +241,23 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         dialogBox.Update(deltaTime);
 
-        // --- Toggle keys (edge-detect so they fire once per press) ---
-
-        // Esc: toggle pause menu (was: exit the program).
-        if (actionMap.IsPressed(InputAction::TogglePause, wasPauseActionDown))
+        if (pausePressed)
             imguiLayer.TogglePauseMenu();
-
-        // F1: toggle debug overlay.
-        if (actionMap.IsPressed(InputAction::ToggleDebug, wasDebugActionDown))
+        if (debugPressed)
             imguiLayer.ToggleDebugOverlay();
-
-        // F5: reload Asset Registry and World Grid without restarting.
-        // Also rebuilds terrain + forest for the active cell and respawns instances.
-        if (actionMap.IsPressed(InputAction::ReloadAssets, wasReloadActionDown))
-        {
+        if (reloadPressed)
             WorldReload::ReloadAssetsAndWorld(worldReloadContext);
-        }
 
-        const bool interactPressed = actionMap.IsPressed(InputAction::Interact, wasInteractActionDown);
-
-        // Handle quit/resume signals from the UI.
         if (imguiLayer.WantsQuit())
             break;
         imguiLayer.ClearFrameFlags();
 
-        // T / G — terrain toggle (only when not paused).
-        if (!imguiLayer.IsPauseMenuOpen())
+        const bool paused = imguiLayer.IsPauseMenuOpen();
+        const bool editorActive = worldEditor.IsEditorInteractionActive();
+        const bool wantCursorVisible = paused || editorActive;
+        CursorMode::ApplyCursorVisibility(cursorModeState, wantCursorVisible);
+
+        if (!paused)
         {
             if (InputEdge::PollTPressed(inputEdgeState))
                 useTerrainPatch = true;
@@ -270,58 +266,39 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                 useTerrainPatch = false;
         }
 
-        // Show/hide system cursor and re-center mouse based on pause state.
-        // Show cursor when paused OR when the World Editor is in placement mode.
-        const bool paused = imguiLayer.IsPauseMenuOpen();
-        const bool editorActive = worldEditor.IsEditorInteractionActive();
-        const bool wantCursorVisible = paused || editorActive;
-        CursorMode::ApplyCursorVisibility(cursorModeState, wantCursorVisible);
-
         if (!paused && dialogBox.IsOpen() && interactPressed)
             dialogBox.Dismiss();
 
-        // Animate the clear color so you can see it is updating.
-        debugClearColorTime += deltaTime;
-        float r = 0.2f + 0.2f * sinf(debugClearColorTime);
-        float g = 0.2f + 0.2f * sinf(debugClearColorTime * 1.7f);
-        float b = 0.3f + 0.2f * sinf(debugClearColorTime * 2.3f);
-
-        // --- Camera + movement (now handled by CameraController) ---
-        // Movement: enabled as long as the pause menu is closed.
-        //   Player can still walk/jump while World Editor Placement Mode is active.
-        // Mouse look: disabled during Placement Mode so the cursor stays free for
-        //   clicking on the ground.  Re-enabled when Placement Mode turns off.
-        //   To avoid a sudden camera jump when mouse-look re-enables, we treat the
-        //   first frame after the transition as a "first frame" (skips the delta).
-        const bool allowMovement  = !paused;
-        const bool allowMouseLook = !paused && !editorActive;
-
-        // Detect the moment Placement Mode turns OFF so we can reset mouse baseline.
-        CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
-
-        // F — edge-detect unconditionally to keep state consistent while paused.
-        const bool attackPressed = actionMap.IsPressed(InputAction::Attack, wasAttackActionDown);
+        // --- 4. Player update ---
+        // Update player state, stats, and dodge burst.
+        // Uses input and grounded state from above.
         const bool playerIsGrounded = camController.IsGrounded();
         runtimeScene.BeginPlayerFrame(deltaTime, actionMap, playerIsGrounded, attackPressed, camController);
 
+        // --- 5. Camera update ---
+        // Move and rotate the camera based on input and player state.
+        const bool allowMovement = !paused;
+        const bool allowMouseLook = !paused && !editorActive;
+        CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
         camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
 
-        // --- Cell-crossing detection: rebuild terrain instantly on biome change ---
-        // This gives hard biome borders with no loading screen.
+        // --- 6. World update ---
+        // Cell crossing detection, asset reload, editor placement.
+        // Runs after camera so player position is up to date.
         {
-            int playerCX = 0, playerCZ = 0;
-            worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(),
-                                  playerCX, playerCZ);
+            int playerCX = 0;
+            int playerCZ = 0;
+            worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), playerCX, playerCZ);
             if (playerCX != lastPlayerCX || playerCZ != lastPlayerCZ)
             {
                 WorldCell* newCell = worldGrid.FindCell(playerCX, playerCZ);
                 if (newCell)
                 {
-                    std::ostringstream ss;
-                    ss << "Cell change: (" << lastPlayerCX << "," << lastPlayerCZ
-                       << ") -> (" << playerCX << "," << playerCZ
-                       << ") biome=" << newCell->terrainBiome;
-                    LOG_INFO(ss.str());
+                    std::ostringstream cellChangeMessage;
+                    cellChangeMessage << "Cell change: (" << lastPlayerCX << "," << lastPlayerCZ
+                                      << ") -> (" << playerCX << "," << playerCZ
+                                      << ") biome=" << newCell->terrainBiome;
+                    LOG_INFO(cellChangeMessage.str());
                     WorldRefresh::RefreshCellVisuals(*newCell, cellRefreshContext);
                 }
                 lastPlayerCX = playerCX;
@@ -329,7 +306,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             }
         }
 
-        // --- Left-click placement ---
         const WorldEditorFrameOps::PlacementResult placementResult = WorldEditorFrameOps::HandlePlacementClick(
             window.GetHandle(),
             InputEdge::PollLeftButtonClicked(inputEdgeState),
@@ -345,75 +321,70 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                 WorldRefresh::RefreshCellVisuals(*activeCell, cellRefreshContext);
         }
 
-        // Pass camera info and FPS stats to ImGuiLayer for the debug overlay.
-        imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),
-                                 camController.GetYaw(),  camController.GetPitch());
-        imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
-        // Rebuild runtime actor visuals for this frame (player, enemies).
-        // Pass current player XYZ (post camController.Update) so enemy AI is up-to-date.
+        // --- 7. Combat update ---
+        // Update enemies, resolve hits, spawn damage numbers.
+        // Runs after world so terrain and positions are final.
         runtimeScene.BeginFrame(deltaTime, renderer,
                                 camController.GetPlayerX(),
                                 camController.GetPlayerY(),
                                 camController.GetPlayerZ());
+        runtimeScene.damageNumbers.Update(deltaTime);
 
-        // Respawn the player at the spawn point after defeat.
-        // RuntimeScene resets stats; Main handles the camera teleport.
         if (runtimeScene.WantsRespawn())
         {
             camController.ResetToSpawn(
                 runtimeScene.GetRespawnX(), 0.0f, runtimeScene.GetRespawnZ(),
                 0.0f, -0.5f);
             runtimeScene.ClearRespawnFlag();
-            firstFrame = true; // suppress camera jump caused by cursor warp after teleport
+            firstFrame = true;
         }
 
-        const CombatSystem& combatSystem = runtimeScene.GetCombatSystem();
-
-        // Update floating damage numbers (only when unpaused; spawning is done inside BeginFrame).
-        if (!paused)
-            damageNumbers.Update(deltaTime);
-
-        // F — player attack (ATB-gated, ignored while paused).
-        // Runs after BeginPlayerFrame so the ATB readiness check uses the current frame's value.
         if (!paused && attackPressed && runtimeScene.TriggerPlayerAttack(camController))
             audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
 
+        // --- 8. Actor visuals ---
+        // Submit all actor visual data to the primitive renderer.
+        // Runs after all state is resolved for this frame.
         runtimeScene.SubmitActors(camController, prefabLibrary);
 
-        renderer.ClearScreen(r, g, b, 1.0f);
+        imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),
+                                 camController.GetYaw(), camController.GetPitch());
+        imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
+
+        // --- 9. Draw ---
+        // Clear screen, draw world, draw UI, present.
+        // Nothing in this section changes game state.
+        renderer.ClearScreen(0.1f, 0.1f, 0.15f, 1.0f);
         {
             GR_ZONE_SCOPED_N("Renderer Frame");
             renderer.DrawSky();
-            // draw terrain/ground
-            if (useTerrainPatch) renderer.DrawTerrainPatch();
-            else renderer.DrawGroundPlane();
-            // draw the forest
+            if (useTerrainPatch)
+                renderer.DrawTerrainPatch();
+            else
+                renderer.DrawGroundPlane();
             forest.Draw(renderer);
-            // draw placed primitive prefab instances
             primRenderer.Draw(renderer);
-            renderer.DrawRotatingTriangle(deltaTime);
 
-            // ImGui: begin frame, draw UI panels, then render ImGui draw data.
             imguiLayer.BeginFrame();
             if (!imguiLayer.IsPauseMenuOpen())
             {
-                gameHud.Draw(playerActor.stats, ImGui::GetIO(), debugClearColorTime);
-                damageNumbers.Draw(camController.GetCamX(),
-                                   camController.GetCamY(),
-                                   camController.GetCamZ(),
-                                   camController.GetYaw(),
-                                   camController.GetPitch(),
-                                   static_cast<float>(window.GetWidth()),
-                                   static_cast<float>(window.GetHeight()));
+                gameHud.Draw(playerActor.stats, ImGui::GetIO(), deltaTime);
+                runtimeScene.damageNumbers.Draw(camController.GetCamX(),
+                                                camController.GetCamY(),
+                                                camController.GetCamZ(),
+                                                camController.GetYaw(),
+                                                camController.GetPitch(),
+                                                static_cast<float>(window.GetWidth()),
+                                                static_cast<float>(window.GetHeight()));
                 dialogBox.Draw(ImGui::GetIO());
                 minimap.Draw(worldGrid,
                              camController.GetPlayerX(), camController.GetPlayerZ(),
                              camController.GetYaw(), ImGui::GetIO());
             }
-            // Draw the World Editor panel inside the ImGui frame.
+
             WorldEditorFrameOps::DrawEditorPanelForActiveCell(
                 worldEditor, worldGrid, camController, renderer);
-            // Combat debug overlay (hitboxes, radii, state labels).
+
             if (imguiLayer.showCombatDebug)
             {
                 imguiLayer.DrawCombatDebug(
@@ -432,6 +403,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
             renderer.PresentFrame();
         }
+
         GR_FRAME_MARK;
         Sleep(1); // tiny sleep so we don't peg CPU at 100%
     }

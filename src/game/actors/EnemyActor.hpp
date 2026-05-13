@@ -64,7 +64,7 @@ public:
     void OnHit(int damage);
 
     // Expand the enemy visual into the runtime primitive bucket.
-    // Reuses the player blockout prefab as a temporary enemy blockout.
+    // Reuses the player blockout prefab for enemy visuals.
     // Does nothing when isDead is true.
     void SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
                              PrimitiveRenderer&   primitiveRenderer) const;

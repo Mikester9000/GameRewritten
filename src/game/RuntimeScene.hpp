@@ -13,10 +13,10 @@
 // Usage:
 //   RuntimeScene scene(playerActor, primRenderer);
 //   scene.InitEnemies(spawnCenterX, spawnCenterZ);
-//   scene.SetDamageNumbers(&damageNumbers);   // optional: enables floating numbers
 //   // each frame:
 //   scene.BeginPlayerFrame(deltaTime, actionMap, camController.IsGrounded(), attackPressed, camController);
 //   scene.BeginFrame(deltaTime, renderer, playerX, playerY, playerZ);
+//   scene.damageNumbers.Update(deltaTime);
 //   scene.SubmitActors(camController, prefabLibrary);
 
 #include "actors/PlayerActor.hpp"
@@ -24,6 +24,7 @@
 #include "PrimitiveRenderer.hpp"
 #include "combat/CombatSystem.hpp"
 #include "CameraController.hpp"
+#include "../ui/DamageNumbers.hpp"
 #include "../app/InputActionMap.hpp"
 #include <cmath>
 #include <logger/Logger.hpp>
@@ -32,7 +33,6 @@
 // includes RuntimeScene.
 class D3D11Renderer;
 class PrefabLibrary;
-class DamageNumbers;
 
 class RuntimeScene
 {
@@ -59,12 +59,7 @@ public:
                           centerX + 10.0f, centerZ + 50.0f);
     }
 
-    // Provide a DamageNumbers instance so RuntimeScene can spawn floating
-    // hit numbers directly. Call once after construction, before the loop.
-    void SetDamageNumbers(DamageNumbers* dn) { m_damageNumbers = dn; }
-
-    float m_lastMoveDirX = 0.0f;
-    float m_lastMoveDirZ = 1.0f; // default facing forward
+    DamageNumbers damageNumbers;
 
     // Update player state and trigger one-shot dodge bursts before camera movement.
     // This ordering avoids a one-frame latency before dodge movement starts.
@@ -133,7 +128,7 @@ public:
     }
 
     // Spawn a hitbox for the current combo step.
-    // Step 1 requires ATB; step 2 chains within the combo window, ATB not required.
+    // Step 1 requires Surge; step 2 chains within the combo window, Surge not required.
     // Returns true if an attack was triggered.
     bool TriggerPlayerAttack(const CameraController& camController)
     {
@@ -144,16 +139,16 @@ public:
 
         if (m_combatSystem.comboStep == 0)
         {
-            // Step 1 — only allowed from Idle or Move while grounded; requires ATB.
+            // Step 1 — only allowed from Idle or Move while grounded; requires Surge.
             const PlayerActionState s = m_player.state;
             if (s != PlayerActionState::Idle && s != PlayerActionState::Move)
                 return false;
             if (!camController.IsGrounded())
                 return false;
-            if (!m_player.stats.IsAtbReady())
+            if (!m_player.stats.IsSurgeReady())
                 return false;
 
-            m_player.stats.atbCharge = 0.0f;
+            m_player.stats.surgeCharge = 0.0f;
             m_combatSystem.TriggerAttack(px, py, pz, yaw, 1);
             m_player.state      = PlayerActionState::Attack1;
             m_player.stateTimer = 0.40f;
@@ -162,14 +157,14 @@ public:
         }
         else if (m_combatSystem.comboStep == 1 && m_combatSystem.comboTimer > 0.0f)
         {
-            // Step 2 — allowed from Attack1, Idle, or Move during the combo window; ATB not required.
+            // Step 2 — allowed from Attack1, Idle, or Move during the combo window; Surge not required.
             const PlayerActionState s = m_player.state;
             if (s != PlayerActionState::Attack1 &&
                 s != PlayerActionState::Idle    &&
                 s != PlayerActionState::Move)
                 return false;
 
-            m_player.stats.atbCharge = 0.0f;
+            m_player.stats.surgeCharge = 0.0f;
             m_combatSystem.TriggerAttack(px, py, pz, yaw, 2);
             m_player.state      = PlayerActionState::Attack2;
             m_player.stateTimer = 0.40f;
@@ -218,7 +213,6 @@ private:
     PrimitiveRenderer& m_primRenderer;
     EnemyActor         m_enemies[kEnemyCount];
     CombatSystem       m_combatSystem;
-    DamageNumbers*     m_damageNumbers = nullptr;
 
     // Player position updated each frame in BeginFrame (after camController.Update()).
     float m_playerX = 0.0f;
@@ -235,16 +229,19 @@ private:
     // Accumulated damage from enemy attacks this frame (AABB-tested).
     int m_pendingEnemyDamage = 0;
 
+    float m_lastMoveDirX = 0.0f;
+    float m_lastMoveDirZ = 1.0f; // default facing forward
+
     // Returns true if the given hitbox overlaps the player's body AABB.
     // m_playerY is the camera eye level; body center is shifted down by kPlayerBodyCenterOffset.
-    bool HitBoxOverlapsPlayer(const HitBox& hb) const
+    bool HitBoxOverlapsPlayer(const HitBox& hitBox) const
     {
-        float bodyY = m_playerY - kPlayerBodyCenterOffset;
-        float dx = fabsf(m_playerX - hb.x);
-        float dy = fabsf(bodyY     - hb.y);
-        float dz = fabsf(m_playerZ - hb.z);
-        return (dx < kPlayerHitHalfX + hb.halfX) &&
-               (dy < kPlayerHitHalfY + hb.halfY) &&
-               (dz < kPlayerHitHalfZ + hb.halfZ);
+        float bodyCenterY = m_playerY - kPlayerBodyCenterOffset;
+        float distX = fabsf(m_playerX - hitBox.x);
+        float distY = fabsf(bodyCenterY - hitBox.y);
+        float distZ = fabsf(m_playerZ - hitBox.z);
+        return (distX < kPlayerHitHalfX + hitBox.halfX) &&
+               (distY < kPlayerHitHalfY + hitBox.halfY) &&
+               (distZ < kPlayerHitHalfZ + hitBox.halfZ);
     }
 };

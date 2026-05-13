@@ -16,6 +16,9 @@ Rules that apply to every automated agent or Copilot coding session in this repo
 - Never write to disk (save files, write config) without explicit instruction.
 - Every new `.cpp` file must be added to `GameRewritten.vcxproj` and `GameRewritten.vcxproj.filters` in the same PR.
 - Every new feature must compile without warnings on D3D11 / MSVC.
+- Follow the Narrative Code style defined in
+  `.github/copilot-instructions.md` — every function tells one
+  story, reads top to bottom, and uses self-describing names.
 
 ## PR Scope Rules
 - Each PR implements exactly one feature from the prompt. Do not bundle unrelated changes.

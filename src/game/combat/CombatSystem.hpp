@@ -1,7 +1,6 @@
 #pragma once
 // CombatSystem.hpp
 // Manages active hitboxes, ticks their lifetime, and resolves hits against enemies.
-// Player damage is ignored in this first pass. No knockback or animations yet.
 
 #include "HitBox.hpp"
 #include <vector>

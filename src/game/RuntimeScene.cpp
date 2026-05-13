@@ -1,11 +1,7 @@
 // RuntimeScene.cpp
 // BeginFrame implementation for RuntimeScene.
-// Separated from RuntimeScene.hpp to avoid pulling UI headers (DamageNumbers)
-// into every translation unit that includes RuntimeScene.hpp.
 
 #include "RuntimeScene.hpp"
-
-#include "../ui/DamageNumbers.hpp"
 
 #include <string>
 
@@ -25,13 +21,10 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
     m_combatSystem.Update(dt, m_enemies, kEnemyCount);
 
     // Spawn floating damage numbers for player hits on enemies this frame.
-    if (m_damageNumbers)
-    {
-        const CombatSystem::EnemyHitRecord* hits = m_combatSystem.GetRecentEnemyHits();
-        int hitCount = m_combatSystem.GetRecentEnemyHitCount();
-        for (int i = 0; i < hitCount; ++i)
-            m_damageNumbers->Spawn(hits[i].damage, hits[i].x, hits[i].y, hits[i].z);
-    }
+    const CombatSystem::EnemyHitRecord* hitRecords = m_combatSystem.GetRecentEnemyHits();
+    int hitCount = m_combatSystem.GetRecentEnemyHitCount();
+    for (int i = 0; i < hitCount; ++i)
+        damageNumbers.Spawn(hitRecords[i].damage, hitRecords[i].x, hitRecords[i].y, hitRecords[i].z);
 
     // Check for enemy attack hitboxes spawned this frame.
     // Test each hitbox against the player AABB before accumulating damage.
@@ -42,18 +35,24 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
 
         enemy.pendingAttack = false;
 
-        HitBox hb;
-        hb.x      = enemy.x;
-        hb.y      = enemy.y + 1.0f;
-        hb.z      = enemy.z;
-        hb.halfX  = kEnemyAttackHalfX;
-        hb.halfY  = kEnemyAttackHalfY;
-        hb.halfZ  = kEnemyAttackHalfZ;
-        hb.damage = kEnemyAttackDamage;
+        HitBox hitBox;
+        hitBox.x = enemy.x;
+        hitBox.y = enemy.y + 1.0f;
+        hitBox.z = enemy.z;
+        hitBox.halfX = kEnemyAttackHalfX;
+        hitBox.halfY = kEnemyAttackHalfY;
+        hitBox.halfZ = kEnemyAttackHalfZ;
+        hitBox.damage = kEnemyAttackDamage;
         // framesToLive not set -- this hitbox is tested immediately and discarded.
 
-        if (HitBoxOverlapsPlayer(hb))
-            m_pendingEnemyDamage += hb.damage;
+        if (hitBox.hasHitPlayer)
+            continue;
+
+        if (HitBoxOverlapsPlayer(hitBox))
+        {
+            m_pendingEnemyDamage += hitBox.damage;
+            hitBox.hasHitPlayer = true;
+        }
     }
 
     // Apply accumulated enemy damage to the player.
@@ -71,7 +70,7 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
             // Restore stats and signal Main.cpp to teleport the camera.
             m_player.stats.hp        = m_player.stats.maxHp;
             m_player.stats.mp        = m_player.stats.maxMp;
-            m_player.stats.atbCharge = 0.0f;
+            m_player.stats.surgeCharge = 0.0f;
             m_player.state           = PlayerActionState::Idle;
             m_player.stateTimer      = 0.0f;
             m_wantsRespawn           = true;

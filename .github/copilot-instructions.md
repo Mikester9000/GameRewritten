@@ -286,3 +286,64 @@ Follow these exact patterns when adding new systems — do not invent new wiring
 - If multiple sections exist, add to the most relevant section.
 - Create new sections only when the instruction doesn't fit existing categories.
 - Use bullet lists for instructions and maintain consistent indentation and spacing.
+
+## Coding Style — Narrative Code
+
+Every function in this repo must read like a clear set of
+instructions. A new developer should be able to read any
+function top to bottom in one pass and understand exactly
+what it does and why, without jumping to other files.
+
+### The three rules — follow these in every PR
+
+RULE 1 — Each function tells one story.
+A function does one job. Its name says what that job is.
+If a function is doing two jobs, split it into two functions.
+Helper functions are encouraged — name them clearly.
+
+RULE 2 — Code reads top to bottom like instructions.
+Each block sets up the next block. Always in this order:
+setup → guard clauses → main logic → output.
+Never mix unrelated concerns in the same section.
+Separate logical steps with one blank line.
+
+RULE 3 — Names tell you what something IS.
+Names must be self-describing without needing a comment.
+  distanceToPlayer  not  d
+  hitBox            not  hb
+  enemy             not  e
+  lifeRatio         not  t
+  TestEnemyHitsAgainstPlayer()  not  CheckHits()
+Single-letter names are only allowed for loop counters (i, j).
+
+### Comments — earn every one
+
+A comment STAYS if it explains WHY — why this value, why this
+order, why this approach over the obvious alternative.
+
+A comment is REMOVED if it:
+- Restates what the next line of code already says clearly
+- Describes what a function does when the name already says it
+- References a completed task or merged track
+- Says "for now" or "temporary" for something permanent
+
+A codebase with fewer accurate comments is better than one
+with many comments that cannot be trusted.
+
+### Main loop and large functions — section headers
+
+Any function longer than 20 lines must be divided into
+clearly labelled sections with a one-line comment header:
+  // --- Step name ---
+Each section does one thing. Each flows logically from the one
+above it. The section headers together should read like a
+summary of the whole function.
+
+### The test
+
+After writing any function, read it top to bottom once as if
+you are seeing it for the first time.
+If you have to stop and think about what a line does, rename it.
+If you have to read ahead to understand the current line, reorder it.
+If a comment restates the code, delete the comment.
+If a function is doing two things, split it.

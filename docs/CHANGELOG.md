@@ -18,3 +18,4 @@
 - 2026-05-12: Track 12.6: Fix ScreenProjection.hpp (replace manual rotation with DirectXMath matching renderer), add player AABB damage intake with enemy attack AABB check, stun-on-hit, defeat reset with camera respawn (CameraController::ResetToSpawn), and screen-edge low-HP warning pulse in GameHUD. Move DamageNumbers spawning from Main.cpp into RuntimeScene.
 - 2026-05-12: Track 12.5: Add enemy combat state machine (Patrol/Chase/Attack/Hit/Dead) and debug hitbox/radius visualization toggle (F1 overlay)
 - 2026-05-12: Added floating damage numbers with shared WorldToScreen helper (`ScreenProjection.hpp`), fixed-pool `DamageNumbers` HUD system, and combat-hit wiring.
+- 2026-05-13: Cleanup: Narrative code pass — Surge rename, duplicate DamageNumbers removed, test draw calls removed, Main loop reorganised as ten-step narrative, short variable names expanded, narrative code style written permanently into agent rules

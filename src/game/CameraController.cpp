@@ -147,7 +147,7 @@ void CameraController::Update(float dt, bool allowMovement, bool allowMouseLook,
 
         if (m_dodgeActive)
         {
-            // TODO Track 12.6: apply invincibility window (~0.2s) during dodge burst
+            // Dodge burst movement overrides regular WASD movement until the burst ends.
             const float dodgeStepDt = std::min(dt, m_dodgeTimer);
             m_playerX += m_dodgeVelX * dodgeStepDt;
             m_playerZ += m_dodgeVelZ * dodgeStepDt;
