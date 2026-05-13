@@ -112,7 +112,7 @@ public:
     // has run this frame, so enemy AI sees an up-to-date position.
     // playerY is the eye-level Y (CameraController::GetPlayerY()).
     // Call once each frame after camController.Update(), before submitting actor visuals.
-    // Implementation lives in RuntimeScene.cpp to avoid pulling UI headers here.
+    // Implementation lives in RuntimeScene.cpp.
     void BeginFrame(float dt, D3D11Renderer& renderer,
                     float playerX, float playerY, float playerZ);
 

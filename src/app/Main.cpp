@@ -328,7 +328,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                 camController.GetPlayerX(),
                                 camController.GetPlayerY(),
                                 camController.GetPlayerZ());
-        runtimeScene.damageNumbers.Update(deltaTime);
+        if (!paused)
+            runtimeScene.damageNumbers.Update(deltaTime);
 
         if (runtimeScene.WantsRespawn())
         {
