@@ -8,41 +8,42 @@ public:
     // Lock range in world units. Keep this comfortably beyond enemy detect radius.
     static constexpr float kLockRadius = 25.0f;
 
-    bool isLocked = false;
-    EnemyActor* target = nullptr;
-
     void ToggleLockOn(EnemyActor* enemies, int count, float playerX, float playerZ)
     {
-        if (isLocked)
+        if (IsLocked())
         {
             ClearLock();
             return;
         }
 
-        target = FindNearestAliveEnemyInRange(enemies, count, playerX, playerZ);
-        isLocked = (target != nullptr);
+        m_target = FindNearestAliveEnemyInRange(enemies, count, playerX, playerZ);
     }
 
     void RefreshLock(float playerX, float playerZ)
     {
-        if (!IsTargetValid(target, playerX, playerZ))
+        if (!IsTargetValid(m_target, playerX, playerZ))
             ClearLock();
+    }
+
+    bool IsLocked() const
+    {
+        return (m_target != nullptr) && !m_target->isDead;
     }
 
     const EnemyActor* GetTarget() const
     {
-        if (!isLocked || !target || target->isDead)
+        if (!IsLocked())
             return nullptr;
-        return target;
+        return m_target;
     }
 
 private:
     static constexpr float kLockRadiusSq = kLockRadius * kLockRadius;
+    EnemyActor* m_target = nullptr;
 
     void ClearLock()
     {
-        isLocked = false;
-        target = nullptr;
+        m_target = nullptr;
     }
 
     static bool IsTargetValid(const EnemyActor* candidate, float playerX, float playerZ)

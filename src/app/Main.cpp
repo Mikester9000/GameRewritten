@@ -342,8 +342,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         if (!paused && lockOnPressed)
         {
-            runtimeScene.ToggleLockOn(camController.GetPlayerX(),
-                                      camController.GetPlayerZ());
+            runtimeScene.ToggleLockOn();
         }
 
         if (!paused)

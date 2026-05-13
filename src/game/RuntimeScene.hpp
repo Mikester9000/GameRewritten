@@ -242,9 +242,9 @@ public:
     int                 GetEnemyCount()   const { return kEnemyCount; }
     const EnemyActor*   GetLockedTarget() const { return m_targeting.GetTarget(); }
 
-    void ToggleLockOn(float playerX, float playerZ)
+    void ToggleLockOn()
     {
-        m_targeting.ToggleLockOn(m_enemies, kEnemyCount, playerX, playerZ);
+        m_targeting.ToggleLockOn(m_enemies, kEnemyCount, m_playerX, m_playerZ);
     }
 
 private:
