@@ -21,6 +21,7 @@ void EnemyActor::Init(float startX, float startZ,
     y = 0.0f;
     z = startZ;
     yaw = 0.0f;
+    name  = "Goblin";
     hp    = startHp;
     maxHp = startHp;
     isDead = false;

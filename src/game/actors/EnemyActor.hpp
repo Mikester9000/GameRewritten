@@ -31,6 +31,9 @@ public:
     // Y-axis rotation in radians (0 = facing +Z).
     float yaw = 0.0f;
 
+    // Display name shown in the target HUD when this enemy is locked on.
+    const char* name = "Goblin";
+
     // Health.
     int  hp    = 10;
     int  maxHp = 10;

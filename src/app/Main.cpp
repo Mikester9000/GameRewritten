@@ -417,10 +417,18 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             imguiLayer.BeginFrame();
             if (!imguiLayer.IsPauseMenuOpen())
             {
-                gameHud.Draw(playerActor.stats, ImGui::GetIO(), deltaTime);
+                const ImGuiIO&    io     = ImGui::GetIO();
+                const CombatSystem& combat = runtimeScene.GetCombatSystem();
+
+                gameHud.Draw(playerActor.stats, io, deltaTime);
+                gameHud.DrawTargetInfo(runtimeScene.GetLockedTarget(), io);
+                gameHud.DrawComboIndicator(combat.comboStep,
+                                           combat.comboTimer,
+                                           CombatSystem::kComboWindowSec,
+                                           io);
                 if (tacticalPauseHeld)
                 {
-                    const TacticalCommand tacticalCmd = tacticalPauseMenu.Draw(playerActor.stats, ImGui::GetIO());
+                    const TacticalCommand tacticalCmd = tacticalPauseMenu.Draw(playerActor.stats, io);
                     if (tacticalCmd == TacticalCommand::SurgeStrike)
                     {
                         runtimeScene.TriggerSurgeStrike(camController);
@@ -434,10 +442,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                                 camController.GetPitch(),
                                                 static_cast<float>(window.GetWidth()),
                                                 static_cast<float>(window.GetHeight()));
-                dialogBox.Draw(ImGui::GetIO());
+                dialogBox.Draw(io);
                 minimap.Draw(worldGrid,
                              camController.GetPlayerX(), camController.GetPlayerZ(),
-                             camController.GetYaw(), ImGui::GetIO());
+                             camController.GetYaw(), io);
 
                 imguiLayer.DrawLockOnMarker(
                     runtimeScene.GetLockedTarget(),

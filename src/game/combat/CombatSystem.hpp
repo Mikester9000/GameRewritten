@@ -18,6 +18,10 @@ public:
         int   damage = 0;
     };
 
+    // Combo window duration in seconds — exposed so callers can normalise the
+    // timer without coupling to a magic number.
+    static constexpr float kComboWindowSec = 0.60f;
+
     // Combo state — 0 = no active combo, 1 = step 1 triggered (window open).
     int   comboStep  = 0;
     // Seconds remaining to chain the next combo hit.
@@ -51,7 +55,6 @@ public:
     { return m_recentEnemyHitCount; }
 
 private:
-    static constexpr float kComboWindowSec = 0.60f;
     static constexpr int   kMaxRecentEnemyHits = 32;
 
     std::vector<HitBox> m_activeHitBoxes;
