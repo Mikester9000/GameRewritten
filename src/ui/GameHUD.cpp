@@ -50,6 +50,7 @@ constexpr float kComboGapAbove    =  10.0f;
 constexpr float kOffscreenIndicatorMargin = 44.0f;
 constexpr float kOffscreenIndicatorRadius = 10.0f;
 constexpr float kOffscreenArrowSize = 8.0f;
+constexpr float kTargetIndicatorHeightOffset = 1.8f;
 
 float NormalizeValue(float value, float maxValue)
 {
@@ -295,7 +296,7 @@ void GameHUD::DrawOffScreenTargetIndicator(const EnemyActor* target,
     float targetScreenX = 0.0f;
     float targetScreenY = 0.0f;
     const bool projectedToScreen = ScreenProjection::WorldToScreenVP(
-        target->x, target->y + 1.8f, target->z,
+        target->x, target->y + kTargetIndicatorHeightOffset, target->z,
         viewProj, vpW, vpH,
         targetScreenX, targetScreenY);
 
