@@ -51,6 +51,14 @@ float NormalizeValue(float value, float maxValue)
     return std::clamp(value / maxValue, 0.0f, 1.0f);
 }
 
+// Returns the pixel height of the target-info panel, derived from the current
+// font size. Both DrawTargetInfo and DrawComboIndicator use this so the combo
+// panel always sits flush above the target panel even if padding changes.
+float CalcTargetPanelHeight()
+{
+    return kTargetPanelPadY + ImGui::GetFontSize() + kTargetBarGap + kTargetBarH + kTargetPanelPadY;
+}
+
 void DrawLowHpPulse(const ImGuiIO& io, float pulseTime)
 {
     // Pulse brightness oscillates between 0 and kPulseMaxAlpha.
@@ -148,8 +156,8 @@ void GameHUD::DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io)
     if (!target) return;
 
     // Calculate panel height from the current font size so it scales correctly.
+    const float panelH = CalcTargetPanelHeight();
     const float fontH  = ImGui::GetFontSize();
-    const float panelH = kTargetPanelPadY + fontH + kTargetBarGap + kTargetBarH + kTargetPanelPadY;
     const float posX   = (io.DisplaySize.x - kTargetPanelW) * 0.5f;
     const float posY   = io.DisplaySize.y - panelH - kTargetMarginBottom;
 
@@ -220,8 +228,7 @@ void GameHUD::DrawComboIndicator(int comboStep, float comboTimer, float comboWin
     if (comboStep == 0 || comboTimer <= 0.0f) return;
 
     // Position the combo panel centred and sitting just above the target panel area.
-    const float fontH   = ImGui::GetFontSize();
-    const float targetH = kTargetPanelPadY + fontH + kTargetBarGap + kTargetBarH + kTargetPanelPadY;
+    const float targetH = CalcTargetPanelHeight();
     const float posX    = (io.DisplaySize.x - kComboPanelW) * 0.5f;
     const float posY    = io.DisplaySize.y - targetH - kTargetMarginBottom - kComboGapAbove - kComboPanelH;
 
