@@ -7,5 +7,7 @@ struct ImGuiIO;
 class GameHUD
 {
 public:
-    void Draw(const PlayerStats& stats, const ImGuiIO& io);
+    // totalTime is used to drive the low-HP pulse animation (pass a running
+    // game-time counter, e.g. the same one used for the clear-color pulse).
+    void Draw(const PlayerStats& stats, const ImGuiIO& io, float totalTime);
 };

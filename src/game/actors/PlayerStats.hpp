@@ -19,4 +19,16 @@ struct PlayerStats
     }
 
     bool IsAtbReady() const { return atbCharge >= 1.0f; }
+
+    // Reduce HP by amount; clamps to zero. Safe to call with zero or positive values only.
+    void TakeDamage(int amount)
+    {
+        if (amount <= 0)
+            return;
+        hp -= static_cast<float>(amount);
+        if (hp < 0.0f)
+            hp = 0.0f;
+    }
+
+    bool IsDead() const { return hp <= 0.0f; }
 };

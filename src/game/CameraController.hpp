@@ -57,6 +57,12 @@ public:
     void SetCollisionWorld(const CollisionWorld* collisionWorld) { m_collisionWorld = collisionWorld; }
     void BeginDodge(float dirX, float dirZ);
 
+    // Teleport the player to a new spawn position and reset all physics and
+    // dodge state. Call after a player defeat so the next frame starts clean.
+    // x/z are ground-level world coordinates; y is treated as the initial eye
+    // level and will be terrain-snapped on the next Update call.
+    void ResetToSpawn(float x, float y, float z, float yaw, float pitch);
+
     // Advance camera + player movement by one frame.
     // allowMovement  = true when WASD/jump/gravity should be processed.
     //                  Pass false only when the pause menu is open.
