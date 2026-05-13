@@ -17,14 +17,14 @@ static constexpr float ENEMY_HALF_Y = 1.0f;
 static constexpr float ENEMY_HALF_Z = 0.5f;
 static constexpr float DAMAGE_NUMBER_Y_OFFSET = 5.2f; // spawn above enemy head
 
-static bool HitBoxOverlapsEnemy(const HitBox& hb, const EnemyActor& enemy)
+static bool HitBoxOverlapsEnemy(const HitBox& hitBox, const EnemyActor& enemy)
 {
-    float dx = fabsf(enemy.x - hb.x);
-    float dy = fabsf(enemy.y - hb.y);
-    float dz = fabsf(enemy.z - hb.z);
-    return (dx < hb.halfX + ENEMY_HALF_X) &&
-           (dy < hb.halfY + ENEMY_HALF_Y) &&
-           (dz < hb.halfZ + ENEMY_HALF_Z);
+    float distX = fabsf(enemy.x - hitBox.x);
+    float distY = fabsf(enemy.y - hitBox.y);
+    float distZ = fabsf(enemy.z - hitBox.z);
+    return (distX < hitBox.halfX + ENEMY_HALF_X) &&
+           (distY < hitBox.halfY + ENEMY_HALF_Y) &&
+           (distZ < hitBox.halfZ + ENEMY_HALF_Z);
 }
 
 void CombatSystem::SpawnHitBox(const HitBox& hitbox)
@@ -40,33 +40,33 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
         return;
     }
 
-    HitBox hb;
-    hb.x = px + 1.5f * sinf(yaw);
-    hb.y = py;
-    hb.z = pz + 1.5f * cosf(yaw);
-    hb.halfY       = 1.0f;
-    hb.framesToLive = 2;
+    HitBox hitBox;
+    hitBox.x = px + 1.5f * sinf(yaw);
+    hitBox.y = py;
+    hitBox.z = pz + 1.5f * cosf(yaw);
+    hitBox.halfY = 1.0f;
+    hitBox.framesToLive = 2;
 
     if (attackStep == 1)
     {
-        hb.halfX   = 0.75f;
-        hb.halfZ   = 0.75f;
-        hb.damage  = 3;
+        hitBox.halfX = 0.75f;
+        hitBox.halfZ = 0.75f;
+        hitBox.damage = 3;
         comboStep  = 1;
         comboTimer = kComboWindowSec;
         LOG_INFO("CombatSystem: Combo step 1 triggered.");
     }
     else if (attackStep == 2)
     {
-        hb.halfX   = 0.90f;
-        hb.halfZ   = 0.90f;
-        hb.damage  = 5;
+        hitBox.halfX = 0.90f;
+        hitBox.halfZ = 0.90f;
+        hitBox.damage = 5;
         comboStep  = 0;
         comboTimer = 0.0f;
         LOG_INFO("CombatSystem: Combo step 2 triggered — combo complete.");
     }
 
-    SpawnHitBox(hb);
+    SpawnHitBox(hitBox);
 }
 
 void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
@@ -85,12 +85,12 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
         }
     }
 
-    for (HitBox& hb : m_activeHitBoxes)
+    for (HitBox& hitBox : m_activeHitBoxes)
     {
-        --hb.framesToLive;
+        --hitBox.framesToLive;
 
         // Skip damage for expired hitboxes (guards against zero/negative framesToLive at spawn).
-        if (hb.framesToLive <= 0)
+        if (hitBox.framesToLive <= 0)
             continue;
 
         for (int i = 0; i < count; ++i)
@@ -98,23 +98,23 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
             EnemyActor& enemy = enemies[i];
             if (enemy.isDead)
                 continue;
-            if (!HitBoxOverlapsEnemy(hb, enemy))
+            if (!HitBoxOverlapsEnemy(hitBox, enemy))
                 continue;
 
             std::ostringstream ss;
             ss << "CombatSystem: Hit enemy " << i
-               << " for " << hb.damage << " damage.";
+               << " for " << hitBox.damage << " damage.";
             LOG_INFO(ss.str());
 
-            enemy.OnHit(hb.damage);
+            enemy.OnHit(hitBox.damage);
 
             if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
             {
-                EnemyHitRecord& hit = m_recentEnemyHits[m_recentEnemyHitCount++];
-                hit.x = enemy.x;
-                hit.y = enemy.y + DAMAGE_NUMBER_Y_OFFSET;
-                hit.z = enemy.z;
-                hit.damage = hb.damage;
+                EnemyHitRecord& hitRecord = m_recentEnemyHits[m_recentEnemyHitCount++];
+                hitRecord.x = enemy.x;
+                hitRecord.y = enemy.y + DAMAGE_NUMBER_Y_OFFSET;
+                hitRecord.z = enemy.z;
+                hitRecord.damage = hitBox.damage;
             }
         }
     }
@@ -122,6 +122,6 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
     // Remove any hitboxes whose lifetime has run out.
     m_activeHitBoxes.erase(
         std::remove_if(m_activeHitBoxes.begin(), m_activeHitBoxes.end(),
-                       [](const HitBox& hb) { return hb.framesToLive <= 0; }),
+                       [](const HitBox& hitBox) { return hitBox.framesToLive <= 0; }),
         m_activeHitBoxes.end());
 }

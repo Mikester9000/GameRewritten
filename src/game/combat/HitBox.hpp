@@ -20,4 +20,8 @@ struct HitBox
 
     // Remaining frames this hitbox should exist. Decremented each Update call.
     int framesToLive = 2;
+
+    // True after this hitbox has hit the player once.
+    // Prevents the same hitbox dealing damage on consecutive frames.
+    bool hasHitPlayer = false;
 };

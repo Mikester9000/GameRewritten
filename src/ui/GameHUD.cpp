@@ -32,11 +32,11 @@ float NormalizeValue(float value, float maxValue)
     return std::clamp(value / maxValue, 0.0f, 1.0f);
 }
 
-void DrawLowHpPulse(const ImGuiIO& io, float totalTime)
+void DrawLowHpPulse(const ImGuiIO& io, float pulseTime)
 {
     // Pulse brightness oscillates between 0 and kPulseMaxAlpha.
-    float t = 0.5f + 0.5f * sinf(totalTime * kPulseFrequency * kTwoPi);
-    int alpha = static_cast<int>(t * static_cast<float>(kPulseMaxAlpha));
+    float pulseRatio = 0.5f + 0.5f * sinf(pulseTime * kPulseFrequency * kTwoPi);
+    int alpha = static_cast<int>(pulseRatio * static_cast<float>(kPulseMaxAlpha));
     ImU32 color = IM_COL32(200, 20, 20, alpha);
 
     float screenW = io.DisplaySize.x;
@@ -55,8 +55,10 @@ void DrawLowHpPulse(const ImGuiIO& io, float totalTime)
 }
 }
 
-void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float totalTime)
+void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
 {
+    m_lowHpPulseTime += (dt > 0.0f) ? dt : 0.0f;
+
     ImGui::SetNextWindowPos(ImVec2(kHudOffsetX, io.DisplaySize.y - kHudHeight - kHudBottomMargin), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(kHudWidth, kHudHeight), ImGuiCond_Always);
 
@@ -93,11 +95,11 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float totalTime)
     ImGui::Text("MP  %.0f / %.0f", stats.mp, stats.maxMp);
 
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.9f, 0.8f, 0.1f, 1.0f));
-    ImGui::ProgressBar(NormalizeValue(stats.atbCharge, 1.0f), kGaugeSize, "");
+    ImGui::ProgressBar(NormalizeValue(stats.surgeCharge, 1.0f), kGaugeSize, "");
     ImGui::PopStyleColor();
     ImGui::SameLine();
-    ImGui::Text("ATB");
-    if (stats.IsAtbReady())
+    ImGui::Text("SURGE");
+    if (stats.IsSurgeReady())
     {
         ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.1f, 0.9f, 0.2f, 1.0f), "READY");
@@ -107,5 +109,5 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float totalTime)
 
     // Draw screen-edge danger pulse when HP is critically low.
     if (isLowHp)
-        DrawLowHpPulse(io, totalTime);
+        DrawLowHpPulse(io, m_lowHpPulseTime);
 }

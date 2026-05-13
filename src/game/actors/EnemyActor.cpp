@@ -31,6 +31,8 @@ void EnemyActor::Init(float startX, float startZ,
     state        = EnemyState::Patrol;
     stateTimer   = 0.0f;
     pendingAttack = false;
+    pendingAttackHitBox = HitBox{};
+    pendingAttackHitBox.framesToLive = 0;
 }
 
 void EnemyActor::TransitionTo(EnemyState next, float duration)
@@ -74,20 +76,20 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
     }
 
     // Distance to player (XZ plane only).
-    const float dpx = playerX - x;
-    const float dpz = playerZ - z;
-    const float distToPlayer = sqrtf(dpx * dpx + dpz * dpz);
+    const float distXToPlayer = playerX - x;
+    const float distZToPlayer = playerZ - z;
+    const float distanceToPlayer = sqrtf(distXToPlayer * distXToPlayer + distZToPlayer * distZToPlayer);
 
     if (state == EnemyState::Patrol)
     {
         // Walk between the two waypoints.
         const float targetX = waypointX[currentWaypoint];
         const float targetZ = waypointZ[currentWaypoint];
-        const float dx      = targetX - x;
-        const float dz      = targetZ - z;
-        const float dist    = sqrtf(dx * dx + dz * dz);
+        const float distXToWaypoint = targetX - x;
+        const float distZToWaypoint = targetZ - z;
+        const float distanceToWaypoint = sqrtf(distXToWaypoint * distXToWaypoint + distZToWaypoint * distZToWaypoint);
 
-        if (dist < 0.5f)
+        if (distanceToWaypoint < 0.5f)
         {
             // Snap to waypoint and switch target.
             x = targetX;
@@ -97,14 +99,14 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
         else
         {
             const float step    = moveSpeed * dt;
-            const float invDist = 1.0f / dist;
-            const float move    = (step < dist) ? step : dist;
-            x   += dx * invDist * move;
-            z   += dz * invDist * move;
-            yaw  = atan2f(dx, dz);
+            const float inverseDistance = 1.0f / distanceToWaypoint;
+            const float move = (step < distanceToWaypoint) ? step : distanceToWaypoint;
+            x += distXToWaypoint * inverseDistance * move;
+            z += distZToWaypoint * inverseDistance * move;
+            yaw = atan2f(distXToWaypoint, distZToWaypoint);
         }
 
-        if (distToPlayer < kDetectRadius)
+        if (distanceToPlayer < kDetectRadius)
         {
             TransitionTo(EnemyState::Chase, 0.0f);
             LOG_INFO("EnemyActor: Detected player — entering Chase.");
@@ -113,22 +115,22 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
     else if (state == EnemyState::Chase)
     {
         // Move toward the player.
-        if (distToPlayer > 0.01f)
+        if (distanceToPlayer > 0.01f)
         {
-            const float invDist = 1.0f / distToPlayer;
+            const float inverseDistance = 1.0f / distanceToPlayer;
             const float step    = moveSpeed * dt;
-            const float move    = (step < distToPlayer) ? step : distToPlayer;
-            x   += dpx * invDist * move;
-            z   += dpz * invDist * move;
-            yaw  = atan2f(dpx, dpz);
+            const float move = (step < distanceToPlayer) ? step : distanceToPlayer;
+            x += distXToPlayer * inverseDistance * move;
+            z += distZToPlayer * inverseDistance * move;
+            yaw = atan2f(distXToPlayer, distZToPlayer);
         }
 
-        if (distToPlayer < kAttackRadius)
+        if (distanceToPlayer < kAttackRadius)
         {
             TransitionTo(EnemyState::Attack, kAttackWindUpDuration);
             LOG_INFO("EnemyActor: In attack range — winding up.");
         }
-        else if (distToPlayer > kLeashRadius)
+        else if (distanceToPlayer > kLeashRadius)
         {
             TransitionTo(EnemyState::Patrol, 0.0f);
             LOG_INFO("EnemyActor: Player out of range — returning to Patrol.");
@@ -140,6 +142,8 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
         if (stateTimer <= 0.0f)
         {
             pendingAttack = true;
+            pendingAttackHitBox = HitBox{};
+            pendingAttackHitBox.framesToLive = 0;
             TransitionTo(EnemyState::Chase, 0.0f);
             LOG_INFO("EnemyActor: Attack released.");
         }
@@ -175,4 +179,3 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
 
     primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, 1.0f);
 }
-

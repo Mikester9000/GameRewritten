@@ -5,6 +5,7 @@
 
 #include "ActorCommon.hpp"
 #include "EnemyState.hpp"
+#include "../combat/HitBox.hpp"
 
 class D3D11Renderer;
 class PrefabLibrary;
@@ -47,6 +48,7 @@ public:
     EnemyState state       = EnemyState::Patrol;
     float      stateTimer  = 0.0f;
     bool       pendingAttack = false;
+    HitBox     pendingAttackHitBox{};
 
     // Set starting position and patrol waypoints.
     // y is terrain-snapped on the first Update call.
@@ -64,7 +66,7 @@ public:
     void OnHit(int damage);
 
     // Expand the enemy visual into the runtime primitive bucket.
-    // Reuses the player blockout prefab as a temporary enemy blockout.
+    // Reuses the player blockout prefab for enemy visuals.
     // Does nothing when isDead is true.
     void SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
                              PrimitiveRenderer&   primitiveRenderer) const;

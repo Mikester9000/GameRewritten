@@ -292,7 +292,7 @@ void ImGuiLayer::DrawPauseMenu()
                 float bgmVolume = m_audioManager->GetBGMVolume();
                 if (ImGui::SliderFloat("BGM Volume (next play)", &bgmVolume, 0.0f, 1.0f))
                     m_audioManager->SetBGMVolume(bgmVolume);
-                ImGui::TextDisabled("tp::Audio BGM is one-shot for now.");
+                ImGui::TextDisabled("tp::Audio BGM playback is one-shot.");
             }
             ImGui::Unindent();
         }
