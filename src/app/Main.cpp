@@ -286,8 +286,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // Cell crossing detection, asset reload, editor placement.
         // Runs after camera so player position is up to date.
         {
-            int playerCX = 0;
-            int playerCZ = 0;
+            int playerCX;
+            int playerCZ;
             worldGrid.WorldToCell(camController.GetPlayerX(), camController.GetPlayerZ(), playerCX, playerCZ);
             if (playerCX != lastPlayerCX || playerCZ != lastPlayerCZ)
             {

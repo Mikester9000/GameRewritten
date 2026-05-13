@@ -33,9 +33,7 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
         if (!enemy.pendingAttack)
             continue;
 
-        enemy.pendingAttack = false;
-
-        HitBox hitBox;
+        HitBox& hitBox = enemy.pendingAttackHitBox;
         hitBox.x = enemy.x;
         hitBox.y = enemy.y + 1.0f;
         hitBox.z = enemy.z;
@@ -53,6 +51,8 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
             m_pendingEnemyDamage += hitBox.damage;
             hitBox.hasHitPlayer = true;
         }
+
+        enemy.pendingAttack = false;
     }
 
     // Apply accumulated enemy damage to the player.

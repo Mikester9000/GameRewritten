@@ -5,6 +5,7 @@
 
 #include "ActorCommon.hpp"
 #include "EnemyState.hpp"
+#include "../combat/HitBox.hpp"
 
 class D3D11Renderer;
 class PrefabLibrary;
@@ -47,6 +48,7 @@ public:
     EnemyState state       = EnemyState::Patrol;
     float      stateTimer  = 0.0f;
     bool       pendingAttack = false;
+    HitBox     pendingAttackHitBox{};
 
     // Set starting position and patrol waypoints.
     // y is terrain-snapped on the first Update call.
