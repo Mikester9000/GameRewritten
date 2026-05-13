@@ -106,14 +106,14 @@ TacticalCommand TacticalPauseMenu::Draw(const PlayerStats& stats, const ImGuiIO&
         if (surgeReady)
             ImGui::PushStyleColor(ImGuiCol_Text, kReadyColor);
 
-        if (DrawCommandRow("  Surge Strike", surgeReady, surgeReady ? nullptr : "(Surge not full)"))
+        if (DrawCommandRow("  Surge Strike", surgeReady, surgeReady ? nullptr : "Need Surge"))
             selectedCommand = TacticalCommand::SurgeStrike;
 
         if (surgeReady)
             ImGui::PopStyleColor();
 
         // Stub commands — reserved for later milestones.
-        DrawCommandRow(kMagicLabel, false, "Coming soon");
+        DrawCommandRow(kMagicLabel, false, "No MP");
         DrawCommandRow(kItemsLabel, false, "Coming soon");
         DrawCommandRow(kAllyLabel,  false, "Coming soon");
 

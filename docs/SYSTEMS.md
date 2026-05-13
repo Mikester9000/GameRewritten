@@ -71,17 +71,17 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Lock-on target cycling | ✅ | `src/game/combat/Targeting.hpp`, `src/app/Main.cpp` |
 | Auto-retarget on target death / range loss | ✅ | `src/game/combat/Targeting.hpp`, `src/game/RuntimeScene.hpp` |
 | Pressure / stagger integration stub | ❌ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| Tactical Pause command readiness reasons | ❌ | `src/ui/TacticalPauseMenu.cpp/hpp` |
-| Off-screen lock-on target indicator | ❌ | `src/ui/ImGuiLayer.cpp/hpp`, `src/ui/GameHUD.cpp/hpp` |
+| Tactical Pause command readiness reasons | ✅ | `src/ui/TacticalPauseMenu.cpp/hpp` |
+| Off-screen lock-on target indicator | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
 | Enemy reaction / interrupt-lite | ❌ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Enemy attack telegraph lite | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
-| Hit flash system | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Hit flash system | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Screen edge damage flash | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Hit pause / hitstop | ❌ | `src/game/RuntimeScene.hpp` |
 | Stagger meter | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Enemy attack telegraph | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Parry / counter window | ❌ | `src/game/actors/PlayerActor.cpp/hpp` |
-| Miss indicator | ❌ | `src/ui/DamageNumbers.cpp/hpp` |
+| Miss indicator | ✅ | `src/ui/DamageNumbers.cpp/hpp`, `src/app/Main.cpp` |
 | Weak point damage | ❌ | `src/game/combat/CombatSystem.cpp/hpp` |
 | Combo counter display | ✅ | `src/ui/GameHUD.cpp/hpp` |
 | Area name display | ❌ | `src/ui/GameHUD.cpp/hpp` |

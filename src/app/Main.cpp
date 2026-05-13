@@ -5,6 +5,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <cstdint>
+#include <cmath>
 #include <sstream>   // for std::ostringstream (cell crossing log)
 #include "../platform/win32/Win32Window.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
@@ -201,6 +202,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasLockOnActionDown = false;
     CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
+    bool pendingMissIndicator = false;
+    float pendingMissTimerSec = 0.0f;
+    float pendingMissWorldX = 0.0f;
+    float pendingMissWorldY = 0.0f;
+    float pendingMissWorldZ = 0.0f;
     // Track the cell the player was in last frame to detect cell-crossing.
     // Initialize from the actual spawn position at the center of cell (0,0).
     int lastPlayerCX = 0, lastPlayerCZ = 0;
@@ -351,6 +357,29 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                 camController.GetPlayerY(),
                                 camController.GetPlayerZ());
         runtimeScene.RefreshLockOnTarget();
+        const CombatSystem& combat = runtimeScene.GetCombatSystem();
+
+        if (pendingMissIndicator)
+        {
+            if (combat.GetRecentEnemyHitCount() > 0)
+            {
+                pendingMissIndicator = false;
+                pendingMissTimerSec = 0.0f;
+            }
+            else
+            {
+                pendingMissTimerSec -= scaledDt;
+                if (pendingMissTimerSec <= 0.0f)
+                {
+                    runtimeScene.damageNumbers.SpawnMiss(
+                        pendingMissWorldX,
+                        pendingMissWorldY,
+                        pendingMissWorldZ);
+                    pendingMissIndicator = false;
+                    pendingMissTimerSec = 0.0f;
+                }
+            }
+        }
 
         if (!paused && lockOnPressed && !tacticalPauseHeld)
         {
@@ -389,7 +418,27 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                 attackHandled = runtimeScene.TriggerPlayerAttack(camController);
 
             if (attackHandled)
+            {
+                constexpr float kMissConfirmDelaySec = 0.17f;
+                const EnemyActor* lockedTarget = runtimeScene.GetLockedTarget();
+                float attackYaw = camController.GetYaw();
+
+                if (lockedTarget)
+                {
+                    const float toTargetX = lockedTarget->x - camController.GetPlayerX();
+                    const float toTargetZ = lockedTarget->z - camController.GetPlayerZ();
+                    const float toTargetLenSq = (toTargetX * toTargetX) + (toTargetZ * toTargetZ);
+                    if (toTargetLenSq > 0.0001f)
+                        attackYaw = atan2f(toTargetX, toTargetZ);
+                }
+
+                pendingMissWorldX = camController.GetPlayerX() + sinf(attackYaw) * 1.8f;
+                pendingMissWorldY = camController.GetPlayerGroundY() + 2.8f;
+                pendingMissWorldZ = camController.GetPlayerZ() + cosf(attackYaw) * 1.8f;
+                pendingMissTimerSec = kMissConfirmDelaySec;
+                pendingMissIndicator = true;
                 audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
+            }
         }
 
         // --- 8. Actor visuals ---
@@ -419,10 +468,16 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             if (!imguiLayer.IsPauseMenuOpen())
             {
                 const ImGuiIO&    io     = ImGui::GetIO();
-                const CombatSystem& combat = runtimeScene.GetCombatSystem();
-
                 gameHud.Draw(playerActor.stats, io, deltaTime);
                 gameHud.DrawTargetInfo(runtimeScene.GetLockedTarget(), io);
+                gameHud.DrawOffScreenTargetIndicator(runtimeScene.GetLockedTarget(),
+                                                     camController.GetCamX(),
+                                                     camController.GetCamY(),
+                                                     camController.GetCamZ(),
+                                                     camController.GetYaw(),
+                                                     camController.GetPitch(),
+                                                     static_cast<float>(window.GetWidth()),
+                                                     static_cast<float>(window.GetHeight()));
                 gameHud.DrawComboIndicator(combat.comboStep,
                                            combat.comboTimer,
                                            CombatSystem::kComboWindowSec,

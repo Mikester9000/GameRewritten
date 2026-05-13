@@ -22,6 +22,8 @@ public:
     // State duration constants (seconds).
     static constexpr float kAttackWindUpDuration = 0.60f;  // wind-up before dealing damage
     static constexpr float kHitStaggerDuration   = 0.30f;  // stagger after taking a hit
+    static constexpr float kHitFlashDuration     = 0.14f;  // short readability flash on hit
+    static constexpr float kHitFlashBlinkPeriod  = 0.04f;  // blink cadence during flash
 
     // World-space position.
     float x = 0.0f;
@@ -52,6 +54,7 @@ public:
     float      stateTimer  = 0.0f;
     bool       pendingAttack = false;
     HitBox     pendingAttackHitBox{};
+    float      hitFlashTimer = 0.0f;
 
     // Set starting position and patrol waypoints.
     // y is terrain-snapped on the first Update call.
@@ -77,4 +80,7 @@ public:
 private:
     // Change state immediately and set the state-duration timer.
     void TransitionTo(EnemyState next, float duration);
+
+    // Returns whether the visual should be drawn this frame during hit flash.
+    bool IsHitFlashVisible() const;
 };

@@ -1,6 +1,8 @@
 #include "GameHUD.hpp"
+#include "ScreenProjection.hpp"
 
 #include <imgui.h>
+#include <DirectXMath.h>
 
 #include <algorithm>
 #include <cmath>
@@ -43,6 +45,11 @@ constexpr float kComboPanelH      =  28.0f;
 constexpr float kComboSquareSize  =  12.0f;
 // Extra gap above the target panel so the two panels never overlap.
 constexpr float kComboGapAbove    =  10.0f;
+
+// --- Off-screen lock-on target indicator ---
+constexpr float kOffscreenIndicatorMargin = 44.0f;
+constexpr float kOffscreenIndicatorRadius = 10.0f;
+constexpr float kOffscreenArrowSize = 8.0f;
 
 float NormalizeValue(float value, float maxValue)
 {
@@ -270,4 +277,91 @@ void GameHUD::DrawComboIndicator(int comboStep, float comboTimer, float comboWin
     dl->AddText(ImVec2(sq2X + kComboSquareSize + 8.0f,
                        posY + (kComboPanelH - labelSz.y) * 0.5f),
                 IM_COL32(220, 180, 50, fgAlpha), label);
+}
+
+void GameHUD::DrawOffScreenTargetIndicator(const EnemyActor* target,
+                                           float camX, float camY, float camZ,
+                                           float yaw, float pitch,
+                                           float vpW, float vpH) const
+{
+    if (!target || vpW <= 0.0f || vpH <= 0.0f)
+        return;
+
+    // --- Step 1: skip indicator while target is visibly on-screen ---
+    DirectX::XMMATRIX viewProj;
+    if (!ScreenProjection::BuildViewProj(camX, camY, camZ, yaw, pitch, vpW, vpH, viewProj))
+        return;
+
+    float targetScreenX = 0.0f;
+    float targetScreenY = 0.0f;
+    const bool projectedToScreen = ScreenProjection::WorldToScreenVP(
+        target->x, target->y + 1.8f, target->z,
+        viewProj, vpW, vpH,
+        targetScreenX, targetScreenY);
+
+    if (projectedToScreen &&
+        targetScreenX >= kOffscreenIndicatorMargin &&
+        targetScreenX <= vpW - kOffscreenIndicatorMargin &&
+        targetScreenY >= kOffscreenIndicatorMargin &&
+        targetScreenY <= vpH - kOffscreenIndicatorMargin)
+    {
+        return;
+    }
+
+    // --- Step 2: build 2D direction from camera facing to target ---
+    const float toTargetX = target->x - camX;
+    const float toTargetZ = target->z - camZ;
+    const float toTargetLenSq = (toTargetX * toTargetX) + (toTargetZ * toTargetZ);
+    if (toTargetLenSq < 0.0001f)
+        return;
+
+    const float rightX   = cosf(yaw);
+    const float rightZ   = -sinf(yaw);
+    const float forwardX = sinf(yaw);
+    const float forwardZ = cosf(yaw);
+
+    const float localX = (toTargetX * rightX) + (toTargetZ * rightZ);
+    const float localZ = (toTargetX * forwardX) + (toTargetZ * forwardZ);
+
+    float dirX = localX;
+    float dirY = -localZ;
+    const float dirLenSq = (dirX * dirX) + (dirY * dirY);
+    if (dirLenSq < 0.0001f)
+        return;
+
+    const float invDirLen = 1.0f / sqrtf(dirLenSq);
+    dirX *= invDirLen;
+    dirY *= invDirLen;
+
+    // --- Step 3: clamp indicator to screen edge margin ---
+    const float centerX = vpW * 0.5f;
+    const float centerY = vpH * 0.5f;
+    const float maxOffsetX = centerX - kOffscreenIndicatorMargin;
+    const float maxOffsetY = centerY - kOffscreenIndicatorMargin;
+
+    const float scaleX = (fabsf(dirX) > 0.0001f) ? (maxOffsetX / fabsf(dirX)) : 1000000.0f;
+    const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+    const float edgeScale = std::min(scaleX, scaleY);
+
+    const float indicatorX = centerX + dirX * edgeScale;
+    const float indicatorY = centerY + dirY * edgeScale;
+
+    // --- Step 4: draw subtle lock-on arrow marker ---
+    ImDrawList* drawList = ImGui::GetForegroundDrawList();
+    if (!drawList)
+        return;
+
+    const ImVec2 indicatorCenter(indicatorX, indicatorY);
+    drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+    drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+
+    const float perpX = -dirY;
+    const float perpY = dirX;
+    const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+                     indicatorY + dirY * kOffscreenArrowSize);
+    const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+                      indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+    const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+    drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
 }
