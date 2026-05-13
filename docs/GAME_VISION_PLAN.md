@@ -1,5 +1,5 @@
 # Game Vision Plan
-**Date:** 2026-05-11
+**Date:** 2026-05-13
 
 ---
 
@@ -7,7 +7,7 @@
 
 Build a 3D action RPG that:
 
-- **Plays like FF15 or FF7 Remake** — real-time action combat, lock-on targeting, dodge + combo attacks, an open explorable world.
+- **Plays like FF15 or FF7 Remake** — real-time action combat, lock-on targeting, dodge + combo attacks, Tactical Pause, readable enemy pressure, and an open explorable world.
 - **Looks like FF7 (original)** — stylised "blockout" characters built from simple coloured box primitives, flat-shaded palette-driven art, no expensive PBR or physically-based lighting.
 - **Targets low-spec hardware** — DirectX 11 / GeForce GT 610, forward rendering, ≤ 200 draw calls on Low quality, ≤ 512 MB GPU memory.
 
@@ -15,7 +15,7 @@ The result is a modern open-world action game that retains the charm of old-scho
 
 ---
 
-## Current State Assessment (2026-05-11)
+## Current State Assessment (2026-05-13)
 
 ### What is done and working
 
@@ -31,12 +31,26 @@ The result is a modern open-world action game that retains the charm of old-scho
 | Biome-aware asset registry (50+ prefabs) | ✅ Complete | `Content/AssetRegistry.json`, `Content/Prefabs/` |
 | FF7-style player blockout visual | ✅ Complete | `Content/Prefabs/player_hero_blockout.prefab.json` |
 | Player runtime actor (follows camera, submits each frame) | ✅ Complete | `src/game/actors/PlayerActor.*`, `src/game/RuntimeScene.hpp` |
-| Player stats: HP / MP / ATB | ✅ Complete | `src/game/actors/PlayerStats.hpp` |
-| Input action map (W/A/S/D, F, E, Space …) | ✅ Complete | `src/app/InputActionMap.hpp` |
+| Player stats: HP / MP / Surge / Limit | ✅ Complete | `src/game/actors/PlayerStats.hpp` |
+| Input action map (W/A/S/D, F, Q, Tab, Space …) | ✅ Complete | `src/app/InputActionMap.hpp` |
 | AABB prefab collision (push-out on movement) | ✅ Complete | `src/game/physics/CollisionWorld.*`, `CameraController.*` |
-| Patrol enemy actor | ✅ Complete | `src/game/actors/EnemyActor.*` |
-| ATB-gated attack + hitbox damage | ✅ Complete | `src/game/combat/CombatSystem.*`, `src/game/RuntimeScene.hpp` |
-| Gameplay HUD (HP / MP / ATB bar) | ✅ Complete | `src/ui/GameHUD.*` |
+| Enemy actor | ✅ Complete | `src/game/actors/EnemyActor.*` |
+| Enemy combat states (chase/attack/hit) | ✅ Complete | `src/game/actors/EnemyActor.*`, `src/game/actors/EnemyState.hpp` |
+| Combat system | ✅ Complete | `src/game/combat/CombatSystem.*`, `src/game/RuntimeScene.hpp` |
+| Player action state machine | ✅ Complete | `src/game/actors/PlayerActionState.hpp`, `src/game/actors/PlayerActor.*` |
+| Dodge burst movement | ✅ Complete | `src/game/CameraController.*` |
+| 2-step combo chain | ✅ Complete | `src/game/combat/CombatSystem.*`, `src/game/RuntimeScene.hpp` |
+| Lock-on targeting | ✅ Complete | `src/game/combat/Targeting.hpp`, `src/game/RuntimeScene.hpp`, `src/game/CameraController.*`, `src/app/Main.cpp` |
+| Tactical Pause (time slow + command menu stubs) | ✅ Complete | `src/ui/TacticalPauseMenu.*`, `src/app/Main.cpp` |
+| Gameplay HUD | ✅ Complete | `src/ui/GameHUD.*` |
+| Combat HUD expansion (target info + combo step) | ✅ Complete | `src/ui/GameHUD.*`, `src/app/Main.cpp` |
+| Floating damage numbers | ✅ Complete | `src/ui/DamageNumbers.*` |
+| Low HP warning pulse | ✅ Complete | `src/ui/GameHUD.*` |
+| Enemy awareness radius visualization | ✅ Complete | `src/ui/ImGuiLayer.*` |
+| Player damage intake + defeat reset | ✅ Complete | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp`, `src/game/CameraController.*` |
+| Surge Strike | ✅ Complete | `src/game/RuntimeScene.hpp`, `src/game/combat/CombatSystem.cpp` |
+| Limit Break gauge + move | ✅ Complete | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp`, `src/game/combat/CombatSystem.cpp` |
+| MP passive regeneration | ✅ Complete | `src/game/actors/PlayerStats.hpp` |
 | Dialog box (typewriter reveal) | ✅ Complete | `src/ui/DialogBox.*` |
 | Biome minimap overlay | ✅ Complete | `src/ui/Minimap.*` |
 | Audio SFX one-shot playback | ✅ Complete | `src/audio/AudioManager.*`, `ThirdParty/src/tp_audio.*` |
@@ -44,12 +58,6 @@ The result is a modern open-world action game that retains the charm of old-scho
 | Tracy CPU profiling zones | ✅ Complete | `GR_ZONE_SCOPED_N`, `GR_FRAME_MARK` |
 | Jolt physics (initialised, raycast API) | 🔧 Stub | `ThirdParty/src/tp_physics.*` — no gameplay body yet |
 | Recast/Detour navmesh | 🔧 Stub | `ThirdParty/src/tp_navigation.*` — BuildFromMesh is TODO |
-| Player action state machine | ❌ Not started | needed for dodge, combo, stunned |
-| Dodge / evade | ❌ Not started | |
-| Lock-on targeting | ❌ Not started | |
-| Combo chain (2–3 step) | ❌ Not started | |
-| Enemy combat state (chase/attack/hit) | ❌ Not started | EnemyActor only patrols |
-| Player damage intake + defeat loop | ❌ Not started | |
 | NPC / interaction actors | ❌ Not started | |
 | Mesh loading (cgltf / Assimp) | ❌ Not started | AssetLoader stubs only |
 | Skeletal animation | ❌ Not started | |
@@ -59,19 +67,19 @@ The result is a modern open-world action game that retains the charm of old-scho
 
 ### Documentation drift to fix
 
-- `docs/Development Roadmap.txt` §16–17 still lists primitive split and player blockout as next unchecked tasks — both are already done.
-- `docs/Architecture.md` §5 says player/enemy/combat are "planned" — they now exist.
+- `docs/Development Roadmap.txt` may still lag behind the now-completed Milestone 12 combat baseline.
+- `docs/Architecture.md` should be checked for any remaining wording that implies player/enemy/combat systems are still planned.
 - `docs/ASSET_REGISTRY.md` describes 200×200 cells; actual `world.json` uses `cell_size: 100`.
 - `docs/WORLD_EDITOR.md` says WASD is suspended in placement mode; in reality only mouse-look is suspended.
-- `docs/SYSTEMS.md` marks Jolt/Audio/DirectXTex as "init only" — Audio does play SFX, DirectXTex uploads real SRVs.
+- Future doc updates should use **Surge** terminology instead of old **ATB** wording except where describing historical migration.
 
 ---
 
 ## Phased Development Plan
 
-### Milestone 12 — Playable Micro-Encounter (target: first playable combat loop)
+### Milestone 12 — Playable Combat Loop
 
-**Why now:** The foundation is solid. The single biggest gap between "tech demo" and "game" is a combat loop you can win or lose. This milestone closes that gap without requiring mesh loading or skeletal animation.
+**Why now:** The foundation is solid. The single biggest gap between "tech demo" and "game" is a combat loop that reads well, feels responsive, and can be won or lost cleanly. Milestone 12 closes that gap while keeping scope modular and GT610-safe.
 
 **Acceptance criteria:**
 - Player can attack, dodge, and take damage.
@@ -81,489 +89,109 @@ The result is a modern open-world action game that retains the charm of old-scho
 - Basic attacks are always free.
 - Surge and Limit Break gauges are functional.
 - Tactical Pause slows time and shows command menu.
+- Combat readability is improved through lock-on HUD, damage feedback, and low-risk feedback additions.
+
+**Implemented so far:**
+- Player action state machine
+- Dodge burst movement
+- 2-step combo chain
+- Enemy chase / attack / hit states
+- Player damage intake + defeat reset
+- Surge system and Limit Break support
+- Lock-on targeting
+- Tactical Pause with command menu stubs
+- Combat HUD expansion (target info + combo step)
+- Floating damage numbers
+- Low HP warning pulse
+- Enemy awareness radius visualization
+
+**Remaining Milestone 12 focus:**
+- Lock-on target cycling
+- Auto-retarget on target death / range loss
+- Tactical Pause command readiness reasons
+- Hit flash on enemy
+- Screen edge red flash on player damage
+- Hit pause / hitstop
+- Miss indicator
+- Enemy aggro indicator
+- Death / defeat screen
+- Contextual button prompts
+- Off-screen lock-on target indicator
+- Enemy reaction / interrupt-lite
+- Enemy attack telegraph lite
+- Pressure / stagger integration stub
+- GT610 budget debug counters
+
+**Implementation rules for safe rollout:**
+- Prefer small themed PRs over one large combat closeout PR.
+- Add hooks/stubs first when full FF7R-style behavior would otherwise require a rewrite.
+- Keep combat-facing additions data-light and renderer-cheap.
+- Avoid tightly coupling HUD, combat resolution, and renderer state.
 
 ---
 
-#### Track 12.1 — Player action state machine
+#### Remaining Track 12.x recommendations
 
-**Why first:** Every other combat feature (dodge, combo, stunned, lock-on) hangs off this.
-
-**Files to create / change:**
-- `src/game/actors/PlayerActionState.hpp` — new
-- `src/game/actors/PlayerActor.hpp` — add `PlayerActionState state`
-- `src/game/actors/PlayerActor.cpp` — add `Update(dt, input)` transition logic
-
-**Example code structure:**
-
-```cpp
-// src/game/actors/PlayerActionState.hpp
-#pragma once
-
-enum class PlayerActionState
-{
-    Idle,
-    Move,
-    Jump,
-    Fall,
-    Attack1,   // first hit in combo
-    Attack2,   // second hit
-    Dodge,
-    Stunned,
-    Dead
-};
-```
-
-```cpp
-// src/game/actors/PlayerActor.hpp  (additions)
-#pragma once
-#include "ActorCommon.hpp"
-#include "PlayerStats.hpp"
-#include "PlayerActionState.hpp"
-
-class PlayerActor
-{
-public:
-    PlayerStats       stats;
-    PlayerActionState state = PlayerActionState::Idle;
-    float             stateTimer = 0.0f; // seconds left in timed state
-
-    // Drive state transitions from input + physics
-    void Update(float dt, const struct InputActionMap& input, bool isGrounded);
-
-    // ... existing SubmitRuntimeVisual unchanged
-};
-```
-
-```cpp
-// src/game/actors/PlayerActor.cpp  (Update skeleton)
-void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded)
-{
-    stateTimer -= dt;
-    if (stateTimer < 0.0f) stateTimer = 0.0f;
-
-    switch (state)
-    {
-        case PlayerActionState::Idle:
-        case PlayerActionState::Move:
-            if (input.IsHeld(InputAction::Attack) && stats.IsAtbReady())
-                TransitionTo(PlayerActionState::Attack1, 0.40f); // 400 ms window
-            else if (input.IsHeld(InputAction::Dodge))
-                TransitionTo(PlayerActionState::Dodge, 0.35f);
-            break;
-
-        case PlayerActionState::Attack1:
-            if (stateTimer <= 0.0f)
-                TransitionTo(PlayerActionState::Idle, 0.0f);
-            break;
-
-        case PlayerActionState::Dodge:
-            if (stateTimer <= 0.0f)
-                TransitionTo(PlayerActionState::Idle, 0.0f);
-            break;
-
-        case PlayerActionState::Stunned:
-            if (stateTimer <= 0.0f)
-                TransitionTo(stats.hp > 0 ? PlayerActionState::Idle
-                                          : PlayerActionState::Dead, 0.0f);
-            break;
-
-        default: break;
-    }
-}
-
-void PlayerActor::TransitionTo(PlayerActionState next, float duration)
-{
-    state      = next;
-    stateTimer = duration;
-}
-```
-
----
-
-#### Track 12.2 — Input actions for dodge and lock-on
+##### Track 12.9 — Lock-on flow improvements
+- Add target cycling while locked on.
+- Add auto-retarget when the current target dies or leaves valid range.
+- Keep unlock behavior predictable and low-friction.
 
 **Files to change:**
-- `src/app/InputActionMap.hpp` — add `Dodge`, `LockOn`
-
-```cpp
-// src/app/InputActionMap.hpp  (additions)
-enum class InputAction
-{
-    MoveForward, MoveBack, MoveLeft, MoveRight,
-    Jump,
-    Attack,
-    Dodge,      // NEW — default binding: left Shift
-    LockOn,     // NEW — default binding: Q
-    Interact,
-    TogglePause,
-    ToggleDebug,
-    ReloadAssets
-};
-
-// In Default():
-map.bindings[InputAction::Dodge]  = VK_SHIFT;
-map.bindings[InputAction::LockOn] = 'Q';
-```
-
----
-
-#### Track 12.3 — Dodge burst movement
-
-Dodge moves the player 4 units in the input direction over 0.35 seconds, ignoring friction. Gate behind `PlayerActionState::Dodge`.
-
-**Files to change:**
-- `src/game/CameraController.cpp` — read dodge state and apply burst velocity
-- `src/game/RuntimeScene.hpp` — pass `playerActor.state` to camera controller
-
-```cpp
-// src/game/CameraController.cpp  (inside Update, simplified sketch)
-if (playerState == PlayerActionState::Dodge && dodgeTimer > 0.0f)
-{
-    const float dodgeSpeed = 4.0f / 0.35f; // covers 4 units in 0.35 s
-    m_playerX += dodgeDir.x * dodgeSpeed * dt;
-    m_playerZ += dodgeDir.z * dodgeSpeed * dt;
-}
-```
-
----
-
-#### Track 12.4 — 2-step combo chain
-
-Replace the single ATB attack with a timed two-hit chain.
-
-**Files to change:**
-- `src/game/combat/CombatSystem.hpp` — add combo tracking
-- `src/game/RuntimeScene.hpp` — pass combo step to SpawnHitBox
-
-```cpp
-// src/game/combat/CombatSystem.hpp  (additions)
-class CombatSystem
-{
-public:
-    int  comboStep   = 0;    // 0 = no combo, 1 = first hit, 2 = second hit
-    float comboTimer = 0.0f; // seconds left to chain the next hit
-
-    // Call when player presses Attack with ATB ready
-    void TriggerAttack(float px, float py, float pz, float yaw, int attackStep);
-    void Update(EnemyActor* enemies, int count);
-
-private:
-    static constexpr float kComboWindowSec = 0.60f; // time between hits to continue combo
-    std::vector<HitBox> m_activeHitBoxes;
-};
-```
-
-```cpp
-// Combo logic in RuntimeScene::TriggerPlayerAttack (sketch)
-bool RuntimeScene::TriggerPlayerAttack(const CameraController& cam)
-{
-    if (!m_player.stats.IsAtbReady())
-        return false;
-
-    int step = (m_combatSystem.comboStep % 2) + 1; // cycles 1 → 2 → 1 → 2
-    m_combatSystem.TriggerAttack(cam.GetPlayerX(),
-                                  cam.GetPlayerGroundY() + 1.0f,
-                                  cam.GetPlayerZ(),
-                                  cam.GetYaw(), step);
-
-    m_player.stats.atbCharge = 0.0f; // reset ATB after each hit
-    return true;
-}
-```
-
----
-
-#### Track 12.5 — Enemy combat state machine
-
-Upgrade EnemyActor from patrol-only to a minimal fight-capable actor.
-
-**Files to change:**
-- `src/game/actors/EnemyActor.hpp` — add `EnemyState` enum + chase/attack fields
-- `src/game/actors/EnemyActor.cpp` — implement state transitions
-
-```cpp
-// src/game/actors/EnemyActor.hpp  (additions)
-#pragma once
-#include "ActorCommon.hpp"
-
-enum class EnemyState { Patrol, Chase, Attack, Hit, Dead };
-
-class EnemyActor
-{
-public:
-    EnemyState state     = EnemyState::Patrol;
-    float      stateTimer = 0.0f;
-
-    // Detection radii
-    static constexpr float kDetectRadius = 18.0f;
-    static constexpr float kAttackRadius =  2.5f;
-
-    // Called each frame with player world position
-    void Update(float dt, float playerX, float playerZ, D3D11Renderer& renderer);
-
-    // ... existing fields (x, y, z, hp, waypoints, etc.)
-};
-```
-
-```cpp
-// EnemyActor::Update skeleton
-void EnemyActor::Update(float dt, float playerX, float playerZ, D3D11Renderer& renderer)
-{
-    if (isDead) return;
-
-    float dx = playerX - x;
-    float dz = playerZ - z;
-    float dist = sqrtf(dx * dx + dz * dz);
-
-    switch (state)
-    {
-        case EnemyState::Patrol:
-            DoPatrol(dt, renderer);
-            if (dist < kDetectRadius)
-                TransitionTo(EnemyState::Chase, 0.0f);
-            break;
-
-        case EnemyState::Chase:
-            MoveToward(playerX, playerZ, dt, renderer);
-            if (dist < kAttackRadius)
-                TransitionTo(EnemyState::Attack, 0.60f);
-            else if (dist > kDetectRadius * 1.5f)
-                TransitionTo(EnemyState::Patrol, 0.0f);
-            break;
-
-        case EnemyState::Attack:
-            if (stateTimer <= 0.0f)
-            {
-                // Emit an enemy hitbox toward the player — dealt in CombatSystem
-                m_pendingAttack = true;
-                TransitionTo(EnemyState::Chase, 0.0f);
-            }
-            break;
-
-        case EnemyState::Hit:
-            if (stateTimer <= 0.0f)
-                TransitionTo(hp > 0 ? EnemyState::Chase : EnemyState::Dead, 0.0f);
-            break;
-
-        default: break;
-    }
-
-    stateTimer = std::max(0.0f, stateTimer - dt);
-}
-```
-
----
-
-#### Track 12.6 — Player damage intake + defeat reset
-
-Add the other side of combat so there is a real win/lose loop.
-
-**Files to change:**
-- `src/game/combat/CombatSystem.hpp` / `.cpp` — add enemy hitboxes + player hit resolution
-- `src/game/actors/PlayerStats.hpp` — add `TakeDamage(int)`
-- `src/game/RuntimeScene.hpp` — check `player.stats.hp <= 0` and trigger reset
-
-```cpp
-// src/game/actors/PlayerStats.hpp  (additions)
-void TakeDamage(int amount)
-{
-    hp -= static_cast<float>(amount);
-    if (hp < 0.0f) hp = 0.0f;
-}
-
-bool IsDead() const { return hp <= 0.0f; }
-```
-
-```cpp
-// RuntimeScene: simple reset when player dies
-if (m_player.stats.IsDead())
-{
-    m_player.stats.hp  = m_player.stats.maxHp;
-    m_player.stats.mp  = m_player.stats.maxMp;
-    m_player.state     = PlayerActionState::Idle;
-    // teleport player back to spawn — camera controller needs a Reset() method
-    LOG_INFO("RuntimeScene: Player defeated — respawning.");
-}
-```
-
----
-
-#### Track 12.6b — Surge system
-
-- Remove ATB gate from attacks.
-- Add Surge fill from hit reports in `CombatSystem`.
-- Add Surge Strike spend action.
-- Add Limit Break gauge and move.
-- Rename ATB to Surge on HUD, add Limit bar below Surge.
-
-**Files to create / change:**
-- `src/game/actors/PlayerStats.hpp`
+- `src/game/combat/Targeting.hpp`
 - `src/game/RuntimeScene.hpp`
-- `src/game/combat/CombatSystem.hpp`
-- `src/ui/GameHUD.hpp`
-- `src/ui/GameHUD.cpp`
+- `src/app/Main.cpp`
 
----
-
-#### Track 12.7 — Lock-on targeting
-
-Select the nearest living enemy in range; camera biases toward that enemy.
-
-**Files to create:**
-- `src/game/combat/Targeting.hpp` — new
-
-```cpp
-// src/game/combat/Targeting.hpp
-#pragma once
-#include <cmath>
-
-class EnemyActor;
-
-class Targeting
-{
-public:
-    bool         isLocked  = false;
-    EnemyActor*  target    = nullptr;
-
-    static constexpr float kLockRadius = 25.0f;
-
-    // Find and lock the nearest alive enemy within kLockRadius.
-    // Call when the player presses LockOn.
-    void ToggleLock(EnemyActor* enemies, int count,
-                    float playerX, float playerZ)
-    {
-        if (isLocked) { isLocked = false; target = nullptr; return; }
-
-        float bestDist = kLockRadius;
-        for (int i = 0; i < count; ++i)
-        {
-            if (enemies[i].isDead) continue;
-            float dx = enemies[i].x - playerX;
-            float dz = enemies[i].z - playerZ;
-            float d  = sqrtf(dx * dx + dz * dz);
-            if (d < bestDist) { bestDist = d; target = &enemies[i]; }
-        }
-        isLocked = (target != nullptr);
-    }
-
-    // Returns nullptr if not locked or target died.
-    const EnemyActor* GetTarget() const
-    {
-        if (!isLocked || !target || target->isDead) return nullptr;
-        return target;
-    }
-};
-```
-
-**Camera framing (CameraController.cpp sketch):**
-
-```cpp
-// If locked on, rotate yaw smoothly toward the target instead of free mouse look
-if (targeting.GetTarget())
-{
-    float tx = targeting.GetTarget()->x - m_playerX;
-    float tz = targeting.GetTarget()->z - m_playerZ;
-    float targetYaw = atan2f(tx, tz);
-    m_yaw = LerpAngle(m_yaw, targetYaw, 8.0f * dt); // smooth bias
-}
-```
-
----
-
-#### Track 12.7b — Tactical Pause
-
-- Hold `Tab` slows time to `15%`.
-- `Tab` is now reserved for Tactical Pause. Keep lock-on on `Q`.
-- Command menu with four stubs: Surge Strike, Magic, Items, Ally.
-- Magic/Items/Ally show "Coming soon" until their milestones.
-- Styled as dark FF-style panel with chunky text.
-
-**Files to create / change:**
-- `src/app/Main.cpp` (`timeScale`)
-- `src/ui/TacticalPauseMenu.hpp` — new
-- `src/ui/TacticalPauseMenu.cpp` — new
-
-**Copy-friendly next agent prompt:**
-
-```text
-Repo: Mikester9000/GameRewritten
-
-Read first:
-- .github/copilot-instructions.md
-- docs/AGENT_RULES.md
-- docs/SYSTEMS.md
-- docs/COMBAT_VISION.md
-- src/app/Main.cpp
-- src/app/InputActionMap.hpp
-
-Goal:
-Add the first Wait Mode / Tactical Pause pass now that lock-on is already merged.
-
-Touch only:
-- src/app/Main.cpp
-- src/ui/TacticalPauseMenu.hpp
-- src/ui/TacticalPauseMenu.cpp
-- GameRewritten.vcxproj
-- GameRewritten.vcxproj.filters
-- docs/SYSTEMS.md
-- docs/CHANGELOG.md
-
-Requirements:
-- Hold Tab to enter Tactical Pause. Releasing Tab closes it.
-- While Tactical Pause is open, gameplay runs at 0.15x time scale.
-- Keep lock-on on Q. Do not move it back to Tab.
-- Draw a simple FF-style ImGui command panel with: Surge Strike, Magic, Items, Ally.
-- Magic / Items / Ally can be stub entries that say Coming soon.
-- Make Surge Strike look disabled when Surge is not full.
-- Keep the existing pause menu and lock-on behavior unchanged apart from Tab now being used for Tactical Pause.
-
-Acceptance:
-- Tab only controls Tactical Pause.
-- Q still toggles lock-on.
-- Holding Tab slows player, camera, enemy, and combat updates to 15% speed.
-- Releasing Tab restores normal speed immediately.
-- The Tactical Pause menu only appears while Tab is held.
-- docs/SYSTEMS.md and docs/CHANGELOG.md are updated.
-```
-
----
-
-#### Track 12.8 — Combat HUD expansion
-
-Show the locked target's name and HP bar, and the current combo step.
+##### Track 12.10 — Combat readability feedback pass A
+- Add enemy hit flash.
+- Add miss indicator.
+- Add off-screen lock-on target indicator.
+- Add Tactical Pause command readiness reasons.
 
 **Files to change:**
-- `src/ui/GameHUD.hpp` / `.cpp` — add `DrawTargetInfo()` and combo indicator
+- `src/game/actors/EnemyActor.cpp/hpp`
+- `src/ui/DamageNumbers.cpp/hpp`
+- `src/ui/GameHUD.cpp/hpp`
+- `src/ui/TacticalPauseMenu.cpp/hpp`
 
-```cpp
-// src/ui/GameHUD.hpp  (additions)
-class GameHUD
-{
-public:
-    void Draw(const PlayerStats& stats, const ImGuiIO& io);
-    void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
-    void DrawComboStep(int step, const ImGuiIO& io);
-};
-```
+##### Track 12.11 — Combat readability feedback pass B
+- Add screen edge damage flash.
+- Add enemy aggro indicator.
+- Add enemy attack telegraph lite.
+- Add enemy reaction / interrupt-lite.
 
-```
-HUD layout sketch (FF7 Remake-inspired):
+**Files to change:**
+- `src/ui/GameHUD.cpp/hpp`
+- `src/ui/ImGuiLayer.cpp/hpp`
+- `src/game/actors/EnemyActor.cpp/hpp`
+- `src/game/combat/CombatSystem.cpp/hpp`
 
-┌────────────────────────────────────────────────┐
-│  [HP ████████████████░░░░░] 80/100             │
-│  [MP ██████░░░░░░░░░░░░░░░] 30/50              │
-│  [ATB ████████████████████] READY              │
-│                                                │
-│            [TARGET: Goblin  HP ██░░]           │
-│                  Combo: 1 > 2                  │
-└────────────────────────────────────────────────┘
-```
+##### Track 12.12 — Encounter failure + pacing
+- Add death / defeat screen.
+- Add hit pause / hitstop.
+- Add contextual button prompts.
+- Add pressure / stagger integration stub for future expansion.
+
+**Files to change:**
+- `src/ui/GameHUD.cpp/hpp`
+- `src/game/RuntimeScene.hpp`
+- `src/game/combat/CombatSystem.cpp/hpp`
+- `src/game/actors/EnemyActor.cpp/hpp`
+
+##### Track 12.13 — Performance visibility
+- Add GT610 budget counters to the debug overlay.
+- Surface only the metrics needed for safe iteration (draw calls, active hitboxes, active enemies, etc.).
+
+**Files to change:**
+- `src/ui/ImGuiLayer.cpp/hpp`
+- `src/rendering/d3d11/D3D11Renderer.cpp/hpp`
+- `src/game/RuntimeScene.hpp`
 
 ---
 
 ### Milestone 13 — Open-World Feel (streaming + multi-enemy encounters)
 
-Once the micro-encounter loop is solid, expand the world feel:
+Once the combat loop is solid, expand the world feel:
 
 - **Multi-cell streaming**: activate 2–3 surrounding cells simultaneously instead of one.
 - **Enemy spawner per cell**: each cell JSON can declare spawn points.
@@ -587,12 +215,17 @@ Additional planned scope:
 - **Fog of war on minimap (visited cell tracking)**
 - **Enemy respawn timer per spawn point**
 - **Enemy group spawning from cell JSON**
+- **Interaction hotspot registry stub**
+- **Landmark discovery trigger stub**
+- **NPC interaction prompt routing stub**
+- **Quest flag / world-state hook**
+- **Spawn composition table stub (solo / pair / pack)**
 
 ---
 
 ### Milestone 14 — Visual Polish (FF7-style)
 
-Stay within GT610 constraints using simple per-vertex techniques:
+Stay within GT610 constraints using simple per-vertex or low-cost screen techniques:
 
 - **Outline / toon edge**: write depth and compare neighbor pixels in a cheap post-pass (one full-screen pass allowed on Low).
 - **Palette-constrained tint**: a small 16-entry 1D texture maps palette IDs to colors per prefab part; this is the "old-school FF7 look" without any texture artist work.
@@ -612,6 +245,11 @@ Additional planned scope:
 - **Enemy aggro indicator visual**
 - **Hit flash on enemy tint**
 - **Screen edge red flash on player damage**
+- **Lock-on ring / target reticle polish**
+- **Directional hit spark / slash effect stub**
+- **World prop highlight / interact tint**
+- **Lock-on camera recovery smoothing**
+- **Tactical Pause panel animation polish**
 
 Example cel-shade HLSL (add to `prim_ps.hlsl`):
 
@@ -641,21 +279,30 @@ Additional planned scope:
 - **Combo escalation hit sounds**
 - **Environmental interaction sounds (chest open, item pickup, area enter)**
 - **Dynamic audio volume zones based on biome or indoor/outdoor state**
+- **Tactical Pause enter / exit SFX**
+- **Lock-on acquire / break SFX**
+- **Enemy alert bark stub**
 
-## Milestone 16 — Player Progression and World Systems
+---
+
+### Milestone 16 — Player Progression and World Systems
 
 - XP gain on enemy kill and level system
-- Stat growth on level up (HP max, MP max, ATB fill rate)
+- Stat growth on level up (HP max, MP max, Surge fill rate)
 - Inventory system with item list and counts
 - Potion / heal item use with key bind
 - Status effects lite (Poisoned HP drain, Slowed move speed) with tint indicator
 - Ability / skill hotbar (functional)
-- MP cost on special attacks (future extension of ATB system)
+- MP cost on special attacks
 - Fast travel stub (named location list, no complex map UI)
 - Save / load system
 - Settings persistence (resolution, volume, quality preset)
 - Quality preset enforcement (Low/Med/High changing draw distance, max enemies, effect quality)
 - Loading screen for world cell transitions
+- Map screen and map fog of war
+- Equipment slot stub
+- Ability unlock / progression hook
+- Combat stat modifier pipeline stub
 
 ---
 
@@ -675,26 +322,28 @@ Additional planned scope:
 
 ## Folder ownership map (where each feature belongs)
 
-```
+```text
 src/
   game/
     actors/
       PlayerActor.cpp/.hpp       ← player visual + stats
-      PlayerActionState.hpp      ← NEW state enum
-      EnemyActor.cpp/.hpp        ← enemy AI + health
+      PlayerActionState.hpp      ← action state enum
+      EnemyActor.cpp/.hpp        ← enemy AI + health + future reactions
     combat/
       CombatSystem.cpp/.hpp      ← hitbox pool + damage resolution
       HitBox.hpp                 ← AABB lifetime struct
-      Targeting.hpp              ← NEW lock-on target selector
+      Targeting.hpp              ← lock-on selection / future cycling / retargeting
     CameraController.cpp/.hpp    ← movement, terrain snap, lock-on framing
     RuntimeScene.hpp             ← orchestration: update → submit → draw
   ui/
-    GameHUD.cpp/.hpp             ← HP/MP/ATB + NEW target bar + combo step
+    GameHUD.cpp/.hpp             ← HP/MP/Surge/Limit + target bar + combo step + combat prompts
+    TacticalPauseMenu.cpp/.hpp   ← Tactical Pause command UI
+    DamageNumbers.cpp/.hpp       ← damage numbers + miss indicator path
     DialogBox.cpp/.hpp           ← NPC/story dialog
     Minimap.cpp/.hpp             ← biome map overlay
     ImGuiLayer.cpp/.hpp          ← frame begin/end, pause menu, debug overlay
   audio/
-    AudioManager.cpp/.hpp        ← BGM/SFX, volume controls
+    AudioManager.cpp/.hpp        ← BGM/SFX, volume controls, combat cues
   app/
     Main.cpp                     ← frame loop orchestration ONLY
     InputActionMap.hpp           ← input bindings
@@ -702,10 +351,10 @@ src/
     d3d11/
       D3D11Renderer.cpp/.hpp     ← D3D11 device, constant buffers, draw calls
 Shaders/
-  prim_vs.hlsl / prim_ps.hlsl   ← box primitive (actors, props)
-  tree_vs.hlsl / tree_ps.hlsl   ← tree instancing
-  ground_vs.hlsl / ground_ps.hlsl ← textured terrain
-  sky_vs.hlsl / sky_ps.hlsl     ← simple sky dome
+  prim_vs.hlsl / prim_ps.hlsl    ← box primitive (actors, props)
+  tree_vs.hlsl / tree_ps.hlsl    ← tree instancing
+  ground_vs.hlsl / ground_ps.hlsl← textured terrain
+  sky_vs.hlsl / sky_ps.hlsl      ← simple sky dome
 Content/
   Prefabs/                       ← one .prefab.json per object type
   World/                         ← world.json + cell_*.json
@@ -715,24 +364,17 @@ Content/
 
 ---
 
-## Agent prompt ordering for Milestone 12
+## Suggested prompt ordering for remaining Milestone 12 work
 
-Work these prompts in order — each one depends on the previous completing cleanly.
+Work these prompts in order — each one should land cleanly and update docs as it goes.
 
 | # | Prompt scope | Depends on |
 |---|---|---|
-| 12.1 | Add `PlayerActionState` enum and state machine to `PlayerActor` | none |
-| 12.2 | Extend `InputActionMap` with `Dodge` and `LockOn` bindings | 12.1 |
-| 12.3 | Implement dodge burst movement in `CameraController` | 12.2 |
-| 12.4 | Replace single ATB attack with 2-step combo in `CombatSystem` | 12.1 |
-| 12.5 | Add enemy chase / attack / hit states to `EnemyActor` | 12.4 |
-| 12.6 | Add player damage intake and defeat / respawn reset | 12.5 |
-| 12.6b | Add Surge resource system and Limit Break gauge/move; update HUD bars | 12.6 |
-| 12.7 | Add `Targeting` class and lock-on toggle | 12.6 |
-| 12.7b | Add Tactical Pause (0.15x time scale + command menu stubs) | 12.7 |
-| 12.8 | Add lock-on camera framing bias to `CameraController` | 12.7 |
-| 12.9 | Expand `GameHUD` with target HP bar and combo step indicator | 12.7 |
-| 12.10 | Add per-frame GT610 budget counters to debug overlay | 12.6 |
+| 12.9 | Add lock-on target cycling + auto-retarget | 12.8 complete |
+| 12.10 | Add hit flash, miss indicator, off-screen target indicator, Tactical Pause readiness reasons | 12.9 |
+| 12.11 | Add screen-edge damage flash, aggro indicator, telegraph lite, reaction / interrupt-lite | 12.10 |
+| 12.12 | Add defeat screen, hitstop, contextual prompts, pressure / stagger stub | 12.11 |
+| 12.13 | Add GT610 budget counters to debug overlay | 12.12 |
 
 ---
 
@@ -750,5 +392,5 @@ Work these prompts in order — each one depends on the previous completing clea
 
 1. Read `docs/SYSTEMS.md` — do not re-implement a ✅ system.
 2. Read `docs/AGENT_RULES.md` — follow all hard rules.
-3. Touch only the files listed in the prompt scope.
+3. Touch only the files listed in the prompt scope unless the prompt explicitly expands them.
 4. After finishing: update `docs/SYSTEMS.md` and add one line to `docs/CHANGELOG.md`.
