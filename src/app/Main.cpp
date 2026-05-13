@@ -17,6 +17,7 @@
 #include "../game/physics/CollisionWorld.hpp"
 #include "../ui/GameHUD.hpp"
 #include "../ui/ImGuiLayer.hpp"
+#include "../ui/TacticalPauseMenu.hpp"
 #include "../ui/DialogBox.hpp"
 #include "../ui/Minimap.hpp"
 #include "../ui/WorldEditor.hpp"
@@ -115,6 +116,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // --- World Editor ---
     GameHUD gameHud;
+    TacticalPauseMenu tacticalPauseMenu;
     WorldEditor worldEditor;
     DialogBox dialogBox;
     Minimap minimap;
@@ -222,12 +224,21 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         // --- 2. Input ---
         // Read all input for this frame. No logic yet — just read state.
-        const bool pausePressed = actionMap.IsPressed(InputAction::TogglePause, wasPauseActionDown);
-        const bool debugPressed = actionMap.IsPressed(InputAction::ToggleDebug, wasDebugActionDown);
+        const bool pausePressed  = actionMap.IsPressed(InputAction::TogglePause, wasPauseActionDown);
+        const bool debugPressed  = actionMap.IsPressed(InputAction::ToggleDebug, wasDebugActionDown);
         const bool reloadPressed = actionMap.IsPressed(InputAction::ReloadAssets, wasReloadActionDown);
         const bool interactPressed = actionMap.IsPressed(InputAction::Interact, wasInteractActionDown);
         const bool attackPressed = actionMap.IsPressed(InputAction::Attack, wasAttackActionDown);
         const bool lockOnPressed = actionMap.IsPressed(InputAction::LockOn, wasLockOnActionDown);
+        // Tab is reserved for Tactical Pause. VK_TAB is checked directly
+        // because it is not a combat InputAction — it controls time scale only.
+        constexpr int kTacticalPauseKey   = VK_TAB;
+        const bool tacticalPauseHeld = actionMap.IsVirtualKeyHeld(kTacticalPauseKey);
+
+        // Scale gameplay delta time to 15% while Tactical Pause is open.
+        // UI, dialog, and HUD animations always use the unscaled deltaTime.
+        const float kTacticalTimeScale = 0.15f;
+        const float scaledDt = tacticalPauseHeld ? deltaTime * kTacticalTimeScale : deltaTime;
 
         // --- 3. UI state ---
         // Apply pause, cursor visibility, dialog update.
@@ -275,7 +286,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // Update player state, stats, and dodge burst.
         // Uses input and grounded state from above.
         const bool playerIsGrounded = camController.IsGrounded();
-        runtimeScene.BeginPlayerFrame(deltaTime, actionMap, playerIsGrounded, attackPressed, camController);
+        runtimeScene.BeginPlayerFrame(scaledDt, actionMap, playerIsGrounded, attackPressed, camController);
 
         // --- 5. Camera update ---
         // Move and rotate the camera based on input and player state.
@@ -291,7 +302,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         const bool allowMovement = !paused;
         const bool allowMouseLook = !paused && !editorActive;
         CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
-        camController.Update(deltaTime, allowMovement, allowMouseLook, firstFrame, renderer);
+        camController.Update(scaledDt, allowMovement, allowMouseLook, firstFrame, renderer);
 
         // --- 6. World update ---
         // Cell crossing detection, asset reload, editor placement.
@@ -335,7 +346,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // --- 7. Combat update ---
         // Update enemies, resolve hits, spawn damage numbers.
         // Runs after world so terrain and positions are final.
-        runtimeScene.BeginFrame(deltaTime, renderer,
+        runtimeScene.BeginFrame(scaledDt, renderer,
                                 camController.GetPlayerX(),
                                 camController.GetPlayerY(),
                                 camController.GetPlayerZ());
@@ -346,7 +357,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
 
         if (!paused)
-            runtimeScene.damageNumbers.Update(deltaTime);
+            runtimeScene.damageNumbers.Update(scaledDt);
 
         if (runtimeScene.WantsRespawn())
         {
@@ -407,6 +418,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             if (!imguiLayer.IsPauseMenuOpen())
             {
                 gameHud.Draw(playerActor.stats, ImGui::GetIO(), deltaTime);
+                if (tacticalPauseHeld)
+                    tacticalPauseMenu.Draw(playerActor.stats, ImGui::GetIO());
                 runtimeScene.damageNumbers.Draw(camController.GetCamX(),
                                                 camController.GetCamY(),
                                                 camController.GetCamZ(),

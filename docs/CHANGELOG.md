@@ -1,3 +1,4 @@
+- 2026-05-13: Track 12.7b: Added Tactical Pause — hold Tab slows gameplay to 0.15x time scale and opens FF-style command panel (Surge Strike enabled when Surge full; Magic/Items/Ally stubbed as Coming soon); Tab stays reserved, lock-on remains on Q
 - 2026-05-13: Docs: Added a concise copy-friendly Track 12.7b Wait Mode / Tactical Pause agent prompt and aligned Tactical Pause docs to keep lock-on on Q
 - 2026-05-13: Track 12.7: Added header-only lock-on `Targeting` system (nearest-enemy toggle/validation), camera yaw bias toward locked target, lock-aware attack facing, lock marker overlay, and remapped LockOn from Tab to Q (Tab left free for Tactical Pause)
 - 2026-05-13: Docs: Clarified Tactical Pause planning and moved battle music transition back to Milestone 15
