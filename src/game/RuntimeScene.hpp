@@ -25,15 +25,14 @@
 #include "combat/CombatSystem.hpp"
 #include "CameraController.hpp"
 #include "../app/InputActionMap.hpp"
-#include "../ui/DamageNumbers.hpp"
 #include <cmath>
-#include <string>
 #include <logger/Logger.hpp>
 
 // Forward-declared to avoid pulling their full headers into every file that
 // includes RuntimeScene.
 class D3D11Renderer;
 class PrefabLibrary;
+class DamageNumbers;
 
 class RuntimeScene
 {
@@ -118,92 +117,9 @@ public:
     // has run this frame, so enemy AI sees an up-to-date position.
     // playerY is the eye-level Y (CameraController::GetPlayerY()).
     // Call once each frame after camController.Update(), before submitting actor visuals.
+    // Implementation lives in RuntimeScene.cpp to avoid pulling UI headers here.
     void BeginFrame(float dt, D3D11Renderer& renderer,
-                    float playerX, float playerY, float playerZ)
-    {
-        // Cache the up-to-date player position for enemy AI and AABB checks.
-        m_playerX = playerX;
-        m_playerY = playerY;
-        m_playerZ = playerZ;
-
-        m_primRenderer.ClearRuntimeInstances();
-
-        for (EnemyActor& enemy : m_enemies)
-            enemy.Update(dt, renderer, m_playerX, m_playerZ);
-
-        m_combatSystem.Update(dt, m_enemies, kEnemyCount);
-
-        // Spawn floating damage numbers for player hits on enemies this frame.
-        // This was previously done in Main.cpp; now RuntimeScene owns the wiring.
-        if (m_damageNumbers)
-        {
-            const CombatSystem::EnemyHitRecord* hits = m_combatSystem.GetRecentEnemyHits();
-            int hitCount = m_combatSystem.GetRecentEnemyHitCount();
-            for (int i = 0; i < hitCount; ++i)
-                m_damageNumbers->Spawn(hits[i].damage, hits[i].x, hits[i].y, hits[i].z);
-        }
-
-        // Check for enemy attack hitboxes spawned this frame.
-        // Fix 2: Test the hitbox against the player AABB before accumulating damage.
-        // Fix 3: Damage is consumed and applied here instead of being left for Main.cpp.
-        for (EnemyActor& enemy : m_enemies)
-        {
-            if (!enemy.pendingAttack)
-                continue;
-
-            enemy.pendingAttack = false;
-
-            HitBox hb;
-            hb.x           = enemy.x;
-            hb.y           = enemy.y + 1.0f;
-            hb.z           = enemy.z;
-            hb.halfX       = kEnemyAttackHalfX;
-            hb.halfY       = kEnemyAttackHalfY;
-            hb.halfZ       = kEnemyAttackHalfZ;
-            hb.damage      = kEnemyAttackDamage;
-            hb.framesToLive = kEnemyAttackFrameLifetime;
-
-            // Only deal damage if the attack hitbox overlaps the player's body.
-            if (HitBoxOverlapsPlayer(hb))
-                m_pendingEnemyDamage += hb.damage;
-        }
-
-        // Apply accumulated enemy damage to the player.
-        int totalDamage = m_pendingEnemyDamage;
-        m_pendingEnemyDamage = 0;
-
-        if (totalDamage > 0 &&
-            m_player.state != PlayerActionState::Dead &&
-            m_player.state != PlayerActionState::Dodge) // dodge grants invincibility
-        {
-            m_player.stats.TakeDamage(totalDamage);
-
-            if (m_player.stats.IsDead())
-            {
-                // Restore stats and signal Main.cpp to teleport the camera.
-                m_player.stats.hp         = m_player.stats.maxHp;
-                m_player.stats.mp         = m_player.stats.maxMp;
-                m_player.stats.atbCharge  = 0.0f;
-                m_player.state            = PlayerActionState::Idle;
-                m_player.stateTimer       = 0.0f;
-                m_wantsRespawn            = true;
-                LOG_INFO("RuntimeScene: Player defeated — respawning.");
-            }
-            else
-            {
-                m_player.state      = PlayerActionState::Stunned;
-                m_player.stateTimer = 0.30f;
-                std::string msg = "RuntimeScene: Player hit for ";
-                msg += std::to_string(totalDamage);
-                msg += " damage (HP ";
-                msg += std::to_string(static_cast<int>(m_player.stats.hp));
-                msg += " / ";
-                msg += std::to_string(static_cast<int>(m_player.stats.maxHp));
-                msg += ").";
-                LOG_INFO(msg);
-            }
-        }
-    }
+                    float playerX, float playerY, float playerZ);
 
     // Submit visual representations for all registered runtime actors.
     // Call after BeginFrame(), before drawing.
@@ -284,11 +200,10 @@ private:
     static constexpr int kEnemyCount = 2;
 
     // Enemy attack hitbox parameters.
-    static constexpr float kEnemyAttackHalfX        = 1.2f;
-    static constexpr float kEnemyAttackHalfY        = 1.0f;
-    static constexpr float kEnemyAttackHalfZ        = 1.2f;
-    static constexpr int   kEnemyAttackDamage       = 2;
-    static constexpr int   kEnemyAttackFrameLifetime = 3;
+    static constexpr float kEnemyAttackHalfX  = 1.2f;
+    static constexpr float kEnemyAttackHalfY  = 1.0f;
+    static constexpr float kEnemyAttackHalfZ  = 1.2f;
+    static constexpr int   kEnemyAttackDamage = 2;
 
     // Player body AABB half-extents used for incoming damage checks.
     // Slightly larger than the movement collision box for fair hit detection.
@@ -321,7 +236,7 @@ private:
     int m_pendingEnemyDamage = 0;
 
     // Returns true if the given hitbox overlaps the player's body AABB.
-    // m_playerY is the camera eye level; body center is shifted down by 0.5 units.
+    // m_playerY is the camera eye level; body center is shifted down by kPlayerBodyCenterOffset.
     bool HitBoxOverlapsPlayer(const HitBox& hb) const
     {
         float bodyY = m_playerY - kPlayerBodyCenterOffset;

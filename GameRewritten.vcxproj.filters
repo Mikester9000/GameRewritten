@@ -98,6 +98,9 @@
     <ClCompile Include="src\game\PrimitiveRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\RuntimeScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\assets\AssetLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

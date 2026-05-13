@@ -245,6 +245,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\game\Forest.cpp" />
     <ClCompile Include="src\game\PrefabLibrary.cpp" />
     <ClCompile Include="src\game\PrimitiveRenderer.cpp" />
+    <ClCompile Include="src\game\RuntimeScene.cpp" />
     <ClCompile Include="src\logger\Logger.cpp" />
     <ClCompile Include="src\platform\win32\Win32Window.cpp" />
     <ClCompile Include="src\rendering\d3d11\D3D11RendererHelpers.cpp" />

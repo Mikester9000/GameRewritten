@@ -3,6 +3,7 @@
 #include "ScreenProjection.hpp"
 
 #include "../../third_party/imgui/imgui.h"
+#include <DirectXMath.h>
 #include <logger/Logger.hpp>
 #include <algorithm>
 #include <cstdio>
@@ -77,6 +78,12 @@ void DamageNumbers::Draw(float camX, float camY, float camZ,
     if (!drawList)
         return;
 
+    // Build the view*projection matrix once for the whole batch instead of
+    // rebuilding it for every active entry (up to kMaxEntries per frame).
+    DirectX::XMMATRIX viewProj;
+    if (!ScreenProjection::BuildViewProj(camX, camY, camZ, yaw, pitch, vpW, vpH, viewProj))
+        return;
+
     for (const Entry& entry : m_entries)
     {
         if (!entry.active)
@@ -84,9 +91,8 @@ void DamageNumbers::Draw(float camX, float camY, float camZ,
 
         float sx = 0.0f;
         float sy = 0.0f;
-        if (!ScreenProjection::WorldToScreen(entry.x, entry.y, entry.z,
-                                             camX, camY, camZ, yaw, pitch,
-                                             vpW, vpH, sx, sy))
+        if (!ScreenProjection::WorldToScreenVP(entry.x, entry.y, entry.z,
+                                               viewProj, vpW, vpH, sx, sy))
         {
             continue;
         }
