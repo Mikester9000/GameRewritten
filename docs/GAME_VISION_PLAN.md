@@ -78,6 +78,9 @@ The result is a modern open-world action game that retains the charm of old-scho
 - Enemy can chase, attack, and die.
 - A short encounter can be won or lost and then reset.
 - Runs at 60 fps on GT610 with two enemies on-screen.
+- Basic attacks are always free.
+- Surge and Limit Break gauges are functional.
+- Tactical Pause slows time and shows command menu.
 
 ---
 
@@ -385,6 +388,23 @@ if (m_player.stats.IsDead())
 
 ---
 
+#### Track 12.6b — Surge system
+
+- Remove ATB gate from attacks.
+- Add Surge fill from hit reports in `CombatSystem`.
+- Add Surge Strike spend action.
+- Add Limit Break gauge and move.
+- Rename ATB to Surge on HUD, add Limit bar below Surge.
+
+**Files to create / change:**
+- `src/game/actors/PlayerStats.hpp`
+- `src/game/RuntimeScene.hpp`
+- `src/game/combat/CombatSystem.hpp`
+- `src/ui/GameHUD.hpp`
+- `src/ui/GameHUD.cpp`
+
+---
+
 #### Track 12.7 — Lock-on targeting
 
 Select the nearest living enemy in range; camera biases toward that enemy.
@@ -447,6 +467,22 @@ if (targeting.GetTarget())
     m_yaw = LerpAngle(m_yaw, targetYaw, 8.0f * dt); // smooth bias
 }
 ```
+
+---
+
+#### Track 12.7b — Tactical Pause
+
+- Hold `Tab` slows time to `15%`.
+- Input disambiguation: tap `Tab` toggles lock-on; hold `Tab` (>= `0.25 s`) opens Tactical Pause and suppresses lock-on toggle.
+- Command menu with four stubs: Surge Strike, Magic, Items, Ally.
+- Magic/Items/Ally show "Coming soon" until their milestones.
+- Styled as dark FF-style panel with chunky text.
+
+**Files to create / change:**
+- `src/app/Main.cpp` (`timeScale`)
+- `src/ui/TacticalPauseMenu.hpp` — new
+- `src/ui/TacticalPauseMenu.cpp` — new
+- `src/app/InputActionMap.hpp`
 
 ---
 
@@ -649,7 +685,9 @@ Work these prompts in order — each one depends on the previous completing clea
 | 12.4 | Replace single ATB attack with 2-step combo in `CombatSystem` | 12.1 |
 | 12.5 | Add enemy chase / attack / hit states to `EnemyActor` | 12.4 |
 | 12.6 | Add player damage intake and defeat / respawn reset | 12.5 |
+| 12.6b | Add Surge resource system and Limit Break gauge/move; update HUD bars | 12.6 |
 | 12.7 | Add `Targeting` class and lock-on toggle | 12.6 |
+| 12.7b | Add Tactical Pause (0.15x time scale + command menu stubs) | 12.7 |
 | 12.8 | Add lock-on camera framing bias to `CameraController` | 12.7 |
 | 12.9 | Expand `GameHUD` with target HP bar and combo step indicator | 12.7 |
 | 12.10 | Add per-frame GT610 budget counters to debug overlay | 12.6 |

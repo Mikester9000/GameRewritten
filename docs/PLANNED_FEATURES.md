@@ -1,5 +1,5 @@
 # Planned Features
-**Last updated:** 2026-05-11
+**Last updated:** 2026-05-13
 
 This file lists all features planned for future milestones but not yet implemented.
 Check docs/SYSTEMS.md for current implementation status.
@@ -24,6 +24,20 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Player damage intake and defeat reset
 - [ ] Combat HUD expansion (target HP bar, combo step)
 - [ ] GT610 budget debug counters
+
+### Combat resource system
+- [ ] Remove ATB gate from basic attacks (always free)
+- [ ] Rename ATB to Surge on HUD
+- [ ] Surge fills from hits landed, hits taken, skilled dodge, passive time
+- [ ] Surge Strike action (F while Surge full — 3x damage)
+- [ ] Limit Break gauge (fills from taking damage)
+- [ ] Limit Break move (5x damage finisher when gauge full)
+- [ ] MP passive regeneration (2.0f per second)
+- [ ] Tactical Pause (hold Tab — 15% time scale, command menu)
+- [ ] Tactical Pause Magic submenu stub
+- [ ] Tactical Pause Items submenu stub
+- [ ] Tactical Pause Ally submenu stub
+- [ ] Tab input split: tap Tab = Lock-on, hold Tab (>=0.25s) = Tactical Pause
 
 ### Combat feedback
 - [ ] Floating damage numbers
@@ -71,6 +85,9 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Elite enemy variant
 - [ ] Enemy patrol path variation (3-4 waypoints)
 - [ ] Enemy loot drop
+- [ ] Enemy tint colour field per enemy type
+- [ ] Enemy scale variation (standard 1.0f / elite 1.35f / boss 2.0f+)
+- [ ] Pre-combat tension audio sting on first Chase entry per scene
 
 ---
 
@@ -116,6 +133,9 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Saving indicator
 - [ ] Crosshair / aim indicator
 - [ ] Ability / skill hotbar stub (layout reserved)
+- [ ] FF7-style chunky custom HUD bars (HP / MP / Surge / Limit)
+- [ ] Player tint states (low HP red pulse, stunned white flash, dodge blue)
+- [ ] Summon system stub (reserved slot)
 
 ---
 
@@ -169,6 +189,10 @@ These are agreed ideas not yet assigned to a milestone:
 - Skill trees or progression systems
 - Full inventory grid UI
 - Area streaming beyond 3 cells
+- Summon cinematic event
+- NPC dialogue flag system (lines change after story beats)
+- Elemental spell system (Fire / Ice / Thunder / Cure)
+- Limit Break escalation tiers per character
 
 ---
 
