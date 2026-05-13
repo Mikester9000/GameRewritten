@@ -50,7 +50,7 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
         hb.halfY  = kEnemyAttackHalfY;
         hb.halfZ  = kEnemyAttackHalfZ;
         hb.damage = kEnemyAttackDamage;
-        // framesToLive not set — this hitbox is tested immediately and discarded.
+        // framesToLive not set -- this hitbox is tested immediately and discarded.
 
         if (HitBoxOverlapsPlayer(hb))
             m_pendingEnemyDamage += hb.damage;
