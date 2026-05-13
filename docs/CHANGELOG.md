@@ -1,3 +1,4 @@
+- 2026-05-13: Docs: Added a concise copy-friendly Track 12.7b Wait Mode / Tactical Pause agent prompt and updated it to keep lock-on on Q
 - 2026-05-13: Track 12.7: Added header-only lock-on `Targeting` system (nearest-enemy toggle/validation), camera yaw bias toward locked target, lock-aware attack facing, lock marker overlay, and remapped LockOn from Tab to Q (Tab left free for Tactical Pause)
 - 2026-05-13: Docs: Clarified Tab tap-vs-hold split (Lock-on vs Tactical Pause) and moved battle music transition back to Milestone 15
 - 2026-05-13: Docs: Lock in Surge / Limit Break / Tactical Pause / MP vision

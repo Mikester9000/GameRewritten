@@ -473,7 +473,7 @@ if (targeting.GetTarget())
 #### Track 12.7b — Tactical Pause
 
 - Hold `Tab` slows time to `15%`.
-- Input disambiguation: tap `Tab` toggles lock-on; hold `Tab` (>= `0.25 s`) opens Tactical Pause and suppresses lock-on toggle.
+- `Tab` is now reserved for Tactical Pause. Keep lock-on on `Q`.
 - Command menu with four stubs: Surge Strike, Magic, Items, Ally.
 - Magic/Items/Ally show "Coming soon" until their milestones.
 - Styled as dark FF-style panel with chunky text.
@@ -482,7 +482,49 @@ if (targeting.GetTarget())
 - `src/app/Main.cpp` (`timeScale`)
 - `src/ui/TacticalPauseMenu.hpp` — new
 - `src/ui/TacticalPauseMenu.cpp` — new
-- `src/app/InputActionMap.hpp`
+
+**Copy-friendly next agent prompt:**
+
+```text
+Repo: Mikester9000/GameRewritten
+
+Read first:
+- .github/copilot-instructions.md
+- docs/AGENT_RULES.md
+- docs/SYSTEMS.md
+- docs/COMBAT_VISION.md
+- src/app/Main.cpp
+- src/app/InputActionMap.hpp
+
+Goal:
+Add the first Wait Mode / Tactical Pause pass now that lock-on is already merged.
+
+Touch only:
+- src/app/Main.cpp
+- src/ui/TacticalPauseMenu.hpp
+- src/ui/TacticalPauseMenu.cpp
+- GameRewritten.vcxproj
+- GameRewritten.vcxproj.filters
+- docs/SYSTEMS.md
+- docs/CHANGELOG.md
+
+Requirements:
+- Hold Tab to enter Tactical Pause. Releasing Tab closes it.
+- While Tactical Pause is open, gameplay runs at 0.15x time scale.
+- Keep lock-on on Q. Do not move it back to Tab.
+- Draw a simple FF-style ImGui command panel with: Surge Strike, Magic, Items, Ally.
+- Magic / Items / Ally can be stub entries that say Coming soon.
+- Make Surge Strike look disabled when Surge is not full.
+- Keep the existing pause menu and lock-on behavior unchanged apart from Tab now being used for Tactical Pause.
+
+Acceptance:
+- Tab only controls Tactical Pause.
+- Q still toggles lock-on.
+- Holding Tab slows player, camera, enemy, and combat updates to 15% speed.
+- Releasing Tab restores normal speed immediately.
+- The Tactical Pause menu only appears while Tab is held.
+- docs/SYSTEMS.md and docs/CHANGELOG.md are updated.
+```
 
 ---
 
