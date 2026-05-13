@@ -40,6 +40,13 @@
 #include "tp_tracy.hpp"
 #include <imgui.h>
 
+namespace
+{
+constexpr float kMissConfirmDelaySec = 0.17f;
+constexpr float kMissIndicatorForwardOffset = 1.8f;
+constexpr float kMissIndicatorHeightOffset = 2.8f;
+}
+
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
     Win32Window window;
@@ -419,9 +426,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
             if (attackHandled)
             {
-                constexpr float kMissConfirmDelaySec = 0.17f;
-                constexpr float kMissIndicatorForwardOffset = 1.8f;
-                constexpr float kMissIndicatorHeightOffset = 2.8f;
                 const EnemyActor* lockedTarget = runtimeScene.GetLockedTarget();
                 float attackYaw = camController.GetYaw();
 

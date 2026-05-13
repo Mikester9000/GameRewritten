@@ -315,6 +315,8 @@ void GameHUD::DrawOffScreenTargetIndicator(const EnemyActor* target,
     if (toTargetLenSq < 0.0001f)
         return;
 
+    // Camera-space basis in this project:
+    // yaw=0 faces +Z, right is +X, and Y is up.
     const float rightX   = cosf(yaw);
     const float rightZ   = -sinf(yaw);
     const float forwardX = sinf(yaw);

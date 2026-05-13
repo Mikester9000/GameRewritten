@@ -190,7 +190,7 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
     if (!visualPrefab)
         return;
 
-    const float hitFlashScale = (hitFlashTimer > 0.0f) ? 1.05f : 1.0f;
+    const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
     primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, hitFlashScale);
 }
 

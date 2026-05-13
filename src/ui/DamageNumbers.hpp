@@ -34,5 +34,6 @@ private:
     static constexpr float kLifetimeSec = 1.0f;
     static constexpr float kRiseSpeed = 0.8f;
 
+    Entry* AcquireEntrySlot();
     Entry m_entries[kMaxEntries]{};
 };

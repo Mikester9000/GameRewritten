@@ -24,6 +24,7 @@ public:
     static constexpr float kHitStaggerDuration   = 0.30f;  // stagger after taking a hit
     static constexpr float kHitFlashDuration     = 0.14f;  // short readability flash on hit
     static constexpr float kHitFlashBlinkPeriod  = 0.04f;  // blink cadence during flash
+    static constexpr float kHitFlashScale        = 1.05f;  // slight pop while flashing
 
     // World-space position.
     float x = 0.0f;

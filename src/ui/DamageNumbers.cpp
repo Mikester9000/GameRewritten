@@ -9,6 +9,23 @@
 #include <cstdio>
 #include <cfloat>
 
+DamageNumbers::Entry* DamageNumbers::AcquireEntrySlot()
+{
+    for (Entry& entry : m_entries)
+    {
+        if (!entry.active)
+            return &entry;
+    }
+
+    Entry* oldestEntry = &m_entries[0];
+    for (Entry& entry : m_entries)
+    {
+        if (entry.ageSec > oldestEntry->ageSec)
+            oldestEntry = &entry;
+    }
+    return oldestEntry;
+}
+
 void DamageNumbers::Reset()
 {
     for (Entry& entry : m_entries)
@@ -23,26 +40,7 @@ void DamageNumbers::Spawn(int damage, float worldX, float worldY, float worldZ)
         damage = 0;
     }
 
-    Entry* slot = nullptr;
-
-    for (Entry& entry : m_entries)
-    {
-        if (!entry.active)
-        {
-            slot = &entry;
-            break;
-        }
-    }
-
-    if (!slot)
-    {
-        slot = &m_entries[0];
-        for (Entry& entry : m_entries)
-        {
-            if (entry.ageSec > slot->ageSec)
-                slot = &entry;
-        }
-    }
+    Entry* slot = AcquireEntrySlot();
 
     slot->active = true;
     slot->x = worldX;
@@ -55,26 +53,7 @@ void DamageNumbers::Spawn(int damage, float worldX, float worldY, float worldZ)
 
 void DamageNumbers::SpawnMiss(float worldX, float worldY, float worldZ)
 {
-    Entry* slot = nullptr;
-
-    for (Entry& entry : m_entries)
-    {
-        if (!entry.active)
-        {
-            slot = &entry;
-            break;
-        }
-    }
-
-    if (!slot)
-    {
-        slot = &m_entries[0];
-        for (Entry& entry : m_entries)
-        {
-            if (entry.ageSec > slot->ageSec)
-                slot = &entry;
-        }
-    }
+    Entry* slot = AcquireEntrySlot();
 
     slot->active = true;
     slot->x = worldX;
