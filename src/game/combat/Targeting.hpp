@@ -10,8 +10,6 @@ public:
 
     void ToggleLockOn(EnemyActor* enemies, int count, float playerX, float playerZ)
     {
-        RememberEnemyList(enemies, count);
-
         if (!IsLocked())
         {
             m_target = FindNearestAliveEnemyInRange(enemies, count, playerX, playerZ, nullptr);
@@ -25,11 +23,18 @@ public:
             return;
         }
 
-        // Keep previous toggle behavior when no alternate target exists.
+        // No alternate target in range, so unlock cleanly.
         ClearLock();
     }
 
+    // Legacy compatibility overload; RuntimeScene now refreshes lock with enemy context.
     void RefreshLock(float playerX, float playerZ)
+    {
+        (void)playerX;
+        (void)playerZ;
+    }
+
+    void RefreshLock(EnemyActor* enemies, int count, float playerX, float playerZ)
     {
         if (!IsLocked())
             return;
@@ -38,7 +43,7 @@ public:
             return;
 
         EnemyActor* replacementTarget = FindNearestAliveEnemyInRange(
-            m_lastEnemyList, m_lastEnemyCount, playerX, playerZ, m_target);
+            enemies, count, playerX, playerZ, m_target);
         if (replacementTarget)
         {
             m_target = replacementTarget;
@@ -66,18 +71,10 @@ public:
 private:
     static constexpr float kLockRadiusSq = kLockRadius * kLockRadius;
     EnemyActor* m_target = nullptr;
-    EnemyActor* m_lastEnemyList = nullptr;
-    int m_lastEnemyCount = 0;
 
     void ClearLock()
     {
         m_target = nullptr;
-    }
-
-    void RememberEnemyList(EnemyActor* enemies, int count)
-    {
-        m_lastEnemyList = enemies;
-        m_lastEnemyCount = count;
     }
 
     static bool IsTargetValid(const EnemyActor* candidate, float playerX, float playerZ)

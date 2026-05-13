@@ -350,6 +350,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                 camController.GetPlayerX(),
                                 camController.GetPlayerY(),
                                 camController.GetPlayerZ());
+        runtimeScene.RefreshLockOnTarget();
 
         if (!paused && lockOnPressed && !tacticalPauseHeld)
         {

@@ -247,6 +247,11 @@ public:
         m_targeting.ToggleLockOn(m_enemies, kEnemyCount, m_playerX, m_playerZ);
     }
 
+    void RefreshLockOnTarget()
+    {
+        m_targeting.RefreshLock(m_enemies, kEnemyCount, m_playerX, m_playerZ);
+    }
+
 private:
     static constexpr int kEnemyCount = 2;
 
