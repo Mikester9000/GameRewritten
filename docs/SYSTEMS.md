@@ -66,6 +66,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Enemy awareness radius visualization   | ✅ | `src/ui/ImGuiLayer.cpp/hpp` |
 | Player damage intake + defeat reset | ✅ | `src/game/actors/PlayerStats.hpp`, `src/game/RuntimeScene.hpp`, `src/game/CameraController.cpp/hpp` |
 | Floating damage numbers | ✅ | `src/ui/DamageNumbers.cpp/hpp` |
+| Tactical Pause (hold Tab) | ✅ | `src/ui/TacticalPauseMenu.cpp/hpp`, `src/app/Main.cpp` |
 | Hit flash system | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Screen edge damage flash | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Hit pause / hitstop | ❌ | `src/game/RuntimeScene.hpp` |
