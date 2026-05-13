@@ -67,9 +67,7 @@ No overengineered state machines. No elaborate networking. Just clean, readable,
 ### Tactical Pause
 - Hold `Tab` to slow time to `15%` speed and open a command menu:
   - `[ Surge Strike ] [ Magic ▶ ] [ Items ▶ ] [ Ally ▶ ]`
-- Input split with lock-on:
-  - Tap `Tab` (press and release under ~0.25 s): toggle lock-on
-  - Hold `Tab` (>= ~0.25 s): open Tactical Pause and suppress lock-on toggle
+- `Tab` is reserved for Tactical Pause. Lock-on stays on `Q`.
 - Surge Strike is greyed out if Surge is not full.
 - Magic shows spell list with MP costs (stub until Milestone 16).
 - Items shows inventory list (stub until Milestone 16).
@@ -84,7 +82,7 @@ No overengineered state machines. No elaborate networking. Just clean, readable,
 - Current hit detection is AABB only — no sphere or convex hull until explicitly needed.
 
 ### Lock-On
-- One lock-on target at a time. Tap `Tab` to toggle.
+- One lock-on target at a time. Press `Q` to toggle.
 - Camera biases toward target — does not fully snap, just softly pulls.
 - Attack direction overrides input direction when locked on.
 - Lock-on breaks if target dies or leaves range (~20 units).
