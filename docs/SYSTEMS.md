@@ -68,8 +68,8 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Floating damage numbers | ✅ | `src/ui/DamageNumbers.cpp/hpp` |
 | Tactical Pause (hold Tab) | ✅ | `src/ui/TacticalPauseMenu.cpp/hpp`, `src/app/Main.cpp` |
 | Combat HUD expansion (target info + combo step) | ✅ | `src/ui/GameHUD.hpp`, `src/ui/GameHUD.cpp`, `src/app/Main.cpp` |
-| Lock-on target cycling | ❌ | `src/game/combat/Targeting.hpp`, `src/app/Main.cpp` |
-| Auto-retarget on target death / range loss | ❌ | `src/game/combat/Targeting.hpp`, `src/game/RuntimeScene.hpp` |
+| Lock-on target cycling | ✅ | `src/game/combat/Targeting.hpp`, `src/app/Main.cpp` |
+| Auto-retarget on target death / range loss | ✅ | `src/game/combat/Targeting.hpp`, `src/game/RuntimeScene.hpp` |
 | Pressure / stagger integration stub | ❌ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Tactical Pause command readiness reasons | ❌ | `src/ui/TacticalPauseMenu.cpp/hpp` |
 | Off-screen lock-on target indicator | ❌ | `src/ui/ImGuiLayer.cpp/hpp`, `src/ui/GameHUD.cpp/hpp` |

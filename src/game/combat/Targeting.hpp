@@ -10,19 +10,42 @@ public:
 
     void ToggleLockOn(EnemyActor* enemies, int count, float playerX, float playerZ)
     {
-        if (IsLocked())
+        RememberEnemyList(enemies, count);
+
+        if (!IsLocked())
         {
-            ClearLock();
+            m_target = FindNearestAliveEnemyInRange(enemies, count, playerX, playerZ, nullptr);
             return;
         }
 
-        m_target = FindNearestAliveEnemyInRange(enemies, count, playerX, playerZ);
+        EnemyActor* nextTarget = FindNearestAliveEnemyInRange(enemies, count, playerX, playerZ, m_target);
+        if (nextTarget)
+        {
+            m_target = nextTarget;
+            return;
+        }
+
+        // Keep previous toggle behavior when no alternate target exists.
+        ClearLock();
     }
 
     void RefreshLock(float playerX, float playerZ)
     {
-        if (!IsTargetValid(m_target, playerX, playerZ))
-            ClearLock();
+        if (!IsLocked())
+            return;
+
+        if (IsTargetValid(m_target, playerX, playerZ))
+            return;
+
+        EnemyActor* replacementTarget = FindNearestAliveEnemyInRange(
+            m_lastEnemyList, m_lastEnemyCount, playerX, playerZ, m_target);
+        if (replacementTarget)
+        {
+            m_target = replacementTarget;
+            return;
+        }
+
+        ClearLock();
     }
 
     bool IsLocked() const
@@ -43,10 +66,18 @@ public:
 private:
     static constexpr float kLockRadiusSq = kLockRadius * kLockRadius;
     EnemyActor* m_target = nullptr;
+    EnemyActor* m_lastEnemyList = nullptr;
+    int m_lastEnemyCount = 0;
 
     void ClearLock()
     {
         m_target = nullptr;
+    }
+
+    void RememberEnemyList(EnemyActor* enemies, int count)
+    {
+        m_lastEnemyList = enemies;
+        m_lastEnemyCount = count;
     }
 
     static bool IsTargetValid(const EnemyActor* candidate, float playerX, float playerZ)
@@ -61,14 +92,19 @@ private:
     }
 
     static EnemyActor* FindNearestAliveEnemyInRange(
-        EnemyActor* enemies, int count, float playerX, float playerZ)
+        EnemyActor* enemies, int count, float playerX, float playerZ, const EnemyActor* excludeTarget)
     {
+        if (!enemies || count <= 0)
+            return nullptr;
+
         EnemyActor* bestTarget = nullptr;
         float bestDistanceSq = kLockRadiusSq;
 
         for (int i = 0; i < count; ++i)
         {
             EnemyActor& candidate = enemies[i];
+            if (&candidate == excludeTarget)
+                continue;
             if (candidate.isDead)
                 continue;
 
