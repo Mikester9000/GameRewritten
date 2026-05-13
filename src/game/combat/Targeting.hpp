@@ -27,6 +27,9 @@ public:
 
     bool IsLocked() const
     {
+        // Lock state is implicit: locked only while target pointer exists and target is alive.
+        // RuntimeScene calls RefreshLock() each frame right after combat resolution so dead
+        // targets are cleared immediately.
         return (m_target != nullptr) && !m_target->isDead;
     }
 
