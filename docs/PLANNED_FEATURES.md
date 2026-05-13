@@ -11,6 +11,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - Before implementing a feature, check docs/SYSTEMS.md to confirm it is ❌ Not started.
 - After implementing a feature, move it from this list and mark it ✅ in docs/SYSTEMS.md.
 - When a new feature idea is agreed, add it here first before prompting for implementation.
+- Prefer rollout-safe additions: small isolated features, clean stubs, and extension hooks over large rewrites.
 
 ---
 
@@ -23,6 +24,9 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [x] Enemy combat states (chase / attack / hit)
 - [x] Player damage intake and defeat reset
 - [x] Combat HUD expansion (target HP bar, combo step)
+- [ ] Lock-on target cycling
+- [ ] Auto-retarget on target death / range loss
+- [ ] Pressure / stagger integration stub
 - [ ] GT610 budget debug counters
 
 ### Combat resource system
@@ -38,6 +42,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [x] Tactical Pause Items submenu stub
 - [x] Tactical Pause Ally submenu stub
 - [x] Lock-on moved to Q so Tab is free for Tactical Pause
+- [ ] Tactical Pause command readiness reasons
 
 ### Combat feedback
 - [x] Floating damage numbers
@@ -51,6 +56,15 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Death / defeat screen
 - [ ] Contextual button prompts
 - [x] Enemy name display on lock-on
+- [ ] Off-screen lock-on target indicator
+- [ ] Enemy reaction / interrupt-lite
+- [ ] Enemy attack telegraph lite
+
+### Milestone 12 implementation notes
+- Prefer small themed PRs even when the milestone is broad.
+- Add stubs or hooks first when a full FF7R-style system would otherwise require a rewrite.
+- Keep combat-facing additions data-light and GT610-safe.
+- Avoid coupling HUD, combat resolution, and renderer state more tightly than needed.
 
 ---
 
@@ -67,6 +81,8 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Fog of war on minimap
 - [ ] Area name display on cell enter
 - [ ] Notification toast system
+- [ ] Interaction hotspot registry stub
+- [ ] Landmark discovery trigger stub
 
 ### NPC and narrative
 - [ ] Named NPC actor
@@ -78,6 +94,8 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Dialog branching lite
 - [ ] Merchant / shop NPC
 - [ ] Inn / rest NPC
+- [ ] NPC interaction prompt routing stub
+- [ ] Quest flag / world-state hook
 
 ### Enemy variety
 - [ ] Multiple enemy types / stat variation
@@ -88,6 +106,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Enemy tint colour field per enemy type
 - [ ] Enemy scale variation (standard 1.0f / elite 1.35f / boss 2.0f+)
 - [ ] Pre-combat tension audio sting on first Chase entry per scene
+- [ ] Spawn composition table stub (solo / pair / pack)
 
 ---
 
@@ -103,6 +122,8 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [x] Enemy awareness radius visualization
 - [ ] Block / guard state
 - [ ] Hit pause / hitstop (if not done in M12)
+- [ ] Lock-on ring / target reticle polish
+- [ ] Directional hit spark / slash effect stub
 
 ### World visuals
 - [ ] Wind effect on trees
@@ -112,6 +133,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Biome transition fade
 - [ ] Landmark props
 - [ ] Destructible prop stub
+- [ ] World prop highlight / interact tint
 
 ### Camera and presentation
 - [ ] Camera shake on impact
@@ -121,6 +143,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Letterbox bars on scripted events
 - [ ] Cinematic event camera stub
 - [ ] Death camera effect
+- [ ] Lock-on camera recovery smoothing
 
 ### UI polish
 - [ ] Level up screen overlay
@@ -136,6 +159,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] FF7-style chunky custom HUD bars (HP / MP / Surge / Limit)
 - [ ] Player tint states (low HP red pulse, stunned white flash, dodge blue)
 - [ ] Summon system stub (reserved slot)
+- [ ] Tactical Pause panel animation polish
 
 ---
 
@@ -153,6 +177,9 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Dynamic audio volume zones
 - [ ] NPC voice line stubs via DialogBox
 - [ ] Boss music track slot stub
+- [ ] Tactical Pause enter / exit SFX
+- [ ] Lock-on acquire / break SFX
+- [ ] Enemy alert bark stub
 
 ---
 
@@ -172,6 +199,9 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Loading screen for cell transitions
 - [ ] Map screen
 - [ ] Map screen fog of war
+- [ ] Equipment slot stub
+- [ ] Ability unlock / progression hook
+- [ ] Combat stat modifier pipeline stub
 
 ---
 
@@ -193,6 +223,9 @@ These are agreed ideas not yet assigned to a milestone:
 - NPC dialogue flag system (lines change after story beats)
 - Elemental spell system (Fire / Ice / Thunder / Cure)
 - Limit Break escalation tiers per character
+- Full FF7R-style pressure and stagger loop
+- Party command wheel / character swap
+- Boss phase scripting framework
 
 ---
 
