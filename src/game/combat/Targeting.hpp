@@ -10,7 +10,7 @@ public:
     bool isLocked = false;
     EnemyActor* target = nullptr;
 
-    void ToggleLock(EnemyActor* enemies, int count, float playerX, float playerZ)
+    void ToggleLockOn(EnemyActor* enemies, int count, float playerX, float playerZ)
     {
         if (isLocked)
         {

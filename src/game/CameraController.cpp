@@ -15,6 +15,8 @@ using namespace DirectX;
 
 namespace
 {
+constexpr float kLockOnYawBiasSpeed = 8.0f;
+
 float WrapAngle(float angle)
 {
     constexpr float kPi = 3.14159265f;
@@ -35,7 +37,7 @@ void CameraController::BiasYawTowardTarget(float targetX, float targetZ, float d
     const float toTargetZ = targetZ - m_playerZ;
     const float targetYaw = atan2f(toTargetX, toTargetZ);
     const float yawDelta = WrapAngle(targetYaw - m_yaw);
-    const float blend = std::clamp(8.0f * dt, 0.0f, 1.0f);
+    const float blend = std::clamp(kLockOnYawBiasSpeed * dt, 0.0f, 1.0f);
     m_yaw = WrapAngle(m_yaw + (yawDelta * blend));
 }
 

@@ -28,6 +28,16 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 // ---------------------------------------------------------------------------
 #include <DirectXMath.h>
 
+namespace
+{
+constexpr float kLockMarkerHeightOffset = 2.8f;
+constexpr float kLockMarkerCircleRadius = 14.0f;
+constexpr int   kLockMarkerCircleSegments = 24;
+constexpr float kLockMarkerCircleThickness = 2.0f;
+constexpr float kLockMarkerTextOffsetX = -22.0f;
+constexpr float kLockMarkerTextOffsetY = -30.0f;
+}
+
 static bool WorldToScreen(
     float wx, float wy, float wz,
     float camX, float camY, float camZ,
@@ -530,7 +540,7 @@ void ImGuiLayer::DrawLockOnMarker(
 
     float sx = 0.0f;
     float sy = 0.0f;
-    if (!WorldToScreen(target->x, target->y + 2.8f, target->z,
+    if (!WorldToScreen(target->x, target->y + kLockMarkerHeightOffset, target->z,
                        camX, camY, camZ, yaw, pitch, vpW, vpH, sx, sy))
     {
         return;
@@ -539,6 +549,8 @@ void ImGuiLayer::DrawLockOnMarker(
     ImDrawList* drawList = ImGui::GetForegroundDrawList();
     const ImU32 lockColor = IM_COL32(255, 220, 80, 255);
 
-    drawList->AddCircle(ImVec2(sx, sy), 14.0f, lockColor, 24, 2.0f);
-    drawList->AddText(ImVec2(sx - 22.0f, sy - 30.0f), lockColor, "LOCK");
+    drawList->AddCircle(ImVec2(sx, sy), kLockMarkerCircleRadius, lockColor,
+                        kLockMarkerCircleSegments, kLockMarkerCircleThickness);
+    drawList->AddText(ImVec2(sx + kLockMarkerTextOffsetX, sy + kLockMarkerTextOffsetY),
+                      lockColor, "LOCK");
 }

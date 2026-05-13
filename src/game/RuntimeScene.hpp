@@ -244,7 +244,7 @@ public:
 
     void ToggleLockOn(float playerX, float playerZ)
     {
-        m_targeting.ToggleLock(m_enemies, kEnemyCount, playerX, playerZ);
+        m_targeting.ToggleLockOn(m_enemies, kEnemyCount, playerX, playerZ);
     }
 
 private:
