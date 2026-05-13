@@ -347,6 +347,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             bool attackHandled = false;
 
             // Priority 1: Limit Break (Shift held + F pressed while Limit is full).
+            // InputAction::Dodge is bound to VK_SHIFT — we reuse it here as the modifier key.
             if (!attackHandled && actionMap.IsHeld(InputAction::Dodge))
                 attackHandled = runtimeScene.TriggerLimitBreak(camController);
 

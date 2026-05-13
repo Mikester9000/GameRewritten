@@ -216,7 +216,7 @@ public:
         const float pz  = camController.GetPlayerZ();
 
         m_player.stats.SpendLimit();
-        m_player.stats.AddSurge(0.50f);
+        m_player.stats.AddSurge(0.50f); // half a Surge bar as bonus for landing Limit Break
         m_combatSystem.TriggerAttack(px, py, pz, yaw, 4);
         m_player.state      = PlayerActionState::Attack2;
         m_player.stateTimer = 0.60f;

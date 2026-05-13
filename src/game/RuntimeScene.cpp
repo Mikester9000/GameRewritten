@@ -21,7 +21,8 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
     m_combatSystem.Update(dt, m_enemies, kEnemyCount);
 
     // Fill Surge from hits landed this frame and spawn floating damage numbers.
-    // Stronger hits (step-2 combo or above) give more Surge than light hits.
+    // Heavy hits (damage >= 5, i.e. combo step 2 or Surge Strike level) reward more Surge
+    // than light jabs so skilled play builds the bar faster.
     const CombatSystem::EnemyHitRecord* hitRecords = m_combatSystem.GetRecentEnemyHits();
     int hitCount = m_combatSystem.GetRecentEnemyHitCount();
     for (int i = 0; i < hitCount; ++i)

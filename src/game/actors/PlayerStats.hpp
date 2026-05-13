@@ -21,6 +21,9 @@ struct PlayerStats
     // MP regenerates passively at this rate per second.
     static constexpr float kMpRegenRate = 2.0f;
 
+    // Limit gauge advances by this fraction each time the player takes a hit.
+    static constexpr float kLimitChargePerHit = 0.20f;
+
     // Tick passive Surge fill and MP regeneration each frame.
     void Update(float dt)
     {
@@ -57,7 +60,7 @@ struct PlayerStats
         if (amount <= 0)
             return;
         hp = std::clamp(hp - static_cast<float>(amount), 0.0f, maxHp);
-        AddLimitCharge(0.20f);
+        AddLimitCharge(kLimitChargePerHit);
     }
 
     bool IsDead() const { return hp <= 0.0f; }
