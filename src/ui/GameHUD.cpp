@@ -10,7 +10,7 @@ namespace
 constexpr float kHudOffsetX = 20.0f;
 constexpr float kHudBottomMargin = 20.0f;
 constexpr float kHudWidth = 220.0f;
-constexpr float kHudHeight = 110.0f;
+constexpr float kHudHeight = 140.0f; // tall enough for HP / MP / SURGE / LIMIT bars
 constexpr float kGaugeWidth = 120.0f;
 const ImVec2 kGaugeSize(kGaugeWidth, 0.0f);
 
@@ -102,7 +102,19 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
     if (stats.IsSurgeReady())
     {
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.1f, 0.9f, 0.2f, 1.0f), "READY");
+        ImGui::TextColored(ImVec4(0.1f, 0.9f, 0.2f, 1.0f), "READY  F");
+    }
+
+    // Limit bar — purple fill; shows prompt when full.
+    ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.6f, 0.1f, 0.9f, 1.0f));
+    ImGui::ProgressBar(NormalizeValue(stats.limitCharge, 1.0f), kGaugeSize, "");
+    ImGui::PopStyleColor();
+    ImGui::SameLine();
+    ImGui::Text("LIMIT");
+    if (stats.IsLimitReady())
+    {
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.9f, 0.4f, 1.0f, 1.0f), "READY  Shift+F");
     }
 
     ImGui::End();

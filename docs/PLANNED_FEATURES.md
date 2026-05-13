@@ -26,13 +26,13 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] GT610 budget debug counters
 
 ### Combat resource system
-- [ ] Remove ATB gate from basic attacks (always free)
-- [ ] Rename ATB to Surge on HUD
-- [ ] Surge fills from hits landed, hits taken, skilled dodge, passive time
-- [ ] Surge Strike action (F while Surge full — 3x damage)
-- [ ] Limit Break gauge (fills from taking damage)
-- [ ] Limit Break move (5x damage finisher when gauge full)
-- [ ] MP passive regeneration (2.0f per second)
+- [x] Remove ATB gate from basic attacks (always free)
+- [x] Rename ATB to Surge on HUD
+- [x] Surge fills from hits landed, hits taken, skilled dodge, passive time
+- [x] Surge Strike action (F while Surge full — 3x damage)
+- [x] Limit Break gauge (fills from taking damage)
+- [x] Limit Break move (5x damage finisher when gauge full)
+- [x] MP passive regeneration (2.0f per second)
 - [ ] Tactical Pause (hold Tab — 15% time scale, command menu)
 - [ ] Tactical Pause Magic submenu stub
 - [ ] Tactical Pause Items submenu stub

@@ -128,7 +128,7 @@ public:
     }
 
     // Spawn a hitbox for the current combo step.
-    // Step 1 requires Surge; step 2 chains within the combo window, Surge not required.
+    // Both combo steps are always free — no Surge required.
     // Returns true if an attack was triggered.
     bool TriggerPlayerAttack(const CameraController& camController)
     {
@@ -139,16 +139,13 @@ public:
 
         if (m_combatSystem.comboStep == 0)
         {
-            // Step 1 — only allowed from Idle or Move while grounded; requires Surge.
+            // Step 1 — only allowed from Idle or Move while grounded.
             const PlayerActionState s = m_player.state;
             if (s != PlayerActionState::Idle && s != PlayerActionState::Move)
                 return false;
             if (!camController.IsGrounded())
                 return false;
-            if (!m_player.stats.IsSurgeReady())
-                return false;
 
-            m_player.stats.surgeCharge = 0.0f;
             m_combatSystem.TriggerAttack(px, py, pz, yaw, 1);
             m_player.state      = PlayerActionState::Attack1;
             m_player.stateTimer = 0.40f;
@@ -157,14 +154,13 @@ public:
         }
         else if (m_combatSystem.comboStep == 1 && m_combatSystem.comboTimer > 0.0f)
         {
-            // Step 2 — allowed from Attack1, Idle, or Move during the combo window; Surge not required.
+            // Step 2 — allowed from Attack1, Idle, or Move during the combo window.
             const PlayerActionState s = m_player.state;
             if (s != PlayerActionState::Attack1 &&
                 s != PlayerActionState::Idle    &&
                 s != PlayerActionState::Move)
                 return false;
 
-            m_player.stats.surgeCharge = 0.0f;
             m_combatSystem.TriggerAttack(px, py, pz, yaw, 2);
             m_player.state      = PlayerActionState::Attack2;
             m_player.stateTimer = 0.40f;
@@ -173,6 +169,59 @@ public:
         }
 
         return false;
+    }
+
+    // Fire a Surge Strike — a powerful single hit that spends the full Surge bar.
+    // Requires Idle or Move state, grounded, and full Surge.
+    // Returns true if fired.
+    bool TriggerSurgeStrike(const CameraController& camController)
+    {
+        const PlayerActionState s = m_player.state;
+        if (s != PlayerActionState::Idle && s != PlayerActionState::Move)
+            return false;
+        if (!camController.IsGrounded())
+            return false;
+        if (!m_player.stats.IsSurgeReady())
+            return false;
+
+        const float yaw = camController.GetYaw();
+        const float px  = camController.GetPlayerX();
+        const float py  = camController.GetPlayerGroundY() + 1.0f;
+        const float pz  = camController.GetPlayerZ();
+
+        m_player.stats.SpendSurge();
+        m_combatSystem.TriggerAttack(px, py, pz, yaw, 3);
+        m_player.state      = PlayerActionState::Attack2;
+        m_player.stateTimer = 0.50f;
+        LOG_INFO("RuntimeScene: Surge Strike triggered.");
+        return true;
+    }
+
+    // Fire a Limit Break — the strongest hit; spends the full Limit bar and grants bonus Surge.
+    // Requires Idle or Move state, grounded, and full Limit charge.
+    // Returns true if fired.
+    bool TriggerLimitBreak(const CameraController& camController)
+    {
+        const PlayerActionState s = m_player.state;
+        if (s != PlayerActionState::Idle && s != PlayerActionState::Move)
+            return false;
+        if (!camController.IsGrounded())
+            return false;
+        if (!m_player.stats.IsLimitReady())
+            return false;
+
+        const float yaw = camController.GetYaw();
+        const float px  = camController.GetPlayerX();
+        const float py  = camController.GetPlayerGroundY() + 1.0f;
+        const float pz  = camController.GetPlayerZ();
+
+        m_player.stats.SpendLimit();
+        m_player.stats.AddSurge(0.50f);
+        m_combatSystem.TriggerAttack(px, py, pz, yaw, 4);
+        m_player.state      = PlayerActionState::Attack2;
+        m_player.stateTimer = 0.60f;
+        LOG_INFO("RuntimeScene: Limit Break triggered.");
+        return true;
     }
 
     // Returns true when the player was defeated this frame and needs to be
