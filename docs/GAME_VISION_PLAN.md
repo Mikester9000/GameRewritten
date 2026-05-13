@@ -193,7 +193,7 @@ enum class InputAction
     Jump,
     Attack,
     Dodge,      // NEW — default binding: left Shift
-    LockOn,     // NEW — default binding: Tab
+    LockOn,     // NEW — default binding: Q
     Interact,
     TogglePause,
     ToggleDebug,
@@ -202,7 +202,7 @@ enum class InputAction
 
 // In Default():
 map.bindings[InputAction::Dodge]  = VK_SHIFT;
-map.bindings[InputAction::LockOn] = VK_TAB;
+map.bindings[InputAction::LockOn] = 'Q';
 ```
 
 ---

@@ -37,7 +37,7 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [ ] Tactical Pause Magic submenu stub
 - [ ] Tactical Pause Items submenu stub
 - [ ] Tactical Pause Ally submenu stub
-- [ ] Tab input split: tap Tab = Lock-on, hold Tab (>=0.25s) = Tactical Pause
+- [x] Lock-on moved to Q so Tab is free for Tactical Pause
 
 ### Combat feedback
 - [ ] Floating damage numbers
