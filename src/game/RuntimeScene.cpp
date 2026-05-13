@@ -18,6 +18,8 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
     for (EnemyActor& enemy : m_enemies)
         enemy.Update(dt, renderer, m_playerX, m_playerZ);
 
+    m_targeting.RefreshLock(m_playerX, m_playerZ);
+
     m_combatSystem.Update(dt, m_enemies, kEnemyCount);
 
     // Fill Surge from hits landed this frame and spawn floating damage numbers.

@@ -75,6 +75,12 @@ public:
         float yaw,     float pitch,
         float vpW,     float vpH);
 
+    void DrawLockOnMarker(
+        const class EnemyActor* target,
+        float camX, float camY, float camZ,
+        float yaw,  float pitch,
+        float vpW,  float vpH);
+
     // Toggled by the checkbox inside DrawDebugOverlay.
     bool showCombatDebug = false;
 

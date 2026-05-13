@@ -1,3 +1,4 @@
+- 2026-05-13: Track 12.7: Added header-only lock-on `Targeting` system (nearest-enemy toggle/validation), camera yaw bias toward locked target, lock-aware attack facing, lock marker overlay, and remapped LockOn from Tab to Q (Tab left free for Tactical Pause)
 - 2026-05-13: Docs: Clarified Tab tap-vs-hold split (Lock-on vs Tactical Pause) and moved battle music transition back to Milestone 15
 - 2026-05-13: Docs: Lock in Surge / Limit Break / Tactical Pause / MP vision
 - 2026-05-11: Docs: Added PLANNED_FEATURES.md master feature list and expanded COMBAT_VISION, UI_VISION, GRAPHICS_VISION, GAME_VISION_PLAN, and SYSTEMS with all planned feature suggestions

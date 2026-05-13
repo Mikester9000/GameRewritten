@@ -516,3 +516,29 @@ void ImGuiLayer::DrawCombatDebug(
         }
     }
 }
+
+void ImGuiLayer::DrawLockOnMarker(
+    const EnemyActor* target,
+    float camX, float camY, float camZ,
+    float yaw,  float pitch,
+    float vpW,  float vpH)
+{
+    if (!target || target->isDead)
+        return;
+    if (!ImGui::GetCurrentContext())
+        return;
+
+    float sx = 0.0f;
+    float sy = 0.0f;
+    if (!WorldToScreen(target->x, target->y + 2.8f, target->z,
+                       camX, camY, camZ, yaw, pitch, vpW, vpH, sx, sy))
+    {
+        return;
+    }
+
+    ImDrawList* drawList = ImGui::GetForegroundDrawList();
+    const ImU32 lockColor = IM_COL32(255, 220, 80, 255);
+
+    drawList->AddCircle(ImVec2(sx, sy), 14.0f, lockColor, 24, 2.0f);
+    drawList->AddText(ImVec2(sx - 22.0f, sy - 30.0f), lockColor, "LOCK");
+}

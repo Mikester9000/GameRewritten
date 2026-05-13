@@ -196,6 +196,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasReloadActionDown = false;
     bool wasInteractActionDown = false;
     bool wasAttackActionDown = false;
+    bool wasLockOnActionDown = false;
     CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
     // Track the cell the player was in last frame to detect cell-crossing.
@@ -226,6 +227,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         const bool reloadPressed = actionMap.IsPressed(InputAction::ReloadAssets, wasReloadActionDown);
         const bool interactPressed = actionMap.IsPressed(InputAction::Interact, wasInteractActionDown);
         const bool attackPressed = actionMap.IsPressed(InputAction::Attack, wasAttackActionDown);
+        const bool lockOnPressed = actionMap.IsPressed(InputAction::LockOn, wasLockOnActionDown);
 
         // --- 3. UI state ---
         // Apply pause, cursor visibility, dialog update.
@@ -277,6 +279,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         // --- 5. Camera update ---
         // Move and rotate the camera based on input and player state.
+        if (!paused)
+        {
+            const EnemyActor* lockedTarget = runtimeScene.GetLockedTarget();
+            if (lockedTarget)
+                camController.BiasYawTowardTarget(lockedTarget->x, lockedTarget->z, deltaTime);
+        }
+
         const bool allowMovement = !paused;
         const bool allowMouseLook = !paused && !editorActive;
         CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
@@ -328,6 +337,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                 camController.GetPlayerX(),
                                 camController.GetPlayerY(),
                                 camController.GetPlayerZ());
+
+        if (!paused && lockOnPressed)
+        {
+            runtimeScene.ToggleLockOn(camController.GetPlayerX(),
+                                      camController.GetPlayerZ());
+        }
+
         if (!paused)
             runtimeScene.damageNumbers.Update(deltaTime);
 
@@ -401,6 +417,16 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                 minimap.Draw(worldGrid,
                              camController.GetPlayerX(), camController.GetPlayerZ(),
                              camController.GetYaw(), ImGui::GetIO());
+
+                imguiLayer.DrawLockOnMarker(
+                    runtimeScene.GetLockedTarget(),
+                    camController.GetCamX(),
+                    camController.GetCamY(),
+                    camController.GetCamZ(),
+                    camController.GetYaw(),
+                    camController.GetPitch(),
+                    static_cast<float>(window.GetWidth()),
+                    static_cast<float>(window.GetHeight()));
             }
 
             WorldEditorFrameOps::DrawEditorPanelForActiveCell(

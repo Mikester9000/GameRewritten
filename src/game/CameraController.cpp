@@ -13,6 +13,32 @@
 
 using namespace DirectX;
 
+namespace
+{
+float WrapAngle(float angle)
+{
+    constexpr float kPi = 3.14159265f;
+    constexpr float kTwoPi = 6.28318530f;
+
+    while (angle > kPi)  angle -= kTwoPi;
+    while (angle < -kPi) angle += kTwoPi;
+    return angle;
+}
+}
+
+void CameraController::BiasYawTowardTarget(float targetX, float targetZ, float dt)
+{
+    if (dt <= 0.0f)
+        return;
+
+    const float toTargetX = targetX - m_playerX;
+    const float toTargetZ = targetZ - m_playerZ;
+    const float targetYaw = atan2f(toTargetX, toTargetZ);
+    const float yawDelta = WrapAngle(targetYaw - m_yaw);
+    const float blend = std::clamp(8.0f * dt, 0.0f, 1.0f);
+    m_yaw = WrapAngle(m_yaw + (yawDelta * blend));
+}
+
 // ---------------------------------------------------------------------------
 // ResetToSpawn
 // ---------------------------------------------------------------------------

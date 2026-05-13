@@ -23,6 +23,7 @@
 #include "actors/EnemyActor.hpp"
 #include "PrimitiveRenderer.hpp"
 #include "combat/CombatSystem.hpp"
+#include "combat/Targeting.hpp"
 #include "CameraController.hpp"
 #include "../ui/DamageNumbers.hpp"
 #include "../app/InputActionMap.hpp"
@@ -132,10 +133,10 @@ public:
     // Returns true if an attack was triggered.
     bool TriggerPlayerAttack(const CameraController& camController)
     {
-        const float yaw = camController.GetYaw();
         const float px  = camController.GetPlayerX();
         const float py  = camController.GetPlayerGroundY() + 1.0f; // mid-body height
         const float pz  = camController.GetPlayerZ();
+        const float yaw = GetAttackYaw(camController);
 
         if (m_combatSystem.comboStep == 0)
         {
@@ -184,10 +185,10 @@ public:
         if (!m_player.stats.IsSurgeReady())
             return false;
 
-        const float yaw = camController.GetYaw();
         const float px  = camController.GetPlayerX();
         const float py  = camController.GetPlayerGroundY() + 1.0f;
         const float pz  = camController.GetPlayerZ();
+        const float yaw = GetAttackYaw(camController);
 
         m_player.stats.SpendSurge();
         m_combatSystem.TriggerAttack(px, py, pz, yaw, 3);
@@ -210,10 +211,10 @@ public:
         if (!m_player.stats.IsLimitReady())
             return false;
 
-        const float yaw = camController.GetYaw();
         const float px  = camController.GetPlayerX();
         const float py  = camController.GetPlayerGroundY() + 1.0f;
         const float pz  = camController.GetPlayerZ();
+        const float yaw = GetAttackYaw(camController);
 
         m_player.stats.SpendLimit();
         m_player.stats.AddSurge(0.50f); // half a Surge bar as bonus for landing Limit Break
@@ -239,6 +240,12 @@ public:
     const CombatSystem& GetCombatSystem() const { return m_combatSystem; }
     const EnemyActor*   GetEnemies()      const { return m_enemies; }
     int                 GetEnemyCount()   const { return kEnemyCount; }
+    const EnemyActor*   GetLockedTarget() const { return m_targeting.GetTarget(); }
+
+    void ToggleLockOn(float playerX, float playerZ)
+    {
+        m_targeting.ToggleLock(m_enemies, kEnemyCount, playerX, playerZ);
+    }
 
 private:
     static constexpr int kEnemyCount = 2;
@@ -262,6 +269,7 @@ private:
     PrimitiveRenderer& m_primRenderer;
     EnemyActor         m_enemies[kEnemyCount];
     CombatSystem       m_combatSystem;
+    Targeting          m_targeting;
 
     // Player position updated each frame in BeginFrame (after camController.Update()).
     float m_playerX = 0.0f;
@@ -292,5 +300,18 @@ private:
         return (distX < kPlayerHitHalfX + hitBox.halfX) &&
                (distY < kPlayerHitHalfY + hitBox.halfY) &&
                (distZ < kPlayerHitHalfZ + hitBox.halfZ);
+    }
+
+    float GetAttackYaw(const CameraController& camController) const
+    {
+        const EnemyActor* lockedTarget = m_targeting.GetTarget();
+        if (!lockedTarget)
+            return camController.GetYaw();
+
+        const float playerX = camController.GetPlayerX();
+        const float playerZ = camController.GetPlayerZ();
+        const float deltaX = lockedTarget->x - playerX;
+        const float deltaZ = lockedTarget->z - playerZ;
+        return atan2f(deltaX, deltaZ);
     }
 };

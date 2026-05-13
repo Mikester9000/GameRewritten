@@ -56,6 +56,7 @@ public:
     void SetInputActionMap(const InputActionMap* inputActionMap) { m_inputActionMap = inputActionMap; }
     void SetCollisionWorld(const CollisionWorld* collisionWorld) { m_collisionWorld = collisionWorld; }
     void BeginDodge(float dirX, float dirZ);
+    void BiasYawTowardTarget(float targetX, float targetZ, float dt);
 
     // Teleport the player to a new spawn position and reset all physics and
     // dodge state. Call after a player defeat so the next frame starts clean.
