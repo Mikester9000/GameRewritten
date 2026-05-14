@@ -199,7 +199,8 @@ bool EnemyActor::IsHitFlashVisible() const
     if (hitFlashTimer <= 0.0f)
         return true;
 
-    const int blinkPhase = static_cast<int>(hitFlashTimer / kHitFlashBlinkPeriod);
-    // Even phases are visible; odd phases are hidden for a light blink effect.
+    const float elapsedFlashTime = kHitFlashDuration - hitFlashTimer;
+    const int blinkPhase = static_cast<int>(elapsedFlashTime / kHitFlashBlinkPeriod);
+    // Even elapsed phases are visible so a fresh hit starts visible.
     return (blinkPhase % 2) == 0;
 }
