@@ -21,6 +21,12 @@ public:
     // avoid coupling GameHUD to the combat system header.
     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
 
+    // Draw a subtle edge indicator when the lock-on target is outside the screen.
+    void DrawOffScreenTargetIndicator(const EnemyActor* target,
+                                      float camX, float camY, float camZ,
+                                      float yaw, float pitch,
+                                      float vpW, float vpH) const;
+
 private:
     float m_lowHpPulseTime = 0.0f;
 };

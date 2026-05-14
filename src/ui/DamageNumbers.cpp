@@ -9,6 +9,23 @@
 #include <cstdio>
 #include <cfloat>
 
+DamageNumbers::Entry* DamageNumbers::AcquireEntrySlot()
+{
+    for (Entry& entry : m_entries)
+    {
+        if (!entry.active)
+            return &entry;
+    }
+
+    Entry* oldestEntry = &m_entries[0];
+    for (Entry& entry : m_entries)
+    {
+        if (entry.ageSec > oldestEntry->ageSec)
+            oldestEntry = &entry;
+    }
+    return oldestEntry;
+}
+
 void DamageNumbers::Reset()
 {
     for (Entry& entry : m_entries)
@@ -23,26 +40,7 @@ void DamageNumbers::Spawn(int damage, float worldX, float worldY, float worldZ)
         damage = 0;
     }
 
-    Entry* slot = nullptr;
-
-    for (Entry& entry : m_entries)
-    {
-        if (!entry.active)
-        {
-            slot = &entry;
-            break;
-        }
-    }
-
-    if (!slot)
-    {
-        slot = &m_entries[0];
-        for (Entry& entry : m_entries)
-        {
-            if (entry.ageSec > slot->ageSec)
-                slot = &entry;
-        }
-    }
+    Entry* slot = AcquireEntrySlot();
 
     slot->active = true;
     slot->x = worldX;
@@ -50,6 +48,20 @@ void DamageNumbers::Spawn(int damage, float worldX, float worldY, float worldZ)
     slot->z = worldZ;
     slot->damage = damage;
     slot->ageSec = 0.0f;
+    slot->style  = Entry::Style::Damage;
+}
+
+void DamageNumbers::SpawnMiss(float worldX, float worldY, float worldZ)
+{
+    Entry* slot = AcquireEntrySlot();
+
+    slot->active = true;
+    slot->x = worldX;
+    slot->y = worldY;
+    slot->z = worldZ;
+    slot->damage = 0;
+    slot->ageSec = 0.0f;
+    slot->style  = Entry::Style::Miss;
 }
 
 void DamageNumbers::Update(float dt)
@@ -101,9 +113,19 @@ void DamageNumbers::Draw(float camX, float camY, float camZ,
         const int alpha = static_cast<int>((1.0f - t) * 255.0f);
 
         char text[16]{};
-        std::snprintf(text, sizeof(text), "%d", entry.damage);
+        float fontSize = 33.0f;
+        ImU32 textColor = IM_COL32(255, 255, 255, alpha);
+        if (entry.style == Entry::Style::Miss)
+        {
+            std::snprintf(text, sizeof(text), "MISS");
+            fontSize = 26.0f;
+            textColor = IM_COL32(235, 215, 120, alpha);
+        }
+        else
+        {
+            std::snprintf(text, sizeof(text), "%d", entry.damage);
+        }
 
-        const float fontSize = 33.0f;
         ImFont* font = ImGui::GetFont();
         const ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
 
@@ -111,7 +133,7 @@ void DamageNumbers::Draw(float camX, float camY, float camZ,
             font,
             fontSize,
             ImVec2(sx - textSize.x * 0.5f, sy),
-            IM_COL32(255, 255, 255, alpha),
+            textColor,
             text);
     }
 }

@@ -34,6 +34,7 @@ void EnemyActor::Init(float startX, float startZ,
     pendingAttack = false;
     pendingAttackHitBox = HitBox{};
     pendingAttackHitBox.framesToLive = 0;
+    hitFlashTimer = 0.0f;
 }
 
 void EnemyActor::TransitionTo(EnemyState next, float duration)
@@ -46,6 +47,7 @@ void EnemyActor::TransitionTo(EnemyState next, float duration)
 
 void EnemyActor::OnHit(int damage)
 {
+    hitFlashTimer = kHitFlashDuration;
     hp -= damage;
     if (hp <= 0)
     {
@@ -74,6 +76,13 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
         stateTimer -= dt;
         if (stateTimer < 0.0f)
             stateTimer = 0.0f;
+    }
+
+    if (hitFlashTimer > 0.0f)
+    {
+        hitFlashTimer -= dt;
+        if (hitFlashTimer < 0.0f)
+            hitFlashTimer = 0.0f;
     }
 
     // Distance to player (XZ plane only).
@@ -173,10 +182,25 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
     if (isDead)
         return;
 
+    if (!IsHitFlashVisible())
+        return;
+
     static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
     const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
     if (!visualPrefab)
         return;
 
-    primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, 1.0f);
+    const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
+    primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, hitFlashScale);
+}
+
+bool EnemyActor::IsHitFlashVisible() const
+{
+    if (hitFlashTimer <= 0.0f)
+        return true;
+
+    const float elapsedFlashTime = kHitFlashDuration - hitFlashTimer;
+    const int blinkPhase = static_cast<int>(elapsedFlashTime / kHitFlashBlinkPeriod);
+    // Even elapsed phases are visible so a fresh hit starts visible.
+    return (blinkPhase % 2) == 0;
 }
