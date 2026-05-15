@@ -15,7 +15,7 @@
 static constexpr float ENEMY_HALF_X = 0.5f;
 static constexpr float ENEMY_HALF_Y = 1.0f;
 static constexpr float ENEMY_HALF_Z = 0.5f;
-static constexpr float DAMAGE_NUMBER_Y_OFFSET = 5.2f; // spawn above enemy head
+static constexpr float DAMAGE_NUMBER_Y_OFFSET = 2.2f; // spawn above enemy head
 
 static bool HitBoxOverlapsEnemy(const HitBox& hitBox, const EnemyActor& enemy)
 {
