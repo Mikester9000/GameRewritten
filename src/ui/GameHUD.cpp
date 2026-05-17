@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/ui/GameHUD.cpp
-// SYSTEM: GameHUD.cpp
-// SYSTEM: HUD, menus, overlays, and editor tool panels
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: GameHUD module behavior and local implementation details.
+// ============================================================
 
 #include "GameHUD.hpp"
 #include "ScreenProjection.hpp"

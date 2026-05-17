@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/app/WorldRuntimeRefresh.hpp
-// SYSTEM: WorldRuntimeRefresh.hpp
-// SYSTEM: app startup/shutdown wiring and frame orchestration
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: WorldRuntimeRefresh module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 // WorldRuntimeRefresh.hpp

@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/ui/ImGuiLayer.hpp
-// SYSTEM: ImGuiLayer.hpp
-// SYSTEM: HUD, menus, overlays, and editor tool panels
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: ImGuiLayer module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 // ImGuiLayer.hpp

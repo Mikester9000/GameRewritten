@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/assets/AssetRegistry.cpp
-// SYSTEM: AssetRegistry.cpp
-// SYSTEM: asset registry lookups and content loading helpers
+// SYSTEM: Assets
+// ROLE: asset registry lookups and content loading helpers
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: AssetRegistry module behavior and local implementation details.
+// ============================================================
 
 // AssetRegistry.cpp
 // Loads Content/AssetRegistry.json and answers GetPath() queries.

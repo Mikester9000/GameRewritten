@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/assets/AssetRegistry.hpp
-// SYSTEM: AssetRegistry.hpp
-// SYSTEM: asset registry lookups and content loading helpers
+// SYSTEM: Assets
+// ROLE: asset registry lookups and content loading helpers
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: AssetRegistry module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 // AssetRegistry.hpp

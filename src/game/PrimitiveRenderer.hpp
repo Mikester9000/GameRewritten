@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/game/PrimitiveRenderer.hpp
-// SYSTEM: PrimitiveRenderer.hpp
-// SYSTEM: gameplay systems, actors, combat, and runtime state
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: PrimitiveRenderer module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 // PrimitiveRenderer.hpp

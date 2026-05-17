@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/game/actors/PlayerActor.cpp
-// SYSTEM: PlayerActor.cpp
-// SYSTEM: gameplay systems, actors, combat, and runtime state
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: PlayerActor module behavior and local implementation details.
+// ============================================================
 
 #include "PlayerActor.hpp"
 

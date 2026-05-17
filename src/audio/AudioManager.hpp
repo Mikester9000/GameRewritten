@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/audio/AudioManager.hpp
-// SYSTEM: AudioManager.hpp
-// SYSTEM: audio playback and runtime audio control
+// SYSTEM: Audio
+// ROLE: audio playback and runtime audio control
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: AudioManager module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 

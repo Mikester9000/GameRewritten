@@ -130,16 +130,19 @@ def assert_clean_worktree() -> None:
         )
 
 
-def doctor_check_files_exist() -> None:
+def doctor_check_files_exist(*, require_next_task: bool) -> None:
     missing = []
-    for rel in [
-        "docs/NEXT_TASK.md",
+    required_files = [
         "docs/FULL_TASK_SEQUENCE.md",
         "docs/SYSTEMS.md",
         "docs/CHANGELOG.md",
         "docs/AGENT_WORK_LOG.md",
         "tools/llm/advance_next_task.py",
-    ]:
+    ]
+    if require_next_task:
+        required_files.insert(0, "docs/NEXT_TASK.md")
+
+    for rel in required_files:
         if not (REPO_ROOT / rel).exists():
             missing.append(rel)
     if missing:
@@ -167,10 +170,11 @@ def doctor_check_next_task_format() -> None:
         raise RuntimeError("NEXT_TASK has no valid files to touch.")
 
 
-def run_doctor() -> None:
-    doctor_check_files_exist()
+def run_doctor(*, require_next_task: bool = True) -> None:
+    doctor_check_files_exist(require_next_task=require_next_task)
     doctor_check_task_sequence_format()
-    doctor_check_next_task_format()
+    if require_next_task:
+        doctor_check_next_task_format()
 
 
 def ensure_required_docs_present(changed: Set[str]) -> None:
@@ -194,7 +198,7 @@ def ensure_scope(changed: Set[str], allowed_task_files: Set[str]) -> None:
 
 def do_start() -> int:
     assert_clean_worktree()
-    run_doctor()
+    run_doctor(require_next_task=False)
     run([sys.executable, str(ADVANCE_SCRIPT)])
     run_doctor()
     print("START OK: docs/NEXT_TASK.md regenerated from first unchecked backlog task.")

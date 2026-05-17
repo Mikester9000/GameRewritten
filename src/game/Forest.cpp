@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/game/Forest.cpp
-// SYSTEM: Forest.cpp
-// SYSTEM: gameplay systems, actors, combat, and runtime state
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: Forest module behavior and local implementation details.
+// ============================================================
 
 #include "Forest.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"

@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/logger/Logger.hpp
-// SYSTEM: Logger.hpp
-// SYSTEM: logging macros and logger implementation only
+// SYSTEM: Logger
+// ROLE: logging macros and logger implementation only
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: Logger module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 #include <string>

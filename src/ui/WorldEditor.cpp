@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/ui/WorldEditor.cpp
-// SYSTEM: WorldEditor.cpp
-// SYSTEM: HUD, menus, overlays, and editor tool panels
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: WorldEditor module behavior and local implementation details.
+// ============================================================
 
 // WorldEditor.cpp
 // ImGui "World Editor" panel implementation.

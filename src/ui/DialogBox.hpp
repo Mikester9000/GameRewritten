@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/ui/DialogBox.hpp
-// SYSTEM: DialogBox.hpp
-// SYSTEM: HUD, menus, overlays, and editor tool panels
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: DialogBox module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 

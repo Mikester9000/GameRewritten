@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/game/RuntimeScene.hpp
-// SYSTEM: RuntimeScene.hpp
-// SYSTEM: gameplay systems, actors, combat, and runtime state
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: RuntimeScene module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 // RuntimeScene.hpp

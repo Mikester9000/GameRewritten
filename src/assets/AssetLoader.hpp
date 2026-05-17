@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/assets/AssetLoader.hpp
-// SYSTEM: AssetLoader.hpp
-// SYSTEM: asset registry lookups and content loading helpers
+// SYSTEM: Assets
+// ROLE: asset registry lookups and content loading helpers
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: AssetLoader module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 // AssetLoader.hpp

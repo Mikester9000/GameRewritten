@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/assets/TextureCache.hpp
-// SYSTEM: TextureCache.hpp
-// SYSTEM: asset registry lookups and content loading helpers
+// SYSTEM: Assets
+// ROLE: asset registry lookups and content loading helpers
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: TextureCache module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 // TextureCache.hpp

@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/app/CursorModeController.hpp
-// SYSTEM: CursorModeController.hpp
-// SYSTEM: app startup/shutdown wiring and frame orchestration
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: CursorModeController module behavior and local implementation details.
+// ============================================================
 
 #pragma once
 // CursorModeController.hpp

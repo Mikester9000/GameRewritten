@@ -1,7 +1,10 @@
 // ============================================================
 // FILE: src/ui/ImGuiLayer.cpp
-// SYSTEM: ImGuiLayer.cpp
-// SYSTEM: HUD, menus, overlays, and editor tool panels
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: ImGuiLayer module behavior and local implementation details.
+// ============================================================
 
 // ImGuiLayer.cpp
 // Manages Dear ImGui context, Win32 + D3D11 backends, and draws the in-game UI.
