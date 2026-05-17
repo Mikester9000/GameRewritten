@@ -3,11 +3,12 @@
 This file is the complete ordered sequence from current state to "all planned systems in `docs/SYSTEMS.md` marked ✅".
 
 ## Execution Rule (No Thinking Required)
-1. Run `python tools/llm/worst_llm_guard.py start`.
-2. Execute only the task written into `docs/NEXT_TASK.md`.
-3. When done: update `docs/SYSTEMS.md`, `docs/CHANGELOG.md`, `docs/AGENT_WORK_LOG.md`.
-4. Run `python tools/llm/worst_llm_guard.py complete`.
-5. Stop. Repeat next run.
+1. Run `python tools/llm/worst_llm_guard.py doctor`.
+2. Run `python tools/llm/worst_llm_guard.py start`.
+3. Execute only the task written into `docs/NEXT_TASK.md`.
+4. When done: update `docs/SYSTEMS.md`, `docs/CHANGELOG.md`, `docs/AGENT_WORK_LOG.md`.
+5. Run `python tools/llm/worst_llm_guard.py complete`.
+6. Stop. Repeat next run.
 
 ## Mandatory micro-steps per task
 1. Read listed files once.
@@ -324,3 +325,32 @@ Project completion for this autopilot track means:
   - Files: `src/game/combat/CombatModifiers.hpp`, `src/game/combat/CombatSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
+
+---
+
+## Phase 5 — Debugging + polish completion pass (mandatory)
+
+- [ ] **Task 056: Combat bugfix sweep**
+  - Files: `src/game/combat/CombatSystem.cpp/hpp`, `src/game/RuntimeScene.hpp`, `src/app/Main.cpp`
+  - Steps: resolve remaining combat regressions and unsafe edge cases using minimal scoped fixes only.
+  - Done when: no known combat blockers remain in `docs/AGENT_WORK_LOG.md`, `docs/SYSTEMS.md` flipped to ✅ where applicable, changelog/log updated.
+
+- [ ] **Task 057: Camera/input bugfix sweep**
+  - Files: `src/game/CameraController.cpp/hpp`, `src/app/InputActionMap.hpp`, `src/app/Main.cpp`
+  - Steps: resolve camera/input logic bugs and bad state transitions with minimal safe edits.
+  - Done when: no known camera/input blockers remain in `docs/AGENT_WORK_LOG.md`, relevant systems flipped to ✅, changelog/log updated.
+
+- [ ] **Task 058: UI/HUD polish and bugfix sweep**
+  - Files: `src/ui/GameHUD.cpp/hpp`, `src/ui/ImGuiLayer.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp`
+  - Steps: fix HUD/UI defects and apply low-risk clarity polish for readability/usability.
+  - Done when: no known UI/HUD blockers remain in `docs/AGENT_WORK_LOG.md`, relevant systems flipped to ✅, changelog/log updated.
+
+- [ ] **Task 059: World/runtime stability sweep**
+  - Files: `src/world/WorldGrid.cpp/hpp`, `src/game/RuntimeScene.cpp/hpp`, `src/game/Forest.cpp/hpp`
+  - Steps: fix high-impact runtime/world stability issues with smallest safe patches.
+  - Done when: no known world/runtime blockers remain in `docs/AGENT_WORK_LOG.md`, relevant systems flipped to ✅, changelog/log updated.
+
+- [ ] **Task 060: Audio and final quality sweep**
+  - Files: `src/audio/AudioManager.cpp/hpp`, `src/app/QualityPreset.cpp/hpp`, `src/ui/GameHUD.cpp/hpp`
+  - Steps: fix remaining audio/quality defects and apply final GT610-safe polish pass.
+  - Done when: final quality blockers are closed in `docs/AGENT_WORK_LOG.md`, relevant systems flipped to ✅, changelog/log updated.

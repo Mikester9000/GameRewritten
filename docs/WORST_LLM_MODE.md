@@ -12,6 +12,7 @@ Use this mode for very weak local models with poor planning, memory, and cross-f
 Run exactly:
 
 ```bash
+python tools/llm/worst_llm_guard.py doctor
 python tools/llm/worst_llm_guard.py start
 ```
 
@@ -41,6 +42,11 @@ python tools/llm/worst_llm_guard.py complete
   - `docs/CHANGELOG.md`
   - `docs/AGENT_WORK_LOG.md`
 - If all checks pass, marks task done in `docs/FULL_TASK_SEQUENCE.md` and regenerates `docs/NEXT_TASK.md`.
+
+## What `doctor` enforces automatically
+- Fails if required workflow files are missing.
+- Fails if `docs/FULL_TASK_SEQUENCE.md` is malformed (missing task/file lines).
+- Fails if `docs/NEXT_TASK.md` is malformed (missing task ID or file scope).
 
 ## Failure fallback (no reasoning)
 If blocked:

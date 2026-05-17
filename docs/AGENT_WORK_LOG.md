@@ -22,3 +22,8 @@ This file records every change made by an automated agent or local LLM.
   FILES CHANGED: docs/WORST_LLM_MODE.md, docs/AUTOPILOT_WORKFLOW.md, docs/AGENT_RULES.md, docs/LOCAL_AGENT_QUICKSTART.md, docs/FULL_TASK_SEQUENCE.md, docs/README_AGENT_DOCS.md, docs/NEXT_TASK.md, README.md, tools/llm/advance_next_task.py, tools/llm/worst_llm_guard.py, docs/CHANGELOG.md
   WHAT CHANGED: Added a strict start/complete guard script that blocks out-of-scope edits and missing completion docs, then auto-advances backlog task state. Updated all relevant docs to use guarded commands and regenerated NEXT_TASK.
   KNOWN ISSUES: dotnet build still fails in this environment due missing Visual Studio C++ targets (MSB4278).
+
+[2026-05-17] TASK: Harden workflow for hallucination-prone low-capability LLMs (doctor gate + debug/polish phase)
+  FILES CHANGED: tools/llm/worst_llm_guard.py, tools/llm/advance_next_task.py, docs/WORST_LLM_MODE.md, docs/AUTOPILOT_WORKFLOW.md, docs/FULL_TASK_SEQUENCE.md, docs/AGENT_RULES.md, docs/LOCAL_AGENT_QUICKSTART.md, docs/AGENT_TASK_TEMPLATE.md, docs/README_AGENT_DOCS.md, docs/NEXT_TASK.md, README.md, docs/CHANGELOG.md
+  WHAT CHANGED: Added deterministic `doctor` preflight checks and clean-start enforcement to prevent ambiguous runs and malformed task inputs. Extended the ordered task backlog with mandatory final debugging/polish sweep tasks so weak LLM runs include bugfix and finishing passes explicitly.
+  KNOWN ISSUES: dotnet build still fails in this environment due missing Visual Studio C++ targets (MSB4278).

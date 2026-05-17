@@ -3,8 +3,11 @@
 Guardrail wrapper for ultra-low-capability local LLM workflows.
 
 Commands:
+  python tools/llm/worst_llm_guard.py doctor
+      -> Run deterministic preflight checks before any task execution.
+
   python tools/llm/worst_llm_guard.py start
-      -> Regenerate docs/NEXT_TASK.md from the first unchecked backlog task.
+      -> Require clean worktree, run preflight, and regenerate docs/NEXT_TASK.md.
 
   python tools/llm/worst_llm_guard.py complete
       -> Validate task-scope edits + required docs, then auto-advance task state.
@@ -22,6 +25,7 @@ from typing import List, Set
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 NEXT_TASK_PATH = REPO_ROOT / "docs" / "NEXT_TASK.md"
+FULL_TASK_PATH = REPO_ROOT / "docs" / "FULL_TASK_SEQUENCE.md"
 ADVANCE_SCRIPT = REPO_ROOT / "tools" / "llm" / "advance_next_task.py"
 
 TASK_ID_RE = re.compile(r"^\*\*Task ID:\*\*\s*(?P<id>\d+)\s*$")
@@ -113,6 +117,62 @@ def current_changed_files() -> Set[str]:
     return changed
 
 
+def parse_task_lines(text: str) -> List[str]:
+    return [line.strip() for line in text.splitlines() if line.strip()]
+
+
+def assert_clean_worktree() -> None:
+    changed = current_changed_files()
+    if changed:
+        raise RuntimeError(
+            "Worktree is not clean before start. Commit or revert these files first:\n"
+            + "\n".join(f"- {item}" for item in sorted(changed))
+        )
+
+
+def doctor_check_files_exist() -> None:
+    missing = []
+    for rel in [
+        "docs/NEXT_TASK.md",
+        "docs/FULL_TASK_SEQUENCE.md",
+        "docs/SYSTEMS.md",
+        "docs/CHANGELOG.md",
+        "docs/AGENT_WORK_LOG.md",
+        "tools/llm/advance_next_task.py",
+    ]:
+        if not (REPO_ROOT / rel).exists():
+            missing.append(rel)
+    if missing:
+        raise RuntimeError(
+            "Missing required workflow files:\n" + "\n".join(f"- {item}" for item in missing)
+        )
+
+
+def doctor_check_task_sequence_format() -> None:
+    text = FULL_TASK_PATH.read_text(encoding="utf-8")
+    lines = parse_task_lines(text)
+    has_task = any(line.startswith("- [ ] **Task ") or line.startswith("- [x] **Task ") for line in lines)
+    has_files = any(line.startswith("- Files:") for line in lines)
+    if not has_task or not has_files:
+        raise RuntimeError(
+            "docs/FULL_TASK_SEQUENCE.md is missing required task formatting ('Task' and '- Files:' lines)."
+        )
+
+
+def doctor_check_next_task_format() -> None:
+    text = read_next_task_text()
+    _ = parse_task_id(text)
+    files = parse_allowed_files(text)
+    if not files:
+        raise RuntimeError("NEXT_TASK has no valid files to touch.")
+
+
+def run_doctor() -> None:
+    doctor_check_files_exist()
+    doctor_check_task_sequence_format()
+    doctor_check_next_task_format()
+
+
 def ensure_required_docs_present(changed: Set[str]) -> None:
     missing = sorted(REQUIRED_DOCS - changed)
     if missing:
@@ -133,13 +193,17 @@ def ensure_scope(changed: Set[str], allowed_task_files: Set[str]) -> None:
 
 
 def do_start() -> int:
+    assert_clean_worktree()
+    run_doctor()
     run([sys.executable, str(ADVANCE_SCRIPT)])
+    run_doctor()
     print("START OK: docs/NEXT_TASK.md regenerated from first unchecked backlog task.")
     print("Now implement only what docs/NEXT_TASK.md says.")
     return 0
 
 
 def do_complete() -> int:
+    run_doctor()
     text = read_next_task_text()
     task_id = parse_task_id(text)
     allowed_task_files = parse_allowed_files(text)
@@ -157,11 +221,19 @@ def do_complete() -> int:
     return 0
 
 
+def do_doctor() -> int:
+    run_doctor()
+    print("DOCTOR OK: Workflow files and task formatting are valid.")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["start", "complete"])
+    parser.add_argument("command", choices=["doctor", "start", "complete"])
     args = parser.parse_args()
 
+    if args.command == "doctor":
+        return do_doctor()
     if args.command == "start":
         return do_start()
     return do_complete()

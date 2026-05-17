@@ -10,12 +10,13 @@ Do not choose a different task.
 ---
 
 ## Zero-decision execution steps
-1. Open each listed file and read it once top-to-bottom.
-2. Implement the smallest working version of this system only.
-3. Keep edits inside listed files only unless strictly required by compiler errors.
-4. Do not rename files or move files.
-5. Do not add dependencies.
-6. Keep D3D11 + GT610-safe defaults.
+1. Run `python tools/llm/worst_llm_guard.py doctor`.
+2. Open each listed file and read it once top-to-bottom.
+3. Implement the smallest working version of this system only.
+4. Keep edits inside listed files only unless strictly required by compiler errors.
+5. Do not rename files or move files.
+6. Do not add dependencies.
+7. Keep D3D11 + GT610-safe defaults.
 
 ## Required completion updates
 1. Update `docs/SYSTEMS.md` for this system (`❌` -> `✅`).

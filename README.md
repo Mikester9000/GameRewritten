@@ -119,4 +119,4 @@ For underpowered local LLM execution, use:
 - `docs/NEXT_TASK.md` (single active task)
 - `docs/FULL_TASK_SEQUENCE.md` (complete ordered project path)
 - `python tools/llm/advance_next_task.py` (auto-generate task card)
-- `python tools/llm/worst_llm_guard.py start|complete` (guarded start/finish commands)
+- `python tools/llm/worst_llm_guard.py doctor|start|complete` (guarded preflight/start/finish commands)

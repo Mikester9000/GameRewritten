@@ -3,12 +3,13 @@
 Rules that apply to every automated agent or Copilot coding session in this repo.
 
 ## Before Writing Any Code
-1. Run `python tools/llm/worst_llm_guard.py start`.
-2. Read `docs/NEXT_TASK.md` — only implement that one task.
-3. Read `docs/FULL_TASK_SEQUENCE.md` — confirm the task order and current checkbox state.
-4. Read `docs/SYSTEMS.md` — confirm the system you are about to build is not already listed as ✅ Complete.
-5. Read `.github/copilot-instructions.md` — follow all rules there without exception.
-6. Read the relevant existing files for the area you are changing before touching them.
+1. Run `python tools/llm/worst_llm_guard.py doctor`.
+2. Run `python tools/llm/worst_llm_guard.py start`.
+3. Read `docs/NEXT_TASK.md` — only implement that one task.
+4. Read `docs/FULL_TASK_SEQUENCE.md` — confirm the task order and current checkbox state.
+5. Read `docs/SYSTEMS.md` — confirm the system you are about to build is not already listed as ✅ Complete.
+6. Read `.github/copilot-instructions.md` — follow all rules there without exception.
+7. Read the relevant existing files for the area you are changing before touching them.
 
 ## Hard Rules
 - Never reimplement a system already marked ✅ in `docs/SYSTEMS.md`.
