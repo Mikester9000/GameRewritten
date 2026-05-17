@@ -125,7 +125,7 @@ if (playerActor.stats.hp < prevHp)
 2. Open `docs/CHANGELOG.md`. Add one line:
    `[YYYY-MM-DD] Added screen-edge damage flash to GameHUD (TriggerDamageFlash / DrawDamageFlash).`
 3. Open `docs/AGENT_WORK_LOG.md`. Add one entry (see format inside that file).
-4. Open `docs/TASK_QUEUE.md`. Copy Task 1 from that file into this file to replace the current task.
+4. Open `docs/FULL_TASK_SEQUENCE.md`. Mark this task as complete (`- [x]`), then copy the next unchecked task into this file.
 
 ---
 

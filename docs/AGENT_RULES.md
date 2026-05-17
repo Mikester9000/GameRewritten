@@ -3,9 +3,11 @@
 Rules that apply to every automated agent or Copilot coding session in this repo.
 
 ## Before Writing Any Code
-1. Read `docs/SYSTEMS.md` — confirm the system you are about to build is not already listed as ✅ Complete.
-2. Read `.github/copilot-instructions.md` — follow all rules there without exception.
-3. Read the relevant existing files for the area you are changing before touching them.
+1. Read `docs/NEXT_TASK.md` — only implement that one task.
+2. Read `docs/FULL_TASK_SEQUENCE.md` — confirm the task order and current checkbox state.
+3. Read `docs/SYSTEMS.md` — confirm the system you are about to build is not already listed as ✅ Complete.
+4. Read `.github/copilot-instructions.md` — follow all rules there without exception.
+5. Read the relevant existing files for the area you are changing before touching them.
 
 ## Hard Rules
 - Never reimplement a system already marked ✅ in `docs/SYSTEMS.md`.
@@ -29,4 +31,5 @@ Rules that apply to every automated agent or Copilot coding session in this repo
 - Update `docs/SYSTEMS.md` — change the new system's status from ❌ to ✅.
 - Add a one-line entry to `docs/CHANGELOG.md` (create it if it doesn't exist).
 - Append one entry to `docs/AGENT_WORK_LOG.md` using the format shown in that file.
-- Update `docs/NEXT_TASK.md` — copy the next task from `docs/TASK_QUEUE.md` to replace the completed one.
+- Mark the completed item as `- [x]` in `docs/FULL_TASK_SEQUENCE.md`.
+- Update `docs/NEXT_TASK.md` — copy the next unchecked task from `docs/FULL_TASK_SEQUENCE.md` to replace the completed one.

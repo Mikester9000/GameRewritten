@@ -5,6 +5,7 @@
 2. Do exactly what NEXT_TASK.md says. One task. Stop after it is done.
 3. After finishing, follow the "AFTER completing this task" steps in NEXT_TASK.md.
 4. Open `docs/AGENT_WORK_LOG.md` and add one entry describing what you changed.
+5. Open `docs/FULL_TASK_SEQUENCE.md`, check off the completed task, then copy the next unchecked task into `docs/NEXT_TASK.md`.
 
 Do NOT read other docs until NEXT_TASK.md is complete.
 
