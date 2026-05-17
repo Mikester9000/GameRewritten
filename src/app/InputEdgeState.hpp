@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/app/InputEdgeState.hpp
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: InputEdgeState module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // InputEdgeState.hpp
 // Tracks edge-trigger key/button inputs so actions fire once per press.

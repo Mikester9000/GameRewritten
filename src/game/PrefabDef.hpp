@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/PrefabDef.hpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: PrefabDef module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // PrefabDef.hpp
 // Data structures for primitive-part prefab definitions.

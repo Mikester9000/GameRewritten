@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/app/WorldReloadFlow.hpp
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: WorldReloadFlow module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // WorldReloadFlow.hpp
 // Handles the F5 world/registry reload workflow used by Main.cpp.

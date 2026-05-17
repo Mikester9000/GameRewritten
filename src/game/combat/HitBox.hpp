@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/combat/HitBox.hpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: HitBox module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // HitBox.hpp
 // A short-lived world-space AABB that deals damage to any overlapping actor.

@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/ui/WorldEditor.hpp
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: WorldEditor module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // WorldEditor.hpp
 // ImGui "World Editor" panel — lets you click to place prefab instances on the ground.

@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/PrimitiveRenderer.cpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: PrimitiveRenderer module behavior and local implementation details.
+// ============================================================
+
 // PrimitiveRenderer.cpp
 // Renders multi-part primitive (box) prefab instances via Direct3D 11.
 

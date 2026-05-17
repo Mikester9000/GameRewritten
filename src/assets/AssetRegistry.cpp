@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/assets/AssetRegistry.cpp
+// SYSTEM: Assets
+// ROLE: asset registry lookups and content loading helpers
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: AssetRegistry module behavior and local implementation details.
+// ============================================================
+
 // AssetRegistry.cpp
 // Loads Content/AssetRegistry.json and answers GetPath() queries.
 // Safe reload: on parse error the old registry stays intact.

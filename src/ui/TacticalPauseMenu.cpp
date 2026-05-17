@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/ui/TacticalPauseMenu.cpp
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: TacticalPauseMenu module behavior and local implementation details.
+// ============================================================
+
 // TacticalPauseMenu.cpp
 // Classic FF-style command panel shown while the player holds Tab.
 // Time scale is applied by Main.cpp; this file only handles drawing.

@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/ui/TacticalPauseMenu.hpp
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: TacticalPauseMenu module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // TacticalPauseMenu.hpp
 // Draws the FF-style Tactical Pause command panel while Tab is held.

@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/ui/DialogBox.cpp
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: DialogBox module behavior and local implementation details.
+// ============================================================
+
 #include "DialogBox.hpp"
 
 #include <imgui.h>

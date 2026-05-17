@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/ui/ScreenProjection.hpp
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: ScreenProjection module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // ScreenProjection.hpp
 // Shared world-to-screen projection helper used by DamageNumbers

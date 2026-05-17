@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/ui/Minimap.hpp
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: Minimap module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // Minimap.hpp
 // Draws a 160x160 minimap overlay in the top-right corner using ImGui draw lists.

@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/CameraController.hpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: CameraController module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // CameraController.hpp
 // Owns all camera + player movement state, isolating it from Main.cpp.

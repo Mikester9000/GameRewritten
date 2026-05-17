@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/ui/ImGuiLayer.hpp
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: ImGuiLayer module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // ImGuiLayer.hpp
 // Wraps Dear ImGui context creation, Win32 + D3D11 backend init/shutdown,

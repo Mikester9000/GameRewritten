@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/physics/CollisionWorld.cpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: CollisionWorld module behavior and local implementation details.
+// ============================================================
+
 #include "CollisionWorld.hpp"
 
 void CollisionWorld::AddBox(float cx, float cy, float cz, float hw, float hh, float hd)

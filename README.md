@@ -108,3 +108,15 @@ See `docs/THIRD_PARTY.md` for a full list of vendored libraries, their
 licenses, and update instructions.
 
 See `docs/ROADMAP_VENDORING.md` for planned future dependencies.
+
+---
+
+## Autonomous local-LLM workflow
+
+For underpowered local LLM execution, use:
+- `docs/AUTOPILOT_WORKFLOW.md` (run loop)
+- `docs/WORST_LLM_MODE.md` (strictest mode, lowest reasoning load)
+- `docs/NEXT_TASK.md` (single active task)
+- `docs/FULL_TASK_SEQUENCE.md` (complete ordered project path)
+- `python tools/llm/advance_next_task.py` (auto-generate task card)
+- `python tools/llm/worst_llm_guard.py doctor|start|complete` (guarded preflight/start/finish commands)

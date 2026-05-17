@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/assets/TextureCache.hpp
+// SYSTEM: Assets
+// ROLE: asset registry lookups and content loading helpers
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: TextureCache module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // TextureCache.hpp
 // Loads D3D11 shader resource views from disk via DirectXTex and caches them

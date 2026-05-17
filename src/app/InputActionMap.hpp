@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/app/InputActionMap.hpp
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: InputActionMap module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN

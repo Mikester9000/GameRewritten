@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/rendering/d3d11/D3D11Renderer.cpp
+// SYSTEM: Rendering
+// ROLE: rendering GPU resources, shader flow, and draw submission
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: D3D11Renderer module behavior and local implementation details.
+// ============================================================
+
 #include "D3D11Renderer.hpp"
 #include "D3D11RendererHelpers.hpp"
 #include <d3dcompiler.h>

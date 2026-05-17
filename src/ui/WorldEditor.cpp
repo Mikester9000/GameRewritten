@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/ui/WorldEditor.cpp
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: WorldEditor module behavior and local implementation details.
+// ============================================================
+
 // WorldEditor.cpp
 // ImGui "World Editor" panel implementation.
 // Lets you click on the ground to place prefab instances, save them to cell JSON,

@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/RuntimeScene.cpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: RuntimeScene module behavior and local implementation details.
+// ============================================================
+
 // RuntimeScene.cpp
 // BeginFrame implementation for RuntimeScene.
 

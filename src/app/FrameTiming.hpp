@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/app/FrameTiming.hpp
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: FrameTiming module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // FrameTiming.hpp
 // Small helper for frame delta timing and smoothed FPS display values.

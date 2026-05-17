@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/actors/ActorCommon.hpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: ActorCommon module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 
 namespace ActorCommon

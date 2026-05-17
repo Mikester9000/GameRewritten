@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/PrefabLibrary.hpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: PrefabLibrary module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // PrefabLibrary.hpp
 // Loads and caches PrimitivePrefab definitions from JSON files.

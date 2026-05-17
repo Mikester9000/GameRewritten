@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/world/WorldGrid.cpp
+// SYSTEM: World
+// ROLE: world cells, biome data, and streaming structure
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: WorldGrid module behavior and local implementation details.
+// ============================================================
+
 // WorldGrid.cpp
 // Loads Content/World/world.json and individual cell JSON files.
 // Provides minimal synchronous cell streaming around a player position.

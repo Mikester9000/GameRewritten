@@ -11,6 +11,8 @@ Use this template when creating tasks for future agents.
 
 ## Scope
 - **Files to touch (exact paths):**
+- **Exact insertion points (function names or line anchors):**
+- **Exact text to insert/replace (if known):**
 - **Files not to touch:**
 - **Allowed side-effects:**
 - **Out of scope (explicit):**
@@ -29,10 +31,12 @@ Use this template when creating tasks for future agents.
 - [ ] Build/test/smoke checks completed.
 
 ## Verification steps
-1. Build the project with existing toolchain.
-2. Run in-game smoke pass for changed path.
-3. Validate no regressions in adjacent systems.
-4. Confirm logs/UI show expected results.
+1. Run `python tools/llm/worst_llm_guard.py doctor`.
+2. Build the project with existing toolchain.
+3. Run in-game smoke pass for changed path.
+4. Validate no regressions in adjacent systems.
+5. Confirm logs/UI show expected results.
+6. Run `python tools/llm/worst_llm_guard.py complete`.
 
 ## Copy-paste example
 - **Goal:** Add enemy telegraph-lite visual before enemy attack.

@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/assets/TextureCache.cpp
+// SYSTEM: Assets
+// ROLE: asset registry lookups and content loading helpers
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: TextureCache module behavior and local implementation details.
+// ============================================================
+
 // TextureCache.cpp
 // Loads D3D11 textures via DirectXTex and caches the resulting SRVs.
 

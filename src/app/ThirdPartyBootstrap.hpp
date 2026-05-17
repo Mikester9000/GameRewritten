@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/app/ThirdPartyBootstrap.hpp
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: ThirdPartyBootstrap module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // ThirdPartyBootstrap.hpp
 // App-layer startup/shutdown wrapper for third-party subsystem smoke tests.

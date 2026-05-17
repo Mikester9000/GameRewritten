@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/app/WorldRuntimeRefresh.hpp
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: WorldRuntimeRefresh module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // WorldRuntimeRefresh.hpp
 // Small app-layer helpers for refreshing the current cell's runtime/world visuals.

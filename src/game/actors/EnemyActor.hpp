@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/actors/EnemyActor.hpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: EnemyActor module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // EnemyActor.hpp
 // A patrol enemy with a combat state machine (Patrol/Chase/Attack/Hit/Dead).

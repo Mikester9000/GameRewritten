@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/app/WorldEditorFrameOps.hpp
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: WorldEditorFrameOps module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // WorldEditorFrameOps.hpp
 // App-layer helpers for per-frame World Editor interactions.

@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/ui/DamageNumbers.cpp
+// SYSTEM: UI
+// ROLE: HUD, menus, overlays, and editor tool panels
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: DamageNumbers module behavior and local implementation details.
+// ============================================================
+
 #include "DamageNumbers.hpp"
 
 #include "ScreenProjection.hpp"

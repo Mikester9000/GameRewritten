@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/platform/win32/Win32Window.hpp
+// SYSTEM: Platform
+// ROLE: platform windowing and OS-facing runtime integration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: Win32Window module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 #include <windows.h>
 

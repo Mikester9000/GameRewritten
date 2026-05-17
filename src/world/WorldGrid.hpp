@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/world/WorldGrid.hpp
+// SYSTEM: World
+// ROLE: world cells, biome data, and streaming structure
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: WorldGrid module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // WorldGrid.hpp
 // Loads Content/World/world.json and individual cell JSON files.

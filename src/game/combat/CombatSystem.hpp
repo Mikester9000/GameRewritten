@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/game/combat/CombatSystem.hpp
+// SYSTEM: Game
+// ROLE: gameplay systems, actors, combat, and runtime state
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: CombatSystem module behavior and local implementation details.
+// ============================================================
+
 #pragma once
 // CombatSystem.hpp
 // Manages active hitboxes, ticks their lifetime, and resolves hits against enemies.

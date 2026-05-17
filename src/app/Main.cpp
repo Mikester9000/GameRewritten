@@ -1,3 +1,11 @@
+// ============================================================
+// FILE: src/app/Main.cpp
+// SYSTEM: App
+// ROLE: app startup/shutdown wiring and frame orchestration
+// DO NOT: Modify unrelated systems or break subsystem boundaries.
+// OWNS: Main module behavior and local implementation details.
+// ============================================================
+
 // Main.cpp
 // Application entry point: initializes all engine systems, runs the main game loop,
 // and shuts everything down cleanly on exit.
