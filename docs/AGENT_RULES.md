@@ -28,3 +28,5 @@ Rules that apply to every automated agent or Copilot coding session in this repo
 ## After Writing Code
 - Update `docs/SYSTEMS.md` — change the new system's status from ❌ to ✅.
 - Add a one-line entry to `docs/CHANGELOG.md` (create it if it doesn't exist).
+- Append one entry to `docs/AGENT_WORK_LOG.md` using the format shown in that file.
+- Update `docs/NEXT_TASK.md` — copy the next task from `docs/TASK_QUEUE.md` to replace the completed one.

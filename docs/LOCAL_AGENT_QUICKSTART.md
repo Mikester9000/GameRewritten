@@ -1,5 +1,15 @@
 # LOCAL AGENT QUICKSTART
 
+## Section 0 — START HERE (before anything else):
+1. Open `docs/NEXT_TASK.md`. That file is your only job. Read it completely.
+2. Do exactly what NEXT_TASK.md says. One task. Stop after it is done.
+3. After finishing, follow the "AFTER completing this task" steps in NEXT_TASK.md.
+4. Open `docs/AGENT_WORK_LOG.md` and add one entry describing what you changed.
+
+Do NOT read other docs until NEXT_TASK.md is complete.
+
+---
+
 ## Section 1 — What this is:
 > Direct3D 11 C++ game engine. Windows only. GT 610 GPU target.
 
