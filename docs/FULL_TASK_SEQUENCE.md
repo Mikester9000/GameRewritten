@@ -3,11 +3,21 @@
 This file is the complete ordered sequence from current state to "all planned systems in `docs/SYSTEMS.md` marked ✅".
 
 ## Execution Rule (No Thinking Required)
-1. Pick the first unchecked task in this file.
-2. Copy it into `docs/NEXT_TASK.md` and execute exactly that task.
+1. Run `python tools/llm/advance_next_task.py`.
+2. Execute only the task written into `docs/NEXT_TASK.md`.
 3. When done: update `docs/SYSTEMS.md`, `docs/CHANGELOG.md`, `docs/AGENT_WORK_LOG.md`.
-4. Mark the task complete here (`- [x]`).
+4. Run `python tools/llm/advance_next_task.py --complete-current`.
 5. Stop. Repeat next run.
+
+## Mandatory micro-steps per task
+1. Read listed files once.
+2. Make only the minimum edits needed.
+3. Keep edits inside listed files unless compiler requires one extra file.
+4. Do not rename/move files.
+5. Do not add dependencies.
+6. Keep frame-safe defaults for GT610.
+7. Update the 3 docs (`SYSTEMS`, `CHANGELOG`, `AGENT_WORK_LOG`).
+8. Advance to next task using the script command above.
 
 ## Global Constraints
 - Keep one task per run.

@@ -11,14 +11,19 @@ Do not improvise.
 - `docs/CHANGELOG.md` → one-line release notes per completed task
 
 ## Run loop (mandatory)
-1. Open `docs/NEXT_TASK.md`.
-2. Implement exactly that task.
-3. Update `docs/SYSTEMS.md` (`❌` to `✅` for the finished system).
-4. Add one line to `docs/CHANGELOG.md`.
-5. Append one entry to `docs/AGENT_WORK_LOG.md`.
-6. Open `docs/FULL_TASK_SEQUENCE.md`, mark that task complete (`- [x]`).
-7. Copy the next unchecked task from `docs/FULL_TASK_SEQUENCE.md` into `docs/NEXT_TASK.md`.
+1. Run `python tools/llm/advance_next_task.py`.
+2. Open `docs/NEXT_TASK.md`.
+3. Implement exactly that task.
+4. Update `docs/SYSTEMS.md` (`❌` to `✅` for the finished system).
+5. Add one line to `docs/CHANGELOG.md`.
+6. Append one entry to `docs/AGENT_WORK_LOG.md`.
+7. Run `python tools/llm/advance_next_task.py --complete-current`.
 8. Stop.
+
+## No-decision defaults
+- If uncertain, implement the smallest safe stub in listed files.
+- If a task appears to need extra files, only add those required by compile/link errors.
+- If a task is too large, split into one minimal visible slice but keep the same task ID.
 
 ## Completion condition
 Project is complete for this track when:

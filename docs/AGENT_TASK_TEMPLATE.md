@@ -11,6 +11,8 @@ Use this template when creating tasks for future agents.
 
 ## Scope
 - **Files to touch (exact paths):**
+- **Exact insertion points (function names or line anchors):**
+- **Exact text to insert/replace (if known):**
 - **Files not to touch:**
 - **Allowed side-effects:**
 - **Out of scope (explicit):**
@@ -33,6 +35,7 @@ Use this template when creating tasks for future agents.
 2. Run in-game smoke pass for changed path.
 3. Validate no regressions in adjacent systems.
 4. Confirm logs/UI show expected results.
+5. Run `python tools/llm/advance_next_task.py --complete-current`.
 
 ## Copy-paste example
 - **Goal:** Add enemy telegraph-lite visual before enemy attack.

@@ -3,11 +3,12 @@
 Rules that apply to every automated agent or Copilot coding session in this repo.
 
 ## Before Writing Any Code
-1. Read `docs/NEXT_TASK.md` — only implement that one task.
-2. Read `docs/FULL_TASK_SEQUENCE.md` — confirm the task order and current checkbox state.
-3. Read `docs/SYSTEMS.md` — confirm the system you are about to build is not already listed as ✅ Complete.
-4. Read `.github/copilot-instructions.md` — follow all rules there without exception.
-5. Read the relevant existing files for the area you are changing before touching them.
+1. Run `python tools/llm/advance_next_task.py`.
+2. Read `docs/NEXT_TASK.md` — only implement that one task.
+3. Read `docs/FULL_TASK_SEQUENCE.md` — confirm the task order and current checkbox state.
+4. Read `docs/SYSTEMS.md` — confirm the system you are about to build is not already listed as ✅ Complete.
+5. Read `.github/copilot-instructions.md` — follow all rules there without exception.
+6. Read the relevant existing files for the area you are changing before touching them.
 
 ## Hard Rules
 - Never reimplement a system already marked ✅ in `docs/SYSTEMS.md`.
@@ -31,5 +32,4 @@ Rules that apply to every automated agent or Copilot coding session in this repo
 - Update `docs/SYSTEMS.md` — change the new system's status from ❌ to ✅.
 - Add a one-line entry to `docs/CHANGELOG.md` (create it if it doesn't exist).
 - Append one entry to `docs/AGENT_WORK_LOG.md` using the format shown in that file.
-- Mark the completed item as `- [x]` in `docs/FULL_TASK_SEQUENCE.md`.
-- Update `docs/NEXT_TASK.md` — copy the next unchecked task from `docs/FULL_TASK_SEQUENCE.md` to replace the completed one.
+- Run `python tools/llm/advance_next_task.py --complete-current` to mark complete + generate next task.
