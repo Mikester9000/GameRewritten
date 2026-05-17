@@ -3,10 +3,10 @@
 This file is the complete ordered sequence from current state to "all planned systems in `docs/SYSTEMS.md` marked ✅".
 
 ## Execution Rule (No Thinking Required)
-1. Run `python tools/llm/advance_next_task.py`.
+1. Run `python tools/llm/worst_llm_guard.py start`.
 2. Execute only the task written into `docs/NEXT_TASK.md`.
 3. When done: update `docs/SYSTEMS.md`, `docs/CHANGELOG.md`, `docs/AGENT_WORK_LOG.md`.
-4. Run `python tools/llm/advance_next_task.py --complete-current`.
+4. Run `python tools/llm/worst_llm_guard.py complete`.
 5. Stop. Repeat next run.
 
 ## Mandatory micro-steps per task
@@ -17,7 +17,7 @@ This file is the complete ordered sequence from current state to "all planned sy
 5. Do not add dependencies.
 6. Keep frame-safe defaults for GT610.
 7. Update the 3 docs (`SYSTEMS`, `CHANGELOG`, `AGENT_WORK_LOG`).
-8. Advance to next task using the script command above.
+8. Advance to next task using the guarded command above.
 
 ## Global Constraints
 - Keep one task per run.

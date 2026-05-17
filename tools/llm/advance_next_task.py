@@ -123,8 +123,8 @@ Do not choose a different task.
 2. Add one line in `docs/CHANGELOG.md`.
 3. Append one entry in `docs/AGENT_WORK_LOG.md`.
 4. Run:
-   `python tools/llm/advance_next_task.py --complete-current`
-   This marks this task complete in `docs/FULL_TASK_SEQUENCE.md` and writes the next task here.
+   `python tools/llm/worst_llm_guard.py complete`
+   This validates scope + required docs, then marks this task complete and writes the next task.
 
 ## Hard stop rule
 After the command above succeeds, stop immediately.

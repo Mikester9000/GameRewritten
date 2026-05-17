@@ -1,11 +1,11 @@
 # LOCAL AGENT QUICKSTART
 
 ## Section 0 — START HERE (before anything else):
-1. Run `python tools/llm/advance_next_task.py`.
+1. Run `python tools/llm/worst_llm_guard.py start`.
 2. Open `docs/NEXT_TASK.md`. That file is your only job. Read it completely.
 3. Do exactly what NEXT_TASK.md says. One task. Stop after it is done.
 4. Open `docs/AGENT_WORK_LOG.md` and add one entry describing what you changed.
-5. Run `python tools/llm/advance_next_task.py --complete-current`.
+5. Run `python tools/llm/worst_llm_guard.py complete`.
 
 Do NOT read other docs until NEXT_TASK.md is complete.
 

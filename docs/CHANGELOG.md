@@ -1,3 +1,4 @@
+- 2026-05-17: Workflow hardening: added `worst_llm_guard.py` with enforced task-scope and required-doc checks, and switched start/finish docs to guarded commands for first-generation local LLM reliability.
 - 2026-05-13: Track 12.10: Added lightweight enemy hit flash blink, MISS indicator feedback, off-screen lock-on edge indicator, and Tactical Pause unavailable-command reason labels (Need Surge / No MP / Coming soon).
 - 2026-05-13: Track 12.9: Improved lock-on flow with target cycling while locked and automatic nearest-target retargeting when a locked enemy dies or leaves valid range
 - 2026-05-13: Track 12.8: Added Combat HUD expansion — FF7R-style target info panel (enemy name + colour-coded HP bar, bottom-centre) and combo step indicator (fading square dots with COMBO label) wired to lock-on target and active combo window; added EnemyActor::name field; tidied PLANNED_FEATURES.md checkboxes for all implemented Milestone 12 features

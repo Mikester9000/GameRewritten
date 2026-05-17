@@ -12,7 +12,7 @@ Use this mode for very weak local models with poor planning, memory, and cross-f
 Run exactly:
 
 ```bash
-python tools/llm/advance_next_task.py
+python tools/llm/worst_llm_guard.py start
 ```
 
 This writes `docs/NEXT_TASK.md` from the first unchecked item in `docs/FULL_TASK_SEQUENCE.md`.
@@ -28,10 +28,19 @@ This writes `docs/NEXT_TASK.md` from the first unchecked item in `docs/FULL_TASK
 5. Run exactly:
 
 ```bash
-python tools/llm/advance_next_task.py --complete-current
+python tools/llm/worst_llm_guard.py complete
 ```
 
 6. Stop.
+
+## What `complete` enforces automatically
+- Fails if no files changed.
+- Fails if any file outside task scope was edited.
+- Fails if any required doc update is missing:
+  - `docs/SYSTEMS.md`
+  - `docs/CHANGELOG.md`
+  - `docs/AGENT_WORK_LOG.md`
+- If all checks pass, marks task done in `docs/FULL_TASK_SEQUENCE.md` and regenerates `docs/NEXT_TASK.md`.
 
 ## Failure fallback (no reasoning)
 If blocked:

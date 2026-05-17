@@ -12,6 +12,7 @@ Start here: [AGENT_JOB.md](./AGENT_JOB.md)
 ## Foundation / agent guidance
 - `AUTOPILOT_WORKFLOW.md` — deterministic run loop for small local LLM execution.
 - `WORST_LLM_MODE.md` — strictest zero-decision mode for weakest local LLMs.
+- `../tools/llm/worst_llm_guard.py` — guarded start/complete commands that enforce scope + required doc updates.
 - `FULL_TASK_SEQUENCE.md` — complete ordered task list from current state to completion.
 - `NEXT_TASK.md` — single active task card (only coding target per run).
 - `AGENT_WORK_LOG.md` — append-only implementation history.

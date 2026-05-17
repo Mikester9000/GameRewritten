@@ -11,19 +11,23 @@ Do not improvise.
 - `docs/CHANGELOG.md` → one-line release notes per completed task
 
 ## Run loop (mandatory)
-1. Run `python tools/llm/advance_next_task.py`.
+1. Run `python tools/llm/worst_llm_guard.py start`.
 2. Open `docs/NEXT_TASK.md`.
 3. Implement exactly that task.
 4. Update `docs/SYSTEMS.md` (`❌` to `✅` for the finished system).
 5. Add one line to `docs/CHANGELOG.md`.
 6. Append one entry to `docs/AGENT_WORK_LOG.md`.
-7. Run `python tools/llm/advance_next_task.py --complete-current`.
+7. Run `python tools/llm/worst_llm_guard.py complete`.
 8. Stop.
 
 ## No-decision defaults
 - If uncertain, implement the smallest safe stub in listed files.
 - If a task appears to need extra files, only add those required by compile/link errors.
 - If a task is too large, split into one minimal visible slice but keep the same task ID.
+
+## Recommended zero-interpretation command pair
+1. `python tools/llm/worst_llm_guard.py start`
+2. `python tools/llm/worst_llm_guard.py complete`
 
 ## Completion condition
 Project is complete for this track when:
