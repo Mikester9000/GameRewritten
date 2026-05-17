@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/actors/PlayerActor.hpp
+// SYSTEM: PlayerActor.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 
 #include "ActorCommon.hpp"

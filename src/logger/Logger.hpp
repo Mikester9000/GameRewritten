@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/logger/Logger.hpp
+// SYSTEM: Logger.hpp
+// SYSTEM: logging macros and logger implementation only
+
 #pragma once
 #include <string>
 #include <windows.h>

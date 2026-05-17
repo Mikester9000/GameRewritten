@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/app/WorldReloadFlow.hpp
+// SYSTEM: WorldReloadFlow.hpp
+// SYSTEM: app startup/shutdown wiring and frame orchestration
+
 #pragma once
 // WorldReloadFlow.hpp
 // Handles the F5 world/registry reload workflow used by Main.cpp.

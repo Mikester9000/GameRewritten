@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/platform/win32/Win32Window.cpp
+// SYSTEM: Win32Window.cpp
+// SYSTEM: platform windowing and OS-facing runtime integration
+
 #include "Win32Window.hpp"
 
 Win32Window::Win32Window()

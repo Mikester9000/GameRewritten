@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/world/WorldGrid.hpp
+// SYSTEM: WorldGrid.hpp
+// SYSTEM: world cells, biome data, and streaming structure
+
 #pragma once
 // WorldGrid.hpp
 // Loads Content/World/world.json and individual cell JSON files.

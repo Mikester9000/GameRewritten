@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/actors/PlayerActor.cpp
+// SYSTEM: PlayerActor.cpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #include "PlayerActor.hpp"
 
 #include "../../app/InputActionMap.hpp"

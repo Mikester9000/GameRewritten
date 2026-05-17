@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/assets/AssetLoader.hpp
+// SYSTEM: AssetLoader.hpp
+// SYSTEM: asset registry lookups and content loading helpers
+
 #pragma once
 // AssetLoader.hpp
 // Stub loaders for data-driven Content/ assets (materials, prefabs, scenes).

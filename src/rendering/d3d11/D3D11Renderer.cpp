@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/rendering/d3d11/D3D11Renderer.cpp
+// SYSTEM: D3D11Renderer.cpp
+// SYSTEM: rendering GPU resources, shader flow, and draw submission
+
 #include "D3D11Renderer.hpp"
 #include "D3D11RendererHelpers.hpp"
 #include <d3dcompiler.h>

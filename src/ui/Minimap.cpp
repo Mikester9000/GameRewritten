@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/Minimap.cpp
+// SYSTEM: Minimap.cpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 // Minimap.cpp
 // ImGui draw-list minimap showing nearby world cells, player position, and facing direction.
 

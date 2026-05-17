@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/DamageNumbers.hpp
+// SYSTEM: DamageNumbers.hpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #pragma once
 
 class DamageNumbers

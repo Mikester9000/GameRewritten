@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/ImGuiLayer.cpp
+// SYSTEM: ImGuiLayer.cpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 // ImGuiLayer.cpp
 // Manages Dear ImGui context, Win32 + D3D11 backends, and draws the in-game UI.
 // Esc  → toggle pause menu (Resume / Options / Quit)

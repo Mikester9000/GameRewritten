@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/GameHUD.hpp
+// SYSTEM: GameHUD.hpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #pragma once
 
 #include "../game/actors/PlayerStats.hpp"

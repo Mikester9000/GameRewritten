@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/GameHUD.cpp
+// SYSTEM: GameHUD.cpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #include "GameHUD.hpp"
 #include "ScreenProjection.hpp"
 

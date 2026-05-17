@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/CameraController.hpp
+// SYSTEM: CameraController.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 // CameraController.hpp
 // Owns all camera + player movement state, isolating it from Main.cpp.

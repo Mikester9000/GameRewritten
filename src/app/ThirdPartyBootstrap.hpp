@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/app/ThirdPartyBootstrap.hpp
+// SYSTEM: ThirdPartyBootstrap.hpp
+// SYSTEM: app startup/shutdown wiring and frame orchestration
+
 #pragma once
 // ThirdPartyBootstrap.hpp
 // App-layer startup/shutdown wrapper for third-party subsystem smoke tests.

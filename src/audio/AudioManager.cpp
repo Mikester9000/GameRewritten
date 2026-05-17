@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/audio/AudioManager.cpp
+// SYSTEM: AudioManager.cpp
+// SYSTEM: audio playback and runtime audio control
+
 #include "AudioManager.hpp"
 
 #include <algorithm>

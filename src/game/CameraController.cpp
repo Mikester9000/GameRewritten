@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/CameraController.cpp
+// SYSTEM: CameraController.cpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 // CameraController.cpp
 // Camera + third-person player movement, isolated from Main.cpp.
 

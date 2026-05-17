@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/app/WorldEditorFrameOps.hpp
+// SYSTEM: WorldEditorFrameOps.hpp
+// SYSTEM: app startup/shutdown wiring and frame orchestration
+
 #pragma once
 // WorldEditorFrameOps.hpp
 // App-layer helpers for per-frame World Editor interactions.

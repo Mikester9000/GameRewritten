@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/PrimitiveRenderer.hpp
+// SYSTEM: PrimitiveRenderer.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 // PrimitiveRenderer.hpp
 // Renders multi-part primitive (box) prefab instances using Direct3D 11.

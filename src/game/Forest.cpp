@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/Forest.cpp
+// SYSTEM: Forest.cpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #include "Forest.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include <d3dcompiler.h>

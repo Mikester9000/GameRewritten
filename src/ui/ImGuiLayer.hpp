@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/ImGuiLayer.hpp
+// SYSTEM: ImGuiLayer.hpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #pragma once
 // ImGuiLayer.hpp
 // Wraps Dear ImGui context creation, Win32 + D3D11 backend init/shutdown,

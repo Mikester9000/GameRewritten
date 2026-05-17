@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/combat/HitBox.hpp
+// SYSTEM: HitBox.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 // HitBox.hpp
 // A short-lived world-space AABB that deals damage to any overlapping actor.

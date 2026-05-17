@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/WorldEditor.hpp
+// SYSTEM: WorldEditor.hpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #pragma once
 // WorldEditor.hpp
 // ImGui "World Editor" panel — lets you click to place prefab instances on the ground.

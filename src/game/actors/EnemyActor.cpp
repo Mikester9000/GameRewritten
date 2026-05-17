@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/actors/EnemyActor.cpp
+// SYSTEM: EnemyActor.cpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 // EnemyActor.cpp
 // Implements the enemy combat state machine (Patrol/Chase/Attack/Hit/Dead),
 // terrain-snap, and visual submission.

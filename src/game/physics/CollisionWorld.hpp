@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/physics/CollisionWorld.hpp
+// SYSTEM: CollisionWorld.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 
 #include "AABB.hpp"

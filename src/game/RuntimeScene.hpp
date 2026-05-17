@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/RuntimeScene.hpp
+// SYSTEM: RuntimeScene.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 // RuntimeScene.hpp
 // Coordinates per-frame runtime actor update and visual submission.

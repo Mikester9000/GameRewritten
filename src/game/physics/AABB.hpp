@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/physics/AABB.hpp
+// SYSTEM: AABB.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 
 struct AABB

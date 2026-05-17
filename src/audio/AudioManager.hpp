@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/audio/AudioManager.hpp
+// SYSTEM: AudioManager.hpp
+// SYSTEM: audio playback and runtime audio control
+
 #pragma once
 
 #include <string>

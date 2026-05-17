@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/logger/Logger.cpp
+// SYSTEM: Logger.cpp
+// SYSTEM: logging macros and logger implementation only
+
 #include "Logger.hpp"
 #include <sstream>
 

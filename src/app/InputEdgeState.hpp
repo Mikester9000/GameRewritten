@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/app/InputEdgeState.hpp
+// SYSTEM: InputEdgeState.hpp
+// SYSTEM: app startup/shutdown wiring and frame orchestration
+
 #pragma once
 // InputEdgeState.hpp
 // Tracks edge-trigger key/button inputs so actions fire once per press.

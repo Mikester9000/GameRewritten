@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/actors/EnemyState.hpp
+// SYSTEM: EnemyState.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 enum class EnemyState
 {

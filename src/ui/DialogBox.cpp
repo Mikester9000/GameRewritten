@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/DialogBox.cpp
+// SYSTEM: DialogBox.cpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #include "DialogBox.hpp"
 
 #include <imgui.h>

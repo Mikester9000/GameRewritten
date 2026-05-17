@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/Minimap.hpp
+// SYSTEM: Minimap.hpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #pragma once
 // Minimap.hpp
 // Draws a 160x160 minimap overlay in the top-right corner using ImGui draw lists.

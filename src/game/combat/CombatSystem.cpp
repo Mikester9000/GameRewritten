@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/combat/CombatSystem.cpp
+// SYSTEM: CombatSystem.cpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 // CombatSystem.cpp
 // Implements hitbox lifetime ticking, AABB overlap testing against enemies,
 // hp reduction, and death detection. Player damage is not handled here yet.

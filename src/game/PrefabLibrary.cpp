@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/PrefabLibrary.cpp
+// SYSTEM: PrefabLibrary.cpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 // PrefabLibrary.cpp
 // Loads and caches PrimitivePrefab definitions from JSON files.
 

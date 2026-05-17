@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/app/Main.cpp
+// SYSTEM: Main.cpp
+// SYSTEM: app startup/shutdown wiring and frame orchestration
+
 // Main.cpp
 // Application entry point: initializes all engine systems, runs the main game loop,
 // and shuts everything down cleanly on exit.

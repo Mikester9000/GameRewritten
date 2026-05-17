@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/app/WorldRuntimeRefresh.hpp
+// SYSTEM: WorldRuntimeRefresh.hpp
+// SYSTEM: app startup/shutdown wiring and frame orchestration
+
 #pragma once
 // WorldRuntimeRefresh.hpp
 // Small app-layer helpers for refreshing the current cell's runtime/world visuals.

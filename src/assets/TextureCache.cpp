@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/assets/TextureCache.cpp
+// SYSTEM: TextureCache.cpp
+// SYSTEM: asset registry lookups and content loading helpers
+
 // TextureCache.cpp
 // Loads D3D11 textures via DirectXTex and caches the resulting SRVs.
 

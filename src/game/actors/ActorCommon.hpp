@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/actors/ActorCommon.hpp
+// SYSTEM: ActorCommon.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 
 namespace ActorCommon

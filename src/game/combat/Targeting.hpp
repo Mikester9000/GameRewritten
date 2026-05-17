@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/combat/Targeting.hpp
+// SYSTEM: Targeting.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 
 #include "../actors/EnemyActor.hpp"

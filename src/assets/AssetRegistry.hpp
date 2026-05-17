@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/assets/AssetRegistry.hpp
+// SYSTEM: AssetRegistry.hpp
+// SYSTEM: asset registry lookups and content loading helpers
+
 #pragma once
 // AssetRegistry.hpp
 // Maps scoped asset IDs (e.g. "textures.placeholder") to file paths.

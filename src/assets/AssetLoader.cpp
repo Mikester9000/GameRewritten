@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/assets/AssetLoader.cpp
+// SYSTEM: AssetLoader.cpp
+// SYSTEM: asset registry lookups and content loading helpers
+
 // AssetLoader.cpp
 // Parses Content/ JSON files and logs what was loaded.
 // Replace the LOG_INFO bodies with real resource creation as the engine grows.

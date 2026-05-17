@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/PrefabLibrary.hpp
+// SYSTEM: PrefabLibrary.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 // PrefabLibrary.hpp
 // Loads and caches PrimitivePrefab definitions from JSON files.

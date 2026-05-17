@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/actors/EnemyActor.hpp
+// SYSTEM: EnemyActor.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 // EnemyActor.hpp
 // A patrol enemy with a combat state machine (Patrol/Chase/Attack/Hit/Dead).

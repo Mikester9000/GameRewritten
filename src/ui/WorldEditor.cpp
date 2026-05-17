@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/WorldEditor.cpp
+// SYSTEM: WorldEditor.cpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 // WorldEditor.cpp
 // ImGui "World Editor" panel implementation.
 // Lets you click on the ground to place prefab instances, save them to cell JSON,

@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/app/InputActionMap.hpp
+// SYSTEM: InputActionMap.hpp
+// SYSTEM: app startup/shutdown wiring and frame orchestration
+
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN

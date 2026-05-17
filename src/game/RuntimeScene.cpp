@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/RuntimeScene.cpp
+// SYSTEM: RuntimeScene.cpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 // RuntimeScene.cpp
 // BeginFrame implementation for RuntimeScene.
 

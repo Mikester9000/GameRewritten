@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/DialogBox.hpp
+// SYSTEM: DialogBox.hpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #pragma once
 
 #include <string>

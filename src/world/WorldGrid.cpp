@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/world/WorldGrid.cpp
+// SYSTEM: WorldGrid.cpp
+// SYSTEM: world cells, biome data, and streaming structure
+
 // WorldGrid.cpp
 // Loads Content/World/world.json and individual cell JSON files.
 // Provides minimal synchronous cell streaming around a player position.

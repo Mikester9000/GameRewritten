@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/ScreenProjection.hpp
+// SYSTEM: ScreenProjection.hpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #pragma once
 // ScreenProjection.hpp
 // Shared world-to-screen projection helper used by DamageNumbers

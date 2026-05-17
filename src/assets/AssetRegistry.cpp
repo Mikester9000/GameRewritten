@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/assets/AssetRegistry.cpp
+// SYSTEM: AssetRegistry.cpp
+// SYSTEM: asset registry lookups and content loading helpers
+
 // AssetRegistry.cpp
 // Loads Content/AssetRegistry.json and answers GetPath() queries.
 // Safe reload: on parse error the old registry stays intact.

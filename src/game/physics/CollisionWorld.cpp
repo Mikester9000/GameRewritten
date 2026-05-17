@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/physics/CollisionWorld.cpp
+// SYSTEM: CollisionWorld.cpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #include "CollisionWorld.hpp"
 
 void CollisionWorld::AddBox(float cx, float cy, float cz, float hw, float hh, float hd)

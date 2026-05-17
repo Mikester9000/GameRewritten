@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/PrefabDef.hpp
+// SYSTEM: PrefabDef.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 // PrefabDef.hpp
 // Data structures for primitive-part prefab definitions.

@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/app/CursorModeController.hpp
+// SYSTEM: CursorModeController.hpp
+// SYSTEM: app startup/shutdown wiring and frame orchestration
+
 #pragma once
 // CursorModeController.hpp
 // Owns cursor visibility state and placement-mode mouse recenter transitions.

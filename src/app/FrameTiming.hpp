@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/app/FrameTiming.hpp
+// SYSTEM: FrameTiming.hpp
+// SYSTEM: app startup/shutdown wiring and frame orchestration
+
 #pragma once
 // FrameTiming.hpp
 // Small helper for frame delta timing and smoothed FPS display values.

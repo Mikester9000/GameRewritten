@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/ui/DamageNumbers.cpp
+// SYSTEM: DamageNumbers.cpp
+// SYSTEM: HUD, menus, overlays, and editor tool panels
+
 #include "DamageNumbers.hpp"
 
 #include "ScreenProjection.hpp"

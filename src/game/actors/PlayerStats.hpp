@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/actors/PlayerStats.hpp
+// SYSTEM: PlayerStats.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 
 #include <algorithm>

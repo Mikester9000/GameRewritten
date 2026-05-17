@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/platform/win32/Win32Window.hpp
+// SYSTEM: Win32Window.hpp
+// SYSTEM: platform windowing and OS-facing runtime integration
+
 #pragma once
 #include <windows.h>
 

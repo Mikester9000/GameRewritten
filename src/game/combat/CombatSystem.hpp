@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/combat/CombatSystem.hpp
+// SYSTEM: CombatSystem.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 // CombatSystem.hpp
 // Manages active hitboxes, ticks their lifetime, and resolves hits against enemies.

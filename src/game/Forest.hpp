@@ -1,3 +1,8 @@
+// ============================================================
+// FILE: src/game/Forest.hpp
+// SYSTEM: Forest.hpp
+// SYSTEM: gameplay systems, actors, combat, and runtime state
+
 #pragma once
 #include <vector>
 #include <d3d11.h>
