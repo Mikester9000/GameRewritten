@@ -10,6 +10,10 @@ Start here: [AGENT_JOB.md](./AGENT_JOB.md)
 - [QUALITY_BAR.md](./QUALITY_BAR.md) — minimum acceptable quality.
 
 ## Foundation / agent guidance
+- `AUTOPILOT_WORKFLOW.md` — deterministic run loop for small local LLM execution.
+- `FULL_TASK_SEQUENCE.md` — complete ordered task list from current state to completion.
+- `NEXT_TASK.md` — single active task card (only coding target per run).
+- `AGENT_WORK_LOG.md` — append-only implementation history.
 - `AGENT_TASK_TEMPLATE.md` — reusable task format.
 - `KNOWN_ISSUES.md` — fragile spots and current risks.
 - `SUGGESTED_FEATURES.md` — practical future work list.

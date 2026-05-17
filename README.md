@@ -108,3 +108,12 @@ See `docs/THIRD_PARTY.md` for a full list of vendored libraries, their
 licenses, and update instructions.
 
 See `docs/ROADMAP_VENDORING.md` for planned future dependencies.
+
+---
+
+## Autonomous local-LLM workflow
+
+For underpowered local LLM execution, use:
+- `docs/AUTOPILOT_WORKFLOW.md` (run loop)
+- `docs/NEXT_TASK.md` (single active task)
+- `docs/FULL_TASK_SEQUENCE.md` (complete ordered project path)
