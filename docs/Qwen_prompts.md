@@ -1,223 +1,361 @@
-# Qwen 2.5 7B — **Modular “Lego Block” Code Tasks**
+# Qwen 2.5 7B — **Lego‑Block Code Tasks (Aligned to Repo Docs)**
 
-This file is a **complete set of small, standalone coding blocks** to reach **commercial‑release grade**. Each block is meant to be **written independently** by Qwen and then **inserted manually** into the repo. Blocks are **modular** so you can add them one‑by‑one.
+This file is **strictly aligned** to these docs (source of truth):
+- `docs/CURRENT_STATE.md`
+- `docs/SYSTEMS.md`
+- `docs/FULL_TASK_SEQUENCE.md`
+- `docs/GRAPHICS_VISION.md`
+- `docs/UI_VISION.md`
+- `docs/COMBAT_VISION.md`
+- `docs/PERFORMANCE_GUARDRAILS.md`
 
-**Rules for every prompt**
-- Qwen has **no repo access**. You must paste required files/snippets.
-- Keep prompts **small** (you control size).
-- Ask Qwen to output **only the final code** (no explanations).
-- If a task touches project files, ask Qwen to list **exact project edits** (e.g., `.vcxproj` additions).
+**Only implement systems marked ❌ in `docs/SYSTEMS.md`**. Do **not** rebuild ✅ systems. Do **not** add new dependencies. Keep GT610 guardrails.
+
+---
+
+## Usage Rules (for every prompt)
+- Qwen has **no repo access**. You must paste required files.
+- Keep prompts **small** and **single‑purpose**.
+- Output **only final code or exact patch steps**. No explanations.
+- If adding a new `.cpp`, ask Qwen to list **exact `.vcxproj` + `.vcxproj.filters` edits**.
 
 **Output format rule (use in every prompt)**
 > Output only the final code or exact patch steps. No explanations.
 
 ---
 
-## How to use (fast)
-1. Pick **one block** below.
-2. Copy the **Prompt** for that block.
-3. Paste the **exact file(s)** Qwen needs.
-4. Apply the returned code and move to the next block.
+# LEGO BLOCKS — **Exactly the ❌ items from SYSTEMS.md**
+
+> Use **one block at a time**. Each block maps 1:1 to a SYSTEMS.md ❌ entry and the task order in FULL_TASK_SEQUENCE.md.
 
 ---
 
-# BLOCKS — Core Engine (Must‑Have)
+## PHASE 1 — Combat + HUD foundation (Tasks 001–019)
 
-## B‑CORE‑01 — Main loop narrative sections
+### BLOCK 001 — Pressure / stagger integration stub
+**Files:** `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
 **Prompt**
-> I will paste `src/app/Main.cpp`. Add section headers and enforce the order: setup → guard clauses → main logic → output. Keep behavior identical. Output only the updated file.
+> I will paste the listed files. Implement the smallest pressure/stagger stub as described in COMBAT_VISION.md. Keep it reversible and minimal. Output updated files only.
 
-## B‑CORE‑02 — Fixed‑step helper
+### BLOCK 002 — Enemy reaction / interrupt‑lite
+**Files:** `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
 **Prompt**
-> I will paste `src/app/FrameTiming.hpp` and its usage. Add a minimal fixed‑step accumulator helper (with max steps). Keep existing behavior unless fixed‑step is enabled. Output updated files only.
+> I will paste the listed files. Add a minimal interrupt‑lite reaction on hit (small flinch/brief state change). Output updated files only.
 
-## B‑CORE‑03 — Deterministic frame order helpers
+### BLOCK 003 — Enemy attack telegraph lite
+**Files:** `src/game/actors/EnemyActor.cpp/hpp`
 **Prompt**
-> I will paste `src/app/Main.cpp`. Extract small helper functions for `BeginFrame`, `UpdateFrame`, `RenderFrame`, `EndFrame` without changing behavior. Output only updated file.
+> I will paste the listed files. Add a lightweight telegraph (short wind‑up state + tint). Output updated files only.
 
-## B‑CORE‑04 — Safe init/shutdown wiring
+### BLOCK 004 — Screen edge damage flash
+**Files:** `src/ui/GameHUD.cpp/hpp`
 **Prompt**
-> I will paste `Main.cpp` and all module headers that own resources. Add explicit `Initialize()` and `Shutdown()` calls in correct order. Output only updated `Main.cpp`.
+> I will paste the listed files. Add a low‑cost red edge flash on player damage using ImGui draw list. Output updated files only.
 
-## B‑CORE‑05 — Crash‑safe startup log
+### BLOCK 005 — Hit pause / hitstop
+**Files:** `src/game/RuntimeScene.hpp`
 **Prompt**
-> I will paste `src/logger/Logger.hpp` and implementation. Add a startup log section that prints version, build type, GPU/driver when available. Output updated files only.
+> I will paste the listed files. Add a minimal hitstop (1–3 frames) on successful hits. Output updated files only.
+
+### BLOCK 006 — Stagger meter
+**Files:** `src/game/actors/EnemyActor.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add a basic stagger meter that fills on damage and triggers a brief vulnerable state. Output updated files only.
+
+### BLOCK 007 — Enemy attack telegraph (full)
+**Files:** `src/game/actors/EnemyActor.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add a clearer telegraph phase (timed wind‑up + stronger tint). Output updated files only.
+
+### BLOCK 008 — Parry / counter window
+**Files:** `src/game/actors/PlayerActor.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add a tiny parry window tied to dodge timing. Output updated files only.
+
+### BLOCK 009 — Weak point damage
+**Files:** `src/game/combat/CombatSystem.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add behind‑target angle check for bonus damage. Output updated files only.
+
+### BLOCK 010 — Area name display
+**Files:** `src/ui/GameHUD.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add area name fade‑in/out display when entering new cell. Output updated files only.
+
+### BLOCK 011 — Notification toast system
+**Files:** `src/ui/NotificationSystem.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Implement a small toast queue system (text + timer) and drawing. Output updated/new files only.
+
+### BLOCK 012 — Letterbox event bars
+**Files:** `src/ui/ImGuiLayer.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add letterbox bars (top/bottom) toggleable for events. Output updated files only.
+
+### BLOCK 013 — Contextual button prompts
+**Files:** `src/ui/GameHUD.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add simple context prompts (string + key) near player. Output updated files only.
+
+### BLOCK 014 — Level up screen overlay
+**Files:** `src/ui/GameHUD.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add a timed “Level Up” overlay with stat deltas. Output updated files only.
+
+### BLOCK 015 — Status screen
+**Files:** `src/ui/StatusScreen.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Implement a classic FF‑style status screen using ImGui. Output updated/new files only.
+
+### BLOCK 016 — Map screen stub
+**Files:** `src/ui/MapScreen.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Implement a stub map screen using existing minimap data. Output updated/new files only.
+
+### BLOCK 017 — Tooltip system
+**Files:** `src/ui/GameHUD.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add a minimal tooltip system (title + body) for UI elements. Output updated files only.
+
+### BLOCK 018 — Saving indicator
+**Files:** `src/ui/GameHUD.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add a small “Saving…” indicator that fades in/out. Output updated files only.
+
+### BLOCK 019 — Death / defeat screen
+**Files:** `src/ui/GameHUD.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add a full‑screen defeat overlay with respawn prompt. Output updated files only.
 
 ---
 
-# BLOCKS — Rendering (D3D11, Low‑Spec Ready)
+## PHASE 2 — Camera + visual polish (Tasks 020–030)
 
-## B‑RENDER‑01 — Per‑scene constant buffer
+### BLOCK 020 — Camera shake
+**Files:** `src/game/CameraController.cpp/hpp`
 **Prompt**
-> I will paste `D3D11Renderer.hpp/.cpp`. Add a per‑scene cbuffer (view/proj, lightDir, lightColor). Bind to slot b1 VS/PS. Output updated files only.
+> I will paste the listed files. Add a simple camera shake (small random offset) on hit events. Output updated files only.
 
-## B‑RENDER‑02 — Standard lit shader pair
+### BLOCK 021 — Combat camera zoom
+**Files:** `src/game/CameraController.cpp/hpp`
 **Prompt**
-> I will paste a shader template. Create a simple lit shader pair `standard_lit_vs.hlsl` / `standard_lit_ps.hlsl` using a single directional light. Output only shader files.
+> I will paste the listed files. Add a small FOV zoom when lock‑on active (lerp). Output updated files only.
 
-## B‑RENDER‑03 — Unlit shader pair
+### BLOCK 022 — Camera collision avoidance
+**Files:** `src/game/CameraController.cpp/hpp`
 **Prompt**
-> I will paste a shader template. Create `unlit_vs.hlsl` / `unlit_ps.hlsl` for UI/debug. Output only shader files.
+> I will paste the listed files. Add a simple raycast to prevent camera clipping. Output updated files only.
 
-## B‑RENDER‑04 — Debug normals shader
+### BLOCK 023 — Target framing adjustment
+**Files:** `src/game/CameraController.cpp/hpp`
 **Prompt**
-> I will paste a shader template. Create `debug_normals_vs.hlsl` / `debug_normals_ps.hlsl` to visualize normals. Output only shader files.
+> I will paste the listed files. Shift camera framing to keep player + target in view. Output updated files only.
 
-## B‑RENDER‑05 — Basic lighting pass wiring
+### BLOCK 024 — Lock‑on camera recovery smoothing
+**Files:** `src/game/CameraController.cpp/hpp`
 **Prompt**
-> I will paste renderer files and shader list. Wire the standard lit shader into the render path with light uniforms. Output updated files only.
+> I will paste the listed files. Add smoothing when exiting lock‑on. Output updated files only.
 
-## B‑RENDER‑06 — Shadow map pass (single light)
+### BLOCK 025 — Wind effect on trees
+**Files:** `Shaders/tree_vs.hlsl`
 **Prompt**
-> I will paste renderer files and shader list. Add a minimal depth‑only shadow map pass using one light and a single shadow map. Output updated/new files only.
+> I will paste the shader. Add a cheap sine‑wave vertex sway for tree instances. Output updated shader only.
 
-## B‑RENDER‑07 — Low‑spec quality preset clamp
+### BLOCK 026 — Weather system lite
+**Files:** `src/world/WeatherSystem.cpp/hpp`
 **Prompt**
-> I will paste quality config and renderer. Add a Low preset that clamps light count, disables extra passes, and reduces shadow resolution. Output updated files only.
+> I will paste the listed files (or empty if new). Add a minimal weather state (clear/rain/fog) with simple parameters. Output updated/new files only.
 
-## B‑RENDER‑08 — Simple post‑process pass
+### BLOCK 027 — Ambient particles
+**Files:** `src/game/ParticleSystem.cpp/hpp`
 **Prompt**
-> I will paste renderer files. Add one optional post‑process pass (gamma/tonemap). Must be disable‑able. Output updated files only.
+> I will paste the listed files (or empty if new). Add a minimal particle system for low‑count ambient particles. Output updated/new files only.
+
+### BLOCK 028 — Day/night cycle
+**Files:** `src/world/DayNightCycle.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Add a simple time‑of‑day lerp for light/ambient colors. Output updated/new files only.
+
+### BLOCK 029 — Biome transition fade
+**Files:** `src/world/WorldGrid.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add biome transition fade (color lerp). Output updated files only.
+
+### BLOCK 030 — Fog of war on minimap
+**Files:** `src/ui/Minimap.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add simple fog‑of‑war reveal using visited cells. Output updated files only.
 
 ---
 
-# BLOCKS — Assets (Commercial‑grade reliability)
+## PHASE 3 — World + quest + progression core (Tasks 031–045)
 
-## B‑ASSET‑01 — Asset load error logging
+### BLOCK 031 — World event trigger zones
+**Files:** `src/game/world/EventZone.cpp/hpp`
 **Prompt**
-> I will paste `AssetRegistry.*` and `AssetLoader.*`. Add clear error logs and fallback IDs for missing assets. Output updated files only.
+> I will paste the listed files (or empty if new). Add simple trigger zones with enter/exit callbacks. Output updated/new files only.
 
-## B‑ASSET‑02 — In‑memory asset cache
+### BLOCK 032 — Interaction hotspot registry stub
+**Files:** `src/game/world/InteractionRegistry.cpp/hpp`
 **Prompt**
-> I will paste asset loader code. Add a tiny cache keyed by ID/path to avoid re‑loading. Output updated files only.
+> I will paste the listed files (or empty if new). Add a registry for interactable hotspots with IDs and positions. Output updated/new files only.
 
-## B‑ASSET‑03 — Asset validation helper
+### BLOCK 033 — Landmark discovery trigger stub
+**Files:** `src/game/world/LandmarkTrigger.cpp/hpp`
 **Prompt**
-> I will paste asset loader code. Add `ValidateAsset()` (format/size checks). Call it on load. Output updated files only.
+> I will paste the listed files (or empty if new). Add a landmark trigger with “discovered” state. Output updated/new files only.
 
-## B‑ASSET‑04 — Asset dependency tracking
+### BLOCK 034 — NPC actor
+**Files:** `src/game/actors/NpcActor.cpp/hpp`
 **Prompt**
-> I will paste asset loader/registry. Add a minimal dependency list per asset (texture → source). Output updated files only.
+> I will paste the listed files (or empty if new). Implement a simple NPC actor with idle + interaction prompt. Output updated/new files only.
+
+### BLOCK 035 — Quest objective system
+**Files:** `src/game/quest/QuestSystem.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Implement a minimal quest objective list (id, state). Output updated/new files only.
+
+### BLOCK 036 — Treasure chest actor
+**Files:** `src/game/actors/ChestActor.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Implement a chest actor that grants an item once. Output updated/new files only.
+
+### BLOCK 037 — Campfire / rest point actor
+**Files:** `src/game/actors/RestPointActor.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Implement a rest point that restores HP/MP and shows a prompt. Output updated/new files only.
+
+### BLOCK 038 — NPC interaction prompt routing stub
+**Files:** `src/ui/GameHUD.cpp/hpp`, `src/game/world/InteractionRegistry.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add a simple prompt routing from nearby interaction to HUD display. Output updated files only.
+
+### BLOCK 039 — Quest flag / world‑state hook
+**Files:** `src/game/quest/QuestFlags.hpp`, `src/game/quest/QuestSystem.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Add a small quest flag map (string→bool/int). Output updated/new files only.
+
+### BLOCK 040 — Spawn composition table stub
+**Files:** `src/world/SpawnTable.hpp`, `src/world/WorldGrid.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Add a simple spawn table (solo/pair/pack). Output updated/new files only.
+
+### BLOCK 041 — Inventory system
+**Files:** `src/game/inventory/Inventory.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Implement a minimal inventory (items list + add/remove). Output updated/new files only.
+
+### BLOCK 042 — XP / level system
+**Files:** `src/game/actors/PlayerStats.hpp`
+**Prompt**
+> I will paste the listed files. Add XP/level fields and simple level‑up rule. Output updated files only.
+
+### BLOCK 043 — Status effects
+**Files:** `src/game/actors/PlayerStats.hpp`
+**Prompt**
+> I will paste the listed files. Add a minimal status effects list (type + duration). Output updated files only.
+
+### BLOCK 044 — Fast travel stub
+**Files:** `src/game/world/FastTravel.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Implement a minimal fast‑travel list + trigger stub. Output updated/new files only.
+
+### BLOCK 045 — Save / load system
+**Files:** `src/app/SaveSystem.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Implement a minimal versioned save/load stub (player position + stats). Output updated/new files only.
 
 ---
 
-# BLOCKS — Gameplay + Scene
+## PHASE 4 — Audio + quality + progression glue (Tasks 046–055)
 
-## B‑GAME‑01 — RuntimeScene update sections
+### BLOCK 046 — Quality preset enforcement
+**Files:** `src/app/QualityPreset.cpp/hpp`
 **Prompt**
-> I will paste `RuntimeScene.*`. Add section headers and group into `PreUpdate → Update → PostUpdate`. No behavior change. Output updated files only.
+> I will paste the listed files (or empty if new). Implement Low/Medium/High preset toggles and apply to renderer paths. Output updated/new files only.
 
-## B‑GAME‑02 — Minimal component interface
+### BLOCK 047 — Victory fanfare trigger
+**Files:** `src/audio/AudioManager.cpp/hpp`
 **Prompt**
-> I will paste `ActorCommon.hpp` and one actor. Add a tiny component interface (Start/Update) without breaking existing behavior. Output updated files only.
+> I will paste the listed files. Play a fanfare sound when enemies are cleared. Output updated files only.
 
-## B‑GAME‑03 — Prefab validation
+### BLOCK 048 — Environmental ambient audio
+**Files:** `src/audio/AudioManager.cpp/hpp`
 **Prompt**
-> I will paste `PrefabDef.hpp` and `PrefabLibrary.*`. Add validation + logs with safe fallback. Output updated files only.
+> I will paste the listed files. Add looping ambient audio by biome or region. Output updated files only.
 
-## B‑GAME‑04 — Simple save/load stub
+### BLOCK 049 — Looping BGM
+**Files:** `src/audio/AudioManager.cpp/hpp`
 **Prompt**
-> I will paste any save/load files or prefab structures. Add a minimal versioned save/load stub (no full serializer). Output updated files only.
+> I will paste the listed files. Add looping background music with fade in/out. Output updated files only.
+
+### BLOCK 050 — Tactical Pause enter/exit SFX
+**Files:** `src/audio/AudioManager.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add SFX on tactical pause open/close. Output updated files only.
+
+### BLOCK 051 — Lock‑on acquire/break SFX
+**Files:** `src/audio/AudioManager.cpp/hpp`, `src/game/combat/Targeting.hpp`
+**Prompt**
+> I will paste the listed files. Add SFX on lock‑on acquire and break. Output updated files only.
+
+### BLOCK 052 — Enemy alert bark stub
+**Files:** `src/audio/AudioManager.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp`
+**Prompt**
+> I will paste the listed files. Add a single alert bark on enemy detect. Output updated files only.
+
+### BLOCK 053 — Equipment slot stub
+**Files:** `src/game/inventory/Equipment.hpp`, `src/game/actors/PlayerStats.hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Add minimal equipment slots (weapon/armor/accessory). Output updated/new files only.
+
+### BLOCK 054 — Ability unlock / progression hook
+**Files:** `src/game/progression/AbilityProgression.hpp`, `src/game/actors/PlayerStats.hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Add simple ability unlock tracking (id + unlocked). Output updated/new files only.
+
+### BLOCK 055 — Combat stat modifier pipeline stub
+**Files:** `src/game/combat/CombatModifiers.hpp`, `src/game/combat/CombatSystem.cpp/hpp`
+**Prompt**
+> I will paste the listed files (or empty if new). Add a minimal modifier pipeline (additive/multiplicative). Output updated/new files only.
 
 ---
 
-# BLOCKS — UI + Tools (ImGui)
+## PHASE 5 — Polish sweeps (Tasks 056–060)
 
-## B‑UI‑01 — Performance overlay panel
+### BLOCK 056 — Combat bugfix sweep
+**Files:** `src/game/combat/CombatSystem.cpp/hpp`, `src/game/RuntimeScene.hpp`, `src/app/Main.cpp`
 **Prompt**
-> I will paste `ImGuiLayer.*` and UI panels. Add a Performance panel (FPS, frame time, draw calls if available). Output updated files only.
+> I will paste the listed files and known issues. Propose minimal fixes only. Output updated files only.
 
-## B‑UI‑02 — Asset inspector panel
+### BLOCK 057 — Camera/input bugfix sweep
+**Files:** `src/game/CameraController.cpp/hpp`, `src/app/InputActionMap.hpp`, `src/app/Main.cpp`
 **Prompt**
-> I will paste UI panel code and asset registry. Add an Asset Inspector panel listing loaded assets. Output updated files only.
+> I will paste the listed files and known issues. Propose minimal fixes only. Output updated files only.
 
-## B‑UI‑03 — Debug console panel
+### BLOCK 058 — UI/HUD polish sweep
+**Files:** `src/ui/GameHUD.cpp/hpp`, `src/ui/ImGuiLayer.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp`
 **Prompt**
-> I will paste UI panel code. Add a small debug console with a history buffer. Output updated files only.
+> I will paste the listed files and known issues. Apply low‑risk UI polish aligned with UI_VISION.md. Output updated files only.
+
+### BLOCK 059 — World/runtime stability sweep
+**Files:** `src/world/WorldGrid.cpp/hpp`, `src/game/RuntimeScene.cpp/hpp`, `src/game/Forest.cpp/hpp`
+**Prompt**
+> I will paste the listed files and known issues. Apply minimal stability fixes only. Output updated files only.
+
+### BLOCK 060 — Audio + quality sweep
+**Files:** `src/audio/AudioManager.cpp/hpp`, `src/app/QualityPreset.cpp/hpp`, `src/ui/GameHUD.cpp/hpp`
+**Prompt**
+> I will paste the listed files and known issues. Apply minimal fixes + GT610 safety pass. Output updated files only.
 
 ---
 
-# BLOCKS — Audio (Wrapper‑based)
-
-## B‑AUDIO‑01 — Mixer groups
-**Prompt**
-> I will paste `tp_audio.hpp` and usage. Add Music/SFX/UI/Ambient mixer groups with volume controls. Output updated files only.
-
-## B‑AUDIO‑02 — Streaming guard checks
-**Prompt**
-> I will paste audio streaming code. Add guard checks and logs for load/play failures. Output updated files only.
-
----
-
-# BLOCKS — Physics + Navigation
-
-## B‑PHYS‑01 — Raycast helper
-**Prompt**
-> I will paste `tp_physics.hpp` usage. Add a minimal raycast helper (origin, dir, maxDist). Output updated files only.
-
-## B‑PHYS‑02 — Trigger volume system
-**Prompt**
-> I will paste physics wrapper usage and actor collision. Add trigger enter/exit events. Output updated files only.
-
-## B‑NAV‑01 — Navmesh bake stub
-**Prompt**
-> I will paste navigation wrapper usage. Add a minimal navmesh bake function with placeholder config. Output updated files only.
-
----
-
-# BLOCKS — Performance + Stability
-
-## B‑PERF‑01 — GPU resource ownership pattern
-**Prompt**
-> I will paste a renderer module that owns GPU resources. Add `Initialize(ID3D11Device*)` and `Shutdown()` with safe releases. Output updated files only.
-
-## B‑PERF‑02 — CPU profiling zones
-**Prompt**
-> I will paste `Main.cpp` or hot paths. Add `GR_ZONE_SCOPED_N` zones and `GR_FRAME_MARK`. Output updated files only.
-
-## B‑PERF‑03 — Low‑spec budgets clamp
-**Prompt**
-> I will paste quality config and renderer. Clamp draw calls, lights, texture sizes when Low preset is active. Output updated files only.
-
-## B‑PERF‑04 — Safe fallback assets
-**Prompt**
-> I will paste asset loader and content paths. Add fallback asset IDs for missing textures/meshes. Output updated files only.
-
----
-
-# BLOCKS — Release Engineering
-
-## B‑REL‑01 — Version header
-**Prompt**
-> I will paste any version/build files. Create `Version.hpp` with MAJOR/MINOR/PATCH and a string. Wire into app title. Output updated files only.
-
-## B‑REL‑02 — Build output layout
-**Prompt**
-> I will paste build scripts/tools. Add a minimal Release output layout (bin, Content, Shaders, logs). Output updated files only.
-
-## B‑REL‑03 — Release config sanity
-**Prompt**
-> I will paste build configs. Ensure Release disables asserts, enables optimizations, and keeps logging. Output updated files only.
-
----
-
-# BLOCKS — QA + Logging
-
-## B‑QA‑01 — Log file output
-**Prompt**
-> I will paste `Logger.hpp` and implementation. Add a Release‑build file sink for logs. Output updated files only.
-
-## B‑QA‑02 — Smoke test runner
-**Prompt**
-> I will paste `ThirdPartyBootstrap.hpp` and any tests. Add a smoke‑test runner on startup. Output updated files only.
-
----
-
-# BLOCKS — Legal + Commercial Readiness
-
-## B‑LEGAL‑01 — Third‑party notices file
-**Prompt**
-> I will paste the list of third‑party folders and any license files. Generate `THIRD_PARTY_NOTICES.md` with attributions. Output only that file.
+# Notes for Qwen Prompts (alignment reminders)
+- **Do not add** new renderers or heavy post‑process. Respect `GRAPHICS_VISION.md`.
+- **UI style** must follow `UI_VISION.md` (action HUD vs classic menu windows).
+- **Combat** must follow `COMBAT_VISION.md` (simple, readable, no complex FSM).
+- **Performance** must follow `PERFORMANCE_GUARDRAILS.md` (Low preset safe).
+- **Never rebuild** anything already ✅ in `SYSTEMS.md`.
 
 ---
 
