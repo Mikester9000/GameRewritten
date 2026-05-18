@@ -1,232 +1,208 @@
-# Qwen 2.5 7B Prompts (Small, Manual Paste)
+# Qwen 2.5 7B — **Code-Writing Prompts for Missing Work**
 
-Use these **numbered, short prompts** with Qwen. Each prompt assumes **Qwen has zero repo access** and you will paste context manually. Keep every prompt small. Paste only the minimum needed context (file snippets, errors, logs).
+This file is a **work-order list**. Each item is a **small, code-writing task** that Qwen can complete with **minimal reasoning**. You will **paste the specific files** to Qwen, then **copy Qwen’s output back** into the repo manually.
 
-**How to use**
-- Copy **one prompt at a time** into Qwen.
-- Paste only the **exact context** requested by that prompt.
-- Manually apply Qwen’s output to the engine codebase.
+**Rules for every prompt**
+- Qwen has **no repo access**. You must paste required files or snippets.
+- Keep prompts **small** (you control the size).
+- Ask Qwen to output **only the final code**, **no explanations**.
+- If a task affects project files, ask Qwen to list **exact project edits** (e.g., .vcxproj add file entries).
 
----
-
-## Phase 0 — Establish Baseline
-
-1. **Prompt:**
-   > I will paste the current repo structure and build steps. Reply with a 5–7 step baseline plan to build, run, and verify the current engine without changing code. Ask me for any missing commands or tools.
-
-2. **Prompt:**
-   > Here is the current README and build notes. Summarize the minimum build/run steps in 6 bullet points. Ask one clarification if anything is missing.
-
-3. **Prompt:**
-   > I will paste the current top-level folder list. Identify the likely entry point and where frame loop, rendering, and input are located. Keep your answer to 8 bullets max.
-
-4. **Prompt:**
-   > I will paste the current Main.cpp (or entry file). Identify: init order, per-frame order, shutdown order. Reply with three numbered lists.
+**Output format rule (use in every prompt)**
+> Output only the final code or exact patch steps. No explanations.
 
 ---
 
-## Phase 1 — Roadmap from Current State to Commercial Release
-
-5. **Prompt:**
-   > Create a concise roadmap from current engine state to commercial release. Use 6 phases max. Each phase: goal + 3–5 deliverables. Assume D3D11 + low-spec GPU target. Keep it short.
-
-6. **Prompt:**
-   > For Phase 1 only, create 10 small tasks. Each task should be 1–2 sentences and safe to do incrementally.
-
-7. **Prompt:**
-   > For Phase 2 only, create 10 small tasks. Same format as before.
-
-8. **Prompt:**
-   > For Phase 3 only, create 10 small tasks. Same format as before.
-
-9. **Prompt:**
-   > For Phase 4 only, create 10 small tasks. Same format as before.
-
-10. **Prompt:**
-    > For Phase 5 only, create 10 small tasks. Same format as before.
+## How to use (fast)
+1. Pick **one task** below.
+2. Copy the **Prompt** for that task.
+3. Paste the **exact file(s)** Qwen needs.
+4. Apply the returned code.
 
 ---
 
-## Phase 2 — Architecture + Core Systems
+## Phase A — Build + Entry Flow (Small, deterministic)
 
-11. **Prompt:**
-    > I will paste the current module map / file list. Propose a minimal, modular architecture for: rendering, assets, audio, physics, UI, gameplay, tools. Keep to 8–10 bullets.
+### A1 — Main loop structure cleanup
+**Prompt**
+> I will paste `src/app/Main.cpp`. Update it to enforce: setup → guard clauses → main logic → output sections. Add section headers for any function over 20 lines. Keep behavior identical. Output only the updated file.
 
-12. **Prompt:**
-    > I will paste the rendering files. Propose a minimal forward-rendering pipeline with D3D11. List only key steps and data flow.
+### A2 — Add missing module init/shutdown stubs
+**Prompt**
+> I will paste `src/app/Main.cpp` and any module headers. Add safe `Initialize()` / `Shutdown()` calls for modules that own GPU or external resources. Do not change behavior. Output only the updated `Main.cpp`.
 
-13. **Prompt:**
-    > I will paste the input system code. Suggest small, low-risk improvements for stability and clarity. Provide only 3 changes.
-
-14. **Prompt:**
-    > I will paste the asset registry/loader. Propose a small, incremental improvement for caching or error handling. Keep it to one change.
-
-15. **Prompt:**
-    > I will paste the camera controller. Identify any state-reset risks and give 2 small fixes.
+### A3 — Frame timing polish
+**Prompt**
+> I will paste `src/app/FrameTiming.hpp` and relevant usage. Add a minimal fixed-step helper (accumulator + max steps). No behavior changes unless fixed-step is disabled. Output only updated files.
 
 ---
 
-## Phase 3 — Rendering + Visual Targets
+## Phase B — Rendering Core (D3D11, GT610-friendly)
 
-16. **Prompt:**
-    > I will paste current shader list. Propose 5 minimal shaders needed for a commercial-ready baseline (name + purpose only).
+### B1 — Add a minimal per-scene constant buffer
+**Prompt**
+> I will paste `src/rendering/d3d11/D3D11Renderer.hpp` and `.cpp`. Add a per-scene constant buffer (view/proj, light dir, light color). Bind at slot b1 in VS/PS. Output updated files only.
 
-17. **Prompt:**
-    > I will paste the D3D11 renderer. Propose a small batch of changes to add: basic lighting, simple shadows, and a UI pass. Keep to 3–5 steps.
+### B2 — Add a basic directional light
+**Prompt**
+> I will paste `D3D11Renderer.*` and the main shader pair. Add a simple directional light term in the pixel shader. Keep it low-cost. Output only updated shader and C++ updates.
 
-18. **Prompt:**
-    > I will paste the material system (if any). Propose a minimal material model that supports albedo/normal/roughness and per-quality toggles. Keep to 6 bullets.
+### B3 — Add a depth-only shadow map pass
+**Prompt**
+> I will paste renderer files and relevant shader list. Add a minimal depth-only shadow map pass with one light. Use a single shadow map. Output only new/updated files.
 
-19. **Prompt:**
-    > Provide a minimal post-processing list suitable for GT610. Max 3 passes. Explain when each can be disabled.
+### B4 — Add a UI render pass (ImGui already exists)
+**Prompt**
+> I will paste `Main.cpp` and `ImGuiLayer.*`. Ensure UI rendering is a clearly separated pass after 3D rendering. Keep behavior identical. Output updated files only.
 
-20. **Prompt:**
-    > Provide a low-spec visual budget checklist: draw calls, texture sizes, light counts, shadow sizes. Keep to one short table.
-
----
-
-## Phase 4 — Gameplay Framework + Tools
-
-21. **Prompt:**
-    > I will paste the actor/prefab system. Propose a minimal component model with 3–5 components. Keep the change plan small.
-
-22. **Prompt:**
-    > I will paste the runtime scene update loop. Suggest a fixed-step simulation plan that is safe and minimal. Provide only a 5-step plan.
-
-23. **Prompt:**
-    > I will paste ImGui panels. Suggest 3 essential panels for commercial readiness (debug, performance, content). Keep it short.
-
-24. **Prompt:**
-    > Propose a minimal save/load format and versioning scheme for levels/prefabs. 6 bullets max.
-
-25. **Prompt:**
-    > Propose a minimal in-engine console/logging command system. 5 bullets max.
+### B5 — Add a “Low” quality preset toggle
+**Prompt**
+> I will paste current quality/settings config. Add a Low preset that disables extra passes and clamps light counts. Output only updated config and any wiring changes.
 
 ---
 
-## Phase 5 — Audio, Physics, Navigation
+## Phase C — Shader Set (Minimal commercial baseline)
 
-26. **Prompt:**
-    > I will paste the audio wrapper usage. Suggest a minimal audio mixer design: music, SFX, UI, ambient. Keep to 6 bullets.
+### C1 — Standard lit shader pair
+**Prompt**
+> I will paste the shader folder list and an existing shader template. Create a simple lit shader pair `<name>_vs.hlsl` / `<name>_ps.hlsl` using a single directional light and albedo. Output only new shader code.
 
-27. **Prompt:**
-    > I will paste the physics wrapper usage. Suggest 3 small physics features to add next (e.g., triggers, raycasts, simple character controller).
+### C2 — Unlit/UI shader pair
+**Prompt**
+> I will paste a shader template. Create an unlit shader pair for UI or debug. Output only new shader code.
 
-28. **Prompt:**
-    > I will paste navigation usage. Suggest a minimal navmesh workflow and how to bake it. 6 bullets max.
-
----
-
-## Phase 6 — Asset Pipeline + Content
-
-29. **Prompt:**
-    > Propose a minimal asset pipeline from source → cooked data for textures, meshes, audio. Keep to 8 bullets.
-
-30. **Prompt:**
-    > Propose a content folder layout for commercial release with versioned assets and build outputs. Keep it short.
-
-31. **Prompt:**
-    > Propose a small set of automated asset validation checks (naming, sizes, formats). 6 bullets max.
+### C3 — Debug normal-visualization shader
+**Prompt**
+> I will paste a shader template. Create a debug shader to visualize normals. Output only new shader code.
 
 ---
 
-## Phase 7 — Performance + Stability
+## Phase D — Asset System (Small, safe improvements)
 
-32. **Prompt:**
-    > Provide a minimal profiling plan for CPU and GPU on low-spec hardware. 8 bullets max.
+### D1 — Asset load error handling
+**Prompt**
+> I will paste `src/assets/AssetRegistry.*` and `AssetLoader.*`. Add clear error logs on missing or invalid assets and return fallback IDs. Output updated files only.
 
-33. **Prompt:**
-    > Propose 5 low-risk performance wins for D3D11 forward rendering.
+### D2 — Simple asset cache
+**Prompt**
+> I will paste asset loader code. Add a tiny in-memory cache keyed by path or ID. Must avoid duplicates. Output updated files only.
 
-34. **Prompt:**
-    > Propose a crash-safe startup sequence and a safe shutdown sequence. Keep to two numbered lists.
-
-35. **Prompt:**
-    > Propose a minimal error-reporting and log file strategy appropriate for a commercial build. 6 bullets max.
-
----
-
-## Phase 8 — QA + Testing
-
-36. **Prompt:**
-    > Propose a minimal smoke-test checklist for rendering, input, audio, physics. 12 bullets max.
-
-37. **Prompt:**
-    > Propose minimal automated tests that can run in CI for this engine. 8 bullets max.
-
-38. **Prompt:**
-    > Propose a manual QA checklist for low-spec GPU (GT610). Keep it short.
+### D3 — Asset validation helper
+**Prompt**
+> I will paste asset loader code. Add a small `ValidateAsset()` helper used at load time (format/size checks). Output updated files only.
 
 ---
 
-## Phase 9 — Release Engineering
+## Phase E — Gameplay + Scene
 
-39. **Prompt:**
-    > Propose a minimal build pipeline for Debug/Release, including symbol generation and asset cooking. 8 bullets max.
+### E1 — RuntimeScene update order clarity
+**Prompt**
+> I will paste `src/game/RuntimeScene.hpp` and related `.cpp`. Add clear section headers and reorder to `PreUpdate → Update → PostUpdate`. No behavior changes. Output updated files only.
 
-40. **Prompt:**
-    > Propose a Windows packaging plan (installer, portable zip, dependencies). 6 bullets max.
+### E2 — Actor base component stub
+**Prompt**
+> I will paste `src/game/actors/ActorCommon.hpp` and one actor file. Add a tiny component interface (Start/Update) without breaking existing behavior. Output updated files only.
 
-41. **Prompt:**
-    > Propose versioning rules and release notes format. 6 bullets max.
-
-42. **Prompt:**
-    > Provide a minimal rollback strategy for releases. 5 bullets max.
-
----
-
-## Phase 10 — Legal + Commercial Readiness
-
-43. **Prompt:**
-    > Provide a checklist for licenses and third-party attributions required for commercial release. 8 bullets max.
-
-44. **Prompt:**
-    > Provide a minimal EULA + privacy policy checklist (what sections to include). 8 bullets max.
-
-45. **Prompt:**
-    > Provide a minimal security checklist for shipped builds. 8 bullets max.
+### E3 — Prefab loading safety
+**Prompt**
+> I will paste `PrefabDef.hpp` and `PrefabLibrary.*`. Add validation with log errors and safe fallback on bad prefab data. Output updated files only.
 
 ---
 
-## Phase 11 — Documentation + Support
+## Phase F — UI + Tools (ImGui panels)
 
-46. **Prompt:**
-    > Provide a minimal user guide outline for the engine/tools. 8 bullets max.
+### F1 — Performance overlay panel
+**Prompt**
+> I will paste `src/ui/ImGuiLayer.*` and any UI panel files. Add a minimal Performance panel (FPS, frame time, draw calls if available). Output updated files only.
 
-47. **Prompt:**
-    > Provide a minimal developer guide outline for contributors. 8 bullets max.
+### F2 — Asset inspector panel
+**Prompt**
+> I will paste UI panel code and asset registry. Add a small Asset Inspector panel that lists loaded assets and IDs. Output updated files only.
 
-48. **Prompt:**
-    > Provide a minimal troubleshooting guide outline. 8 bullets max.
-
----
-
-## Phase 12 — Task Execution Templates (Small Changes)
-
-49. **Prompt:**
-    > I will paste a single file. Identify one safe, minimal improvement. Provide exact edit steps and explain why. Keep it short.
-
-50. **Prompt:**
-    > I will paste an error log. Identify likely cause and 3 minimal fixes to try, in priority order.
-
-51. **Prompt:**
-    > I will paste a compiler error. Explain it in plain terms and propose the smallest fix.
-
-52. **Prompt:**
-    > I will paste a shader. Suggest one small optimization for GT610 and show the changed snippet only.
-
-53. **Prompt:**
-    > I will paste a class. Suggest one refactor that reduces complexity without changing behavior. Provide the new version only.
+### F3 — World editor panel cleanup
+**Prompt**
+> I will paste `src/ui/WorldEditor.*`. Add section headers and split any large function into small helpers without behavior changes. Output updated files only.
 
 ---
 
-## Phase 13 — Final Commercial Release Gate
+## Phase G — Audio (Wrapper-based)
 
-54. **Prompt:**
-    > Provide a go/no-go checklist for commercial release of this engine. 15 bullets max.
+### G1 — Audio mixer groups
+**Prompt**
+> I will paste `ThirdParty/tp_audio.hpp` and audio usage. Add minimal mixer groups: Music, SFX, UI, Ambient. Provide simple volume controls. Output updated files only.
 
-55. **Prompt:**
-    > Provide a release candidate checklist for bug triage and prioritization. 10 bullets max.
+### G2 — Audio streaming safety
+**Prompt**
+> I will paste audio wrapper and any streaming code. Add guard checks and clear error logs on failure. Output updated files only.
 
-56. **Prompt:**
-    > Provide a post-launch support plan (patch cadence, hotfix rules, support channels). 8 bullets max.
+---
+
+## Phase H — Physics + Navigation
+
+### H1 — Simple raycast helpers
+**Prompt**
+> I will paste `ThirdParty/tp_physics.hpp` usage. Add a minimal raycast helper function (origin, dir, maxDist). Output updated files only.
+
+### H2 — Trigger volume support
+**Prompt**
+> I will paste physics wrapper usage and any actor collision code. Add a minimal trigger system that reports enter/exit. Output updated files only.
+
+### H3 — Navmesh bake workflow stub
+**Prompt**
+> I will paste navigation wrapper usage. Add a minimal function that builds/bakes navmesh with placeholder config. Output updated files only.
+
+---
+
+## Phase I — Performance + Stability
+
+### I1 — Fixed GPU resource ownership pattern
+**Prompt**
+> I will paste a renderer module that owns GPU resources. Add `Initialize(ID3D11Device*)` and `Shutdown()` with clear ownership and safe releases. Output updated files only.
+
+### I2 — Basic CPU profiling zones
+**Prompt**
+> I will paste `Main.cpp` or hot paths. Add `GR_ZONE_SCOPED_N` zones for major frame steps and `GR_FRAME_MARK`. Output updated files only.
+
+### I3 — Low-spec budgets clamp
+**Prompt**
+> I will paste quality config and renderer. Add clamps for draw calls, lights, and texture sizes when Low preset is active. Output updated files only.
+
+---
+
+## Phase J — Packaging + Release
+
+### J1 — Version file
+**Prompt**
+> I will paste any build/version files. Create a small `Version.hpp` with MAJOR/MINOR/PATCH and a string. Wire into app title. Output updated files only.
+
+### J2 — Build output layout
+**Prompt**
+> I will paste build scripts/tools. Add a minimal output folder layout for Release builds (bin, Content, Shaders, logs). Output updated files only.
+
+---
+
+## Phase K — QA + Logging
+
+### K1 — Log file output
+**Prompt**
+> I will paste `src/logger/Logger.hpp` and implementation. Add a minimal file sink for Release builds. Output updated files only.
+
+### K2 — Smoke test runner
+**Prompt**
+> I will paste `src/app/ThirdPartyBootstrap.hpp` and any tests. Add a simple smoke-test runner called from startup. Output updated files only.
+
+---
+
+## Phase L — Legal + Commercial readiness
+
+### L1 — Third-party license aggregation file
+**Prompt**
+> I will paste the list of third-party folders and any license files. Generate a `THIRD_PARTY_NOTICES.md` that aggregates license texts and attributions. Output only that file.
+
+---
+
+## Universal “Write Code For This File” Prompt
+Use this when you already know exactly what change you want.
+
+**Prompt**
+> I will paste a single file and a small change request. Apply the change. Output only the full updated file. No explanations.
