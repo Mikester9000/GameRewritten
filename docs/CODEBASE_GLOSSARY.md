@@ -16,7 +16,7 @@ See also: [Architecture.md](./Architecture.md), [SYSTEM_OWNERSHIP.md](./SYSTEM_O
 |---|---|---|
 | `Main.cpp` | Win32 entry point (`wWinMain`). Constructs every subsystem, runs the 9-step frame loop, tears everything down on exit. | Add new per-frame calls in the numbered sections. Never reorder the 9 steps — order is load-bearing. |
 | `FrameTiming.hpp` | `FrameTiming::State` + `Initialize()` + `BeginFrame()`. Computes `deltaTime` via `QueryPerformanceCounter`, clamps to 50 ms, maintains smoothed FPS. | Replace timing only here; never inline timing logic in `Main.cpp`. |
-| `InputActionMap.hpp` | `InputAction` enum (12 actions), `InputActionMap` struct (bindings map), `IsHeld()`, `IsPressed()`, `IsVirtualKeyHeld()`. Default WASD/F/Shift/Q/E/Esc/F1/F5 layout. | Add new `InputAction` values here, never hard-code `GetAsyncKeyState` elsewhere. |
+| `InputActionMap.hpp` | `InputAction` enum (12 actions), `InputActionMap` struct (bindings map), `IsHeld()`, `IsPressed()`, `IsVirtualKeyHeld()`. Default WASD/Space/F/Shift/Q/E/Esc/F1/F5 layout. | Add new `InputAction` values here, never hard-code `GetAsyncKeyState` elsewhere. |
 | `InputEdgeState.hpp` | `InputEdge::State` (6 bool latches). Edge-trigger helpers for T, G, Escape, F1, F5, LMB. | Add a bool + `PollXPressed()` helper here for any new edge-triggered key. |
 | `CursorModeController.hpp` | `CursorMode::State`. `ApplyCursorVisibility()` manages Win32 `ShowCursor` counter. `HandleMouseLookTransition()` warps cursor on mouse-look enable and sets `firstFrame=true`. | Only touch if cursor/mouse-look rules change. |
 | `WorldEditorFrameOps.hpp` | App-level helpers: `GetActiveCellFromPlayer()`, `HandlePlacementClick()`, `DrawEditorPanelForActiveCell()`. Bridges `WorldEditor ↔ CameraController ↔ D3D11Renderer`. | Safe to extend with new editor frame operations. |
@@ -169,9 +169,9 @@ See also: [Architecture.md](./Architecture.md), [SYSTEM_OWNERSHIP.md](./SYSTEM_O
 ### `wWinMain` — `src/app/Main.cpp:58`
 
 The single Win32 entry point. The only place where all subsystems are constructed and wired together.
-Initialization order (never change this sequence):
+Initialization call order (13 startup steps; never change this sequence):
 
-1. `Win32Window::Create()` (line 60)
+1. `Win32Window::Create()` (line 61)
 2. `D3D11Renderer::Initialize()` (line 68)
 3. `TextureCache` + `AssetRegistry::Load()` (lines 76–83)
 4. `WorldGrid::Load()` (line 89)
@@ -185,7 +185,7 @@ Initialization order (never change this sequence):
 12. `CameraController::Init()` (line 190)
 13. `RuntimeScene::InitEnemies()` (line 191)
 
-Shutdown is the reverse of initialization (lines 556–563).
+Shutdown is the reverse of initialization (lines 556–564).
 
 ---
 
@@ -286,8 +286,8 @@ Main.cpp
 
 | Name | Type | Location | Reuse Guidance |
 |---|---|---|---|
-| `PlayerStats::hp/maxHp/mp/maxMp` | `float` | `PlayerStats.hpp:15–17` | Read directly for HUD bars. |
-| `PlayerStats::surgeCharge/limitCharge` | `float` | `PlayerStats.hpp:21, 26` | 0.0–1.0 range. Full = `>= 1.0f`. |
+| `PlayerStats::hp/maxHp/mp/maxMp` | `float` | `PlayerStats.hpp:15–18` | Read directly for HUD bars. |
+| `PlayerStats::surgeCharge/limitCharge` | `float` | `PlayerStats.hpp:22, 27` | 0.0–1.0 range. Full = `>= 1.0f`. |
 | `PlayerStats::TakeDamage(int)` | method | `PlayerStats.hpp:66` | Only call this to apply damage — it also advances Limit gauge. |
 | `PlayerStats::IsDead()` | `bool` | `PlayerStats.hpp:74` | Used by `RuntimeScene` to gate respawn. |
 | `PlayerStats::Reset()` | method | `PlayerStats.hpp:78` | Call on respawn — restores hp, mp, surge, limit. |
