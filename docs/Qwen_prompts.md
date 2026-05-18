@@ -24,6 +24,24 @@ This file is **strictly aligned** to these docs (source of truth):
 
 ---
 
+## Tiny‑Context Protocol (batch 64, context 484)
+Use these rules whenever a local agent runs automatically:
+
+1. **Max input size**: paste **≤ 180 lines** at a time.
+2. **One file at a time** unless the task explicitly requires two files.
+3. If output might be long, **force PARTS**:
+   - “If output is long, return PART 1 only and wait.”
+4. Use a **2‑step loop**:
+   - Step A: “Read this chunk and list exactly what you need next.”
+   - Step B: “Return updated code for only this chunk.”
+5. **Never ask for extra context** unless required to compile.
+6. **Repeat** until the file is complete.
+
+**Tiny‑context prompt footer (append to every prompt)**
+> If the update cannot fit, output `PART 1/2` only and wait. Do not guess missing code. Ask for the next chunk.
+
+---
+
 # LEGO BLOCKS — **Exactly the ❌ items from SYSTEMS.md**
 
 > Use **one block at a time**. Each block maps 1:1 to a SYSTEMS.md ❌ entry and the task order in FULL_TASK_SEQUENCE.md.
