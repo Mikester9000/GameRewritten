@@ -1,12 +1,12 @@
-# Qwen 2.5 7B — **Code-Writing Prompts for Missing Work**
+# Qwen 2.5 7B — **Modular “Lego Block” Code Tasks**
 
-This file is a **work-order list**. Each item is a **small, code-writing task** that Qwen can complete with **minimal reasoning**. You will **paste the specific files** to Qwen, then **copy Qwen’s output back** into the repo manually.
+This file is a **complete set of small, standalone coding blocks** to reach **commercial‑release grade**. Each block is meant to be **written independently** by Qwen and then **inserted manually** into the repo. Blocks are **modular** so you can add them one‑by‑one.
 
 **Rules for every prompt**
-- Qwen has **no repo access**. You must paste required files or snippets.
-- Keep prompts **small** (you control the size).
-- Ask Qwen to output **only the final code**, **no explanations**.
-- If a task affects project files, ask Qwen to list **exact project edits** (e.g., .vcxproj add file entries).
+- Qwen has **no repo access**. You must paste required files/snippets.
+- Keep prompts **small** (you control size).
+- Ask Qwen to output **only the final code** (no explanations).
+- If a task touches project files, ask Qwen to list **exact project edits** (e.g., `.vcxproj` additions).
 
 **Output format rule (use in every prompt)**
 > Output only the final code or exact patch steps. No explanations.
@@ -14,195 +14,213 @@ This file is a **work-order list**. Each item is a **small, code-writing task** 
 ---
 
 ## How to use (fast)
-1. Pick **one task** below.
-2. Copy the **Prompt** for that task.
+1. Pick **one block** below.
+2. Copy the **Prompt** for that block.
 3. Paste the **exact file(s)** Qwen needs.
-4. Apply the returned code.
+4. Apply the returned code and move to the next block.
 
 ---
 
-## Phase A — Build + Entry Flow (Small, deterministic)
+# BLOCKS — Core Engine (Must‑Have)
 
-### A1 — Main loop structure cleanup
+## B‑CORE‑01 — Main loop narrative sections
 **Prompt**
-> I will paste `src/app/Main.cpp`. Update it to enforce: setup → guard clauses → main logic → output sections. Add section headers for any function over 20 lines. Keep behavior identical. Output only the updated file.
+> I will paste `src/app/Main.cpp`. Add section headers and enforce the order: setup → guard clauses → main logic → output. Keep behavior identical. Output only the updated file.
 
-### A2 — Add missing module init/shutdown stubs
+## B‑CORE‑02 — Fixed‑step helper
 **Prompt**
-> I will paste `src/app/Main.cpp` and any module headers. Add safe `Initialize()` / `Shutdown()` calls for modules that own GPU or external resources. Do not change behavior. Output only the updated `Main.cpp`.
+> I will paste `src/app/FrameTiming.hpp` and its usage. Add a minimal fixed‑step accumulator helper (with max steps). Keep existing behavior unless fixed‑step is enabled. Output updated files only.
 
-### A3 — Frame timing polish
+## B‑CORE‑03 — Deterministic frame order helpers
 **Prompt**
-> I will paste `src/app/FrameTiming.hpp` and relevant usage. Add a minimal fixed-step helper (accumulator + max steps). No behavior changes unless fixed-step is disabled. Output only updated files.
+> I will paste `src/app/Main.cpp`. Extract small helper functions for `BeginFrame`, `UpdateFrame`, `RenderFrame`, `EndFrame` without changing behavior. Output only updated file.
+
+## B‑CORE‑04 — Safe init/shutdown wiring
+**Prompt**
+> I will paste `Main.cpp` and all module headers that own resources. Add explicit `Initialize()` and `Shutdown()` calls in correct order. Output only updated `Main.cpp`.
+
+## B‑CORE‑05 — Crash‑safe startup log
+**Prompt**
+> I will paste `src/logger/Logger.hpp` and implementation. Add a startup log section that prints version, build type, GPU/driver when available. Output updated files only.
 
 ---
 
-## Phase B — Rendering Core (D3D11, GT610-friendly)
+# BLOCKS — Rendering (D3D11, Low‑Spec Ready)
 
-### B1 — Add a minimal per-scene constant buffer
+## B‑RENDER‑01 — Per‑scene constant buffer
 **Prompt**
-> I will paste `src/rendering/d3d11/D3D11Renderer.hpp` and `.cpp`. Add a per-scene constant buffer (view/proj, light dir, light color). Bind at slot b1 in VS/PS. Output updated files only.
+> I will paste `D3D11Renderer.hpp/.cpp`. Add a per‑scene cbuffer (view/proj, lightDir, lightColor). Bind to slot b1 VS/PS. Output updated files only.
 
-### B2 — Add a basic directional light
+## B‑RENDER‑02 — Standard lit shader pair
 **Prompt**
-> I will paste `D3D11Renderer.*` and the main shader pair. Add a simple directional light term in the pixel shader. Keep it low-cost. Output only updated shader and C++ updates.
+> I will paste a shader template. Create a simple lit shader pair `standard_lit_vs.hlsl` / `standard_lit_ps.hlsl` using a single directional light. Output only shader files.
 
-### B3 — Add a depth-only shadow map pass
+## B‑RENDER‑03 — Unlit shader pair
 **Prompt**
-> I will paste renderer files and relevant shader list. Add a minimal depth-only shadow map pass with one light. Use a single shadow map. Output only new/updated files.
+> I will paste a shader template. Create `unlit_vs.hlsl` / `unlit_ps.hlsl` for UI/debug. Output only shader files.
 
-### B4 — Add a UI render pass (ImGui already exists)
+## B‑RENDER‑04 — Debug normals shader
 **Prompt**
-> I will paste `Main.cpp` and `ImGuiLayer.*`. Ensure UI rendering is a clearly separated pass after 3D rendering. Keep behavior identical. Output updated files only.
+> I will paste a shader template. Create `debug_normals_vs.hlsl` / `debug_normals_ps.hlsl` to visualize normals. Output only shader files.
 
-### B5 — Add a “Low” quality preset toggle
+## B‑RENDER‑05 — Basic lighting pass wiring
 **Prompt**
-> I will paste current quality/settings config. Add a Low preset that disables extra passes and clamps light counts. Output only updated config and any wiring changes.
+> I will paste renderer files and shader list. Wire the standard lit shader into the render path with light uniforms. Output updated files only.
+
+## B‑RENDER‑06 — Shadow map pass (single light)
+**Prompt**
+> I will paste renderer files and shader list. Add a minimal depth‑only shadow map pass using one light and a single shadow map. Output updated/new files only.
+
+## B‑RENDER‑07 — Low‑spec quality preset clamp
+**Prompt**
+> I will paste quality config and renderer. Add a Low preset that clamps light count, disables extra passes, and reduces shadow resolution. Output updated files only.
+
+## B‑RENDER‑08 — Simple post‑process pass
+**Prompt**
+> I will paste renderer files. Add one optional post‑process pass (gamma/tonemap). Must be disable‑able. Output updated files only.
 
 ---
 
-## Phase C — Shader Set (Minimal commercial baseline)
+# BLOCKS — Assets (Commercial‑grade reliability)
 
-### C1 — Standard lit shader pair
+## B‑ASSET‑01 — Asset load error logging
 **Prompt**
-> I will paste the shader folder list and an existing shader template. Create a simple lit shader pair `<name>_vs.hlsl` / `<name>_ps.hlsl` using a single directional light and albedo. Output only new shader code.
+> I will paste `AssetRegistry.*` and `AssetLoader.*`. Add clear error logs and fallback IDs for missing assets. Output updated files only.
 
-### C2 — Unlit/UI shader pair
+## B‑ASSET‑02 — In‑memory asset cache
 **Prompt**
-> I will paste a shader template. Create an unlit shader pair for UI or debug. Output only new shader code.
+> I will paste asset loader code. Add a tiny cache keyed by ID/path to avoid re‑loading. Output updated files only.
 
-### C3 — Debug normal-visualization shader
+## B‑ASSET‑03 — Asset validation helper
 **Prompt**
-> I will paste a shader template. Create a debug shader to visualize normals. Output only new shader code.
+> I will paste asset loader code. Add `ValidateAsset()` (format/size checks). Call it on load. Output updated files only.
+
+## B‑ASSET‑04 — Asset dependency tracking
+**Prompt**
+> I will paste asset loader/registry. Add a minimal dependency list per asset (texture → source). Output updated files only.
 
 ---
 
-## Phase D — Asset System (Small, safe improvements)
+# BLOCKS — Gameplay + Scene
 
-### D1 — Asset load error handling
+## B‑GAME‑01 — RuntimeScene update sections
 **Prompt**
-> I will paste `src/assets/AssetRegistry.*` and `AssetLoader.*`. Add clear error logs on missing or invalid assets and return fallback IDs. Output updated files only.
+> I will paste `RuntimeScene.*`. Add section headers and group into `PreUpdate → Update → PostUpdate`. No behavior change. Output updated files only.
 
-### D2 — Simple asset cache
+## B‑GAME‑02 — Minimal component interface
 **Prompt**
-> I will paste asset loader code. Add a tiny in-memory cache keyed by path or ID. Must avoid duplicates. Output updated files only.
+> I will paste `ActorCommon.hpp` and one actor. Add a tiny component interface (Start/Update) without breaking existing behavior. Output updated files only.
 
-### D3 — Asset validation helper
+## B‑GAME‑03 — Prefab validation
 **Prompt**
-> I will paste asset loader code. Add a small `ValidateAsset()` helper used at load time (format/size checks). Output updated files only.
+> I will paste `PrefabDef.hpp` and `PrefabLibrary.*`. Add validation + logs with safe fallback. Output updated files only.
+
+## B‑GAME‑04 — Simple save/load stub
+**Prompt**
+> I will paste any save/load files or prefab structures. Add a minimal versioned save/load stub (no full serializer). Output updated files only.
 
 ---
 
-## Phase E — Gameplay + Scene
+# BLOCKS — UI + Tools (ImGui)
 
-### E1 — RuntimeScene update order clarity
+## B‑UI‑01 — Performance overlay panel
 **Prompt**
-> I will paste `src/game/RuntimeScene.hpp` and related `.cpp`. Add clear section headers and reorder to `PreUpdate → Update → PostUpdate`. No behavior changes. Output updated files only.
+> I will paste `ImGuiLayer.*` and UI panels. Add a Performance panel (FPS, frame time, draw calls if available). Output updated files only.
 
-### E2 — Actor base component stub
+## B‑UI‑02 — Asset inspector panel
 **Prompt**
-> I will paste `src/game/actors/ActorCommon.hpp` and one actor file. Add a tiny component interface (Start/Update) without breaking existing behavior. Output updated files only.
+> I will paste UI panel code and asset registry. Add an Asset Inspector panel listing loaded assets. Output updated files only.
 
-### E3 — Prefab loading safety
+## B‑UI‑03 — Debug console panel
 **Prompt**
-> I will paste `PrefabDef.hpp` and `PrefabLibrary.*`. Add validation with log errors and safe fallback on bad prefab data. Output updated files only.
+> I will paste UI panel code. Add a small debug console with a history buffer. Output updated files only.
 
 ---
 
-## Phase F — UI + Tools (ImGui panels)
+# BLOCKS — Audio (Wrapper‑based)
 
-### F1 — Performance overlay panel
+## B‑AUDIO‑01 — Mixer groups
 **Prompt**
-> I will paste `src/ui/ImGuiLayer.*` and any UI panel files. Add a minimal Performance panel (FPS, frame time, draw calls if available). Output updated files only.
+> I will paste `tp_audio.hpp` and usage. Add Music/SFX/UI/Ambient mixer groups with volume controls. Output updated files only.
 
-### F2 — Asset inspector panel
+## B‑AUDIO‑02 — Streaming guard checks
 **Prompt**
-> I will paste UI panel code and asset registry. Add a small Asset Inspector panel that lists loaded assets and IDs. Output updated files only.
-
-### F3 — World editor panel cleanup
-**Prompt**
-> I will paste `src/ui/WorldEditor.*`. Add section headers and split any large function into small helpers without behavior changes. Output updated files only.
+> I will paste audio streaming code. Add guard checks and logs for load/play failures. Output updated files only.
 
 ---
 
-## Phase G — Audio (Wrapper-based)
+# BLOCKS — Physics + Navigation
 
-### G1 — Audio mixer groups
+## B‑PHYS‑01 — Raycast helper
 **Prompt**
-> I will paste `ThirdParty/tp_audio.hpp` and audio usage. Add minimal mixer groups: Music, SFX, UI, Ambient. Provide simple volume controls. Output updated files only.
+> I will paste `tp_physics.hpp` usage. Add a minimal raycast helper (origin, dir, maxDist). Output updated files only.
 
-### G2 — Audio streaming safety
+## B‑PHYS‑02 — Trigger volume system
 **Prompt**
-> I will paste audio wrapper and any streaming code. Add guard checks and clear error logs on failure. Output updated files only.
+> I will paste physics wrapper usage and actor collision. Add trigger enter/exit events. Output updated files only.
+
+## B‑NAV‑01 — Navmesh bake stub
+**Prompt**
+> I will paste navigation wrapper usage. Add a minimal navmesh bake function with placeholder config. Output updated files only.
 
 ---
 
-## Phase H — Physics + Navigation
+# BLOCKS — Performance + Stability
 
-### H1 — Simple raycast helpers
+## B‑PERF‑01 — GPU resource ownership pattern
 **Prompt**
-> I will paste `ThirdParty/tp_physics.hpp` usage. Add a minimal raycast helper function (origin, dir, maxDist). Output updated files only.
+> I will paste a renderer module that owns GPU resources. Add `Initialize(ID3D11Device*)` and `Shutdown()` with safe releases. Output updated files only.
 
-### H2 — Trigger volume support
+## B‑PERF‑02 — CPU profiling zones
 **Prompt**
-> I will paste physics wrapper usage and any actor collision code. Add a minimal trigger system that reports enter/exit. Output updated files only.
+> I will paste `Main.cpp` or hot paths. Add `GR_ZONE_SCOPED_N` zones and `GR_FRAME_MARK`. Output updated files only.
 
-### H3 — Navmesh bake workflow stub
+## B‑PERF‑03 — Low‑spec budgets clamp
 **Prompt**
-> I will paste navigation wrapper usage. Add a minimal function that builds/bakes navmesh with placeholder config. Output updated files only.
+> I will paste quality config and renderer. Clamp draw calls, lights, texture sizes when Low preset is active. Output updated files only.
+
+## B‑PERF‑04 — Safe fallback assets
+**Prompt**
+> I will paste asset loader and content paths. Add fallback asset IDs for missing textures/meshes. Output updated files only.
 
 ---
 
-## Phase I — Performance + Stability
+# BLOCKS — Release Engineering
 
-### I1 — Fixed GPU resource ownership pattern
+## B‑REL‑01 — Version header
 **Prompt**
-> I will paste a renderer module that owns GPU resources. Add `Initialize(ID3D11Device*)` and `Shutdown()` with clear ownership and safe releases. Output updated files only.
+> I will paste any version/build files. Create `Version.hpp` with MAJOR/MINOR/PATCH and a string. Wire into app title. Output updated files only.
 
-### I2 — Basic CPU profiling zones
+## B‑REL‑02 — Build output layout
 **Prompt**
-> I will paste `Main.cpp` or hot paths. Add `GR_ZONE_SCOPED_N` zones for major frame steps and `GR_FRAME_MARK`. Output updated files only.
+> I will paste build scripts/tools. Add a minimal Release output layout (bin, Content, Shaders, logs). Output updated files only.
 
-### I3 — Low-spec budgets clamp
+## B‑REL‑03 — Release config sanity
 **Prompt**
-> I will paste quality config and renderer. Add clamps for draw calls, lights, and texture sizes when Low preset is active. Output updated files only.
+> I will paste build configs. Ensure Release disables asserts, enables optimizations, and keeps logging. Output updated files only.
 
 ---
 
-## Phase J — Packaging + Release
+# BLOCKS — QA + Logging
 
-### J1 — Version file
+## B‑QA‑01 — Log file output
 **Prompt**
-> I will paste any build/version files. Create a small `Version.hpp` with MAJOR/MINOR/PATCH and a string. Wire into app title. Output updated files only.
+> I will paste `Logger.hpp` and implementation. Add a Release‑build file sink for logs. Output updated files only.
 
-### J2 — Build output layout
+## B‑QA‑02 — Smoke test runner
 **Prompt**
-> I will paste build scripts/tools. Add a minimal output folder layout for Release builds (bin, Content, Shaders, logs). Output updated files only.
+> I will paste `ThirdPartyBootstrap.hpp` and any tests. Add a smoke‑test runner on startup. Output updated files only.
 
 ---
 
-## Phase K — QA + Logging
+# BLOCKS — Legal + Commercial Readiness
 
-### K1 — Log file output
+## B‑LEGAL‑01 — Third‑party notices file
 **Prompt**
-> I will paste `src/logger/Logger.hpp` and implementation. Add a minimal file sink for Release builds. Output updated files only.
-
-### K2 — Smoke test runner
-**Prompt**
-> I will paste `src/app/ThirdPartyBootstrap.hpp` and any tests. Add a simple smoke-test runner called from startup. Output updated files only.
+> I will paste the list of third‑party folders and any license files. Generate `THIRD_PARTY_NOTICES.md` with attributions. Output only that file.
 
 ---
 
-## Phase L — Legal + Commercial readiness
-
-### L1 — Third-party license aggregation file
-**Prompt**
-> I will paste the list of third-party folders and any license files. Generate a `THIRD_PARTY_NOTICES.md` that aggregates license texts and attributions. Output only that file.
-
----
-
-## Universal “Write Code For This File” Prompt
-Use this when you already know exactly what change you want.
-
+# Universal “Write Code For This File” Prompt
 **Prompt**
 > I will paste a single file and a small change request. Apply the change. Output only the full updated file. No explanations.
