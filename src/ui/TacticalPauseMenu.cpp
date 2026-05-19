@@ -29,12 +29,8 @@ constexpr float kHintColumnWidth  = 115.0f;
 constexpr ImVec4 kBackgroundColor (0.04f, 0.04f, 0.12f, 0.92f);
 constexpr ImVec4 kTitleColor      (1.00f, 0.90f, 0.35f, 1.00f); // gold, matches DialogBox speaker
 constexpr ImVec4 kReadyColor      (1.00f, 0.95f, 0.60f, 1.00f); // warm yellow — tints surge-ready row
+constexpr ImVec4 kLimitReadyColor (0.92f, 0.72f, 1.00f, 1.00f); // violet tint for limit-ready row
 constexpr ImVec4 kHintColor       (0.50f, 0.50f, 0.55f, 1.00f); // muted grey hint text
-
-// Labels for stub commands. ▶ (U+25B6) encoded as UTF-8 \xe2\x96\xb6.
-constexpr const char* kMagicLabel = "  Magic   \xe2\x96\xb6";
-constexpr const char* kItemsLabel = "  Items   \xe2\x96\xb6";
-constexpr const char* kAllyLabel  = "  Ally    \xe2\x96\xb6";
 
 constexpr float kSelectableHeight      = 28.0f;
 // In ImGui, passing 0.0f as width to Selectable means "stretch to fill the current column".
@@ -109,6 +105,9 @@ TacticalCommand TacticalPauseMenu::Draw(const PlayerStats& stats, const ImGuiIO&
         ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableSetupColumn("##hint",  ImGuiTableColumnFlags_WidthFixed, kHintColumnWidth);
 
+        if (DrawCommandRow("  Attack", true, "Free"))
+            selectedCommand = TacticalCommand::BasicAttack;
+
         // Surge Strike — tinted warm yellow when ready to signal interactivity.
         const bool surgeReady = stats.IsSurgeReady();
         if (surgeReady)
@@ -120,10 +119,16 @@ TacticalCommand TacticalPauseMenu::Draw(const PlayerStats& stats, const ImGuiIO&
         if (surgeReady)
             ImGui::PopStyleColor();
 
-        // Stub commands — reserved for later milestones.
-        DrawCommandRow(kMagicLabel, false, "No MP");
-        DrawCommandRow(kItemsLabel, false, "Coming soon");
-        DrawCommandRow(kAllyLabel,  false, "Coming soon");
+        // Limit Break — tinted violet when full to match HUD limit color language.
+        const bool limitReady = stats.IsLimitReady();
+        if (limitReady)
+            ImGui::PushStyleColor(ImGuiCol_Text, kLimitReadyColor);
+
+        if (DrawCommandRow("  Limit Break", limitReady, limitReady ? nullptr : "Need Limit"))
+            selectedCommand = TacticalCommand::LimitBreak;
+
+        if (limitReady)
+            ImGui::PopStyleColor();
 
         ImGui::EndTable();
     }

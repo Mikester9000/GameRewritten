@@ -53,6 +53,35 @@ namespace
 constexpr float kMissConfirmDelaySec = 0.17f;
 constexpr float kMissIndicatorForwardOffset = 1.8f;
 constexpr float kMissIndicatorHeightOffset = 2.8f;
+
+void QueueAttackFeedback(const RuntimeScene& runtimeScene,
+                         const CameraController& camController,
+                         AudioManager& audioManager,
+                         bool& pendingMissIndicator,
+                         float& pendingMissTimerSec,
+                         float& pendingMissWorldX,
+                         float& pendingMissWorldY,
+                         float& pendingMissWorldZ)
+{
+    const EnemyActor* lockedTarget = runtimeScene.GetLockedTarget();
+    float attackYaw = camController.GetYaw();
+
+    if (lockedTarget)
+    {
+        const float toTargetX = lockedTarget->x - camController.GetPlayerX();
+        const float toTargetZ = lockedTarget->z - camController.GetPlayerZ();
+        const float toTargetLenSq = (toTargetX * toTargetX) + (toTargetZ * toTargetZ);
+        if (toTargetLenSq > 0.0001f)
+            attackYaw = atan2f(toTargetX, toTargetZ);
+    }
+
+    pendingMissWorldX = camController.GetPlayerX() + sinf(attackYaw) * kMissIndicatorForwardOffset;
+    pendingMissWorldY = camController.GetPlayerGroundY() + kMissIndicatorHeightOffset;
+    pendingMissWorldZ = camController.GetPlayerZ() + cosf(attackYaw) * kMissIndicatorForwardOffset;
+    pendingMissTimerSec = kMissConfirmDelaySec;
+    pendingMissIndicator = true;
+    audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
+}
 }
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
@@ -434,24 +463,14 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
             if (attackHandled)
             {
-                const EnemyActor* lockedTarget = runtimeScene.GetLockedTarget();
-                float attackYaw = camController.GetYaw();
-
-                if (lockedTarget)
-                {
-                    const float toTargetX = lockedTarget->x - camController.GetPlayerX();
-                    const float toTargetZ = lockedTarget->z - camController.GetPlayerZ();
-                    const float toTargetLenSq = (toTargetX * toTargetX) + (toTargetZ * toTargetZ);
-                    if (toTargetLenSq > 0.0001f)
-                        attackYaw = atan2f(toTargetX, toTargetZ);
-                }
-
-                pendingMissWorldX = camController.GetPlayerX() + sinf(attackYaw) * kMissIndicatorForwardOffset;
-                pendingMissWorldY = camController.GetPlayerGroundY() + kMissIndicatorHeightOffset;
-                pendingMissWorldZ = camController.GetPlayerZ() + cosf(attackYaw) * kMissIndicatorForwardOffset;
-                pendingMissTimerSec = kMissConfirmDelaySec;
-                pendingMissIndicator = true;
-                audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
+                QueueAttackFeedback(runtimeScene,
+                                    camController,
+                                    audioManager,
+                                    pendingMissIndicator,
+                                    pendingMissTimerSec,
+                                    pendingMissWorldX,
+                                    pendingMissWorldY,
+                                    pendingMissWorldZ);
             }
         }
 
@@ -499,10 +518,34 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                 if (tacticalPauseHeld)
                 {
                     const TacticalCommand tacticalCmd = tacticalPauseMenu.Draw(playerActor.stats, io);
-                    if (tacticalCmd == TacticalCommand::SurgeStrike)
+                    bool tacticalAttackHandled = false;
+
+                    switch (tacticalCmd)
                     {
-                        runtimeScene.TriggerSurgeStrike(camController);
-                        audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
+                    case TacticalCommand::BasicAttack:
+                        tacticalAttackHandled = runtimeScene.TriggerPlayerAttack(camController);
+                        break;
+                    case TacticalCommand::SurgeStrike:
+                        tacticalAttackHandled = runtimeScene.TriggerSurgeStrike(camController);
+                        break;
+                    case TacticalCommand::LimitBreak:
+                        tacticalAttackHandled = runtimeScene.TriggerLimitBreak(camController);
+                        break;
+                    case TacticalCommand::None:
+                    default:
+                        break;
+                    }
+
+                    if (tacticalAttackHandled)
+                    {
+                        QueueAttackFeedback(runtimeScene,
+                                            camController,
+                                            audioManager,
+                                            pendingMissIndicator,
+                                            pendingMissTimerSec,
+                                            pendingMissWorldX,
+                                            pendingMissWorldY,
+                                            pendingMissWorldZ);
                     }
                 }
                 runtimeScene.damageNumbers.Draw(camController.GetCamX(),
