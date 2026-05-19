@@ -16,7 +16,13 @@ struct ImGuiIO;
 
 // Commands that can be activated from the Tactical Pause panel.
 // None means no command was chosen this frame.
-enum class TacticalCommand { None, SurgeStrike };
+enum class TacticalCommand
+{
+    None,
+    BasicAttack,
+    SurgeStrike,
+    LimitBreak
+};
 
 class TacticalPauseMenu
 {

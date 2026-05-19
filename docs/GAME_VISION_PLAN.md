@@ -41,7 +41,7 @@ The result is a modern open-world action game that retains the charm of old-scho
 | Dodge burst movement | ✅ Complete | `src/game/CameraController.*` |
 | 2-step combo chain | ✅ Complete | `src/game/combat/CombatSystem.*`, `src/game/RuntimeScene.hpp` |
 | Lock-on targeting | ✅ Complete | `src/game/combat/Targeting.hpp`, `src/game/RuntimeScene.hpp`, `src/game/CameraController.*`, `src/app/Main.cpp` |
-| Tactical Pause (time slow + command menu stubs) | ✅ Complete | `src/ui/TacticalPauseMenu.*`, `src/app/Main.cpp` |
+| Tactical Pause (time slow + playable command menu) | ✅ Complete | `src/ui/TacticalPauseMenu.*`, `src/app/Main.cpp` |
 | Gameplay HUD | ✅ Complete | `src/ui/GameHUD.*` |
 | Combat HUD expansion (target info + combo step) | ✅ Complete | `src/ui/GameHUD.*`, `src/app/Main.cpp` |
 | Floating damage numbers | ✅ Complete | `src/ui/DamageNumbers.*` |
@@ -99,7 +99,7 @@ The result is a modern open-world action game that retains the charm of old-scho
 - Player damage intake + defeat reset
 - Surge system and Limit Break support
 - Lock-on targeting
-- Tactical Pause with command menu stubs
+- Tactical Pause with playable command menu (Attack / Surge Strike / Limit Break)
 - Combat HUD expansion (target info + combo step)
 - Floating damage numbers
 - Low HP warning pulse

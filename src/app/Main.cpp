@@ -499,10 +499,45 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                 if (tacticalPauseHeld)
                 {
                     const TacticalCommand tacticalCmd = tacticalPauseMenu.Draw(playerActor.stats, io);
-                    if (tacticalCmd == TacticalCommand::SurgeStrike)
+                    bool tacticalAttackHandled = false;
+
+                    switch (tacticalCmd)
                     {
-                        runtimeScene.TriggerSurgeStrike(camController);
+                    case TacticalCommand::BasicAttack:
+                        tacticalAttackHandled = runtimeScene.TriggerPlayerAttack(camController);
+                        break;
+                    case TacticalCommand::SurgeStrike:
+                        tacticalAttackHandled = runtimeScene.TriggerSurgeStrike(camController);
+                        break;
+                    case TacticalCommand::LimitBreak:
+                        tacticalAttackHandled = runtimeScene.TriggerLimitBreak(camController);
+                        break;
+                    case TacticalCommand::None:
+                    default:
+                        break;
+                    }
+
+                    if (tacticalAttackHandled)
+                    {
                         audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
+
+                        const EnemyActor* lockedTarget = runtimeScene.GetLockedTarget();
+                        float attackYaw = camController.GetYaw();
+
+                        if (lockedTarget)
+                        {
+                            const float toTargetX = lockedTarget->x - camController.GetPlayerX();
+                            const float toTargetZ = lockedTarget->z - camController.GetPlayerZ();
+                            const float toTargetLenSq = (toTargetX * toTargetX) + (toTargetZ * toTargetZ);
+                            if (toTargetLenSq > 0.0001f)
+                                attackYaw = atan2f(toTargetX, toTargetZ);
+                        }
+
+                        pendingMissWorldX = camController.GetPlayerX() + sinf(attackYaw) * kMissIndicatorForwardOffset;
+                        pendingMissWorldY = camController.GetPlayerGroundY() + kMissIndicatorHeightOffset;
+                        pendingMissWorldZ = camController.GetPlayerZ() + cosf(attackYaw) * kMissIndicatorForwardOffset;
+                        pendingMissTimerSec = kMissConfirmDelaySec;
+                        pendingMissIndicator = true;
                     }
                 }
                 runtimeScene.damageNumbers.Draw(camController.GetCamX(),
