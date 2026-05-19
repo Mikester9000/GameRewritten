@@ -6,20 +6,29 @@ This plan assumes the LLM cannot directly edit files: it can only return text th
 
 ## Hard Rules
 1. One task per run.
-2. Only edit the files listed in that task card unless compile errors force one extra file.
-3. No dependency additions. No file moves. No file renames.
-4. Keep D3D11 + GT610-safe defaults.
-5. Use append-first edits (add blocks at designated line targets) to keep Lego-style integration.
-6. Update required docs after every task:
+2. Each tiny prompt must target exactly one file.
+3. Only edit the files listed in that task card unless compile errors force one extra file.
+4. No dependency additions. No file moves. No file renames.
+5. Keep D3D11 + GT610-safe defaults.
+6. Use append-first edits (add blocks at designated line targets) to keep Lego-style integration.
+7. Update required docs after every task:
    - `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`
    - `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`
    - `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`
+
+## Read-Minimized Single-File Contract (Required)
+1. Every prompt must include `READ_FILE` with an absolute path.
+2. Every prompt must include `READ_LINES` as a strict range (for example `190-214`).
+3. Read only the listed file and lines before generating output.
+4. If the step lists multiple files (usually docs), split into one prompt per file.
+5. Never ask the LLM to inspect extra files "for context".
 
 ## Manual Copy/Paste Output Contract (Required)
 1. The model must never claim it changed files directly.
 2. For each step, the model must output only copy-ready text for the target file(s).
 3. Every code-edit step output must include:
    - target file absolute path
+   - read file path and line range
    - anchor reference from the task card
    - explicit action (`insert-after-anchor` or `replace-range`)
    - one fenced code block containing the exact final text to paste
@@ -60,9 +69,12 @@ Use the File Edit Plan and Code Context Blocks from this task card exactly.
 You cannot edit files directly. Output copy-ready payloads only.
 Apply append-first edits at listed Insert At Line values unless compile errors force a nearby replacement.
 Do not exceed Modify Existing Lines (max) per file.
+Use one prompt per file step.
 
 For each file output this exact format:
 FILE: <absolute path>
+READ_FILE: <absolute path>
+READ_LINES: <start-end from code context block>
 ACTION: <insert-after-anchor|replace-range>
 ANCHOR: <anchor from task card>
 PASTE_BLOCK_START
@@ -86,8 +98,11 @@ You cannot edit files directly. Output copy-ready payload only.
 Target only the file named in that step packet.
 Use only the matching Code Context Block from the same task card.
 Do not generate changes for any other file in this step.
+Read only the lines specified in the step packet before generating output.
 Output this exact shape:
 FILE: <absolute path>
+READ_FILE: <absolute path>
+READ_LINES: <start-end from code context block>
 ACTION: <insert-after-anchor|replace-range>
 ANCHOR: <anchor from task card>
 PASTE_BLOCK_START
@@ -120,7 +135,7 @@ Stop after finishing this one step.
 3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop so a human can paste them manually.
 4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop so a human can paste them manually.
 5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop so a human can paste them manually.
-6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
+6. Run docs updates as three one-file prompts only: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
 - **Qwen Step Packets (copy exactly one at a time):**
@@ -138,7 +153,8 @@ After reading, stop.
 Task 001: Pressure / stagger integration stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -151,7 +167,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 001: Pressure / stagger integration stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -164,7 +181,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 001: Pressure / stagger integration stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -177,7 +195,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 001: Pressure / stagger integration stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -188,11 +207,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 6 / 7: Update docs only
 ```text
 Task 001: Pressure / stagger integration stub.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -393,7 +414,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop so a human can paste them manually.
 4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop so a human can paste them manually.
 5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop so a human can paste them manually.
-6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
+6. Run docs updates as three one-file prompts only: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
 - **Qwen Step Packets (copy exactly one at a time):**
@@ -411,7 +432,8 @@ After reading, stop.
 Task 002: Enemy reaction / interrupt-lite.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -424,7 +446,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 002: Enemy reaction / interrupt-lite.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -437,7 +460,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 002: Enemy reaction / interrupt-lite.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -450,7 +474,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 002: Enemy reaction / interrupt-lite.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -461,11 +486,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 6 / 7: Update docs only
 ```text
 Task 002: Enemy reaction / interrupt-lite.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -680,7 +707,8 @@ After reading, stop.
 Task 003: Enemy attack telegraph lite.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -693,7 +721,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 003: Enemy attack telegraph lite.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -704,11 +733,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 003: Enemy attack telegraph lite.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -845,7 +876,8 @@ After reading, stop.
 Task 004: Screen edge damage flash.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -858,7 +890,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 004: Screen edge damage flash.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -869,11 +902,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 004: Screen edge damage flash.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -1008,7 +1043,8 @@ After reading, stop.
 Task 005: Hit pause / hitstop.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 331.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -1019,11 +1055,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 3 / 4: Update docs only
 ```text
 Task 005: Hit pause / hitstop.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -1121,7 +1159,8 @@ After reading, stop.
 Task 006: Stagger meter.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -1134,7 +1173,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 006: Stagger meter.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -1145,11 +1185,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 006: Stagger meter.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -1286,7 +1328,8 @@ After reading, stop.
 Task 007: Enemy attack telegraph.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -1299,7 +1342,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 007: Enemy attack telegraph.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -1310,11 +1354,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 007: Enemy attack telegraph.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -1451,7 +1497,8 @@ After reading, stop.
 Task 008: Parry / counter window.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 110.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -1464,7 +1511,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 008: Parry / counter window.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 37.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -1475,11 +1523,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 008: Parry / counter window.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -1616,7 +1666,8 @@ After reading, stop.
 Task 009: Weak point damage.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -1629,7 +1680,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 009: Weak point damage.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -1640,11 +1692,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 009: Weak point damage.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -1781,7 +1835,8 @@ After reading, stop.
 Task 010: Area name display.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -1794,7 +1849,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 010: Area name display.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -1805,11 +1861,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 010: Area name display.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -1946,7 +2004,8 @@ After reading, stop.
 Task 011: Notification toast system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -1959,7 +2018,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 011: Notification toast system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -1970,11 +2030,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 011: Notification toast system.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -2047,7 +2109,8 @@ After reading, stop.
 Task 012: Letterbox event bars.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 567.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -2060,7 +2123,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 012: Letterbox event bars.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 124.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -2071,11 +2135,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 012: Letterbox event bars.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -2212,7 +2278,8 @@ After reading, stop.
 Task 013: Contextual button prompts.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -2225,7 +2292,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 013: Contextual button prompts.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -2236,11 +2304,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 013: Contextual button prompts.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -2377,7 +2447,8 @@ After reading, stop.
 Task 014: Level up screen overlay.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -2390,7 +2461,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 014: Level up screen overlay.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -2401,11 +2473,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 014: Level up screen overlay.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -2542,7 +2616,8 @@ After reading, stop.
 Task 015: Status screen.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -2555,7 +2630,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 015: Status screen.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -2566,11 +2642,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 015: Status screen.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -2643,7 +2721,8 @@ After reading, stop.
 Task 016: Map screen stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -2656,7 +2735,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 016: Map screen stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -2667,11 +2747,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 016: Map screen stub.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -2744,7 +2826,8 @@ After reading, stop.
 Task 017: Tooltip system.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -2757,7 +2840,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 017: Tooltip system.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -2768,11 +2852,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 017: Tooltip system.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -2909,7 +2995,8 @@ After reading, stop.
 Task 018: Saving indicator.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -2922,7 +3009,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 018: Saving indicator.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -2933,11 +3021,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 018: Saving indicator.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -3074,7 +3164,8 @@ After reading, stop.
 Task 019: Death / defeat screen.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -3087,7 +3178,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 019: Death / defeat screen.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -3098,11 +3190,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 019: Death / defeat screen.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -3239,7 +3333,8 @@ After reading, stop.
 Task 020: Camera shake.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -3252,7 +3347,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 020: Camera shake.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -3263,11 +3359,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 020: Camera shake.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -3404,7 +3502,8 @@ After reading, stop.
 Task 021: Combat camera zoom.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -3417,7 +3516,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 021: Combat camera zoom.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -3428,11 +3528,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 021: Combat camera zoom.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -3569,7 +3671,8 @@ After reading, stop.
 Task 022: Camera collision avoidance.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -3582,7 +3685,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 022: Camera collision avoidance.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -3593,11 +3697,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 022: Camera collision avoidance.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -3734,7 +3840,8 @@ After reading, stop.
 Task 023: Target framing adjustment.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -3747,7 +3854,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 023: Target framing adjustment.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -3758,11 +3866,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 023: Target framing adjustment.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -3899,7 +4009,8 @@ After reading, stop.
 Task 024: Lock-on camera recovery smoothing.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -3912,7 +4023,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 024: Lock-on camera recovery smoothing.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -3923,11 +4035,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 024: Lock-on camera recovery smoothing.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -4062,7 +4176,8 @@ After reading, stop.
 Task 025: Wind effect on trees.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 40.
 Max existing lines to modify: 20.
 Target new lines to add: 35.
@@ -4073,11 +4188,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 3 / 4: Update docs only
 ```text
 Task 025: Wind effect on trees.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -4175,7 +4292,8 @@ After reading, stop.
 Task 026: Weather system lite.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -4188,7 +4306,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 026: Weather system lite.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -4199,11 +4318,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 026: Weather system lite.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -4276,7 +4397,8 @@ After reading, stop.
 Task 027: Ambient particles.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -4289,7 +4411,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 027: Ambient particles.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -4300,11 +4423,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 027: Ambient particles.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -4377,7 +4502,8 @@ After reading, stop.
 Task 028: Day/night cycle.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -4390,7 +4516,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 028: Day/night cycle.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -4401,11 +4528,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 028: Day/night cycle.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -4478,7 +4607,8 @@ After reading, stop.
 Task 029: Biome transition fade.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 354.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -4491,7 +4621,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 029: Biome transition fade.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 112.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -4502,11 +4633,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 029: Biome transition fade.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -4643,7 +4776,8 @@ After reading, stop.
 Task 030: Fog of war on minimap.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 149.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -4656,7 +4790,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 030: Fog of war on minimap.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 28.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -4667,11 +4802,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 030: Fog of war on minimap.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -4808,7 +4945,8 @@ After reading, stop.
 Task 031: World event trigger zones.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -4821,7 +4959,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 031: World event trigger zones.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -4832,11 +4971,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 031: World event trigger zones.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -4909,7 +5050,8 @@ After reading, stop.
 Task 032: Interaction hotspot registry stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -4922,7 +5064,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 032: Interaction hotspot registry stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -4933,11 +5076,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 032: Interaction hotspot registry stub.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -5010,7 +5155,8 @@ After reading, stop.
 Task 033: Landmark discovery trigger stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -5023,7 +5169,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 033: Landmark discovery trigger stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -5034,11 +5181,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 033: Landmark discovery trigger stub.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -5111,7 +5260,8 @@ After reading, stop.
 Task 034: NPC actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -5124,7 +5274,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 034: NPC actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -5135,11 +5286,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 034: NPC actor.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -5212,7 +5365,8 @@ After reading, stop.
 Task 035: Quest objective system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -5225,7 +5379,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 035: Quest objective system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -5236,11 +5391,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 035: Quest objective system.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -5313,7 +5470,8 @@ After reading, stop.
 Task 036: Treasure chest actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -5326,7 +5484,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 036: Treasure chest actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -5337,11 +5496,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 036: Treasure chest actor.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -5414,7 +5575,8 @@ After reading, stop.
 Task 037: Campfire / rest point actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -5427,7 +5589,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 037: Campfire / rest point actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -5438,11 +5601,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 037: Campfire / rest point actor.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -5501,7 +5666,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 4. Create only `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp` and stop.
 5. Create only `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp` and stop.
-6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
+6. Run docs updates as three one-file prompts only: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
 - **Qwen Step Packets (copy exactly one at a time):**
@@ -5519,7 +5684,8 @@ After reading, stop.
 Task 038: NPC interaction prompt routing stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -5532,7 +5698,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 038: NPC interaction prompt routing stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -5545,7 +5712,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 038: NPC interaction prompt routing stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -5558,7 +5726,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 038: NPC interaction prompt routing stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -5569,11 +5738,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 6 / 7: Update docs only
 ```text
 Task 038: NPC interaction prompt routing stub.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -5726,7 +5897,8 @@ After reading, stop.
 Task 039: Quest flag / world-state hook.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestFlags.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -5739,7 +5911,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 039: Quest flag / world-state hook.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -5752,7 +5925,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 039: Quest flag / world-state hook.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -5763,11 +5937,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 5 / 6: Update docs only
 ```text
 Task 039: Quest flag / world-state hook.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -5849,7 +6025,8 @@ After reading, stop.
 Task 040: Spawn composition table stub (solo / pair / pack).
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/SpawnTable.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -5862,7 +6039,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 040: Spawn composition table stub (solo / pair / pack).
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 354.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -5875,7 +6053,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 040: Spawn composition table stub (solo / pair / pack).
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 112.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -5886,11 +6065,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 5 / 6: Update docs only
 ```text
 Task 040: Spawn composition table stub (solo / pair / pack).
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -6034,7 +6215,8 @@ After reading, stop.
 Task 041: Inventory system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -6047,7 +6229,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 041: Inventory system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -6058,11 +6241,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 041: Inventory system.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -6133,7 +6318,8 @@ After reading, stop.
 Task 042: XP / level system.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 86.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -6144,11 +6330,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 3 / 4: Update docs only
 ```text
 Task 042: XP / level system.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -6244,7 +6432,8 @@ After reading, stop.
 Task 043: Status effects.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 86.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -6255,11 +6444,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 3 / 4: Update docs only
 ```text
 Task 043: Status effects.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -6357,7 +6548,8 @@ After reading, stop.
 Task 044: Fast travel stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -6370,7 +6562,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 044: Fast travel stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -6381,11 +6574,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 044: Fast travel stub.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -6458,7 +6653,8 @@ After reading, stop.
 Task 045: Save / load system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -6471,7 +6667,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 045: Save / load system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -6482,11 +6679,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 045: Save / load system.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -6559,7 +6758,8 @@ After reading, stop.
 Task 046: Quality preset enforcement.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -6572,7 +6772,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 046: Quality preset enforcement.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -6583,11 +6784,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 046: Quality preset enforcement.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -6660,7 +6863,8 @@ After reading, stop.
 Task 047: Victory fanfare trigger.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -6673,7 +6877,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 047: Victory fanfare trigger.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -6684,11 +6889,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 047: Victory fanfare trigger.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -6825,7 +7032,8 @@ After reading, stop.
 Task 048: Environmental ambient audio.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -6838,7 +7046,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 048: Environmental ambient audio.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -6849,11 +7058,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 048: Environmental ambient audio.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -6990,7 +7201,8 @@ After reading, stop.
 Task 049: Looping BGM.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -7003,7 +7215,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 049: Looping BGM.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -7014,11 +7227,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 049: Looping BGM.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -7141,7 +7356,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop so a human can paste them manually.
 4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp` and stop so a human can paste them manually.
 5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp` and stop so a human can paste them manually.
-6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
+6. Run docs updates as three one-file prompts only: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
 - **Qwen Step Packets (copy exactly one at a time):**
@@ -7159,7 +7374,8 @@ After reading, stop.
 Task 050: Tactical Pause enter / exit SFX.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -7172,7 +7388,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 050: Tactical Pause enter / exit SFX.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -7185,7 +7402,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 050: Tactical Pause enter / exit SFX.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 140.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -7198,7 +7416,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 050: Tactical Pause enter / exit SFX.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 29.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -7209,11 +7428,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 6 / 7: Update docs only
 ```text
 Task 050: Tactical Pause enter / exit SFX.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -7430,7 +7651,8 @@ After reading, stop.
 Task 051: Lock-on acquire / break SFX.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -7443,7 +7665,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 051: Lock-on acquire / break SFX.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -7456,7 +7679,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 051: Lock-on acquire / break SFX.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 137.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -7467,11 +7691,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 5 / 6: Update docs only
 ```text
 Task 051: Lock-on acquire / break SFX.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -7633,7 +7859,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop so a human can paste them manually.
 4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop so a human can paste them manually.
 5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop so a human can paste them manually.
-6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
+6. Run docs updates as three one-file prompts only: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
 - **Qwen Step Packets (copy exactly one at a time):**
@@ -7651,7 +7877,8 @@ After reading, stop.
 Task 052: Enemy alert bark stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -7664,7 +7891,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 052: Enemy alert bark stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -7677,7 +7905,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 052: Enemy alert bark stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -7690,7 +7919,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 052: Enemy alert bark stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -7701,11 +7931,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 6 / 7: Update docs only
 ```text
 Task 052: Enemy alert bark stub.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -7920,7 +8152,8 @@ After reading, stop.
 Task 053: Equipment slot stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Equipment.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -7933,7 +8166,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 053: Equipment slot stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 86.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -7944,11 +8178,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 053: Equipment slot stub.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -8053,7 +8289,8 @@ After reading, stop.
 Task 054: Ability unlock / progression hook.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/progression/AbilityProgression.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -8066,7 +8303,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 054: Ability unlock / progression hook.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 86.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -8077,11 +8315,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 4 / 5: Update docs only
 ```text
 Task 054: Ability unlock / progression hook.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -8188,7 +8428,8 @@ After reading, stop.
 Task 055: Combat stat modifier pipeline stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatModifiers.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -8201,7 +8442,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 055: Combat stat modifier pipeline stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -8214,7 +8456,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 055: Combat stat modifier pipeline stub.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -8225,11 +8468,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 5 / 6: Update docs only
 ```text
 Task 055: Combat stat modifier pipeline stub.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -8359,7 +8604,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop so a human can paste them manually.
 4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` and stop so a human can paste them manually.
 5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` and stop so a human can paste them manually.
-6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
+6. Run docs updates as three one-file prompts only: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
 - **Qwen Step Packets (copy exactly one at a time):**
@@ -8377,7 +8622,8 @@ After reading, stop.
 Task 056: Combat bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -8390,7 +8636,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 056: Combat bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -8403,7 +8650,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 056: Combat bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 331.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -8416,7 +8664,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 056: Combat bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 566.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -8427,11 +8676,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 6 / 7: Update docs only
 ```text
 Task 056: Combat bugfix sweep.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -8632,7 +8883,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop so a human can paste them manually.
 4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp` and stop so a human can paste them manually.
 5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` and stop so a human can paste them manually.
-6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
+6. Run docs updates as three one-file prompts only: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, then `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
 - **Qwen Step Packets (copy exactly one at a time):**
@@ -8650,7 +8901,8 @@ After reading, stop.
 Task 057: Camera/input bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -8663,7 +8915,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 057: Camera/input bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -8676,7 +8929,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 057: Camera/input bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 88.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -8689,7 +8943,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 057: Camera/input bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 566.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -8700,11 +8955,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 6 / 7: Update docs only
 ```text
 Task 057: Camera/input bugfix sweep.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -8927,7 +9184,8 @@ After reading, stop.
 Task 058: UI/HUD polish and bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -8940,7 +9198,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 058: UI/HUD polish and bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -8953,7 +9212,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 058: UI/HUD polish and bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 567.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -8966,7 +9226,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 058: UI/HUD polish and bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 124.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -8979,7 +9240,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 058: UI/HUD polish and bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 140.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -8992,7 +9254,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 058: UI/HUD polish and bugfix sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 29.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -9003,11 +9266,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 8 / 9: Update docs only
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -9308,7 +9573,8 @@ After reading, stop.
 Task 059: World/runtime stability sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 354.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -9321,7 +9587,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 059: World/runtime stability sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 112.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -9334,7 +9601,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 059: World/runtime stability sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 110.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -9347,7 +9615,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 059: World/runtime stability sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 331.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -9360,7 +9629,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 059: World/runtime stability sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/Forest.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 234.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -9373,7 +9643,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 059: World/runtime stability sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/Forest.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 49.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -9384,11 +9655,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 8 / 9: Update docs only
 ```text
 Task 059: World/runtime stability sweep.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
@@ -9689,7 +9962,8 @@ After reading, stop.
 Task 060: Audio and final quality sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -9702,7 +9976,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 060: Audio and final quality sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -9715,7 +9990,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 060: Audio and final quality sweep.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
@@ -9728,7 +10004,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 060: Audio and final quality sweep.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
@@ -9741,7 +10018,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 060: Audio and final quality sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
@@ -9754,7 +10032,8 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 Task 060: Audio and final quality sweep.
 Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
 Do not generate changes for any other file in this step.
-Use the matching Code Context Block from this task card.
+Read only the target file path above, limited to the anchor line range shown in the matching Code Context Block.
+Set READ_FILE to that absolute path and READ_LINES to that anchor range in your output.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
@@ -9765,11 +10044,13 @@ Output copy-ready code blocks for this file only, then stop so a human can paste
 #### Step 8 / 9: Update docs only
 ```text
 Task 060: Audio and final quality sweep.
-Generate copy-ready doc blocks for only these files in this step:
+This docs phase is still one-file-per-prompt.
+Run this step as separate prompts, one file at a time, using the exact file list below:
+For each prompt set READ_FILE to the selected doc path and READ_LINES to 1-EOF for that single file only:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not generate code-file changes outside the listed doc files in this step.
+Do not generate code-file changes in this step, and do not combine multiple doc files in one prompt.
 Update the docs to describe the completed task.
 Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
