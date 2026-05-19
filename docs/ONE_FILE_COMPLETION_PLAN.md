@@ -1240,3 +1240,1033 @@ PASTE_BLOCK_END
 6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
 7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
 8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+---
+
+## Header Companion Tasks (Task ###H)
+These are mandatory one-file companion tasks for implementation tasks that edit `.cpp` files and require header updates to function.
+- Companion coverage generated from Task 001-108: **93** header tasks.
+- Execute each `Task ###H` separately, after or before its paired implementation task, but never in the same run.
+
+## Task 001H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 001 (Pressure / stagger integration stub)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 001 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 001, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 001.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 002H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 002 (Enemy reaction / interrupt-lite)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 002 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 002, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 002.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 003H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 003 (Enemy attack telegraph lite)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 003 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 003, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 003.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 004H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 004 (Screen edge damage flash)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 004 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 004, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 004.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 006H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 006 (Stagger meter)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 006 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 006, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 006.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 007H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 007 (Enemy attack telegraph)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 007 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 007, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 007.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 008H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 008 (Parry / counter window)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 008 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 008, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 008.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 009H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 009 (Weak point damage)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 009 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 009, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 009.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 010H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 010 (Area name display)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 010 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 010, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 010.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 011H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 011 (Notification toast system)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 011 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 011, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 011.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 012H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 012 (Letterbox event bars)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 012 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 012, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 012.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 013H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 013 (Contextual button prompts)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 013 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 013, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 013.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 014H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 014 (Level up screen overlay)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 014 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 014, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 014.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 015H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 015 (Status screen)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 015 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 015, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 015.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 016H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 016 (Map screen stub)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 016 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 016, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 016.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 017H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 017 (Tooltip system)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 017 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 017, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 017.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 018H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 018 (Saving indicator)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 018 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 018, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 018.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 019H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 019 (Death / defeat screen)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 019 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 019, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 019.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 020H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 020 (Camera shake)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 020 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 020, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 020.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 021H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 021 (Combat camera zoom)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 021 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 021, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 021.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 022H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 022 (Camera collision avoidance)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 022 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 022, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 022.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 023H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 023 (Target framing adjustment)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 023 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 023, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 023.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 024H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 024 (Lock-on camera recovery smoothing)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 024 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 024, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 024.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 026H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 026 (Weather system lite)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 026 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 026, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 026.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 027H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 027 (Ambient particles)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 027 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 027, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 027.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 028H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 028 (Day/night cycle)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 028 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 028, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 028.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 029H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 029 (Biome transition fade)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 029 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 029, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 029.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 030H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 030 (Fog of war on minimap)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 030 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 030, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 030.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 031H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 031 (World event trigger zones)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 031 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 031, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 031.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 032H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 032 (Interaction hotspot registry stub)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 032 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 032, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 032.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 033H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 033 (Landmark discovery trigger stub)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 033 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 033, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 033.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 034H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 034 (NPC actor)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 034 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 034, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 034.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 035H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 035 (Quest objective system)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 035 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 035, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 035.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 036H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 036 (Treasure chest actor)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 036 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 036, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 036.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 037H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 037 (Campfire / rest point actor)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 037 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 037, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 037.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 038H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 038 (NPC interaction prompt routing stub)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 038 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 038, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 038.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 041H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 041 (Inventory system)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 041 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 041, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 041.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 044H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 044 (Fast travel stub)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 044 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 044, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 044.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 045H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 045 (Save / load system)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 045 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 045, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 045.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 046H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 046 (Quality preset enforcement)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 046 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 046, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 046.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 047H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 047 (Victory fanfare trigger)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 047 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 047, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 047.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 048H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 048 (Environmental ambient audio)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 048 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 048, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 048.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 049H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 049 (Looping BGM)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 049 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 049, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 049.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 050H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 050 (Tactical Pause enter / exit SFX)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 050 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 050, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 050.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 051H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 051 (Lock-on acquire / break SFX)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 051 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 051, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 051.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 052H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 052 (Enemy alert bark stub)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 052 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 052, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 052.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 056H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 056 (Combat bugfix sweep)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 056 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 056, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 056.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 057H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 057 (Camera/input bugfix sweep)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 057 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 057, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 057.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 058H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 058 (UI/HUD polish and bugfix sweep)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 058 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 058, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 058.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 059H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 059 (World/runtime stability sweep)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 059 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 059, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 059.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 060H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 060 (Audio and final quality sweep)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 060 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 060, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 060.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 061H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 061 (World partition + region streaming core)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 061 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 061, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldPartition.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 061.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 062H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 062 (Asynchronous chunk IO + prefetch queue)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 062 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 062, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/StreamingIO.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 062.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 063H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 063 (Large-world coordinate rebasing)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 063 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 063, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldOriginRebase.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 063.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 064H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 064 (Terrain/mesh LOD tier manager)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 064 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 064, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldLodManager.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 064.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 066H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 066 (Far-distance continent impostors)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 066 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 066, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/ContinentImpostor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 066.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 067H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 067 (Global nav tile streaming bridge)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 067 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 067, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/NavTileStream.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 067.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 068H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 068 (Seamless continent transition triggers)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 068 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 068, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/ContinentTransition.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 068.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 069H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 069 (Traversal mount/vehicle framework stub)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 069 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 069, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/traversal/TraversalMount.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 069.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 070H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 070 (Traversal verbs: climb/swim/glide base)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 070 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 070, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/traversal/TraversalController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 070.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 071H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 071 (Seamless interior/exterior cell portals)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 071 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 071, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/CellPortal.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 071.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 072H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 072 (World map overlay with continent zoom)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 072 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 072, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldMap.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 072.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 073H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 073 (Discovery journal for landmarks/routes)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 073 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 073, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/DiscoveryJournal.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 073.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 074H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 074 (Biome-aware population spawn director)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 074 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 074, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/PopulationDirector.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 074.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 075H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 075 (World event scheduler (time/weather/region))
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 075 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 075, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldEventScheduler.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 075.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 076H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 076 (Region state persistence for streamed world)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 076 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 076, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/RegionStateStore.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 076.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 077H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 077 (Party member runtime slot + follow AI)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 077 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 077, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/party/PartyRuntime.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 077.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 078H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 078 (Command wheel + tactical slow-time commands)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 078 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 078, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/CommandWheel.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 078.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 079H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 079 (ATB-style action charge lanes)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 079 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 079, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/AtbSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 079.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 080H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 080 (Ability targeting templates (single/cone/aoe))
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 080 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 080, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/AbilityTargeting.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 080.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 082H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 082 (Enemy squad tactics coordinator)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 082 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 082, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/ai/SquadCoordinator.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 082.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 083H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 083 (Boss phase state machine framework)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 083 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 083, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/BossActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 083.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 084H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 084 (Guard-break / poise combat pipeline)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 084 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 084, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/PoiseSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 084.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 086H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 086 (Status ailment counters + immunity windows)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 086 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 086, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/StatusAilmentSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 086.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 087H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 087 (Equipment progression + socket rules)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 087 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 087, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/EquipmentProgression.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 087.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 088H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 088 (Skill tree graph + unlock prerequisites)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 088 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 088, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/progression/SkillTree.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 088.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 089H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 089 (Loot table tiers + drop weighting)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 089 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 089, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/loot/LootTable.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 089.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 090H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 090 (Crafting + upgrade station flow)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 090 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 090, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/crafting/CraftingSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 090.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 091H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 091 (Open-world encounter director)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 091 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 091, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/ai/EncounterDirector.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 091.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 092H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 092 (Combat telemetry + balance debug panel)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 092 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 092, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/CombatDebugPanel.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 092.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 094H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 094 (Dialogue branching + localization keys)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 094 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 094, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/dialogue/DialogueRuntime.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 094.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 095H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 095 (Cutscene timeline stub + camera rails)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 095 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 095, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/cutscene/CutsceneTimeline.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 095.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 096H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 096 (Audio event router + mixer bus controls)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 096 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 096, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioRouter.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 096.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 097H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 097 (Adaptive music state machine)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 097 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 097, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/MusicStateMachine.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 097.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 098H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 098 (SFX variation + distance/occlusion rules)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 098 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 098, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/SfxSpatialRules.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 098.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 099H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 099 (Voice placeholder + subtitle timing pipeline)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 099 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 099, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/VoicePlayback.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 099.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 100H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 100 (Save versioning + migration compatibility)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 100 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 100, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/SaveMigration.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 100.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 101H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 101 (Crash capture + runtime diagnostics pack)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 101 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 101, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/CrashDiagnostics.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 101.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 102H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 102 (Full settings menu (graphics/audio/input/accessibility))
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 102 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 102, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/SettingsMenu.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 102.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 103H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 103 (Input rebinding + controller glyph profiles)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 103 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 103, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/InputBindingProfile.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 103.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 104H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 104 (Performance HUD + auto quality scaler)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 104 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 104, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/AutoQualityScaler.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 104.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 106H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 106 (Legal/credits/third-party attribution pass)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 106 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 106, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/CreditsScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 106.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 107H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 107 (New game bootstrap + onboarding tutorial)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 107 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 107, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2):** Keep feature interfaces explicit and low-risk so runtime behavior remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/NewGameFlow.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration used by Task 107.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
