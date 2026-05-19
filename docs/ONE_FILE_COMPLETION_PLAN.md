@@ -1,7 +1,7 @@
 # One-File Commercial Completion Plan (Independent Lego-Block Tasks)
 
 This is the single source document to finish the game track to commercial-readiness handoff.
-Each task is independent, prompt-ready, and includes exact file targets, insertion line numbers, and line-modification budgets.
+Each task is independent, prompt-ready, and includes exact file targets, insertion lines, modification budgets, and copy-ready code blocks.
 
 ## Hard Rules
 1. One task per run.
@@ -23,21 +23,21 @@ python tools/llm/worst_llm_guard.py start
 python tools/llm/worst_llm_guard.py complete
 ```
 
-## How to Read Line Targets
-- **Insert At Line**: preferred line to add new block (usually EOF + 1 for low-conflict integration).
-- **Modify Existing Lines (max)**: hard cap for changed pre-existing lines in this file for the task.
-- **Add New Lines (target)**: expected new lines to add for the task in this file.
+## How to Read Task Cards
+- **Insert At Line** = preferred insertion line (append-first; usually EOF + 1).
+- **Modify Existing Lines (max)** = cap for changed pre-existing lines in that file.
+- **Add New Lines (target)** = expected new-line budget in that file.
+- **Code Context Blocks** = copy these blocks directly into your LLM prompt.
 
-## Copy-Paste Prompt Skeleton
+## Universal Prompt Template
 ```text
 Implement Task <ID>: <NAME>.
 
-File edit plan:
-<paste the File Edit Plan table from the task card>
+Use the File Edit Plan and Code Context Blocks from this task card exactly.
+Apply append-first edits at listed Insert At Line values unless compile errors force a nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 
-Rules: one-task-only, no new dependencies, no file moves/renames, GT610-safe defaults, append-first Lego-block edits.
-
-After code edits update:
+After edits update:
 - /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 - /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 - /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
@@ -58,12 +58,162 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` | yes | 166 | 167 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` | yes | 71 | 72 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+- Anchor lines `190-214` (current file tail before insertion at line `215`):
+```cpp
+190 |     if (isDead)
+191 |         return;
+192 | 
+193 |     if (!IsHitFlashVisible())
+194 |         return;
+195 | 
+196 |     static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+197 |     const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
+198 |     if (!visualPrefab)
+199 |         return;
+200 | 
+201 |     const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
+202 |     primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, hitFlashScale);
+203 | }
+204 | 
+205 | bool EnemyActor::IsHitFlashVisible() const
+206 | {
+207 |     if (hitFlashTimer <= 0.0f)
+208 |         return true;
+209 | 
+210 |     const float elapsedFlashTime = kHitFlashDuration - hitFlashTimer;
+211 |     const int blinkPhase = static_cast<int>(elapsedFlashTime / kHitFlashBlinkPeriod);
+212 |     // Even elapsed phases are visible so a fresh hit starts visible.
+213 |     return (blinkPhase % 2) == 0;
+214 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 215
+ANCHOR RANGE: 190-214
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+- Anchor lines `71-95` (current file tail before insertion at line `96`):
+```cpp
+71 |               float wpAx, float wpAz,
+72 |               float wpBx, float wpBz,
+73 |               int   startHp = 10);
+74 | 
+75 |     // Advance state machine, move, snap Y to terrain.
+76 |     // playerX/playerZ are the current player world-space XZ position.
+77 |     void Update(float dt, D3D11Renderer& renderer,
+78 |                 float playerX, float playerZ);
+79 | 
+80 |     // Apply incoming damage; triggers Hit stagger or Dead transition.
+81 |     void OnHit(int damage);
+82 | 
+83 |     // Expand the enemy visual into the runtime primitive bucket.
+84 |     // Reuses the player blockout prefab for enemy visuals.
+85 |     // Does nothing when isDead is true.
+86 |     void SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
+87 |                              PrimitiveRenderer&   primitiveRenderer) const;
+88 | 
+89 | private:
+90 |     // Change state immediately and set the state-duration timer.
+91 |     void TransitionTo(EnemyState next, float duration);
+92 | 
+93 |     // Returns whether the visual should be drawn this frame during hit flash.
+94 |     bool IsHitFlashVisible() const;
+95 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 96
+ANCHOR RANGE: 71-95
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp`
+- Anchor lines `142-166` (current file tail before insertion at line `167`):
+```cpp
+142 | 
+143 |             std::ostringstream ss;
+144 |             ss << "CombatSystem: Hit enemy " << i
+145 |                << " for " << hitBox.damage << " damage.";
+146 |             LOG_INFO(ss.str());
+147 | 
+148 |             enemy.OnHit(hitBox.damage);
+149 | 
+150 |             if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
+151 |             {
+152 |                 EnemyHitRecord& hitRecord = m_recentEnemyHits[m_recentEnemyHitCount++];
+153 |                 hitRecord.x = enemy.x;
+154 |                 hitRecord.y = enemy.y + DAMAGE_NUMBER_Y_OFFSET;
+155 |                 hitRecord.z = enemy.z;
+156 |                 hitRecord.damage = hitBox.damage;
+157 |             }
+158 |         }
+159 |     }
+160 | 
+161 |     // Remove any hitboxes whose lifetime has run out.
+162 |     m_activeHitBoxes.erase(
+163 |         std::remove_if(m_activeHitBoxes.begin(), m_activeHitBoxes.end(),
+164 |                        [](const HitBox& hitBox) { return hitBox.framesToLive <= 0; }),
+165 |         m_activeHitBoxes.end());
+166 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 167
+ANCHOR RANGE: 142-166
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp`
+- Anchor lines `47-71` (current file tail before insertion at line `72`):
+```cpp
+47 |     // apply damage, mark dead enemies, and remove expired hitboxes.
+48 |     // Also ticks the combo window timer.
+49 |     // Call once per frame from RuntimeScene::BeginFrame.
+50 |     void Update(float dt, EnemyActor* enemies, int count);
+51 | 
+52 |     // Read-only access to active hitboxes for debug visualization.
+53 |     const std::vector<HitBox>& GetActiveHitBoxes() const
+54 |     { return m_activeHitBoxes; }
+55 | 
+56 |     // Recent hit records are valid for the current frame only.
+57 |     // They are reset at the start of each Update() call.
+58 |     // Always pair this pointer with GetRecentEnemyHitCount().
+59 |     const EnemyHitRecord* GetRecentEnemyHits() const
+60 |     { return m_recentEnemyHits; }
+61 | 
+62 |     int GetRecentEnemyHitCount() const
+63 |     { return m_recentEnemyHitCount; }
+64 | 
+65 | private:
+66 |     static constexpr int   kMaxRecentEnemyHits = 32;
+67 | 
+68 |     std::vector<HitBox> m_activeHitBoxes;
+69 |     EnemyHitRecord m_recentEnemyHits[kMaxRecentEnemyHits]{};
+70 |     int m_recentEnemyHitCount = 0;
+71 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 72
+ANCHOR RANGE: 47-71
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 001: Pressure / stagger integration stub.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -79,12 +229,162 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` | yes | 166 | 167 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` | yes | 71 | 72 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+- Anchor lines `190-214` (current file tail before insertion at line `215`):
+```cpp
+190 |     if (isDead)
+191 |         return;
+192 | 
+193 |     if (!IsHitFlashVisible())
+194 |         return;
+195 | 
+196 |     static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+197 |     const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
+198 |     if (!visualPrefab)
+199 |         return;
+200 | 
+201 |     const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
+202 |     primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, hitFlashScale);
+203 | }
+204 | 
+205 | bool EnemyActor::IsHitFlashVisible() const
+206 | {
+207 |     if (hitFlashTimer <= 0.0f)
+208 |         return true;
+209 | 
+210 |     const float elapsedFlashTime = kHitFlashDuration - hitFlashTimer;
+211 |     const int blinkPhase = static_cast<int>(elapsedFlashTime / kHitFlashBlinkPeriod);
+212 |     // Even elapsed phases are visible so a fresh hit starts visible.
+213 |     return (blinkPhase % 2) == 0;
+214 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 215
+ANCHOR RANGE: 190-214
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+- Anchor lines `71-95` (current file tail before insertion at line `96`):
+```cpp
+71 |               float wpAx, float wpAz,
+72 |               float wpBx, float wpBz,
+73 |               int   startHp = 10);
+74 | 
+75 |     // Advance state machine, move, snap Y to terrain.
+76 |     // playerX/playerZ are the current player world-space XZ position.
+77 |     void Update(float dt, D3D11Renderer& renderer,
+78 |                 float playerX, float playerZ);
+79 | 
+80 |     // Apply incoming damage; triggers Hit stagger or Dead transition.
+81 |     void OnHit(int damage);
+82 | 
+83 |     // Expand the enemy visual into the runtime primitive bucket.
+84 |     // Reuses the player blockout prefab for enemy visuals.
+85 |     // Does nothing when isDead is true.
+86 |     void SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
+87 |                              PrimitiveRenderer&   primitiveRenderer) const;
+88 | 
+89 | private:
+90 |     // Change state immediately and set the state-duration timer.
+91 |     void TransitionTo(EnemyState next, float duration);
+92 | 
+93 |     // Returns whether the visual should be drawn this frame during hit flash.
+94 |     bool IsHitFlashVisible() const;
+95 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 96
+ANCHOR RANGE: 71-95
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp`
+- Anchor lines `142-166` (current file tail before insertion at line `167`):
+```cpp
+142 | 
+143 |             std::ostringstream ss;
+144 |             ss << "CombatSystem: Hit enemy " << i
+145 |                << " for " << hitBox.damage << " damage.";
+146 |             LOG_INFO(ss.str());
+147 | 
+148 |             enemy.OnHit(hitBox.damage);
+149 | 
+150 |             if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
+151 |             {
+152 |                 EnemyHitRecord& hitRecord = m_recentEnemyHits[m_recentEnemyHitCount++];
+153 |                 hitRecord.x = enemy.x;
+154 |                 hitRecord.y = enemy.y + DAMAGE_NUMBER_Y_OFFSET;
+155 |                 hitRecord.z = enemy.z;
+156 |                 hitRecord.damage = hitBox.damage;
+157 |             }
+158 |         }
+159 |     }
+160 | 
+161 |     // Remove any hitboxes whose lifetime has run out.
+162 |     m_activeHitBoxes.erase(
+163 |         std::remove_if(m_activeHitBoxes.begin(), m_activeHitBoxes.end(),
+164 |                        [](const HitBox& hitBox) { return hitBox.framesToLive <= 0; }),
+165 |         m_activeHitBoxes.end());
+166 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 167
+ANCHOR RANGE: 142-166
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp`
+- Anchor lines `47-71` (current file tail before insertion at line `72`):
+```cpp
+47 |     // apply damage, mark dead enemies, and remove expired hitboxes.
+48 |     // Also ticks the combo window timer.
+49 |     // Call once per frame from RuntimeScene::BeginFrame.
+50 |     void Update(float dt, EnemyActor* enemies, int count);
+51 | 
+52 |     // Read-only access to active hitboxes for debug visualization.
+53 |     const std::vector<HitBox>& GetActiveHitBoxes() const
+54 |     { return m_activeHitBoxes; }
+55 | 
+56 |     // Recent hit records are valid for the current frame only.
+57 |     // They are reset at the start of each Update() call.
+58 |     // Always pair this pointer with GetRecentEnemyHitCount().
+59 |     const EnemyHitRecord* GetRecentEnemyHits() const
+60 |     { return m_recentEnemyHits; }
+61 | 
+62 |     int GetRecentEnemyHitCount() const
+63 |     { return m_recentEnemyHitCount; }
+64 | 
+65 | private:
+66 |     static constexpr int   kMaxRecentEnemyHits = 32;
+67 | 
+68 |     std::vector<HitBox> m_activeHitBoxes;
+69 |     EnemyHitRecord m_recentEnemyHits[kMaxRecentEnemyHits]{};
+70 |     int m_recentEnemyHitCount = 0;
+71 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 72
+ANCHOR RANGE: 47-71
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 002: Enemy reaction / interrupt-lite.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -98,12 +398,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` | yes | 214 | 215 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` | yes | 95 | 96 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+- Anchor lines `190-214` (current file tail before insertion at line `215`):
+```cpp
+190 |     if (isDead)
+191 |         return;
+192 | 
+193 |     if (!IsHitFlashVisible())
+194 |         return;
+195 | 
+196 |     static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+197 |     const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
+198 |     if (!visualPrefab)
+199 |         return;
+200 | 
+201 |     const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
+202 |     primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, hitFlashScale);
+203 | }
+204 | 
+205 | bool EnemyActor::IsHitFlashVisible() const
+206 | {
+207 |     if (hitFlashTimer <= 0.0f)
+208 |         return true;
+209 | 
+210 |     const float elapsedFlashTime = kHitFlashDuration - hitFlashTimer;
+211 |     const int blinkPhase = static_cast<int>(elapsedFlashTime / kHitFlashBlinkPeriod);
+212 |     // Even elapsed phases are visible so a fresh hit starts visible.
+213 |     return (blinkPhase % 2) == 0;
+214 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 215
+ANCHOR RANGE: 190-214
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+- Anchor lines `71-95` (current file tail before insertion at line `96`):
+```cpp
+71 |               float wpAx, float wpAz,
+72 |               float wpBx, float wpBz,
+73 |               int   startHp = 10);
+74 | 
+75 |     // Advance state machine, move, snap Y to terrain.
+76 |     // playerX/playerZ are the current player world-space XZ position.
+77 |     void Update(float dt, D3D11Renderer& renderer,
+78 |                 float playerX, float playerZ);
+79 | 
+80 |     // Apply incoming damage; triggers Hit stagger or Dead transition.
+81 |     void OnHit(int damage);
+82 | 
+83 |     // Expand the enemy visual into the runtime primitive bucket.
+84 |     // Reuses the player blockout prefab for enemy visuals.
+85 |     // Does nothing when isDead is true.
+86 |     void SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
+87 |                              PrimitiveRenderer&   primitiveRenderer) const;
+88 | 
+89 | private:
+90 |     // Change state immediately and set the state-duration timer.
+91 |     void TransitionTo(EnemyState next, float duration);
+92 | 
+93 |     // Returns whether the visual should be drawn this frame during hit flash.
+94 |     bool IsHitFlashVisible() const;
+95 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 96
+ANCHOR RANGE: 71-95
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 003: Enemy attack telegraph lite.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -117,12 +493,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` | yes | 378 | 379 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` | yes | 40 | 41 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 004: Screen edge damage flash.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -135,12 +587,51 @@ Then run: python tools/llm/worst_llm_guard.py complete
 |---|---:|---:|---:|---:|---:|
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` | yes | 330 | 331 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp`
+- Anchor lines `306-330` (current file tail before insertion at line `331`):
+```cpp
+306 |     // m_playerY is the camera eye level; body center is shifted down by kPlayerBodyCenterOffset.
+307 |     bool HitBoxOverlapsPlayer(const HitBox& hitBox) const
+308 |     {
+309 |         float bodyCenterY = m_playerY - kPlayerBodyCenterOffset;
+310 |         float distX = fabsf(m_playerX - hitBox.x);
+311 |         float distY = fabsf(bodyCenterY - hitBox.y);
+312 |         float distZ = fabsf(m_playerZ - hitBox.z);
+313 |         return (distX < kPlayerHitHalfX + hitBox.halfX) &&
+314 |                (distY < kPlayerHitHalfY + hitBox.halfY) &&
+315 |                (distZ < kPlayerHitHalfZ + hitBox.halfZ);
+316 |     }
+317 | 
+318 |     float GetAttackYaw(const CameraController& camController) const
+319 |     {
+320 |         const EnemyActor* lockedTarget = m_targeting.GetTarget();
+321 |         if (!lockedTarget)
+322 |             return camController.GetYaw();
+323 | 
+324 |         const float playerX = camController.GetPlayerX();
+325 |         const float playerZ = camController.GetPlayerZ();
+326 |         const float deltaX = lockedTarget->x - playerX;
+327 |         const float deltaZ = lockedTarget->z - playerZ;
+328 |         return atan2f(deltaX, deltaZ);
+329 |     }
+330 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 331
+ANCHOR RANGE: 306-330
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 005: Hit pause / hitstop.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -154,12 +645,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` | yes | 214 | 215 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` | yes | 95 | 96 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+- Anchor lines `190-214` (current file tail before insertion at line `215`):
+```cpp
+190 |     if (isDead)
+191 |         return;
+192 | 
+193 |     if (!IsHitFlashVisible())
+194 |         return;
+195 | 
+196 |     static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+197 |     const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
+198 |     if (!visualPrefab)
+199 |         return;
+200 | 
+201 |     const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
+202 |     primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, hitFlashScale);
+203 | }
+204 | 
+205 | bool EnemyActor::IsHitFlashVisible() const
+206 | {
+207 |     if (hitFlashTimer <= 0.0f)
+208 |         return true;
+209 | 
+210 |     const float elapsedFlashTime = kHitFlashDuration - hitFlashTimer;
+211 |     const int blinkPhase = static_cast<int>(elapsedFlashTime / kHitFlashBlinkPeriod);
+212 |     // Even elapsed phases are visible so a fresh hit starts visible.
+213 |     return (blinkPhase % 2) == 0;
+214 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 215
+ANCHOR RANGE: 190-214
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+- Anchor lines `71-95` (current file tail before insertion at line `96`):
+```cpp
+71 |               float wpAx, float wpAz,
+72 |               float wpBx, float wpBz,
+73 |               int   startHp = 10);
+74 | 
+75 |     // Advance state machine, move, snap Y to terrain.
+76 |     // playerX/playerZ are the current player world-space XZ position.
+77 |     void Update(float dt, D3D11Renderer& renderer,
+78 |                 float playerX, float playerZ);
+79 | 
+80 |     // Apply incoming damage; triggers Hit stagger or Dead transition.
+81 |     void OnHit(int damage);
+82 | 
+83 |     // Expand the enemy visual into the runtime primitive bucket.
+84 |     // Reuses the player blockout prefab for enemy visuals.
+85 |     // Does nothing when isDead is true.
+86 |     void SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
+87 |                              PrimitiveRenderer&   primitiveRenderer) const;
+88 | 
+89 | private:
+90 |     // Change state immediately and set the state-duration timer.
+91 |     void TransitionTo(EnemyState next, float duration);
+92 | 
+93 |     // Returns whether the visual should be drawn this frame during hit flash.
+94 |     bool IsHitFlashVisible() const;
+95 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 96
+ANCHOR RANGE: 71-95
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 006: Stagger meter.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -173,12 +740,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` | yes | 214 | 215 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` | yes | 95 | 96 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+- Anchor lines `190-214` (current file tail before insertion at line `215`):
+```cpp
+190 |     if (isDead)
+191 |         return;
+192 | 
+193 |     if (!IsHitFlashVisible())
+194 |         return;
+195 | 
+196 |     static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+197 |     const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
+198 |     if (!visualPrefab)
+199 |         return;
+200 | 
+201 |     const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
+202 |     primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, hitFlashScale);
+203 | }
+204 | 
+205 | bool EnemyActor::IsHitFlashVisible() const
+206 | {
+207 |     if (hitFlashTimer <= 0.0f)
+208 |         return true;
+209 | 
+210 |     const float elapsedFlashTime = kHitFlashDuration - hitFlashTimer;
+211 |     const int blinkPhase = static_cast<int>(elapsedFlashTime / kHitFlashBlinkPeriod);
+212 |     // Even elapsed phases are visible so a fresh hit starts visible.
+213 |     return (blinkPhase % 2) == 0;
+214 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 215
+ANCHOR RANGE: 190-214
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+- Anchor lines `71-95` (current file tail before insertion at line `96`):
+```cpp
+71 |               float wpAx, float wpAz,
+72 |               float wpBx, float wpBz,
+73 |               int   startHp = 10);
+74 | 
+75 |     // Advance state machine, move, snap Y to terrain.
+76 |     // playerX/playerZ are the current player world-space XZ position.
+77 |     void Update(float dt, D3D11Renderer& renderer,
+78 |                 float playerX, float playerZ);
+79 | 
+80 |     // Apply incoming damage; triggers Hit stagger or Dead transition.
+81 |     void OnHit(int damage);
+82 | 
+83 |     // Expand the enemy visual into the runtime primitive bucket.
+84 |     // Reuses the player blockout prefab for enemy visuals.
+85 |     // Does nothing when isDead is true.
+86 |     void SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
+87 |                              PrimitiveRenderer&   primitiveRenderer) const;
+88 | 
+89 | private:
+90 |     // Change state immediately and set the state-duration timer.
+91 |     void TransitionTo(EnemyState next, float duration);
+92 | 
+93 |     // Returns whether the visual should be drawn this frame during hit flash.
+94 |     bool IsHitFlashVisible() const;
+95 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 96
+ANCHOR RANGE: 71-95
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 007: Enemy attack telegraph.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -192,12 +835,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp` | yes | 109 | 110 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp` | yes | 36 | 37 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp`
+- Anchor lines `85-109` (current file tail before insertion at line `110`):
+```cpp
+ 85 |         break;
+ 86 |     }
+ 87 | }
+ 88 | 
+ 89 | void PlayerActor::TransitionTo(PlayerActionState next, float duration)
+ 90 | {
+ 91 |     state = next;
+ 92 |     stateTimer = duration;
+ 93 | }
+ 94 | 
+ 95 | void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,
+ 96 |                                       const PrefabLibrary& prefabLibrary,
+ 97 |                                       PrimitiveRenderer& primitiveRenderer) const
+ 98 | {
+ 99 |     static const std::string kPlayerVisualPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+100 |     const PrimitivePrefab* visualPrefab =
+101 |         prefabLibrary.GetPrefab(kPlayerVisualPrefabId);
+102 |     if (!visualPrefab)
+103 |         return;
+104 | 
+105 |     const ActorCommon::RuntimeActorPose pose = BuildRuntimePose(cameraController);
+106 |     primitiveRenderer.AddRuntimeInstance(*visualPrefab,
+107 |                                          pose.x, pose.y, pose.z,
+108 |                                          pose.yaw, pose.scale);
+109 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 110
+ANCHOR RANGE: 85-109
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp`
+- Anchor lines `12-36` (current file tail before insertion at line `37`):
+```cpp
+12 | #include "PlayerActionState.hpp"
+13 | #include "PlayerStats.hpp"
+14 | 
+15 | class CameraController;
+16 | struct InputActionMap;
+17 | class PrefabLibrary;
+18 | class PrimitiveRenderer;
+19 | 
+20 | class PlayerActor
+21 | {
+22 | public:
+23 |     PlayerStats stats;
+24 |     PlayerActionState state = PlayerActionState::Idle;
+25 |     float stateTimer = 0.0f;
+26 | 
+27 |     void Update(float dt, const InputActionMap& input, bool isGrounded, bool attackPressed);
+28 | 
+29 |     void SubmitRuntimeVisual(const CameraController& cameraController,
+30 |                              const PrefabLibrary& prefabLibrary,
+31 |                              PrimitiveRenderer& primitiveRenderer) const;
+32 | 
+33 | private:
+34 |     void TransitionTo(PlayerActionState next, float duration);
+35 |     ActorCommon::RuntimeActorPose BuildRuntimePose(const CameraController& cameraController) const;
+36 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 37
+ANCHOR RANGE: 12-36
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 008: Parry / counter window.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -211,12 +930,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` | yes | 166 | 167 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` | yes | 71 | 72 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp`
+- Anchor lines `142-166` (current file tail before insertion at line `167`):
+```cpp
+142 | 
+143 |             std::ostringstream ss;
+144 |             ss << "CombatSystem: Hit enemy " << i
+145 |                << " for " << hitBox.damage << " damage.";
+146 |             LOG_INFO(ss.str());
+147 | 
+148 |             enemy.OnHit(hitBox.damage);
+149 | 
+150 |             if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
+151 |             {
+152 |                 EnemyHitRecord& hitRecord = m_recentEnemyHits[m_recentEnemyHitCount++];
+153 |                 hitRecord.x = enemy.x;
+154 |                 hitRecord.y = enemy.y + DAMAGE_NUMBER_Y_OFFSET;
+155 |                 hitRecord.z = enemy.z;
+156 |                 hitRecord.damage = hitBox.damage;
+157 |             }
+158 |         }
+159 |     }
+160 | 
+161 |     // Remove any hitboxes whose lifetime has run out.
+162 |     m_activeHitBoxes.erase(
+163 |         std::remove_if(m_activeHitBoxes.begin(), m_activeHitBoxes.end(),
+164 |                        [](const HitBox& hitBox) { return hitBox.framesToLive <= 0; }),
+165 |         m_activeHitBoxes.end());
+166 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 167
+ANCHOR RANGE: 142-166
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp`
+- Anchor lines `47-71` (current file tail before insertion at line `72`):
+```cpp
+47 |     // apply damage, mark dead enemies, and remove expired hitboxes.
+48 |     // Also ticks the combo window timer.
+49 |     // Call once per frame from RuntimeScene::BeginFrame.
+50 |     void Update(float dt, EnemyActor* enemies, int count);
+51 | 
+52 |     // Read-only access to active hitboxes for debug visualization.
+53 |     const std::vector<HitBox>& GetActiveHitBoxes() const
+54 |     { return m_activeHitBoxes; }
+55 | 
+56 |     // Recent hit records are valid for the current frame only.
+57 |     // They are reset at the start of each Update() call.
+58 |     // Always pair this pointer with GetRecentEnemyHitCount().
+59 |     const EnemyHitRecord* GetRecentEnemyHits() const
+60 |     { return m_recentEnemyHits; }
+61 | 
+62 |     int GetRecentEnemyHitCount() const
+63 |     { return m_recentEnemyHitCount; }
+64 | 
+65 | private:
+66 |     static constexpr int   kMaxRecentEnemyHits = 32;
+67 | 
+68 |     std::vector<HitBox> m_activeHitBoxes;
+69 |     EnemyHitRecord m_recentEnemyHits[kMaxRecentEnemyHits]{};
+70 |     int m_recentEnemyHitCount = 0;
+71 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 72
+ANCHOR RANGE: 47-71
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 009: Weak point damage.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -230,12 +1025,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` | yes | 378 | 379 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` | yes | 40 | 41 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 010: Area name display.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -249,12 +1120,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 011: Notification toast system.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -268,12 +1155,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp` | yes | 566 | 567 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp` | yes | 123 | 124 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp`
+- Anchor lines `542-566` (current file tail before insertion at line `567`):
+```cpp
+542 |     float camX, float camY, float camZ,
+543 |     float yaw,  float pitch,
+544 |     float vpW,  float vpH)
+545 | {
+546 |     if (!target || target->isDead)
+547 |         return;
+548 |     if (!ImGui::GetCurrentContext())
+549 |         return;
+550 | 
+551 |     float sx = 0.0f;
+552 |     float sy = 0.0f;
+553 |     if (!WorldToScreen(target->x, target->y + kLockMarkerHeightOffset, target->z,
+554 |                        camX, camY, camZ, yaw, pitch, vpW, vpH, sx, sy))
+555 |     {
+556 |         return;
+557 |     }
+558 | 
+559 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+560 |     const ImU32 lockColor = IM_COL32(255, 220, 80, 255);
+561 | 
+562 |     drawList->AddCircle(ImVec2(sx, sy), kLockMarkerCircleRadius, lockColor,
+563 |                         kLockMarkerCircleSegments, kLockMarkerCircleThickness);
+564 |     drawList->AddText(ImVec2(sx + kLockMarkerTextOffsetX, sy + kLockMarkerTextOffsetY),
+565 |                       lockColor, "LOCK");
+566 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 567
+ANCHOR RANGE: 542-566
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp`
+- Anchor lines `99-123` (current file tail before insertion at line `124`):
+```cpp
+ 99 | 
+100 | private:
+101 |     bool initialized = false;
+102 | 
+103 |     bool showPauseMenu   = false;
+104 |     bool showDebugOverlay = false;
+105 | 
+106 |     float currentFPS = 0.0f;
+107 |     float currentDT  = 0.0f;
+108 |     float camX = 0.0f, camY = 0.0f, camZ = 0.0f;
+109 |     float camYaw = 0.0f, camPitch = 0.0f;
+110 | 
+111 |     bool wantsQuit   = false;
+112 |     bool wantsResume = false;
+113 |     D3D11Renderer* m_renderer = nullptr;
+114 |     bool  m_lightUiInitialized = false;
+115 |     float m_sunDirX = 0.0f;
+116 |     float m_sunDirY = -1.0f;
+117 |     float m_sunDirZ = 0.0f;
+118 |     float m_ambientStrength = 0.25f;
+119 |     AudioManager* m_audioManager = nullptr;
+120 | 
+121 |     void DrawPauseMenu();
+122 |     void DrawDebugOverlay();
+123 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 124
+ANCHOR RANGE: 99-123
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 012: Letterbox event bars.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -287,12 +1250,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` | yes | 378 | 379 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` | yes | 40 | 41 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 013: Contextual button prompts.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -306,12 +1345,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` | yes | 378 | 379 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` | yes | 40 | 41 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 014: Level up screen overlay.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -325,12 +1440,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 015: Status screen.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -344,12 +1475,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 016: Map screen stub.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -363,12 +1510,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` | yes | 378 | 379 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` | yes | 40 | 41 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 017: Tooltip system.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -382,12 +1605,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` | yes | 378 | 379 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` | yes | 40 | 41 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 018: Saving indicator.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -401,12 +1700,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` | yes | 378 | 379 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` | yes | 40 | 41 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 019: Death / defeat screen.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -420,12 +1795,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` | yes | 303 | 304 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` | yes | 129 | 130 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+- Anchor lines `279-303` (current file tail before insertion at line `304`):
+```cpp
+279 |         XM_PIDIV4,          // 45-degree vertical FOV (matches DrawTerrainPatch)
+280 |         vpW / vpH,
+281 |         0.1f, 2000.0f);
+282 | 
+283 |     // Unproject near and far screen points into world space.
+284 |     // XMVector3Unproject arguments: screenPoint, vpX, vpY, vpW, vpH, minZ, maxZ, proj, view, world
+285 |     XMVECTOR nearPt = XMVector3Unproject(
+286 |         XMVectorSet(mouseX, mouseY, 0.0f, 0.0f),
+287 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+288 |         proj, view, XMMatrixIdentity());
+289 | 
+290 |     XMVECTOR farPt = XMVector3Unproject(
+291 |         XMVectorSet(mouseX, mouseY, 1.0f, 0.0f),
+292 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+293 |         proj, view, XMMatrixIdentity());
+294 | 
+295 |     XMVECTOR dir = XMVector3Normalize(farPt - nearPt);
+296 | 
+297 |     outOriginX = XMVectorGetX(nearPt);
+298 |     outOriginY = XMVectorGetY(nearPt);
+299 |     outOriginZ = XMVectorGetZ(nearPt);
+300 |     outDirX    = XMVectorGetX(dir);
+301 |     outDirY    = XMVectorGetY(dir);
+302 |     outDirZ    = XMVectorGetZ(dir);
+303 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 304
+ANCHOR RANGE: 279-303
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+- Anchor lines `105-129` (current file tail before insertion at line `130`):
+```cpp
+105 |     float GetCamY()    const { return m_camY; }
+106 |     float GetCamZ()    const { return m_camZ; }
+107 |     bool  IsDodgeActive() const { return m_dodgeActive; }
+108 | 
+109 | private:
+110 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_X = 0.3f;
+111 |     static constexpr float PLAYER_COLLISION_HALF_HEIGHT = 0.9f;
+112 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_Z = 0.3f;
+113 | 
+114 |     float m_playerX = 0.0f, m_playerY = 0.0f, m_playerZ = -3.0f;
+115 |     float m_yaw = 0.0f, m_pitch = 0.0f;
+116 |     float m_camX = 0.0f, m_camY = 0.0f, m_camZ = 0.0f;
+117 |     float m_velocityY  = 0.0f;
+118 |     bool  m_isGrounded = true;
+119 |     float m_dodgeVelX = 0.0f;
+120 |     float m_dodgeVelZ = 0.0f;
+121 |     float m_dodgeTimer = 0.0f;
+122 |     bool m_dodgeActive = false;
+123 |     POINT m_centerPoint = {};
+124 |     const InputActionMap* m_inputActionMap = nullptr;
+125 |     const CollisionWorld* m_collisionWorld = nullptr;
+126 | 
+127 |     // Recompute m_camX/Y/Z from player pos + yaw.
+128 |     void ComputeCamFromPlayer();
+129 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 130
+ANCHOR RANGE: 105-129
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 020: Camera shake.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -439,12 +1890,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` | yes | 303 | 304 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` | yes | 129 | 130 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+- Anchor lines `279-303` (current file tail before insertion at line `304`):
+```cpp
+279 |         XM_PIDIV4,          // 45-degree vertical FOV (matches DrawTerrainPatch)
+280 |         vpW / vpH,
+281 |         0.1f, 2000.0f);
+282 | 
+283 |     // Unproject near and far screen points into world space.
+284 |     // XMVector3Unproject arguments: screenPoint, vpX, vpY, vpW, vpH, minZ, maxZ, proj, view, world
+285 |     XMVECTOR nearPt = XMVector3Unproject(
+286 |         XMVectorSet(mouseX, mouseY, 0.0f, 0.0f),
+287 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+288 |         proj, view, XMMatrixIdentity());
+289 | 
+290 |     XMVECTOR farPt = XMVector3Unproject(
+291 |         XMVectorSet(mouseX, mouseY, 1.0f, 0.0f),
+292 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+293 |         proj, view, XMMatrixIdentity());
+294 | 
+295 |     XMVECTOR dir = XMVector3Normalize(farPt - nearPt);
+296 | 
+297 |     outOriginX = XMVectorGetX(nearPt);
+298 |     outOriginY = XMVectorGetY(nearPt);
+299 |     outOriginZ = XMVectorGetZ(nearPt);
+300 |     outDirX    = XMVectorGetX(dir);
+301 |     outDirY    = XMVectorGetY(dir);
+302 |     outDirZ    = XMVectorGetZ(dir);
+303 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 304
+ANCHOR RANGE: 279-303
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+- Anchor lines `105-129` (current file tail before insertion at line `130`):
+```cpp
+105 |     float GetCamY()    const { return m_camY; }
+106 |     float GetCamZ()    const { return m_camZ; }
+107 |     bool  IsDodgeActive() const { return m_dodgeActive; }
+108 | 
+109 | private:
+110 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_X = 0.3f;
+111 |     static constexpr float PLAYER_COLLISION_HALF_HEIGHT = 0.9f;
+112 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_Z = 0.3f;
+113 | 
+114 |     float m_playerX = 0.0f, m_playerY = 0.0f, m_playerZ = -3.0f;
+115 |     float m_yaw = 0.0f, m_pitch = 0.0f;
+116 |     float m_camX = 0.0f, m_camY = 0.0f, m_camZ = 0.0f;
+117 |     float m_velocityY  = 0.0f;
+118 |     bool  m_isGrounded = true;
+119 |     float m_dodgeVelX = 0.0f;
+120 |     float m_dodgeVelZ = 0.0f;
+121 |     float m_dodgeTimer = 0.0f;
+122 |     bool m_dodgeActive = false;
+123 |     POINT m_centerPoint = {};
+124 |     const InputActionMap* m_inputActionMap = nullptr;
+125 |     const CollisionWorld* m_collisionWorld = nullptr;
+126 | 
+127 |     // Recompute m_camX/Y/Z from player pos + yaw.
+128 |     void ComputeCamFromPlayer();
+129 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 130
+ANCHOR RANGE: 105-129
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 021: Combat camera zoom.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -458,12 +1985,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` | yes | 303 | 304 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` | yes | 129 | 130 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+- Anchor lines `279-303` (current file tail before insertion at line `304`):
+```cpp
+279 |         XM_PIDIV4,          // 45-degree vertical FOV (matches DrawTerrainPatch)
+280 |         vpW / vpH,
+281 |         0.1f, 2000.0f);
+282 | 
+283 |     // Unproject near and far screen points into world space.
+284 |     // XMVector3Unproject arguments: screenPoint, vpX, vpY, vpW, vpH, minZ, maxZ, proj, view, world
+285 |     XMVECTOR nearPt = XMVector3Unproject(
+286 |         XMVectorSet(mouseX, mouseY, 0.0f, 0.0f),
+287 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+288 |         proj, view, XMMatrixIdentity());
+289 | 
+290 |     XMVECTOR farPt = XMVector3Unproject(
+291 |         XMVectorSet(mouseX, mouseY, 1.0f, 0.0f),
+292 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+293 |         proj, view, XMMatrixIdentity());
+294 | 
+295 |     XMVECTOR dir = XMVector3Normalize(farPt - nearPt);
+296 | 
+297 |     outOriginX = XMVectorGetX(nearPt);
+298 |     outOriginY = XMVectorGetY(nearPt);
+299 |     outOriginZ = XMVectorGetZ(nearPt);
+300 |     outDirX    = XMVectorGetX(dir);
+301 |     outDirY    = XMVectorGetY(dir);
+302 |     outDirZ    = XMVectorGetZ(dir);
+303 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 304
+ANCHOR RANGE: 279-303
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+- Anchor lines `105-129` (current file tail before insertion at line `130`):
+```cpp
+105 |     float GetCamY()    const { return m_camY; }
+106 |     float GetCamZ()    const { return m_camZ; }
+107 |     bool  IsDodgeActive() const { return m_dodgeActive; }
+108 | 
+109 | private:
+110 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_X = 0.3f;
+111 |     static constexpr float PLAYER_COLLISION_HALF_HEIGHT = 0.9f;
+112 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_Z = 0.3f;
+113 | 
+114 |     float m_playerX = 0.0f, m_playerY = 0.0f, m_playerZ = -3.0f;
+115 |     float m_yaw = 0.0f, m_pitch = 0.0f;
+116 |     float m_camX = 0.0f, m_camY = 0.0f, m_camZ = 0.0f;
+117 |     float m_velocityY  = 0.0f;
+118 |     bool  m_isGrounded = true;
+119 |     float m_dodgeVelX = 0.0f;
+120 |     float m_dodgeVelZ = 0.0f;
+121 |     float m_dodgeTimer = 0.0f;
+122 |     bool m_dodgeActive = false;
+123 |     POINT m_centerPoint = {};
+124 |     const InputActionMap* m_inputActionMap = nullptr;
+125 |     const CollisionWorld* m_collisionWorld = nullptr;
+126 | 
+127 |     // Recompute m_camX/Y/Z from player pos + yaw.
+128 |     void ComputeCamFromPlayer();
+129 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 130
+ANCHOR RANGE: 105-129
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 022: Camera collision avoidance.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -477,12 +2080,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` | yes | 303 | 304 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` | yes | 129 | 130 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+- Anchor lines `279-303` (current file tail before insertion at line `304`):
+```cpp
+279 |         XM_PIDIV4,          // 45-degree vertical FOV (matches DrawTerrainPatch)
+280 |         vpW / vpH,
+281 |         0.1f, 2000.0f);
+282 | 
+283 |     // Unproject near and far screen points into world space.
+284 |     // XMVector3Unproject arguments: screenPoint, vpX, vpY, vpW, vpH, minZ, maxZ, proj, view, world
+285 |     XMVECTOR nearPt = XMVector3Unproject(
+286 |         XMVectorSet(mouseX, mouseY, 0.0f, 0.0f),
+287 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+288 |         proj, view, XMMatrixIdentity());
+289 | 
+290 |     XMVECTOR farPt = XMVector3Unproject(
+291 |         XMVectorSet(mouseX, mouseY, 1.0f, 0.0f),
+292 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+293 |         proj, view, XMMatrixIdentity());
+294 | 
+295 |     XMVECTOR dir = XMVector3Normalize(farPt - nearPt);
+296 | 
+297 |     outOriginX = XMVectorGetX(nearPt);
+298 |     outOriginY = XMVectorGetY(nearPt);
+299 |     outOriginZ = XMVectorGetZ(nearPt);
+300 |     outDirX    = XMVectorGetX(dir);
+301 |     outDirY    = XMVectorGetY(dir);
+302 |     outDirZ    = XMVectorGetZ(dir);
+303 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 304
+ANCHOR RANGE: 279-303
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+- Anchor lines `105-129` (current file tail before insertion at line `130`):
+```cpp
+105 |     float GetCamY()    const { return m_camY; }
+106 |     float GetCamZ()    const { return m_camZ; }
+107 |     bool  IsDodgeActive() const { return m_dodgeActive; }
+108 | 
+109 | private:
+110 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_X = 0.3f;
+111 |     static constexpr float PLAYER_COLLISION_HALF_HEIGHT = 0.9f;
+112 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_Z = 0.3f;
+113 | 
+114 |     float m_playerX = 0.0f, m_playerY = 0.0f, m_playerZ = -3.0f;
+115 |     float m_yaw = 0.0f, m_pitch = 0.0f;
+116 |     float m_camX = 0.0f, m_camY = 0.0f, m_camZ = 0.0f;
+117 |     float m_velocityY  = 0.0f;
+118 |     bool  m_isGrounded = true;
+119 |     float m_dodgeVelX = 0.0f;
+120 |     float m_dodgeVelZ = 0.0f;
+121 |     float m_dodgeTimer = 0.0f;
+122 |     bool m_dodgeActive = false;
+123 |     POINT m_centerPoint = {};
+124 |     const InputActionMap* m_inputActionMap = nullptr;
+125 |     const CollisionWorld* m_collisionWorld = nullptr;
+126 | 
+127 |     // Recompute m_camX/Y/Z from player pos + yaw.
+128 |     void ComputeCamFromPlayer();
+129 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 130
+ANCHOR RANGE: 105-129
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 023: Target framing adjustment.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -496,12 +2175,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` | yes | 303 | 304 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` | yes | 129 | 130 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+- Anchor lines `279-303` (current file tail before insertion at line `304`):
+```cpp
+279 |         XM_PIDIV4,          // 45-degree vertical FOV (matches DrawTerrainPatch)
+280 |         vpW / vpH,
+281 |         0.1f, 2000.0f);
+282 | 
+283 |     // Unproject near and far screen points into world space.
+284 |     // XMVector3Unproject arguments: screenPoint, vpX, vpY, vpW, vpH, minZ, maxZ, proj, view, world
+285 |     XMVECTOR nearPt = XMVector3Unproject(
+286 |         XMVectorSet(mouseX, mouseY, 0.0f, 0.0f),
+287 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+288 |         proj, view, XMMatrixIdentity());
+289 | 
+290 |     XMVECTOR farPt = XMVector3Unproject(
+291 |         XMVectorSet(mouseX, mouseY, 1.0f, 0.0f),
+292 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+293 |         proj, view, XMMatrixIdentity());
+294 | 
+295 |     XMVECTOR dir = XMVector3Normalize(farPt - nearPt);
+296 | 
+297 |     outOriginX = XMVectorGetX(nearPt);
+298 |     outOriginY = XMVectorGetY(nearPt);
+299 |     outOriginZ = XMVectorGetZ(nearPt);
+300 |     outDirX    = XMVectorGetX(dir);
+301 |     outDirY    = XMVectorGetY(dir);
+302 |     outDirZ    = XMVectorGetZ(dir);
+303 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 304
+ANCHOR RANGE: 279-303
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+- Anchor lines `105-129` (current file tail before insertion at line `130`):
+```cpp
+105 |     float GetCamY()    const { return m_camY; }
+106 |     float GetCamZ()    const { return m_camZ; }
+107 |     bool  IsDodgeActive() const { return m_dodgeActive; }
+108 | 
+109 | private:
+110 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_X = 0.3f;
+111 |     static constexpr float PLAYER_COLLISION_HALF_HEIGHT = 0.9f;
+112 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_Z = 0.3f;
+113 | 
+114 |     float m_playerX = 0.0f, m_playerY = 0.0f, m_playerZ = -3.0f;
+115 |     float m_yaw = 0.0f, m_pitch = 0.0f;
+116 |     float m_camX = 0.0f, m_camY = 0.0f, m_camZ = 0.0f;
+117 |     float m_velocityY  = 0.0f;
+118 |     bool  m_isGrounded = true;
+119 |     float m_dodgeVelX = 0.0f;
+120 |     float m_dodgeVelZ = 0.0f;
+121 |     float m_dodgeTimer = 0.0f;
+122 |     bool m_dodgeActive = false;
+123 |     POINT m_centerPoint = {};
+124 |     const InputActionMap* m_inputActionMap = nullptr;
+125 |     const CollisionWorld* m_collisionWorld = nullptr;
+126 | 
+127 |     // Recompute m_camX/Y/Z from player pos + yaw.
+128 |     void ComputeCamFromPlayer();
+129 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 130
+ANCHOR RANGE: 105-129
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 024: Lock-on camera recovery smoothing.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -514,12 +2269,51 @@ Then run: python tools/llm/worst_llm_guard.py complete
 |---|---:|---:|---:|---:|---:|
 | `/home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl` | yes | 39 | 40 | 20 | 35 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl`
+- Anchor lines `15-39` (current file tail before insertion at line `40`):
+```hlsl
+15 | struct VSIn
+16 | {
+17 |     float3 pos    : POSITION;
+18 |     float3 normal : NORMAL;
+19 |     float4 col    : COLOR;
+20 | };
+21 | 
+22 | struct VSOut
+23 | {
+24 |     float4 svPos     : SV_POSITION;
+25 |     float3 worldPos  : TEXCOORD0; // world-space position for gradient
+26 |     float3 worldNorm : NORMAL;
+27 |     float4 col       : COLOR;
+28 | };
+29 | 
+30 | VSOut main(VSIn input)
+31 | {
+32 |     VSOut o;
+33 |     float4 worldPos4 = mul(float4(input.pos, 1.0f), world);
+34 |     o.svPos     = mul(float4(input.pos, 1.0f), mvp);
+35 |     o.worldPos  = worldPos4.xyz;
+36 |     o.worldNorm = normalize(mul(float4(input.normal, 0.0f), world).xyz);
+37 |     o.col       = input.col;
+38 |     return o;
+39 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl
+EDIT MODE: append-first
+INSERT AT LINE: 40
+ANCHOR RANGE: 15-39
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 025: Wind effect on trees.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -533,12 +2327,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 026: Weather system lite.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -552,12 +2362,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 027: Ambient particles.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -571,12 +2397,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 028: Day/night cycle.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -590,12 +2432,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` | yes | 353 | 354 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` | yes | 111 | 112 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp`
+- Anchor lines `329-353` (current file tail before insertion at line `354`):
+```cpp
+329 |     }
+330 |     catch (const std::exception& e)
+331 |     {
+332 |         LOG_ERROR(std::string("WorldGrid::SaveCell: write error: ") + e.what());
+333 |         return false;
+334 |     }
+335 | 
+336 |     // std::ofstream write failures typically set failbit/badbit rather than throwing.
+337 |     // Always check the stream state after writing, regardless of exceptions.
+338 |     if (!out.good())
+339 |     {
+340 |         std::ostringstream streamErr;
+341 |         streamErr << "WorldGrid::SaveCell: stream error after write to '"
+342 |                   << cell->filePath
+343 |                   << "' (disk full, permission denied, or IO error).";
+344 |         LOG_ERROR(streamErr.str());
+345 |         return false;
+346 |     }
+347 | 
+348 |     std::ostringstream ss;
+349 |     ss << "WorldGrid::SaveCell: saved cell (" << cx << "," << cz << ") to '"
+350 |        << cell->filePath << "' with " << cell->instances.size() << " instance(s).";
+351 |     LOG_INFO(ss.str());
+352 |     return true;
+353 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 354
+ANCHOR RANGE: 329-353
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp`
+- Anchor lines `87-111` (current file tail before insertion at line `112`):
+```cpp
+ 87 |     // radius=1 gives a 3x3 block of cells (9 max), radius=0 gives only the player cell.
+ 88 |     std::vector<WorldCell> GetActiveCells(int playerCX, int playerCZ, int radius = 1) const;
+ 89 | 
+ 90 |     // Convert a world-space (X, Z) position into a cell grid coordinate.
+ 91 |     void WorldToCell(float worldX, float worldZ, int& outCX, int& outCZ) const;
+ 92 | 
+ 93 |     float       GetCellSize() const  { return m_cellSize; }
+ 94 |     const std::string& GetName() const { return m_name; }
+ 95 |     int         CellCount()  const  { return static_cast<int>(m_cells.size()); }
+ 96 | 
+ 97 |     // Returns a mutable pointer to the cell at (cx,cz), or nullptr if not found.
+ 98 |     WorldCell* FindCell(int cx, int cz);
+ 99 | 
+100 |     // Write the cell at (cx,cz) back to its JSON file (preserving terrain/forest settings).
+101 |     // Returns true on success; logs an error and keeps in-memory data on failure.
+102 |     bool SaveCell(int cx, int cz);
+103 | 
+104 | private:
+105 |     bool LoadCellFile(const std::string& path, WorldCell& out);
+106 | 
+107 |     std::string           m_worldJsonPath;
+108 |     std::string           m_name;
+109 |     float                 m_cellSize = 200.0f;
+110 |     std::vector<WorldCell> m_cells;
+111 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 112
+ANCHOR RANGE: 87-111
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 029: Biome transition fade.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -609,12 +2527,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp` | yes | 148 | 149 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp` | yes | 27 | 28 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp`
+- Anchor lines `124-148` (current file tail before insertion at line `149`):
+```cpp
+124 |     const float cellSize = grid.GetCellSize();
+125 |     const float fracX = (playerX - static_cast<float>(playerCX) * cellSize) / cellSize;
+126 |     const float fracZ = (playerZ - static_cast<float>(playerCZ) * cellSize) / cellSize;
+127 | 
+128 |     // Map to pixel coordinates. The player's cell occupies column/row kGridRadius.
+129 |     const float playerPxX = origin.x + (static_cast<float>(kGridRadius) + fracX) * kCellPx;
+130 |     const float playerPxY = origin.y + (static_cast<float>(kGridRadius) + fracZ) * kCellPx;
+131 | 
+132 |     // Facing direction: forward = (sin(yaw), cos(yaw)) in world XZ.
+133 |     // On the minimap X maps to screen-right, Z maps to screen-down.
+134 |     const float arrowLen = kCellPx * 0.45f;
+135 |     const float arrowDX  = sinf(playerYaw) * arrowLen;
+136 |     const float arrowDY  = cosf(playerYaw) * arrowLen;
+137 | 
+138 |     // Direction line from player dot toward facing direction.
+139 |     draw->AddLine(
+140 |         ImVec2(playerPxX, playerPxY),
+141 |         ImVec2(playerPxX + arrowDX, playerPxY + arrowDY),
+142 |         IM_COL32(255, 255, 255, 255), 2.0f);
+143 | 
+144 |     // Player position dot drawn on top of the direction line.
+145 |     draw->AddCircleFilled(ImVec2(playerPxX, playerPxY), 4.0f, IM_COL32(255, 255, 255, 255));
+146 | 
+147 |     ImGui::End();
+148 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 149
+ANCHOR RANGE: 124-148
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp`
+- Anchor lines `3-27` (current file tail before insertion at line `28`):
+```cpp
+ 3 | // SYSTEM: UI
+ 4 | // ROLE: HUD, menus, overlays, and editor tool panels
+ 5 | // DO NOT: Modify unrelated systems or break subsystem boundaries.
+ 6 | // OWNS: Minimap module behavior and local implementation details.
+ 7 | // ============================================================
+ 8 | 
+ 9 | #pragma once
+10 | // Minimap.hpp
+11 | // Draws a 160x160 minimap overlay in the top-right corner using ImGui draw lists.
+12 | // Shows nearby world cells colored by biome, plus the player position and facing direction.
+13 | 
+14 | struct ImGuiIO;
+15 | class WorldGrid;
+16 | 
+17 | class Minimap
+18 | {
+19 | public:
+20 |     // Draw the minimap for this frame.
+21 |     // Call inside an active ImGui frame (between BeginFrame / EndFrame).
+22 |     // playerX, playerZ — world-space player position.
+23 |     // playerYaw        — player facing angle in radians (same convention as CameraController::GetYaw()).
+24 |     void Draw(const WorldGrid& grid,
+25 |               float playerX, float playerZ, float playerYaw,
+26 |               const ImGuiIO& io);
+27 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 28
+ANCHOR RANGE: 3-27
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 030: Fog of war on minimap.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -628,12 +2622,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 031: World event trigger zones.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -647,12 +2657,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 032: Interaction hotspot registry stub.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -666,12 +2692,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 033: Landmark discovery trigger stub.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -685,12 +2727,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 034: NPC actor.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -704,12 +2762,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 035: Quest objective system.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -723,12 +2797,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 036: Treasure chest actor.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -742,12 +2832,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 037: Campfire / rest point actor.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -763,12 +2869,102 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 038: NPC interaction prompt routing stub.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -783,12 +2979,35 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestFlags.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestFlags.hpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 039: Quest flag / world-state hook.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -803,12 +3022,95 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` | yes | 353 | 354 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` | yes | 111 | 112 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/SpawnTable.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/SpawnTable.hpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp`
+- Anchor lines `329-353` (current file tail before insertion at line `354`):
+```cpp
+329 |     }
+330 |     catch (const std::exception& e)
+331 |     {
+332 |         LOG_ERROR(std::string("WorldGrid::SaveCell: write error: ") + e.what());
+333 |         return false;
+334 |     }
+335 | 
+336 |     // std::ofstream write failures typically set failbit/badbit rather than throwing.
+337 |     // Always check the stream state after writing, regardless of exceptions.
+338 |     if (!out.good())
+339 |     {
+340 |         std::ostringstream streamErr;
+341 |         streamErr << "WorldGrid::SaveCell: stream error after write to '"
+342 |                   << cell->filePath
+343 |                   << "' (disk full, permission denied, or IO error).";
+344 |         LOG_ERROR(streamErr.str());
+345 |         return false;
+346 |     }
+347 | 
+348 |     std::ostringstream ss;
+349 |     ss << "WorldGrid::SaveCell: saved cell (" << cx << "," << cz << ") to '"
+350 |        << cell->filePath << "' with " << cell->instances.size() << " instance(s).";
+351 |     LOG_INFO(ss.str());
+352 |     return true;
+353 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 354
+ANCHOR RANGE: 329-353
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp`
+- Anchor lines `87-111` (current file tail before insertion at line `112`):
+```cpp
+ 87 |     // radius=1 gives a 3x3 block of cells (9 max), radius=0 gives only the player cell.
+ 88 |     std::vector<WorldCell> GetActiveCells(int playerCX, int playerCZ, int radius = 1) const;
+ 89 | 
+ 90 |     // Convert a world-space (X, Z) position into a cell grid coordinate.
+ 91 |     void WorldToCell(float worldX, float worldZ, int& outCX, int& outCZ) const;
+ 92 | 
+ 93 |     float       GetCellSize() const  { return m_cellSize; }
+ 94 |     const std::string& GetName() const { return m_name; }
+ 95 |     int         CellCount()  const  { return static_cast<int>(m_cells.size()); }
+ 96 | 
+ 97 |     // Returns a mutable pointer to the cell at (cx,cz), or nullptr if not found.
+ 98 |     WorldCell* FindCell(int cx, int cz);
+ 99 | 
+100 |     // Write the cell at (cx,cz) back to its JSON file (preserving terrain/forest settings).
+101 |     // Returns true on success; logs an error and keeps in-memory data on failure.
+102 |     bool SaveCell(int cx, int cz);
+103 | 
+104 | private:
+105 |     bool LoadCellFile(const std::string& path, WorldCell& out);
+106 | 
+107 |     std::string           m_worldJsonPath;
+108 |     std::string           m_name;
+109 |     float                 m_cellSize = 200.0f;
+110 |     std::vector<WorldCell> m_cells;
+111 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 112
+ANCHOR RANGE: 87-111
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 040: Spawn composition table stub (solo / pair / pack).
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -822,12 +3124,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 041: Inventory system.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -840,12 +3158,51 @@ Then run: python tools/llm/worst_llm_guard.py complete
 |---|---:|---:|---:|---:|---:|
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` | yes | 85 | 86 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp`
+- Anchor lines `61-85` (current file tail before insertion at line `86`):
+```cpp
+61 | 
+62 |     bool IsLimitReady() const { return limitCharge >= 1.0f; }
+63 | 
+64 |     // Reduce HP by amount; clamps to zero. Also advances the Limit gauge.
+65 |     // Safe to call with zero or positive values only.
+66 |     void TakeDamage(int amount)
+67 |     {
+68 |         if (amount <= 0)
+69 |             return;
+70 |         hp = std::clamp(hp - static_cast<float>(amount), 0.0f, maxHp);
+71 |         AddLimitCharge(kLimitChargePerHit);
+72 |     }
+73 | 
+74 |     bool IsDead() const { return hp <= 0.0f; }
+75 | 
+76 |     // Restore all combat resources to their full starting values.
+77 |     // Call on player defeat / respawn.
+78 |     void Reset()
+79 |     {
+80 |         hp           = maxHp;
+81 |         mp           = maxMp;
+82 |         surgeCharge  = 0.0f;
+83 |         limitCharge  = 0.0f;
+84 |     }
+85 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 86
+ANCHOR RANGE: 61-85
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 042: XP / level system.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -858,12 +3215,51 @@ Then run: python tools/llm/worst_llm_guard.py complete
 |---|---:|---:|---:|---:|---:|
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` | yes | 85 | 86 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp`
+- Anchor lines `61-85` (current file tail before insertion at line `86`):
+```cpp
+61 | 
+62 |     bool IsLimitReady() const { return limitCharge >= 1.0f; }
+63 | 
+64 |     // Reduce HP by amount; clamps to zero. Also advances the Limit gauge.
+65 |     // Safe to call with zero or positive values only.
+66 |     void TakeDamage(int amount)
+67 |     {
+68 |         if (amount <= 0)
+69 |             return;
+70 |         hp = std::clamp(hp - static_cast<float>(amount), 0.0f, maxHp);
+71 |         AddLimitCharge(kLimitChargePerHit);
+72 |     }
+73 | 
+74 |     bool IsDead() const { return hp <= 0.0f; }
+75 | 
+76 |     // Restore all combat resources to their full starting values.
+77 |     // Call on player defeat / respawn.
+78 |     void Reset()
+79 |     {
+80 |         hp           = maxHp;
+81 |         mp           = maxMp;
+82 |         surgeCharge  = 0.0f;
+83 |         limitCharge  = 0.0f;
+84 |     }
+85 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 86
+ANCHOR RANGE: 61-85
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 043: Status effects.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -877,12 +3273,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 044: Fast travel stub.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -896,12 +3308,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 045: Save / load system.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -915,12 +3343,28 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp` | no | 0 | 1 | 0 | 110 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp` | no | 0 | 1 | 0 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp
+Add new code at line 1.
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 046: Quality preset enforcement.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -934,12 +3378,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` | yes | 103 | 104 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` | yes | 38 | 39 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+- Anchor lines `79-103` (current file tail before insertion at line `104`):
+```cpp
+ 79 | 
+ 80 |     if (!tp::Audio::PlayOneShot(path))
+ 81 |     {
+ 82 |         LogPlayFailure("SFX", path);
+ 83 |         return false;
+ 84 |     }
+ 85 | 
+ 86 |     return true;
+ 87 | }
+ 88 | 
+ 89 | void AudioManager::SetBGMVolume(float v)
+ 90 | {
+ 91 |     m_bgmVolume = Clamp01(v);
+ 92 | }
+ 93 | 
+ 94 | void AudioManager::SetSFXVolume(float v)
+ 95 | {
+ 96 |     m_sfxVolume = Clamp01(v);
+ 97 | }
+ 98 | 
+ 99 | void AudioManager::Shutdown()
+100 | {
+101 |     if (m_bgmRequested)
+102 |         StopBGM();
+103 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 104
+ANCHOR RANGE: 79-103
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+- Anchor lines `14-38` (current file tail before insertion at line `39`):
+```cpp
+14 | {
+15 | public:
+16 |     // Plays BGM via tp::Audio one-shot playback (non-looping in current wrapper).
+17 |     bool PlayBGM(const std::string& path);
+18 |     // Clears AudioManager's tracked BGM state.
+19 |     // Current tp::Audio wrapper does not support stopping an already-playing one-shot.
+20 |     void StopBGM();
+21 |     bool PlaySFX(const std::string& path);
+22 | 
+23 |     void SetBGMVolume(float v);
+24 |     void SetSFXVolume(float v);
+25 |     float GetBGMVolume() const { return m_bgmVolume; }
+26 |     float GetSFXVolume() const { return m_sfxVolume; }
+27 | 
+28 |     void Shutdown();
+29 | 
+30 | private:
+31 |     static float Clamp01(float v);
+32 | 
+33 |     float m_bgmVolume = 1.0f;
+34 |     float m_sfxVolume = 1.0f;
+35 |     bool m_loggedBgmVolumeLimit = false;
+36 |     bool m_loggedSfxVolumeLimit = false;
+37 |     bool m_bgmRequested = false;
+38 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 39
+ANCHOR RANGE: 14-38
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 047: Victory fanfare trigger.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -953,12 +3473,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` | yes | 103 | 104 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` | yes | 38 | 39 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+- Anchor lines `79-103` (current file tail before insertion at line `104`):
+```cpp
+ 79 | 
+ 80 |     if (!tp::Audio::PlayOneShot(path))
+ 81 |     {
+ 82 |         LogPlayFailure("SFX", path);
+ 83 |         return false;
+ 84 |     }
+ 85 | 
+ 86 |     return true;
+ 87 | }
+ 88 | 
+ 89 | void AudioManager::SetBGMVolume(float v)
+ 90 | {
+ 91 |     m_bgmVolume = Clamp01(v);
+ 92 | }
+ 93 | 
+ 94 | void AudioManager::SetSFXVolume(float v)
+ 95 | {
+ 96 |     m_sfxVolume = Clamp01(v);
+ 97 | }
+ 98 | 
+ 99 | void AudioManager::Shutdown()
+100 | {
+101 |     if (m_bgmRequested)
+102 |         StopBGM();
+103 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 104
+ANCHOR RANGE: 79-103
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+- Anchor lines `14-38` (current file tail before insertion at line `39`):
+```cpp
+14 | {
+15 | public:
+16 |     // Plays BGM via tp::Audio one-shot playback (non-looping in current wrapper).
+17 |     bool PlayBGM(const std::string& path);
+18 |     // Clears AudioManager's tracked BGM state.
+19 |     // Current tp::Audio wrapper does not support stopping an already-playing one-shot.
+20 |     void StopBGM();
+21 |     bool PlaySFX(const std::string& path);
+22 | 
+23 |     void SetBGMVolume(float v);
+24 |     void SetSFXVolume(float v);
+25 |     float GetBGMVolume() const { return m_bgmVolume; }
+26 |     float GetSFXVolume() const { return m_sfxVolume; }
+27 | 
+28 |     void Shutdown();
+29 | 
+30 | private:
+31 |     static float Clamp01(float v);
+32 | 
+33 |     float m_bgmVolume = 1.0f;
+34 |     float m_sfxVolume = 1.0f;
+35 |     bool m_loggedBgmVolumeLimit = false;
+36 |     bool m_loggedSfxVolumeLimit = false;
+37 |     bool m_bgmRequested = false;
+38 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 39
+ANCHOR RANGE: 14-38
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 048: Environmental ambient audio.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -972,12 +3568,88 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` | yes | 103 | 104 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` | yes | 38 | 39 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+- Anchor lines `79-103` (current file tail before insertion at line `104`):
+```cpp
+ 79 | 
+ 80 |     if (!tp::Audio::PlayOneShot(path))
+ 81 |     {
+ 82 |         LogPlayFailure("SFX", path);
+ 83 |         return false;
+ 84 |     }
+ 85 | 
+ 86 |     return true;
+ 87 | }
+ 88 | 
+ 89 | void AudioManager::SetBGMVolume(float v)
+ 90 | {
+ 91 |     m_bgmVolume = Clamp01(v);
+ 92 | }
+ 93 | 
+ 94 | void AudioManager::SetSFXVolume(float v)
+ 95 | {
+ 96 |     m_sfxVolume = Clamp01(v);
+ 97 | }
+ 98 | 
+ 99 | void AudioManager::Shutdown()
+100 | {
+101 |     if (m_bgmRequested)
+102 |         StopBGM();
+103 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 104
+ANCHOR RANGE: 79-103
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+- Anchor lines `14-38` (current file tail before insertion at line `39`):
+```cpp
+14 | {
+15 | public:
+16 |     // Plays BGM via tp::Audio one-shot playback (non-looping in current wrapper).
+17 |     bool PlayBGM(const std::string& path);
+18 |     // Clears AudioManager's tracked BGM state.
+19 |     // Current tp::Audio wrapper does not support stopping an already-playing one-shot.
+20 |     void StopBGM();
+21 |     bool PlaySFX(const std::string& path);
+22 | 
+23 |     void SetBGMVolume(float v);
+24 |     void SetSFXVolume(float v);
+25 |     float GetBGMVolume() const { return m_bgmVolume; }
+26 |     float GetSFXVolume() const { return m_sfxVolume; }
+27 | 
+28 |     void Shutdown();
+29 | 
+30 | private:
+31 |     static float Clamp01(float v);
+32 | 
+33 |     float m_bgmVolume = 1.0f;
+34 |     float m_sfxVolume = 1.0f;
+35 |     bool m_loggedBgmVolumeLimit = false;
+36 |     bool m_loggedSfxVolumeLimit = false;
+37 |     bool m_bgmRequested = false;
+38 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 39
+ANCHOR RANGE: 14-38
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 049: Looping BGM.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -993,12 +3665,162 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp` | yes | 139 | 140 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp` | yes | 28 | 29 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+- Anchor lines `79-103` (current file tail before insertion at line `104`):
+```cpp
+ 79 | 
+ 80 |     if (!tp::Audio::PlayOneShot(path))
+ 81 |     {
+ 82 |         LogPlayFailure("SFX", path);
+ 83 |         return false;
+ 84 |     }
+ 85 | 
+ 86 |     return true;
+ 87 | }
+ 88 | 
+ 89 | void AudioManager::SetBGMVolume(float v)
+ 90 | {
+ 91 |     m_bgmVolume = Clamp01(v);
+ 92 | }
+ 93 | 
+ 94 | void AudioManager::SetSFXVolume(float v)
+ 95 | {
+ 96 |     m_sfxVolume = Clamp01(v);
+ 97 | }
+ 98 | 
+ 99 | void AudioManager::Shutdown()
+100 | {
+101 |     if (m_bgmRequested)
+102 |         StopBGM();
+103 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 104
+ANCHOR RANGE: 79-103
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+- Anchor lines `14-38` (current file tail before insertion at line `39`):
+```cpp
+14 | {
+15 | public:
+16 |     // Plays BGM via tp::Audio one-shot playback (non-looping in current wrapper).
+17 |     bool PlayBGM(const std::string& path);
+18 |     // Clears AudioManager's tracked BGM state.
+19 |     // Current tp::Audio wrapper does not support stopping an already-playing one-shot.
+20 |     void StopBGM();
+21 |     bool PlaySFX(const std::string& path);
+22 | 
+23 |     void SetBGMVolume(float v);
+24 |     void SetSFXVolume(float v);
+25 |     float GetBGMVolume() const { return m_bgmVolume; }
+26 |     float GetSFXVolume() const { return m_sfxVolume; }
+27 | 
+28 |     void Shutdown();
+29 | 
+30 | private:
+31 |     static float Clamp01(float v);
+32 | 
+33 |     float m_bgmVolume = 1.0f;
+34 |     float m_sfxVolume = 1.0f;
+35 |     bool m_loggedBgmVolumeLimit = false;
+36 |     bool m_loggedSfxVolumeLimit = false;
+37 |     bool m_bgmRequested = false;
+38 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 39
+ANCHOR RANGE: 14-38
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp`
+- Anchor lines `115-139` (current file tail before insertion at line `140`):
+```cpp
+115 |             ImGui::PushStyleColor(ImGuiCol_Text, kReadyColor);
+116 | 
+117 |         if (DrawCommandRow("  Surge Strike", surgeReady, surgeReady ? nullptr : "Need Surge"))
+118 |             selectedCommand = TacticalCommand::SurgeStrike;
+119 | 
+120 |         if (surgeReady)
+121 |             ImGui::PopStyleColor();
+122 | 
+123 |         // Stub commands — reserved for later milestones.
+124 |         DrawCommandRow(kMagicLabel, false, "No MP");
+125 |         DrawCommandRow(kItemsLabel, false, "Coming soon");
+126 |         DrawCommandRow(kAllyLabel,  false, "Coming soon");
+127 | 
+128 |         ImGui::EndTable();
+129 |     }
+130 | 
+131 |     // --- Footer hint ---
+132 |     ImGui::Spacing();
+133 |     ImGui::Separator();
+134 |     ImGui::Spacing();
+135 |     ImGui::TextColored(kHintColor, "Release Tab to resume");
+136 | 
+137 |     ImGui::End();
+138 |     return selectedCommand;
+139 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 140
+ANCHOR RANGE: 115-139
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp`
+- Anchor lines `4-28` (current file tail before insertion at line `29`):
+```cpp
+ 4 | // ROLE: HUD, menus, overlays, and editor tool panels
+ 5 | // DO NOT: Modify unrelated systems or break subsystem boundaries.
+ 6 | // OWNS: TacticalPauseMenu module behavior and local implementation details.
+ 7 | // ============================================================
+ 8 | 
+ 9 | #pragma once
+10 | // TacticalPauseMenu.hpp
+11 | // Draws the FF-style Tactical Pause command panel while Tab is held.
+12 | // Returns the command activated this frame so Main.cpp can execute it.
+13 | 
+14 | struct PlayerStats;
+15 | struct ImGuiIO;
+16 | 
+17 | // Commands that can be activated from the Tactical Pause panel.
+18 | // None means no command was chosen this frame.
+19 | enum class TacticalCommand { None, SurgeStrike };
+20 | 
+21 | class TacticalPauseMenu
+22 | {
+23 | public:
+24 |     // Draw the command panel for this frame. Returns the selected command (if any).
+25 |     // Call inside an active ImGui frame (between BeginFrame / EndFrame).
+26 |     // Only call while Tab is held — the caller controls open/close.
+27 |     TacticalCommand Draw(const PlayerStats& stats, const ImGuiIO& io);
+28 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 29
+ANCHOR RANGE: 4-28
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 050: Tactical Pause enter / exit SFX.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1013,12 +3835,125 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` | yes | 38 | 39 | 18 | 40 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp` | yes | 136 | 137 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+- Anchor lines `79-103` (current file tail before insertion at line `104`):
+```cpp
+ 79 | 
+ 80 |     if (!tp::Audio::PlayOneShot(path))
+ 81 |     {
+ 82 |         LogPlayFailure("SFX", path);
+ 83 |         return false;
+ 84 |     }
+ 85 | 
+ 86 |     return true;
+ 87 | }
+ 88 | 
+ 89 | void AudioManager::SetBGMVolume(float v)
+ 90 | {
+ 91 |     m_bgmVolume = Clamp01(v);
+ 92 | }
+ 93 | 
+ 94 | void AudioManager::SetSFXVolume(float v)
+ 95 | {
+ 96 |     m_sfxVolume = Clamp01(v);
+ 97 | }
+ 98 | 
+ 99 | void AudioManager::Shutdown()
+100 | {
+101 |     if (m_bgmRequested)
+102 |         StopBGM();
+103 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 104
+ANCHOR RANGE: 79-103
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+- Anchor lines `14-38` (current file tail before insertion at line `39`):
+```cpp
+14 | {
+15 | public:
+16 |     // Plays BGM via tp::Audio one-shot playback (non-looping in current wrapper).
+17 |     bool PlayBGM(const std::string& path);
+18 |     // Clears AudioManager's tracked BGM state.
+19 |     // Current tp::Audio wrapper does not support stopping an already-playing one-shot.
+20 |     void StopBGM();
+21 |     bool PlaySFX(const std::string& path);
+22 | 
+23 |     void SetBGMVolume(float v);
+24 |     void SetSFXVolume(float v);
+25 |     float GetBGMVolume() const { return m_bgmVolume; }
+26 |     float GetSFXVolume() const { return m_sfxVolume; }
+27 | 
+28 |     void Shutdown();
+29 | 
+30 | private:
+31 |     static float Clamp01(float v);
+32 | 
+33 |     float m_bgmVolume = 1.0f;
+34 |     float m_sfxVolume = 1.0f;
+35 |     bool m_loggedBgmVolumeLimit = false;
+36 |     bool m_loggedSfxVolumeLimit = false;
+37 |     bool m_bgmRequested = false;
+38 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 39
+ANCHOR RANGE: 14-38
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp`
+- Anchor lines `112-136` (current file tail before insertion at line `137`):
+```cpp
+112 |         EnemyActor* bestTarget = nullptr;
+113 |         float bestDistanceSq = kLockRadiusSq;
+114 | 
+115 |         for (int i = 0; i < count; ++i)
+116 |         {
+117 |             EnemyActor& candidate = enemies[i];
+118 |             if (&candidate == excludeTarget)
+119 |                 continue;
+120 |             if (candidate.isDead)
+121 |                 continue;
+122 | 
+123 |             const float deltaX = candidate.x - playerX;
+124 |             const float deltaZ = candidate.z - playerZ;
+125 |             const float distanceSq = (deltaX * deltaX) + (deltaZ * deltaZ);
+126 | 
+127 |             if (distanceSq <= bestDistanceSq)
+128 |             {
+129 |                 bestDistanceSq = distanceSq;
+130 |                 bestTarget = &candidate;
+131 |             }
+132 |         }
+133 | 
+134 |         return bestTarget;
+135 |     }
+136 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 137
+ANCHOR RANGE: 112-136
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 051: Lock-on acquire / break SFX.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1034,12 +3969,162 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` | yes | 214 | 215 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` | yes | 95 | 96 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+- Anchor lines `79-103` (current file tail before insertion at line `104`):
+```cpp
+ 79 | 
+ 80 |     if (!tp::Audio::PlayOneShot(path))
+ 81 |     {
+ 82 |         LogPlayFailure("SFX", path);
+ 83 |         return false;
+ 84 |     }
+ 85 | 
+ 86 |     return true;
+ 87 | }
+ 88 | 
+ 89 | void AudioManager::SetBGMVolume(float v)
+ 90 | {
+ 91 |     m_bgmVolume = Clamp01(v);
+ 92 | }
+ 93 | 
+ 94 | void AudioManager::SetSFXVolume(float v)
+ 95 | {
+ 96 |     m_sfxVolume = Clamp01(v);
+ 97 | }
+ 98 | 
+ 99 | void AudioManager::Shutdown()
+100 | {
+101 |     if (m_bgmRequested)
+102 |         StopBGM();
+103 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 104
+ANCHOR RANGE: 79-103
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+- Anchor lines `14-38` (current file tail before insertion at line `39`):
+```cpp
+14 | {
+15 | public:
+16 |     // Plays BGM via tp::Audio one-shot playback (non-looping in current wrapper).
+17 |     bool PlayBGM(const std::string& path);
+18 |     // Clears AudioManager's tracked BGM state.
+19 |     // Current tp::Audio wrapper does not support stopping an already-playing one-shot.
+20 |     void StopBGM();
+21 |     bool PlaySFX(const std::string& path);
+22 | 
+23 |     void SetBGMVolume(float v);
+24 |     void SetSFXVolume(float v);
+25 |     float GetBGMVolume() const { return m_bgmVolume; }
+26 |     float GetSFXVolume() const { return m_sfxVolume; }
+27 | 
+28 |     void Shutdown();
+29 | 
+30 | private:
+31 |     static float Clamp01(float v);
+32 | 
+33 |     float m_bgmVolume = 1.0f;
+34 |     float m_sfxVolume = 1.0f;
+35 |     bool m_loggedBgmVolumeLimit = false;
+36 |     bool m_loggedSfxVolumeLimit = false;
+37 |     bool m_bgmRequested = false;
+38 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 39
+ANCHOR RANGE: 14-38
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+- Anchor lines `190-214` (current file tail before insertion at line `215`):
+```cpp
+190 |     if (isDead)
+191 |         return;
+192 | 
+193 |     if (!IsHitFlashVisible())
+194 |         return;
+195 | 
+196 |     static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+197 |     const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
+198 |     if (!visualPrefab)
+199 |         return;
+200 | 
+201 |     const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
+202 |     primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, hitFlashScale);
+203 | }
+204 | 
+205 | bool EnemyActor::IsHitFlashVisible() const
+206 | {
+207 |     if (hitFlashTimer <= 0.0f)
+208 |         return true;
+209 | 
+210 |     const float elapsedFlashTime = kHitFlashDuration - hitFlashTimer;
+211 |     const int blinkPhase = static_cast<int>(elapsedFlashTime / kHitFlashBlinkPeriod);
+212 |     // Even elapsed phases are visible so a fresh hit starts visible.
+213 |     return (blinkPhase % 2) == 0;
+214 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 215
+ANCHOR RANGE: 190-214
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
+- Anchor lines `71-95` (current file tail before insertion at line `96`):
+```cpp
+71 |               float wpAx, float wpAz,
+72 |               float wpBx, float wpBz,
+73 |               int   startHp = 10);
+74 | 
+75 |     // Advance state machine, move, snap Y to terrain.
+76 |     // playerX/playerZ are the current player world-space XZ position.
+77 |     void Update(float dt, D3D11Renderer& renderer,
+78 |                 float playerX, float playerZ);
+79 | 
+80 |     // Apply incoming damage; triggers Hit stagger or Dead transition.
+81 |     void OnHit(int damage);
+82 | 
+83 |     // Expand the enemy visual into the runtime primitive bucket.
+84 |     // Reuses the player blockout prefab for enemy visuals.
+85 |     // Does nothing when isDead is true.
+86 |     void SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
+87 |                              PrimitiveRenderer&   primitiveRenderer) const;
+88 | 
+89 | private:
+90 |     // Change state immediately and set the state-duration timer.
+91 |     void TransitionTo(EnemyState next, float duration);
+92 | 
+93 |     // Returns whether the visual should be drawn this frame during hit flash.
+94 |     bool IsHitFlashVisible() const;
+95 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 96
+ANCHOR RANGE: 71-95
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 052: Enemy alert bark stub.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1053,12 +4138,58 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Equipment.hpp` | no | 0 | 1 | 0 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` | yes | 85 | 86 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Equipment.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Equipment.hpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp`
+- Anchor lines `61-85` (current file tail before insertion at line `86`):
+```cpp
+61 | 
+62 |     bool IsLimitReady() const { return limitCharge >= 1.0f; }
+63 | 
+64 |     // Reduce HP by amount; clamps to zero. Also advances the Limit gauge.
+65 |     // Safe to call with zero or positive values only.
+66 |     void TakeDamage(int amount)
+67 |     {
+68 |         if (amount <= 0)
+69 |             return;
+70 |         hp = std::clamp(hp - static_cast<float>(amount), 0.0f, maxHp);
+71 |         AddLimitCharge(kLimitChargePerHit);
+72 |     }
+73 | 
+74 |     bool IsDead() const { return hp <= 0.0f; }
+75 | 
+76 |     // Restore all combat resources to their full starting values.
+77 |     // Call on player defeat / respawn.
+78 |     void Reset()
+79 |     {
+80 |         hp           = maxHp;
+81 |         mp           = maxMp;
+82 |         surgeCharge  = 0.0f;
+83 |         limitCharge  = 0.0f;
+84 |     }
+85 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 86
+ANCHOR RANGE: 61-85
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 053: Equipment slot stub.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1072,12 +4203,58 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/progression/AbilityProgression.hpp` | no | 0 | 1 | 0 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` | yes | 85 | 86 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/progression/AbilityProgression.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/progression/AbilityProgression.hpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp`
+- Anchor lines `61-85` (current file tail before insertion at line `86`):
+```cpp
+61 | 
+62 |     bool IsLimitReady() const { return limitCharge >= 1.0f; }
+63 | 
+64 |     // Reduce HP by amount; clamps to zero. Also advances the Limit gauge.
+65 |     // Safe to call with zero or positive values only.
+66 |     void TakeDamage(int amount)
+67 |     {
+68 |         if (amount <= 0)
+69 |             return;
+70 |         hp = std::clamp(hp - static_cast<float>(amount), 0.0f, maxHp);
+71 |         AddLimitCharge(kLimitChargePerHit);
+72 |     }
+73 | 
+74 |     bool IsDead() const { return hp <= 0.0f; }
+75 | 
+76 |     // Restore all combat resources to their full starting values.
+77 |     // Call on player defeat / respawn.
+78 |     void Reset()
+79 |     {
+80 |         hp           = maxHp;
+81 |         mp           = maxMp;
+82 |         surgeCharge  = 0.0f;
+83 |         limitCharge  = 0.0f;
+84 |     }
+85 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 86
+ANCHOR RANGE: 61-85
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 054: Ability unlock / progression hook.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1092,12 +4269,95 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` | yes | 166 | 167 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` | yes | 71 | 72 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatModifiers.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatModifiers.hpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp`
+- Anchor lines `142-166` (current file tail before insertion at line `167`):
+```cpp
+142 | 
+143 |             std::ostringstream ss;
+144 |             ss << "CombatSystem: Hit enemy " << i
+145 |                << " for " << hitBox.damage << " damage.";
+146 |             LOG_INFO(ss.str());
+147 | 
+148 |             enemy.OnHit(hitBox.damage);
+149 | 
+150 |             if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
+151 |             {
+152 |                 EnemyHitRecord& hitRecord = m_recentEnemyHits[m_recentEnemyHitCount++];
+153 |                 hitRecord.x = enemy.x;
+154 |                 hitRecord.y = enemy.y + DAMAGE_NUMBER_Y_OFFSET;
+155 |                 hitRecord.z = enemy.z;
+156 |                 hitRecord.damage = hitBox.damage;
+157 |             }
+158 |         }
+159 |     }
+160 | 
+161 |     // Remove any hitboxes whose lifetime has run out.
+162 |     m_activeHitBoxes.erase(
+163 |         std::remove_if(m_activeHitBoxes.begin(), m_activeHitBoxes.end(),
+164 |                        [](const HitBox& hitBox) { return hitBox.framesToLive <= 0; }),
+165 |         m_activeHitBoxes.end());
+166 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 167
+ANCHOR RANGE: 142-166
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp`
+- Anchor lines `47-71` (current file tail before insertion at line `72`):
+```cpp
+47 |     // apply damage, mark dead enemies, and remove expired hitboxes.
+48 |     // Also ticks the combo window timer.
+49 |     // Call once per frame from RuntimeScene::BeginFrame.
+50 |     void Update(float dt, EnemyActor* enemies, int count);
+51 | 
+52 |     // Read-only access to active hitboxes for debug visualization.
+53 |     const std::vector<HitBox>& GetActiveHitBoxes() const
+54 |     { return m_activeHitBoxes; }
+55 | 
+56 |     // Recent hit records are valid for the current frame only.
+57 |     // They are reset at the start of each Update() call.
+58 |     // Always pair this pointer with GetRecentEnemyHitCount().
+59 |     const EnemyHitRecord* GetRecentEnemyHits() const
+60 |     { return m_recentEnemyHits; }
+61 | 
+62 |     int GetRecentEnemyHitCount() const
+63 |     { return m_recentEnemyHitCount; }
+64 | 
+65 | private:
+66 |     static constexpr int   kMaxRecentEnemyHits = 32;
+67 | 
+68 |     std::vector<HitBox> m_activeHitBoxes;
+69 |     EnemyHitRecord m_recentEnemyHits[kMaxRecentEnemyHits]{};
+70 |     int m_recentEnemyHitCount = 0;
+71 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 72
+ANCHOR RANGE: 47-71
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 055: Combat stat modifier pipeline stub.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1113,12 +4373,162 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` | yes | 330 | 331 | 18 | 40 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` | yes | 565 | 566 | 28 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp`
+- Anchor lines `142-166` (current file tail before insertion at line `167`):
+```cpp
+142 | 
+143 |             std::ostringstream ss;
+144 |             ss << "CombatSystem: Hit enemy " << i
+145 |                << " for " << hitBox.damage << " damage.";
+146 |             LOG_INFO(ss.str());
+147 | 
+148 |             enemy.OnHit(hitBox.damage);
+149 | 
+150 |             if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
+151 |             {
+152 |                 EnemyHitRecord& hitRecord = m_recentEnemyHits[m_recentEnemyHitCount++];
+153 |                 hitRecord.x = enemy.x;
+154 |                 hitRecord.y = enemy.y + DAMAGE_NUMBER_Y_OFFSET;
+155 |                 hitRecord.z = enemy.z;
+156 |                 hitRecord.damage = hitBox.damage;
+157 |             }
+158 |         }
+159 |     }
+160 | 
+161 |     // Remove any hitboxes whose lifetime has run out.
+162 |     m_activeHitBoxes.erase(
+163 |         std::remove_if(m_activeHitBoxes.begin(), m_activeHitBoxes.end(),
+164 |                        [](const HitBox& hitBox) { return hitBox.framesToLive <= 0; }),
+165 |         m_activeHitBoxes.end());
+166 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 167
+ANCHOR RANGE: 142-166
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp`
+- Anchor lines `47-71` (current file tail before insertion at line `72`):
+```cpp
+47 |     // apply damage, mark dead enemies, and remove expired hitboxes.
+48 |     // Also ticks the combo window timer.
+49 |     // Call once per frame from RuntimeScene::BeginFrame.
+50 |     void Update(float dt, EnemyActor* enemies, int count);
+51 | 
+52 |     // Read-only access to active hitboxes for debug visualization.
+53 |     const std::vector<HitBox>& GetActiveHitBoxes() const
+54 |     { return m_activeHitBoxes; }
+55 | 
+56 |     // Recent hit records are valid for the current frame only.
+57 |     // They are reset at the start of each Update() call.
+58 |     // Always pair this pointer with GetRecentEnemyHitCount().
+59 |     const EnemyHitRecord* GetRecentEnemyHits() const
+60 |     { return m_recentEnemyHits; }
+61 | 
+62 |     int GetRecentEnemyHitCount() const
+63 |     { return m_recentEnemyHitCount; }
+64 | 
+65 | private:
+66 |     static constexpr int   kMaxRecentEnemyHits = 32;
+67 | 
+68 |     std::vector<HitBox> m_activeHitBoxes;
+69 |     EnemyHitRecord m_recentEnemyHits[kMaxRecentEnemyHits]{};
+70 |     int m_recentEnemyHitCount = 0;
+71 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 72
+ANCHOR RANGE: 47-71
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp`
+- Anchor lines `306-330` (current file tail before insertion at line `331`):
+```cpp
+306 |     // m_playerY is the camera eye level; body center is shifted down by kPlayerBodyCenterOffset.
+307 |     bool HitBoxOverlapsPlayer(const HitBox& hitBox) const
+308 |     {
+309 |         float bodyCenterY = m_playerY - kPlayerBodyCenterOffset;
+310 |         float distX = fabsf(m_playerX - hitBox.x);
+311 |         float distY = fabsf(bodyCenterY - hitBox.y);
+312 |         float distZ = fabsf(m_playerZ - hitBox.z);
+313 |         return (distX < kPlayerHitHalfX + hitBox.halfX) &&
+314 |                (distY < kPlayerHitHalfY + hitBox.halfY) &&
+315 |                (distZ < kPlayerHitHalfZ + hitBox.halfZ);
+316 |     }
+317 | 
+318 |     float GetAttackYaw(const CameraController& camController) const
+319 |     {
+320 |         const EnemyActor* lockedTarget = m_targeting.GetTarget();
+321 |         if (!lockedTarget)
+322 |             return camController.GetYaw();
+323 | 
+324 |         const float playerX = camController.GetPlayerX();
+325 |         const float playerZ = camController.GetPlayerZ();
+326 |         const float deltaX = lockedTarget->x - playerX;
+327 |         const float deltaZ = lockedTarget->z - playerZ;
+328 |         return atan2f(deltaX, deltaZ);
+329 |     }
+330 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 331
+ANCHOR RANGE: 306-330
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp`
+- Anchor lines `541-565` (current file tail before insertion at line `566`):
+```cpp
+541 |                     camController.GetCamY(),
+542 |                     camController.GetCamZ(),
+543 |                     camController.GetYaw(),
+544 |                     camController.GetPitch(),
+545 |                     static_cast<float>(window.GetWidth()),
+546 |                     static_cast<float>(window.GetHeight()));
+547 |             }
+548 |             imguiLayer.EndFrame();
+549 | 
+550 |             renderer.PresentFrame();
+551 |         }
+552 | 
+553 |         GR_FRAME_MARK;
+554 |         Sleep(1); // tiny sleep so we don't peg CPU at 100%
+555 |     }
+556 |     primRenderer.Shutdown();
+557 |     forest.Shutdown();
+558 |     imguiLayer.Shutdown();
+559 |     audioManager.Shutdown();
+560 |     ThirdPartyBootstrap::Shutdown();
+561 |     textureCache.ReleaseAll();
+562 |     renderer.Shutdown();
+563 |     window.Close();
+564 |     return 0;
+565 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 566
+ANCHOR RANGE: 541-565
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 056: Combat bugfix sweep.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1134,12 +4544,162 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp` | yes | 87 | 88 | 18 | 40 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` | yes | 565 | 566 | 28 | 70 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+- Anchor lines `279-303` (current file tail before insertion at line `304`):
+```cpp
+279 |         XM_PIDIV4,          // 45-degree vertical FOV (matches DrawTerrainPatch)
+280 |         vpW / vpH,
+281 |         0.1f, 2000.0f);
+282 | 
+283 |     // Unproject near and far screen points into world space.
+284 |     // XMVector3Unproject arguments: screenPoint, vpX, vpY, vpW, vpH, minZ, maxZ, proj, view, world
+285 |     XMVECTOR nearPt = XMVector3Unproject(
+286 |         XMVectorSet(mouseX, mouseY, 0.0f, 0.0f),
+287 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+288 |         proj, view, XMMatrixIdentity());
+289 | 
+290 |     XMVECTOR farPt = XMVector3Unproject(
+291 |         XMVectorSet(mouseX, mouseY, 1.0f, 0.0f),
+292 |         0.0f, 0.0f, vpW, vpH, 0.0f, 1.0f,
+293 |         proj, view, XMMatrixIdentity());
+294 | 
+295 |     XMVECTOR dir = XMVector3Normalize(farPt - nearPt);
+296 | 
+297 |     outOriginX = XMVectorGetX(nearPt);
+298 |     outOriginY = XMVectorGetY(nearPt);
+299 |     outOriginZ = XMVectorGetZ(nearPt);
+300 |     outDirX    = XMVectorGetX(dir);
+301 |     outDirY    = XMVectorGetY(dir);
+302 |     outDirZ    = XMVectorGetZ(dir);
+303 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 304
+ANCHOR RANGE: 279-303
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+- Anchor lines `105-129` (current file tail before insertion at line `130`):
+```cpp
+105 |     float GetCamY()    const { return m_camY; }
+106 |     float GetCamZ()    const { return m_camZ; }
+107 |     bool  IsDodgeActive() const { return m_dodgeActive; }
+108 | 
+109 | private:
+110 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_X = 0.3f;
+111 |     static constexpr float PLAYER_COLLISION_HALF_HEIGHT = 0.9f;
+112 |     static constexpr float PLAYER_COLLISION_HALF_WIDTH_Z = 0.3f;
+113 | 
+114 |     float m_playerX = 0.0f, m_playerY = 0.0f, m_playerZ = -3.0f;
+115 |     float m_yaw = 0.0f, m_pitch = 0.0f;
+116 |     float m_camX = 0.0f, m_camY = 0.0f, m_camZ = 0.0f;
+117 |     float m_velocityY  = 0.0f;
+118 |     bool  m_isGrounded = true;
+119 |     float m_dodgeVelX = 0.0f;
+120 |     float m_dodgeVelZ = 0.0f;
+121 |     float m_dodgeTimer = 0.0f;
+122 |     bool m_dodgeActive = false;
+123 |     POINT m_centerPoint = {};
+124 |     const InputActionMap* m_inputActionMap = nullptr;
+125 |     const CollisionWorld* m_collisionWorld = nullptr;
+126 | 
+127 |     // Recompute m_camX/Y/Z from player pos + yaw.
+128 |     void ComputeCamFromPlayer();
+129 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 130
+ANCHOR RANGE: 105-129
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp`
+- Anchor lines `63-87` (current file tail before insertion at line `88`):
+```cpp
+63 |         map.bindings[InputAction::ReloadAssets] = VK_F5;
+64 |         return map;
+65 |     }
+66 | 
+67 |     bool IsHeld(InputAction action) const
+68 |     {
+69 |         const auto it = bindings.find(action);
+70 |         if (it == bindings.end())
+71 |             return false;
+72 |         return (GetAsyncKeyState(it->second) & 0x8000) != 0;
+73 |     }
+74 | 
+75 |     bool IsPressed(InputAction action, bool& wasDown) const
+76 |     {
+77 |         const bool isDown = IsHeld(action);
+78 |         const bool pressed = isDown && !wasDown;
+79 |         wasDown = isDown;
+80 |         return pressed;
+81 |     }
+82 | 
+83 |     bool IsVirtualKeyHeld(int virtualKey) const
+84 |     {
+85 |         return (GetAsyncKeyState(virtualKey) & 0x8000) != 0;
+86 |     }
+87 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 88
+ANCHOR RANGE: 63-87
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp`
+- Anchor lines `541-565` (current file tail before insertion at line `566`):
+```cpp
+541 |                     camController.GetCamY(),
+542 |                     camController.GetCamZ(),
+543 |                     camController.GetYaw(),
+544 |                     camController.GetPitch(),
+545 |                     static_cast<float>(window.GetWidth()),
+546 |                     static_cast<float>(window.GetHeight()));
+547 |             }
+548 |             imguiLayer.EndFrame();
+549 | 
+550 |             renderer.PresentFrame();
+551 |         }
+552 | 
+553 |         GR_FRAME_MARK;
+554 |         Sleep(1); // tiny sleep so we don't peg CPU at 100%
+555 |     }
+556 |     primRenderer.Shutdown();
+557 |     forest.Shutdown();
+558 |     imguiLayer.Shutdown();
+559 |     audioManager.Shutdown();
+560 |     ThirdPartyBootstrap::Shutdown();
+561 |     textureCache.ReleaseAll();
+562 |     renderer.Shutdown();
+563 |     window.Close();
+564 |     return 0;
+565 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 566
+ANCHOR RANGE: 541-565
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 057: Camera/input bugfix sweep.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1157,12 +4717,236 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp` | yes | 139 | 140 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp` | yes | 28 | 29 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp`
+- Anchor lines `542-566` (current file tail before insertion at line `567`):
+```cpp
+542 |     float camX, float camY, float camZ,
+543 |     float yaw,  float pitch,
+544 |     float vpW,  float vpH)
+545 | {
+546 |     if (!target || target->isDead)
+547 |         return;
+548 |     if (!ImGui::GetCurrentContext())
+549 |         return;
+550 | 
+551 |     float sx = 0.0f;
+552 |     float sy = 0.0f;
+553 |     if (!WorldToScreen(target->x, target->y + kLockMarkerHeightOffset, target->z,
+554 |                        camX, camY, camZ, yaw, pitch, vpW, vpH, sx, sy))
+555 |     {
+556 |         return;
+557 |     }
+558 | 
+559 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+560 |     const ImU32 lockColor = IM_COL32(255, 220, 80, 255);
+561 | 
+562 |     drawList->AddCircle(ImVec2(sx, sy), kLockMarkerCircleRadius, lockColor,
+563 |                         kLockMarkerCircleSegments, kLockMarkerCircleThickness);
+564 |     drawList->AddText(ImVec2(sx + kLockMarkerTextOffsetX, sy + kLockMarkerTextOffsetY),
+565 |                       lockColor, "LOCK");
+566 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 567
+ANCHOR RANGE: 542-566
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp`
+- Anchor lines `99-123` (current file tail before insertion at line `124`):
+```cpp
+ 99 | 
+100 | private:
+101 |     bool initialized = false;
+102 | 
+103 |     bool showPauseMenu   = false;
+104 |     bool showDebugOverlay = false;
+105 | 
+106 |     float currentFPS = 0.0f;
+107 |     float currentDT  = 0.0f;
+108 |     float camX = 0.0f, camY = 0.0f, camZ = 0.0f;
+109 |     float camYaw = 0.0f, camPitch = 0.0f;
+110 | 
+111 |     bool wantsQuit   = false;
+112 |     bool wantsResume = false;
+113 |     D3D11Renderer* m_renderer = nullptr;
+114 |     bool  m_lightUiInitialized = false;
+115 |     float m_sunDirX = 0.0f;
+116 |     float m_sunDirY = -1.0f;
+117 |     float m_sunDirZ = 0.0f;
+118 |     float m_ambientStrength = 0.25f;
+119 |     AudioManager* m_audioManager = nullptr;
+120 | 
+121 |     void DrawPauseMenu();
+122 |     void DrawDebugOverlay();
+123 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 124
+ANCHOR RANGE: 99-123
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp`
+- Anchor lines `115-139` (current file tail before insertion at line `140`):
+```cpp
+115 |             ImGui::PushStyleColor(ImGuiCol_Text, kReadyColor);
+116 | 
+117 |         if (DrawCommandRow("  Surge Strike", surgeReady, surgeReady ? nullptr : "Need Surge"))
+118 |             selectedCommand = TacticalCommand::SurgeStrike;
+119 | 
+120 |         if (surgeReady)
+121 |             ImGui::PopStyleColor();
+122 | 
+123 |         // Stub commands — reserved for later milestones.
+124 |         DrawCommandRow(kMagicLabel, false, "No MP");
+125 |         DrawCommandRow(kItemsLabel, false, "Coming soon");
+126 |         DrawCommandRow(kAllyLabel,  false, "Coming soon");
+127 | 
+128 |         ImGui::EndTable();
+129 |     }
+130 | 
+131 |     // --- Footer hint ---
+132 |     ImGui::Spacing();
+133 |     ImGui::Separator();
+134 |     ImGui::Spacing();
+135 |     ImGui::TextColored(kHintColor, "Release Tab to resume");
+136 | 
+137 |     ImGui::End();
+138 |     return selectedCommand;
+139 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 140
+ANCHOR RANGE: 115-139
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp`
+- Anchor lines `4-28` (current file tail before insertion at line `29`):
+```cpp
+ 4 | // ROLE: HUD, menus, overlays, and editor tool panels
+ 5 | // DO NOT: Modify unrelated systems or break subsystem boundaries.
+ 6 | // OWNS: TacticalPauseMenu module behavior and local implementation details.
+ 7 | // ============================================================
+ 8 | 
+ 9 | #pragma once
+10 | // TacticalPauseMenu.hpp
+11 | // Draws the FF-style Tactical Pause command panel while Tab is held.
+12 | // Returns the command activated this frame so Main.cpp can execute it.
+13 | 
+14 | struct PlayerStats;
+15 | struct ImGuiIO;
+16 | 
+17 | // Commands that can be activated from the Tactical Pause panel.
+18 | // None means no command was chosen this frame.
+19 | enum class TacticalCommand { None, SurgeStrike };
+20 | 
+21 | class TacticalPauseMenu
+22 | {
+23 | public:
+24 |     // Draw the command panel for this frame. Returns the selected command (if any).
+25 |     // Call inside an active ImGui frame (between BeginFrame / EndFrame).
+26 |     // Only call while Tab is held — the caller controls open/close.
+27 |     TacticalCommand Draw(const PlayerStats& stats, const ImGuiIO& io);
+28 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 29
+ANCHOR RANGE: 4-28
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 058: UI/HUD polish and bugfix sweep.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1180,12 +4964,236 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.cpp` | yes | 233 | 234 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.hpp` | yes | 48 | 49 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp`
+- Anchor lines `329-353` (current file tail before insertion at line `354`):
+```cpp
+329 |     }
+330 |     catch (const std::exception& e)
+331 |     {
+332 |         LOG_ERROR(std::string("WorldGrid::SaveCell: write error: ") + e.what());
+333 |         return false;
+334 |     }
+335 | 
+336 |     // std::ofstream write failures typically set failbit/badbit rather than throwing.
+337 |     // Always check the stream state after writing, regardless of exceptions.
+338 |     if (!out.good())
+339 |     {
+340 |         std::ostringstream streamErr;
+341 |         streamErr << "WorldGrid::SaveCell: stream error after write to '"
+342 |                   << cell->filePath
+343 |                   << "' (disk full, permission denied, or IO error).";
+344 |         LOG_ERROR(streamErr.str());
+345 |         return false;
+346 |     }
+347 | 
+348 |     std::ostringstream ss;
+349 |     ss << "WorldGrid::SaveCell: saved cell (" << cx << "," << cz << ") to '"
+350 |        << cell->filePath << "' with " << cell->instances.size() << " instance(s).";
+351 |     LOG_INFO(ss.str());
+352 |     return true;
+353 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 354
+ANCHOR RANGE: 329-353
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp`
+- Anchor lines `87-111` (current file tail before insertion at line `112`):
+```cpp
+ 87 |     // radius=1 gives a 3x3 block of cells (9 max), radius=0 gives only the player cell.
+ 88 |     std::vector<WorldCell> GetActiveCells(int playerCX, int playerCZ, int radius = 1) const;
+ 89 | 
+ 90 |     // Convert a world-space (X, Z) position into a cell grid coordinate.
+ 91 |     void WorldToCell(float worldX, float worldZ, int& outCX, int& outCZ) const;
+ 92 | 
+ 93 |     float       GetCellSize() const  { return m_cellSize; }
+ 94 |     const std::string& GetName() const { return m_name; }
+ 95 |     int         CellCount()  const  { return static_cast<int>(m_cells.size()); }
+ 96 | 
+ 97 |     // Returns a mutable pointer to the cell at (cx,cz), or nullptr if not found.
+ 98 |     WorldCell* FindCell(int cx, int cz);
+ 99 | 
+100 |     // Write the cell at (cx,cz) back to its JSON file (preserving terrain/forest settings).
+101 |     // Returns true on success; logs an error and keeps in-memory data on failure.
+102 |     bool SaveCell(int cx, int cz);
+103 | 
+104 | private:
+105 |     bool LoadCellFile(const std::string& path, WorldCell& out);
+106 | 
+107 |     std::string           m_worldJsonPath;
+108 |     std::string           m_name;
+109 |     float                 m_cellSize = 200.0f;
+110 |     std::vector<WorldCell> m_cells;
+111 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 112
+ANCHOR RANGE: 87-111
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.cpp`
+- Anchor lines `85-109` (current file tail before insertion at line `110`):
+```cpp
+ 85 | 
+ 86 |         if (m_player.stats.IsDead())
+ 87 |         {
+ 88 |             // Restore all stats and signal Main.cpp to teleport the camera.
+ 89 |             m_player.stats.Reset();
+ 90 |             m_player.state      = PlayerActionState::Idle;
+ 91 |             m_player.stateTimer = 0.0f;
+ 92 |             m_wantsRespawn      = true;
+ 93 |             LOG_INFO("RuntimeScene: Player defeated — respawning.");
+ 94 |         }
+ 95 |         else
+ 96 |         {
+ 97 |             m_player.state      = PlayerActionState::Stunned;
+ 98 |             m_player.stateTimer = 0.30f;
+ 99 |             std::string msg = "RuntimeScene: Player hit for ";
+100 |             msg += std::to_string(totalDamage);
+101 |             msg += " damage (HP ";
+102 |             msg += std::to_string(static_cast<int>(m_player.stats.hp));
+103 |             msg += " / ";
+104 |             msg += std::to_string(static_cast<int>(m_player.stats.maxHp));
+105 |             msg += ").";
+106 |             LOG_INFO(msg);
+107 |         }
+108 |     }
+109 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 110
+ANCHOR RANGE: 85-109
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp`
+- Anchor lines `306-330` (current file tail before insertion at line `331`):
+```cpp
+306 |     // m_playerY is the camera eye level; body center is shifted down by kPlayerBodyCenterOffset.
+307 |     bool HitBoxOverlapsPlayer(const HitBox& hitBox) const
+308 |     {
+309 |         float bodyCenterY = m_playerY - kPlayerBodyCenterOffset;
+310 |         float distX = fabsf(m_playerX - hitBox.x);
+311 |         float distY = fabsf(bodyCenterY - hitBox.y);
+312 |         float distZ = fabsf(m_playerZ - hitBox.z);
+313 |         return (distX < kPlayerHitHalfX + hitBox.halfX) &&
+314 |                (distY < kPlayerHitHalfY + hitBox.halfY) &&
+315 |                (distZ < kPlayerHitHalfZ + hitBox.halfZ);
+316 |     }
+317 | 
+318 |     float GetAttackYaw(const CameraController& camController) const
+319 |     {
+320 |         const EnemyActor* lockedTarget = m_targeting.GetTarget();
+321 |         if (!lockedTarget)
+322 |             return camController.GetYaw();
+323 | 
+324 |         const float playerX = camController.GetPlayerX();
+325 |         const float playerZ = camController.GetPlayerZ();
+326 |         const float deltaX = lockedTarget->x - playerX;
+327 |         const float deltaZ = lockedTarget->z - playerZ;
+328 |         return atan2f(deltaX, deltaZ);
+329 |     }
+330 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 331
+ANCHOR RANGE: 306-330
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.cpp`
+- Anchor lines `209-233` (current file tail before insertion at line `234`):
+```cpp
+209 | 
+210 |     for (const auto& inst : m_instances)
+211 |     {
+212 |         // Use stored inst.y (sampled at placement). No per-frame sampling.
+213 |         const float trunkNudge = -0.02f; // small downward tweak to ensure contact (tweak if needed)
+214 | 
+215 |         float halfHeight = inst.scale; // half-height after scaling: 0.5 * (inst.scale*2.0f) == inst.scale
+216 |         float transY = inst.y + halfHeight + trunkNudge;
+217 | 
+218 |         XMMATRIX scaleMat = XMMatrixScaling(inst.scale, inst.scale * 2.0f, inst.scale); // scale
+219 |         XMMATRIX transMat = XMMatrixTranslation(inst.x, transY, inst.z);               // translation
+220 |         XMMATRIX worldMat = scaleMat * transMat;
+221 | 
+222 |         // mvp + world
+223 |         XMMATRIX mvp = XMMatrixTranspose(worldMat * view * proj);
+224 |         XMMATRIX worldT = XMMatrixTranspose(worldMat);
+225 |         struct CB { XMFLOAT4X4 mvp; XMFLOAT4X4 world; } cbData;
+226 |         XMStoreFloat4x4(&cbData.mvp, mvp);
+227 |         XMStoreFloat4x4(&cbData.world, worldT);
+228 |         m_context->UpdateSubresource(m_cb, 0, nullptr, &cbData, 0, 0);
+229 |         m_context->VSSetConstantBuffers(0, 1, &m_cb);
+230 | 
+231 |         m_context->DrawIndexed(m_indexCount, 0, 0);
+232 |     }
+233 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/Forest.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 234
+ANCHOR RANGE: 209-233
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.hpp`
+- Anchor lines `24-48` (current file tail before insertion at line `49`):
+```cpp
+24 | 
+25 |     // Add a single instance at the given world position (y is snapped to terrain).
+26 |     void AddInstance(D3D11Renderer& renderer, float x, float y, float z, float scale = 1.0f);
+27 | 
+28 |     // Remove all instances (both procedural and authored).
+29 |     void ClearInstances();
+30 | 
+31 |     // How many instances are currently in memory.
+32 |     int GetInstanceCount() const { return static_cast<int>(m_instances.size()); }
+33 | 
+34 | private:
+35 |     struct Instance { float x, y, z, scale; };
+36 |     std::vector<Instance> m_instances;
+37 | 
+38 |     // GPU resources owned by Forest
+39 |     ID3D11Device* m_device = nullptr;
+40 |     ID3D11DeviceContext* m_context = nullptr;
+41 |     ID3D11Buffer* m_vb = nullptr;
+42 |     ID3D11Buffer* m_ib = nullptr;
+43 |     ID3D11Buffer* m_cb = nullptr;
+44 |     ID3D11VertexShader* m_vs = nullptr;
+45 |     ID3D11PixelShader* m_ps = nullptr;
+46 |     ID3D11InputLayout* m_layout = nullptr;
+47 |     UINT m_indexCount = 0;
+48 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/game/Forest.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 49
+ANCHOR RANGE: 24-48
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 059: World/runtime stability sweep.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
@@ -1203,12 +5211,176 @@ Then run: python tools/llm/worst_llm_guard.py complete
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` | yes | 378 | 379 | 28 | 70 |
 | `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` | yes | 40 | 41 | 18 | 40 |
 
+- **Code Context Blocks (copy into LLM prompt):**
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+- Anchor lines `79-103` (current file tail before insertion at line `104`):
+```cpp
+ 79 | 
+ 80 |     if (!tp::Audio::PlayOneShot(path))
+ 81 |     {
+ 82 |         LogPlayFailure("SFX", path);
+ 83 |         return false;
+ 84 |     }
+ 85 | 
+ 86 |     return true;
+ 87 | }
+ 88 | 
+ 89 | void AudioManager::SetBGMVolume(float v)
+ 90 | {
+ 91 |     m_bgmVolume = Clamp01(v);
+ 92 | }
+ 93 | 
+ 94 | void AudioManager::SetSFXVolume(float v)
+ 95 | {
+ 96 |     m_sfxVolume = Clamp01(v);
+ 97 | }
+ 98 | 
+ 99 | void AudioManager::Shutdown()
+100 | {
+101 |     if (m_bgmRequested)
+102 |         StopBGM();
+103 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 104
+ANCHOR RANGE: 79-103
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp`
+- Anchor lines `14-38` (current file tail before insertion at line `39`):
+```cpp
+14 | {
+15 | public:
+16 |     // Plays BGM via tp::Audio one-shot playback (non-looping in current wrapper).
+17 |     bool PlayBGM(const std::string& path);
+18 |     // Clears AudioManager's tracked BGM state.
+19 |     // Current tp::Audio wrapper does not support stopping an already-playing one-shot.
+20 |     void StopBGM();
+21 |     bool PlaySFX(const std::string& path);
+22 | 
+23 |     void SetBGMVolume(float v);
+24 |     void SetSFXVolume(float v);
+25 |     float GetBGMVolume() const { return m_bgmVolume; }
+26 |     float GetSFXVolume() const { return m_sfxVolume; }
+27 | 
+28 |     void Shutdown();
+29 | 
+30 | private:
+31 |     static float Clamp01(float v);
+32 | 
+33 |     float m_bgmVolume = 1.0f;
+34 |     float m_sfxVolume = 1.0f;
+35 |     bool m_loggedBgmVolumeLimit = false;
+36 |     bool m_loggedSfxVolumeLimit = false;
+37 |     bool m_bgmRequested = false;
+38 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 39
+ANCHOR RANGE: 14-38
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp`
+- File does not exist yet; create this file and follow the line budget from the table above.
+```text
+CREATE FILE: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp
+Add new code at line 1.
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+- Anchor lines `354-378` (current file tail before insertion at line `379`):
+```cpp
+354 |     const float scaleY = (fabsf(dirY) > 0.0001f) ? (maxOffsetY / fabsf(dirY)) : 1000000.0f;
+355 |     const float edgeScale = std::min(scaleX, scaleY);
+356 | 
+357 |     const float indicatorX = centerX + dirX * edgeScale;
+358 |     const float indicatorY = centerY + dirY * edgeScale;
+359 | 
+360 |     // --- Step 4: draw subtle lock-on arrow marker ---
+361 |     ImDrawList* drawList = ImGui::GetForegroundDrawList();
+362 |     if (!drawList)
+363 |         return;
+364 | 
+365 |     const ImVec2 indicatorCenter(indicatorX, indicatorY);
+366 |     drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
+367 |     drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+368 | 
+369 |     const float perpX = -dirY;
+370 |     const float perpY = dirX;
+371 |     const ImVec2 tip(indicatorX + dirX * kOffscreenArrowSize,
+372 |                      indicatorY + dirY * kOffscreenArrowSize);
+373 |     const ImVec2 left(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) + perpX * (kOffscreenArrowSize * 0.70f),
+374 |                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
+375 |     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
+376 |                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
+377 |     drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+378 | }
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+EDIT MODE: append-first
+INSERT AT LINE: 379
+ANCHOR RANGE: 354-378
+```
+
+#### `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp`
+- Anchor lines `16-40` (current file tail before insertion at line `41`):
+```cpp
+16 | class GameHUD
+17 | {
+18 | public:
+19 |     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
+20 |     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
+21 | 
+22 |     // Draw the locked-target info panel (name + HP bar) at the bottom-centre.
+23 |     // Pass nullptr when no enemy is locked on; the panel stays hidden.
+24 |     void DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io);
+25 | 
+26 |     // Draw the active combo step indicator above the target panel.
+27 |     // Only visible while the combo window is open (comboTimer > 0).
+28 |     // comboWindowSec should be CombatSystem::kComboWindowSec — passed in to
+29 |     // avoid coupling GameHUD to the combat system header.
+30 |     void DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io);
+31 | 
+32 |     // Draw a subtle edge indicator when the lock-on target is outside the screen.
+33 |     void DrawOffScreenTargetIndicator(const EnemyActor* target,
+34 |                                       float camX, float camY, float camZ,
+35 |                                       float yaw, float pitch,
+36 |                                       float vpW, float vpH) const;
+37 | 
+38 | private:
+39 |     float m_lowHpPulseTime = 0.0f;
+40 | };
+```
+- Copy packet for this file:
+```text
+FILE: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+EDIT MODE: append-first
+INSERT AT LINE: 41
+ANCHOR RANGE: 16-40
+```
+
 - **Task prompt block (copy exactly):**
 ```text
 Implement Task 060: Audio and final quality sweep.
-Use the File Edit Plan table in this task card exactly.
-Apply append-first edits at the listed Insert At Line values unless a compile error requires a nearby replacement.
-Do not exceed Modify Existing Lines (max) per file. Target Add New Lines counts per file.
+Use this task card only (File Edit Plan + Code Context Blocks).
+Apply append-first edits at listed Insert At Line values unless compile errors force nearby replacement.
+Do not exceed Modify Existing Lines (max) per file.
 After code edits update: /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md, /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md, /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
 Then run: python tools/llm/worst_llm_guard.py complete
 ```
