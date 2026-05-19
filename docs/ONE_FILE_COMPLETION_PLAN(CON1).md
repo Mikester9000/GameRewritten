@@ -9,7 +9,7 @@ Every task uses fields **0-8** and is formatted for manual copy/paste workflows.
 - Base plan task count: **201** total — **108** primary `.cpp` feature tasks (Task 001-108) + **93** `.hpp` companion tasks (Task 001H-107H, one per `.cpp` task that needed a header pair).
 - `.hpp` companion coverage: all `.cpp` tasks in the base plan have a matching `###H` companion task already in the base plan. No `.hpp` companions are missing.
 - Addendum purpose: this file (CON1) extends the base plan with tasks that fall outside the 001-108 + 001H-107H scope: release readiness gates, plan-document maintenance, build wiring, content pipeline, PS2-era graphics, water/swimming, all vehicle types, roads/traffic AI, open-world systems (climbing, gliding, fishing, mounts, photo mode, interior portals), NPC day/night schedules, final integration sweeps, and world-building authoring guide.
-- Tasks in this addendum: **106** total — **8** plan-document maintenance tasks (H01-H08) + **12** release gate tasks (Task 109-120) + **57** open-world/graphics/feature tasks (Task 121-177) + **29** `.hpp` companion tasks (121H-169H, one per new `.cpp` task that introduces new declarations).
+- Tasks in this addendum: **174** total — **8** plan-document maintenance tasks (H01-H08) + **12** release gate tasks (Task 109-120) + **103** open-world/graphics/feature tasks (Task 121-223, covering build wiring, content pipeline, PS2-era graphics, water/swimming, all vehicle classes, roads/traffic AI, open-world systems, FF nostalgia features, audio zones, accessibility, WorldEditor tools, content authoring templates, final integration sweeps, and world-building documentation) + **51** `.hpp` companion tasks (one per new `.cpp` task that introduces new declarations).
 
 ## Execution Rule (No Thinking Required)
 1. Read this addendum and the base one-file plan.
@@ -309,3 +309,1745 @@ Each targets a single `.md` documentation file. They follow the same one-file-at
 6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert near end of release checklist as final gate section.
 7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
+
+---
+
+## Open-World + PS2-Graphics + Vehicles + Content Pipeline Tasks (Task 121–223)
+
+These tasks bring the engine to a fully commercial, feature-complete open-world JRPG state with seamless streaming, PS2-era graphics, water/swimming, all vehicle classes, roads/traffic, complete content pipeline for story authoring, and every system a large studio would ship.
+
+### Section A — Build Wiring + Content Pipeline (Tasks 121–132)
+
+## Task 121
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Register all new .cpp files in the Visual Studio project (compile list)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Register all new .cpp files in the Visual Studio project (compile list)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Ensures every new feature system compiles and links into the game executable on GT610.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/GameRewritten.vcxproj`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 122
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Add new source files to the Visual Studio solution explorer filter groups
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Add new source files to the Visual Studio solution explorer filter groups" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keeps the solution explorer organised by subsystem so developers can find and edit files quickly.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/GameRewritten.vcxproj.filters`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 123
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Wire all new systems (quest, dialogue, NPC, audio router, party, traversal, vehicles, water, streaming) into the Main.cpp frame loop
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Wire all new systems (quest, dialogue, NPC, audio router, party, traversal, vehicles, water, streaming) into the Main.cpp frame loop" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Connects every new system to the boot, per-frame update, and shutdown paths so features are reachable at runtime.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=200 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 124
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Localisation table — string key to display-text map loaded from en_us.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Localisation table — string key to display-text map loaded from en_us.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Lets all quest/dialogue/UI text be authored in JSON rather than hardcoded C++ strings, enabling the story-writing phase.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/localization/LocalizationTable.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 124H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 124 (Localisation table — string key to display-text map loaded from en_us.json)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 124 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 124, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/localization/LocalizationTable.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 124.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 125
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Quest loader — reads Content/Quests/*.json and populates QuestSystem at startup
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Quest loader — reads Content/Quests/*.json and populates QuestSystem at startup" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Allows quests to be authored as data files; the LLM/developer only edits JSON to add new quests, not C++.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/assets/QuestLoader.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 125H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 125 (Quest loader — reads Content/Quests/*.json and populates QuestSystem at startup)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 125 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 125, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/assets/QuestLoader.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 125.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 126
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Dialogue loader — reads Content/Dialogue/*.json and populates DialogueRuntime at startup
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Dialogue loader — reads Content/Dialogue/*.json and populates DialogueRuntime at startup" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Enables branching NPC conversations to be written as data-file trees, ready for story authoring.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/assets/DialogueLoader.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 126H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 126 (Dialogue loader — reads Content/Dialogue/*.json and populates DialogueRuntime at startup)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 126 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 126, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/assets/DialogueLoader.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 126.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 127
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** NPC spawn loader — reads Content/NPCs/cell_X_Y.json and spawns NpcActors into RuntimeScene on cell load
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "NPC spawn loader — reads Content/NPCs/cell_X_Y.json and spawns NpcActors into RuntimeScene on cell load" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Makes NPC placement purely data-driven so world-builders place characters via JSON or the editor, not code.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/assets/NpcSpawnLoader.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 127H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 127 (NPC spawn loader — reads Content/NPCs/cell_X_Y.json and spawns NpcActors into RuntimeScene on cell load)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 127 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 127, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/assets/NpcSpawnLoader.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 127.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 128
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WorldEditor: add NPC placement, quest-zone paint, dialogue-trigger, and landmark panels to the in-game editor
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "WorldEditor: add NPC placement, quest-zone paint, dialogue-trigger, and landmark panels to the in-game editor" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Gives the world-building stage a visual tool to place all story-critical objects without hand-editing JSON.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldEditor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=160 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 128H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 128 (WorldEditor: add NPC placement, quest-zone paint, dialogue-trigger, and landmark panels to the in-game editor)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 128 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 128, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldEditor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 128.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 129
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Quest authoring template — Content/Quests/quest_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Quest authoring template — Content/Quests/quest_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines the canonical JSON schema for quests: id, name, objectives[], flag hooks, reward block.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Quests/quest_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+## Task 130
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Dialogue tree authoring template — Content/Dialogue/dialogue_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Dialogue tree authoring template — Content/Dialogue/dialogue_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines the canonical JSON schema for branching dialogue: node id, speaker, text key, choices[].
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Dialogue/dialogue_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+## Task 131
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** NPC world placement template — Content/NPCs/npc_placement_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "NPC world placement template — Content/NPCs/npc_placement_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines NPC spawn entry format: archetype, world position, dialogue_id, quest_hook, schedule.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/NPCs/npc_placement_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+## Task 132
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** English string table — Content/Localization/en_us.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "English string table — Content/Localization/en_us.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Central text table for all quest/dialogue/UI display strings; edit this file to write story content.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Localization/en_us.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+### Section B — PS2-Era Graphics (Tasks 133–140)
+
+## Task 133
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** PS2-era vertex-colour / baked-lighting vertex shader (ps2_vertcolor_vs.hlsl)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "PS2-era vertex-colour / baked-lighting vertex shader (ps2_vertcolor_vs.hlsl)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Replicates the flat per-vertex-lit look of FF7/FF8/FF10 on GT610 with minimal shader cost.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/ps2_vertcolor_vs.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 134
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** PS2-era flat-shaded pixel shader with palette-warm colour tint (ps2_vertcolor_ps.hlsl)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "PS2-era flat-shaded pixel shader with palette-warm colour tint (ps2_vertcolor_ps.hlsl)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Produces the warm, slightly posterised tone of PS2-era FF titles within D3D11.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/ps2_vertcolor_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 135
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Cel outline back-face extrusion vertex shader (cel_outline_vs.hlsl)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Cel outline back-face extrusion vertex shader (cel_outline_vs.hlsl)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Adds hand-drawn outline silhouettes to characters and props, reinforcing the handmade FF aesthetic.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/cel_outline_vs.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 136
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Cel outline solid-colour pixel shader (cel_outline_ps.hlsl)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Cel outline solid-colour pixel shader (cel_outline_ps.hlsl)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Outputs the solid dark outline colour for the cel-shading pass on GT610.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/cel_outline_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=40 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 137
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Warm colour-grading post-pass pixel shader (color_grade_ps.hlsl)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Warm colour-grading post-pass pixel shader (color_grade_ps.hlsl)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Applies a FF7/FF8 inspired warm colour grade (lifted shadows, golden mids) to the final frame.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/color_grade_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 138
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Single-pass soft bloom pixel shader for GT610 (bloom_ps.hlsl)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Single-pass soft bloom pixel shader for GT610 (bloom_ps.hlsl)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Adds the soft magical glow seen in FF10 cutscenes; single-pass to stay within GT610 bandwidth.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/bloom_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 139
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** PS2 render pass controller — manages vertex-colour, cel-outline, and post-process order
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "PS2 render pass controller — manages vertex-colour, cel-outline, and post-process order" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Sequences the vertex-colour draw, cel-outline back-face pass, and post-process chain each frame.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/Ps2RenderPass.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 139H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 139 (PS2 render pass controller — manages vertex-colour, cel-outline, and post-process order)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 139 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 139, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/Ps2RenderPass.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 139.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 140
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Post-process pipeline — binds colour-grade and bloom passes to back-buffer each frame
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Post-process pipeline — binds colour-grade and bloom passes to back-buffer each frame" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Provides a single ordered post-process chain (bloom → colour grade) that runs after scene render, GT610-safe.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/PostProcessPipeline.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 140H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 140 (Post-process pipeline — binds colour-grade and bloom passes to back-buffer each frame)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 140 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 140, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/PostProcessPipeline.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 140.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section C — Water System (Tasks 141–148)
+
+## Task 141
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Water surface animated vertex shader — scrolling sine-wave displacement (water_surface_vs.hlsl)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Water surface animated vertex shader — scrolling sine-wave displacement (water_surface_vs.hlsl)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Produces the gentle bobbing water surface seen in FF10-era games at low vertex cost for GT610.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/water_surface_vs.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 142
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Water surface pixel shader — ripple normal map, reflection, and depth fade (water_surface_ps.hlsl)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Water surface pixel shader — ripple normal map, reflection, and depth fade (water_surface_ps.hlsl)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Gives open-world water bodies the reflective, slightly transparent look of PS2-era coastal zones.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/water_surface_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 143
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Underwater post-pass pixel shader — blue tint, caustic pattern, edge blur (underwater_ps.hlsl)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Underwater post-pass pixel shader — blue tint, caustic pattern, edge blur (underwater_ps.hlsl)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Applies the immersive underwater visual filter when the camera is below a water volume.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/underwater_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 144
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Water renderer — submits water plane meshes and binds water shaders per visible WaterVolume
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Water renderer — submits water plane meshes and binds water shaders per visible WaterVolume" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Integrates the water surface and underwater shaders into the D3D11 renderer frame loop.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/WaterRenderer.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 144H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 144 (Water renderer — submits water plane meshes and binds water shaders per visible WaterVolume)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 144 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 144, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/WaterRenderer.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 144.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 145
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Water volume — axis-aligned zone that detects player/actors entering and exiting water
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Water volume — axis-aligned zone that detects player/actors entering and exiting water" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Tracks which actors are submerged and drives swim-state transitions and audio filter activation.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WaterVolume.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 145H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 145 (Water volume — axis-aligned zone that detects player/actors entering and exiting water)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 145 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 145, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WaterVolume.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 145.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 146
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Buoyancy component — per-actor buoyancy force applied each physics step when in water
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Buoyancy component — per-actor buoyancy force applied each physics step when in water" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keeps boats, debris, and the player floating correctly on the water surface using Jolt Physics forces.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/physics/BuoyancyComponent.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 146H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 146 (Buoyancy component — per-actor buoyancy force applied each physics step when in water)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 146 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 146, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/physics/BuoyancyComponent.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 146.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 147
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Swim controller — surface swim, dive, sprint-swim, and surface-break state machine
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Swim controller — surface swim, dive, sprint-swim, and surface-break state machine" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Handles all water locomotion states: floating, diving, surfacing, and swimming at speed.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/traversal/SwimController.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 147H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 147 (Swim controller — surface swim, dive, sprint-swim, and surface-break state machine)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 147 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 147, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/traversal/SwimController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 147.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 148
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** PlayerActor swim state integration — detect water entry, delegate to SwimController, restore on exit
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "PlayerActor swim state integration — detect water entry, delegate to SwimController, restore on exit" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Connects the swim controller to the player so entering a WaterVolume switches input and animation state.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 148H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 148 (PlayerActor swim state integration — detect water entry, delegate to SwimController, restore on exit)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 148 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 148, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 148.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section D — Vehicles (Tasks 149–155)
+
+## Task 149
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** VehicleActor base — shared physics body, enter/exit boarding, occupant seat management
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "VehicleActor base — shared physics body, enter/exit boarding, occupant seat management" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Common base for all driveable vehicles; keeps boarding logic, collision, and camera handoff in one place.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/VehicleActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 149H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 149 (VehicleActor base — shared physics body, enter/exit boarding, occupant seat management)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 149 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 149, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/VehicleActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 149.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 150
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** CarActor — 4-wheel ground vehicle (car / truck / van) with suspension physics and engine audio hook
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "CarActor — 4-wheel ground vehicle (car / truck / van) with suspension physics and engine audio hook" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Provides the primary ground transport option; handles road-surface friction and AI traffic spawning.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/CarActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 150H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 150 (CarActor — 4-wheel ground vehicle (car / truck / van) with suspension physics and engine audio hook)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 150 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 150, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/CarActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 150.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 151
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** MotorcycleActor — 2-wheel lean-physics ground vehicle with higher speed cap and tighter turning
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "MotorcycleActor — 2-wheel lean-physics ground vehicle with higher speed cap and tighter turning" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Delivers a FF15-style fast scout vehicle; lean simulation gives it a distinct handling feel.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/MotorcycleActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 151H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 151 (MotorcycleActor — 2-wheel lean-physics ground vehicle with higher speed cap and tighter turning)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 151 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 151, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/MotorcycleActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 151.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 152
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** AirshipActor — free-flight 6DOF aircraft with altitude limits and hover mode
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "AirshipActor — free-flight 6DOF aircraft with altitude limits and hover mode" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Classic FF airship for continent-scale fast travel; free-flight feel with FF nostalgia lineage.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/AirshipActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 152H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 152 (AirshipActor — free-flight 6DOF aircraft with altitude limits and hover mode)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 152 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 152, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/AirshipActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 152.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 153
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** BoatActor — water-surface vessel with BuoyancyComponent, throttle, and wake particle hook
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "BoatActor — water-surface vessel with BuoyancyComponent, throttle, and wake particle hook" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Enables sea travel between islands; stays on water surface via BuoyancyComponent.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/BoatActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 153H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 153 (BoatActor — water-surface vessel with BuoyancyComponent, throttle, and wake particle hook)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 153 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 153, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/BoatActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 153.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 154
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** InputActionMap: add vehicle-specific actions — VehicleSteer, VehicleAccel, VehicleBrake, VehicleExit, VehicleBoost
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "InputActionMap: add vehicle-specific actions — VehicleSteer, VehicleAccel, VehicleBrake, VehicleExit, VehicleBoost" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Separates vehicle controls from foot movement so input routing is deterministic and remappable.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=40 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 155
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** CameraController: vehicle camera mode — third-person follow with speed-adaptive FOV and drift lag
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "CameraController: vehicle camera mode — third-person follow with speed-adaptive FOV and drift lag" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Switches to a wider speed-sensitive camera when inside a vehicle, returning to combat camera on exit.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 155H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 155 (CameraController: vehicle camera mode — third-person follow with speed-adaptive FOV and drift lag)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 155 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 155, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 155.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section E — Roads + Traffic (Tasks 156–161)
+
+## Task 156
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Road spline system — spline data loader and road-mesh generator from Content/Roads/*.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Road spline system — spline data loader and road-mesh generator from Content/Roads/*.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Builds driveable road meshes from authored spline data; AI traffic and player vehicles follow these paths.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/RoadSpline.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 156H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 156 (Road spline system — spline data loader and road-mesh generator from Content/Roads/*.json)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 156 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 156, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/RoadSpline.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 156.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 157
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Traffic director — spawns and drives AI cars along RoadSpline paths at configurable density
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Traffic director — spawns and drives AI cars along RoadSpline paths at configurable density" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Fills the world with ambient vehicle traffic that makes towns and highways feel alive.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/TrafficDirector.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 157H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 157 (Traffic director — spawns and drives AI cars along RoadSpline paths at configurable density)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 157 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 157, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/TrafficDirector.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 157.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 158
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Pedestrian actor — crowd NPC that walks patrol paths, reacts to combat and vehicles
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Pedestrian actor — crowd NPC that walks patrol paths, reacts to combat and vehicles" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Adds civilians and town-dwellers that give settlements population depth and react believably to the player.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/ai/PedestrianActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 158H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 158 (Pedestrian actor — crowd NPC that walks patrol paths, reacts to combat and vehicles)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 158 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 158, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/ai/PedestrianActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 158.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 159
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Road spline authoring template — Content/Roads/road_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Road spline authoring template — Content/Roads/road_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines the canonical JSON schema for a road spline: id, control points[], lane width, surface type.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Roads/road_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+## Task 160
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Vehicle spawn point template — Content/Vehicles/vehicle_spawns_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Vehicle spawn point template — Content/Vehicles/vehicle_spawns_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines spawn entries for parked/world vehicles: type, position, rotation, ownership flag.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Vehicles/vehicle_spawns_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+## Task 161
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WorldEditor: road painter panel — click-to-place spline control points, save to Content/Roads/
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "WorldEditor: road painter panel — click-to-place spline control points, save to Content/Roads/" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Lets the world-builder draw road networks visually in-engine rather than hand-editing spline JSON.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldEditor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section F — Open-World Systems (Tasks 162–170)
+
+## Task 162
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** NpcActor day/night schedule — state table (shop-open / patrol / sleep) keyed by DayNightCycle hour
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "NpcActor day/night schedule — state table (shop-open / patrol / sleep) keyed by DayNightCycle hour" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** NPCs go to bed, open stalls, and walk to work based on the time of day, giving the world a lived-in feel.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 162H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 162 (NpcActor day/night schedule — state table (shop-open / patrol / sleep) keyed by DayNightCycle hour)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 162 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 162, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 162.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 163
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Fishing minigame — cast, wait, reel timing minigame with loot table hook for fish items
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Fishing minigame — cast, wait, reel timing minigame with loot table hook for fish items" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Classic JRPG side activity; reuses LootTable for fish drops and links to Inventory for item rewards.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FishingMinigame.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 163H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 163 (Fishing minigame — cast, wait, reel timing minigame with loot table hook for fish items)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 163 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 163, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FishingMinigame.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 163.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 164
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Mount actor — rideable chocobo/mount with speed bonus, auto-dismount at combat proximity
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Mount actor — rideable chocobo/mount with speed bonus, auto-dismount at combat proximity" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Delivers the FF-iconic chocobo ride; faster than running but dismounts when enemies are near.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/MountActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 164H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 164 (Mount actor — rideable chocobo/mount with speed bonus, auto-dismount at combat proximity)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 164 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 164, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/MountActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 164.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 165
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Photo mode — freeze simulation, free-fly camera, exposure + depth-of-field sliders, screenshot
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Photo mode — freeze simulation, free-fly camera, exposure + depth-of-field sliders, screenshot" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Standard in all modern open-world games; lets players capture the world's handmade PS2-style vistas.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/PhotoMode.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 165H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 165 (Photo mode — freeze simulation, free-fly camera, exposure + depth-of-field sliders, screenshot)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 165 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 165, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/PhotoMode.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 165.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 166
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Climb system — ledge detection, grab, pull-up, wall shimmy, and vault over short obstacles
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Climb system — ledge detection, grab, pull-up, wall shimmy, and vault over short obstacles" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Extends world traversal so players can explore terrain naturally without invisible walls.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/traversal/ClimbSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 166H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 166 (Climb system — ledge detection, grab, pull-up, wall shimmy, and vault over short obstacles)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 166 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 166, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/traversal/ClimbSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 166.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 167
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Glide controller — equip-triggered wing-suit / parachute glide from airship or high ledge
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Glide controller — equip-triggered wing-suit / parachute glide from airship or high ledge" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Provides large-world aerial traversal similar to FF15 regalia air descent, GT610-safe physics.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/traversal/GlideController.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 167H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 167 (Glide controller — equip-triggered wing-suit / parachute glide from airship or high ledge)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 167 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 167, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/traversal/GlideController.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 167.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 168
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Chase AI — enemy pursuit across streaming terrain using NavMesh with memory and give-up timer
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Chase AI — enemy pursuit across streaming terrain using NavMesh with memory and give-up timer" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Gives enemies persistent pursuit behaviour that feels threatening without infinite-chase exploits.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/ai/ChaseAI.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 168H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 168 (Chase AI — enemy pursuit across streaming terrain using NavMesh with memory and give-up timer)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 168 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 168, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/ai/ChaseAI.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 168.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 169
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Interior portal system — seamless trigger-based transition between indoor cells and the open world
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Interior portal system — seamless trigger-based transition between indoor cells and the open world" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Eliminates loading screens when entering buildings by streaming the interior cell and blending fog.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteriorPortalSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 169H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 169 (Interior portal system — seamless trigger-based transition between indoor cells and the open world)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 169 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 169, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteriorPortalSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 169.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 170
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Region definition template — Content/World/region_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Region definition template — Content/World/region_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines the canonical schema for a world region: id, biome, weather table, ambient audio id, BGM id, population density.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/World/region_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+### Section G — Audio Completion (Tasks 171–172)
+
+## Task 171
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** AudioManager: underwater audio filter — low-pass muffle applied when player submerges
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "AudioManager: underwater audio filter — low-pass muffle applied when player submerges" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Activates a low-pass filter on all non-music buses when the player is inside a WaterVolume.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 172
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** AudioManager: vehicle engine audio — pitch/volume scale by throttle and speed each frame
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "AudioManager: vehicle engine audio — pitch/volume scale by throttle and speed each frame" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Drives the engine sound loop so cars and boats sound alive and proportional to player input.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section H — Final Sweeps + World-Building Documentation (Tasks 173–177)
+
+## Task 173
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** PlayerActor: full traversal integration sweep — walk/run/swim/climb/mount/vehicle state unification
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "PlayerActor: full traversal integration sweep — walk/run/swim/climb/mount/vehicle state unification" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Ensures every locomotion state transitions cleanly to every other state with no stuck-states or camera pops.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 174
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** D3D11Renderer: integrate PS2 render pass, water renderer, and post-process pipeline into main frame
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "D3D11Renderer: integrate PS2 render pass, water renderer, and post-process pipeline into main frame" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Connects the new render systems into the main draw loop: scene → water → PS2 pass → post-process.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/D3D11Renderer.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 175
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Main.cpp: final system wiring sweep — verify every new system is constructed, ordered, and shut down
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Main.cpp: final system wiring sweep — verify every new system is constructed, ordered, and shut down" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Guarantees no system is silently orphaned; the game boots cleanly and all new features are active.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 176
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WORLD_BUILDING_GUIDE.md — step-by-step guide for authoring quests, dialogue, NPCs, and regions in JSON
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "WORLD_BUILDING_GUIDE.md — step-by-step guide for authoring quests, dialogue, NPCs, and regions in JSON" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Empowers the story/world-building phase to proceed without touching C++; covers every JSON schema.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/WORLD_BUILDING_GUIDE.md`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under the most relevant section heading.
+7. **Additional information:** LINE_BUDGET target <=200 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready markdown for this file only, with no extra files or commentary.
+
+## Task 177
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** SHIP_CHECKLIST.md: extended gates — open-world streaming, vehicles, water, PS2 visuals, content pipeline
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "SHIP_CHECKLIST.md: extended gates — open-world streaming, vehicles, water, PS2 visuals, content pipeline" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Adds release acceptance criteria for every system added in tasks 121-176.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/SHIP_CHECKLIST.md`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under the most relevant section heading.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready markdown for this file only, with no extra files or commentary.
+
+### Section I — Core Missing UI Screens (Tasks 178–183)
+
+## Task 178
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Title screen and main menu — New Game / Continue / Settings / Quit with animated FF-style background
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Title screen and main menu — New Game / Continue / Settings / Quit with animated FF-style background" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Every commercial game needs a title screen; styled like FF7/FF8 with logo animation and menu music sting.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/TitleScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 178H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 178 (Title screen and main menu — New Game / Continue / Settings / Quit with animated FF-style background)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 178 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 178, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/TitleScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 178.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 179
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Inventory screen — full grid-based item list with category tabs and detail panel on selection
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Inventory screen — full grid-based item list with category tabs and detail panel on selection" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Lets the player manage all items, see descriptions, and use/equip from a dedicated full-screen UI.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/InventoryScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 179H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 179 (Inventory screen — full grid-based item list with category tabs and detail panel on selection)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 179 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 179, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/InventoryScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 179.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 180
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Bestiary / enemy codex screen — unlocked entries with enemy lore, stats, and weak-point diagram
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Bestiary / enemy codex screen — unlocked entries with enemy lore, stats, and weak-point diagram" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Rewards exploration and adds FF-style collectible depth; entries unlock when an enemy is first defeated.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/BestiaryScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 180H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 180 (Bestiary / enemy codex screen — unlocked entries with enemy lore, stats, and weak-point diagram)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 180 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 180, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/BestiaryScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 180.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 181
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Skill tree screen — visual node graph showing unlocked/locked abilities with unlock cost and description
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Skill tree screen — visual node graph showing unlocked/locked abilities with unlock cost and description" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Wraps the SkillTree backend (Task 088) in a browsable visual UI using ImGui node-style drawing.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/SkillTreeScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 181H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 181 (Skill tree screen — visual node graph showing unlocked/locked abilities with unlock cost and description)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 181 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 181, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/SkillTreeScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 181.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 182
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Crafting screen — recipe list, ingredient status bars, and Craft button tied to CraftingSystem
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Crafting screen — recipe list, ingredient status bars, and Craft button tied to CraftingSystem" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Gives players a clear crafting interface at upgrade stations; shows missing ingredients in red.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/CraftingScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 182H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 182 (Crafting screen — recipe list, ingredient status bars, and Craft button tied to CraftingSystem)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 182 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 182, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/CraftingScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 182.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 183
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Shop screen — buy/sell tabs, item grid, price list, and Gil balance tied to ShopInventory
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Shop screen — buy/sell tabs, item grid, price list, and Gil balance tied to ShopInventory" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Standard JRPG shop UI; buy or sell with Gil currency, scrollable list, confirm dialog.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/ShopScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 183H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 183 (Shop screen — buy/sell tabs, item grid, price list, and Gil balance tied to ShopInventory)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 183 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 183, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/ShopScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 183.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section J — Merchant + Inn NPC System (Tasks 184–186)
+
+## Task 184
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Merchant actor — shop NPC that opens ShopScreen and references a ShopInventory data asset
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Merchant actor — shop NPC that opens ShopScreen and references a ShopInventory data asset" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Places buyable-goods vendors in towns; authored by placing a MerchantActor with a shop_inventory_id.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/MerchantActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 184H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 184 (Merchant actor — shop NPC that opens ShopScreen and references a ShopInventory data asset)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 184 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 184, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/MerchantActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 184.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 185
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Innkeeper actor — inn NPC that offers rest (restores HP/MP, saves game) for a Gil cost
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Innkeeper actor — inn NPC that offers rest (restores HP/MP, saves game) for a Gil cost" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Classic JRPG inn mechanic; links to SaveSystem and restores player stats on confirm.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/InnkeeperActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 185H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 185 (Innkeeper actor — inn NPC that offers rest (restores HP/MP, saves game) for a Gil cost)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 185 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 185, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/InnkeeperActor.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 185.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 186
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Shop inventory system — data-driven item stock list with base prices loaded from JSON
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Shop inventory system — data-driven item stock list with base prices loaded from JSON" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Decouples shop contents from NPC code; each merchant references a ShopInventory JSON asset.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/ShopInventory.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 186H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 186 (Shop inventory system — data-driven item stock list with base prices loaded from JSON)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 186 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 186, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/ShopInventory.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 186.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section K — Shadow + Emissive Rendering (Tasks 187–190)
+
+## Task 187
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Shadow map depth-pass vertex shader (shadow_vs.hlsl) — renders scene depth from directional light
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Shadow map depth-pass vertex shader (shadow_vs.hlsl) — renders scene depth from directional light" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** PS2-era games used baked shadows, but a single directional shadow map gives modern grounding at low GT610 cost.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/shadow_vs.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 188
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Shadow map depth-pass pixel shader (shadow_ps.hlsl) — outputs depth to shadow RT
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Shadow map depth-pass pixel shader (shadow_ps.hlsl) — outputs depth to shadow RT" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Pairs with shadow_vs to produce a 512×512 shadow map per frame — sufficient for PS2-style scenes.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/shadow_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=40 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 189
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Shadow renderer — manages shadow RT, depth pass, and shadow-factor injection into main render
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Shadow renderer — manages shadow RT, depth pass, and shadow-factor injection into main render" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Runs the depth pass before the main render, then supplies the shadow texture to the lit material shader.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/ShadowRenderer.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 189H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 189 (Shadow renderer — manages shadow RT, depth pass, and shadow-factor injection into main render)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 189 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 189, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/ShadowRenderer.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 189.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 190
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Emissive material pixel shader (emissive_ps.hlsl) — glowing signs, fire pits, materia, magic effects
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Emissive material pixel shader (emissive_ps.hlsl) — glowing signs, fire pits, materia, magic effects" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Adds bright self-lit surfaces for world props; drives the FF materia glow look without dynamic point lights.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/emissive_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section L — Weather Particle Rendering (Tasks 191–192)
+
+## Task 191
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Rain particle vertex shader (rain_particle_vs.hlsl) — GPU-driven streaking rain drop positions
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Rain particle vertex shader (rain_particle_vs.hlsl) — GPU-driven streaking rain drop positions" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Drives hundreds of rain streak instances on the GPU; negligible cost on GT610 using instanced draw.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/rain_particle_vs.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 192
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Rain particle pixel shader (rain_particle_ps.hlsl) — translucent alpha-blended rain streak colour
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Rain particle pixel shader (rain_particle_ps.hlsl) — translucent alpha-blended rain streak colour" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Renders rain with a semi-transparent streak, consistent with PS2-era visual fidelity targets.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/rain_particle_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=40 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section M — Combat Extras (Tasks 193–196)
+
+## Task 193
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Projectile system — spawn, simulate, and collide hitscan and physics projectiles (arrow, bolt, spell)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Projectile system — spawn, simulate, and collide hitscan and physics projectiles (arrow, bolt, spell)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Supports ranged enemies and magic attacks; projectiles travel in world space and trigger CombatSystem on hit.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/ProjectileSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 193H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 193 (Projectile system — spawn, simulate, and collide hitscan and physics projectiles (arrow, bolt, spell))
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 193 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 193, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/ProjectileSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 193.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 194
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Cinematic finishing blow — slow-motion time scale with camera cut to close-up on kill
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Cinematic finishing blow — slow-motion time scale with camera cut to close-up on kill" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Delivers the dramatic kill moment from FF7 Remake; triggered at the last combo hit on a staggered enemy.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/FinishingBlow.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 194H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 194 (Cinematic finishing blow — slow-motion time scale with camera cut to close-up on kill)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 194 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 194, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/FinishingBlow.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 194.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 195
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** EnemyActor: flee/retreat behaviour and death ragdoll placeholder on HP reaching zero
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "EnemyActor: flee/retreat behaviour and death ragdoll placeholder on HP reaching zero" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Enemies run from dominant players and crumple on death; ragdoll is a static death pose placeholder.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 196
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** AoE ground indicator — circle/ring decal drawn on terrain showing incoming area attack zone
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "AoE ground indicator — circle/ring decal drawn on terrain showing incoming area attack zone" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Telegraphs enemy AoE attacks with a visible ground ring before they fire; essential for action-RPG readability.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/AoEIndicator.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 196H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 196 (AoE ground indicator — circle/ring decal drawn on terrain showing incoming area attack zone)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 196 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 196, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/AoEIndicator.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 196.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section N — World Interaction Props (Tasks 197–198)
+
+## Task 197
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Destructible prop — world object (crate, barrel, jar) that fractures on attack hit with loot drop
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Destructible prop — world object (crate, barrel, jar) that fractures on attack hit with loot drop" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Adds environmental reward to exploration; breaking props drops Gil or consumables from the loot table.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/DestructibleProp.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 197H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 197 (Destructible prop — world object (crate, barrel, jar) that fractures on attack hit with loot drop)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 197 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 197, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/DestructibleProp.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 197.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 198
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Interactive prop — world object (door, lever, switch) that triggers state changes or EventZone signals
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Interactive prop — world object (door, lever, switch) that triggers state changes or EventZone signals" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Powers dungeon puzzles, locked gates, and secret passages; state is persisted via RegionStateStore.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractiveProp.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 198H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 198 (Interactive prop — world object (door, lever, switch) that triggers state changes or EventZone signals)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 198 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 198, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractiveProp.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 198.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section O — Developer / Debug Tools (Tasks 199–201)
+
+## Task 199
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** In-game developer console — toggle with tilde, accepts typed commands (teleport, give, spawn, set_time)
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "In-game developer console — toggle with tilde, accepts typed commands (teleport, give, spawn, set_time)" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Dev-build only; essential for QA and balancing without recompiling; stripped from release build.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/DebugConsole.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 199H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 199 (In-game developer console — toggle with tilde, accepts typed commands (teleport, give, spawn, set_time))
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 199 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 199, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/DebugConsole.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 199.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 200
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Asset hot-reloader — file-watcher that reloads changed HLSL shaders and textures without restart
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Asset hot-reloader — file-watcher that reloads changed HLSL shaders and textures without restart" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Cuts iteration time when tweaking shaders or texture colours; dev-build only, no release cost.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/AssetHotReloader.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 200H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 200 (Asset hot-reloader — file-watcher that reloads changed HLSL shaders and textures without restart)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 200 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 200, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/AssetHotReloader.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 200.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 201
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WorldEditor: NPC patrol-path drawing tool — place waypoints, preview path loop, save to NPC JSON
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "WorldEditor: NPC patrol-path drawing tool — place waypoints, preview path loop, save to NPC JSON" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Lets world-builders define guard routes, town-walker loops, and escort paths visually in-engine.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldEditor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section P — FF Nostalgia Features (Tasks 202–206)
+
+## Task 202
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Battle transition — screen flash and wipe effect on random encounter or scripted combat entry
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Battle transition — screen flash and wipe effect on random encounter or scripted combat entry" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Recreates the iconic FF7/FF8 battle-entry flash that signals a combat shift; skippable after first play.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/BattleTransition.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 202H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 202 (Battle transition — screen flash and wipe effect on random encounter or scripted combat entry)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 202 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 202, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/BattleTransition.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 202.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 203
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Victory screen — post-battle XP / Gil / item summary panel with fanfare audio hook and pose trigger
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Victory screen — post-battle XP / Gil / item summary panel with fanfare audio hook and pose trigger" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Classic FF victory moment: musical sting, level-up count, rare drop highlight; essential for the nostalgia feel.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/VictoryScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 203H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 203 (Victory screen — post-battle XP / Gil / item summary panel with fanfare audio hook and pose trigger)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 203 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 203, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/VictoryScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 203.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 204
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Gil currency system — central balance tracker, earn/spend API, and persistence in SaveSystem
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Gil currency system — central balance tracker, earn/spend API, and persistence in SaveSystem" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Header-only currency singleton; used by shops, loot drops, inn costs, and quest rewards.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/GilSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 205
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Materia / magic-slot glow shader (materia_glow_ps.hlsl) — pulsing sphere glow for equipped materia
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Materia / magic-slot glow shader (materia_glow_ps.hlsl) — pulsing sphere glow for equipped materia" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Renders the signature coloured glow on materia slots in the equipment screen and world pickups.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/materia_glow_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 206
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** World map overview mode — zoom-out to full continent chibi-style overview with location pins
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "World map overview mode — zoom-out to full continent chibi-style overview with location pins" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Lets players see the full world at once in a stylised FF7/FF10 world-map aesthetic to plan travel.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldMapMode.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 206H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 206 (World map overview mode — zoom-out to full continent chibi-style overview with location pins)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 206 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 206, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldMapMode.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 206.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section Q — Audio Zones (Tasks 207–208)
+
+## Task 207
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Reverb zone system — trigger volumes that blend indoor/cave/underwater reverb on audio buses
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Reverb zone system — trigger volumes that blend indoor/cave/underwater reverb on audio buses" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Caves echo, cathedrals resonate, and open fields are dry; driven by trigger zones placed in the editor.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/ReverbZoneSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 207H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 207 (Reverb zone system — trigger volumes that blend indoor/cave/underwater reverb on audio buses)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 207 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 207, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/ReverbZoneSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 207.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 208
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Footstep audio system — material-tagged surface lookup plays correct footstep SFX per step
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Footstep audio system — material-tagged surface lookup plays correct footstep SFX per step" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Differentiates stone, grass, metal, water, and sand footsteps for immersive world traversal.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/FootstepAudioSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 208H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 208 (Footstep audio system — material-tagged surface lookup plays correct footstep SFX per step)
+2. **What the task does + logic:** Adds/updates the required header declarations that Task 208 needs so the implementation compiles and is externally callable where needed.
+3. **Narrative logic explanation:** Read existing type declarations, add/adjust only the declarations required by Task 208, guard duplicate signatures/members, then keep declaration order clear and stable.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Keep feature interfaces explicit and low-risk so runtime behaviour remains predictable on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/FootstepAudioSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type declaration used by Task 208.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section R — Accessibility (Tasks 209–210)
+
+## Task 209
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Colorblind mode post-pass shader (colorblind_ps.hlsl) — Deuteranopia / Protanopia / Tritanopia LUT
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Colorblind mode post-pass shader (colorblind_ps.hlsl) — Deuteranopia / Protanopia / Tritanopia LUT" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Three LUT-based colour remap modes applied as a final post-pass; zero GT610 performance cost.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/colorblind_ps.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 210
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Accessibility settings — text scale multiplier, high-contrast UI, subtitle size, and icon mode
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Accessibility settings — text scale multiplier, high-contrast UI, subtitle size, and icon mode" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Header-only settings struct read by all UI renderers; no separate .cpp needed.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/AccessibilitySettings.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the owning type or constant block and keep changes local.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section S — WorldEditor Tool Extensions (Tasks 211–214)
+
+## Task 211
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WorldEditor: terrain height painter — brush radius + strength sliders, paint height on cell mesh
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "WorldEditor: terrain height painter — brush radius + strength sliders, paint height on cell mesh" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Lets world-builders sculpt hills, valleys, and cliffs without hand-editing vertex data.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldEditor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 212
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WorldEditor: foliage scatter painter — paint tree/grass instances across terrain by brush stroke
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "WorldEditor: foliage scatter painter — paint tree/grass instances across terrain by brush stroke" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Populates landscape with Forest/foliage density using a paint brush rather than manually placing prefabs.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldEditor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 213
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WorldEditor: point-light placement panel — drag to place, set colour/radius/intensity, save to cell JSON
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "WorldEditor: point-light placement panel — drag to place, set colour/radius/intensity, save to cell JSON" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Lets artists light towns, dungeons, and campfires visually without modifying C++ or prefab definitions.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldEditor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 214
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WorldEditor: trigger volume paint tool — draw AABB trigger zones linked to EventZone or DialogueTrigger
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "WorldEditor: trigger volume paint tool — draw AABB trigger zones linked to EventZone or DialogueTrigger" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Unifies quest zone, cutscene trigger, and ambient-audio zone placement in one visual brush tool.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/WorldEditor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+### Section T — Content Authoring Templates (Tasks 215–218)
+
+## Task 215
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Enemy archetype template — Content/Enemies/enemy_archetype_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Enemy archetype template — Content/Enemies/enemy_archetype_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines the canonical schema for enemy stats, AI profile, loot table reference, and weak points.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Enemies/enemy_archetype_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+## Task 216
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Item definition template — Content/Items/item_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Item definition template — Content/Items/item_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines the canonical schema for all item types: id, name key, icon path, stat modifiers, use effect.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Items/item_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+## Task 217
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Shop stock template — Content/Shops/shop_inventory_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Shop stock template — Content/Shops/shop_inventory_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines the canonical schema for a merchant's stock list: item_id, quantity, price_gil, restock_flag.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Shops/shop_inventory_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+## Task 218
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Cutscene script template — Content/Cutscenes/cutscene_template.json
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Cutscene script template — Content/Cutscenes/cutscene_template.json" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Defines the canonical timeline schema for cutscenes: tracks[], camera rail[], dialogue cue[], event cue[].
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Cutscenes/cutscene_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file; output the full JSON document as the paste block.
+7. **Additional information:** LINE_BUDGET target <=40 lines in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+### Section U — Final Integration Sweeps + Ship Documentation (Tasks 219–223)
+
+## Task 219
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** D3D11Renderer: integrate shadow renderer, emissive pass, and rain particle pass into frame loop
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "D3D11Renderer: integrate shadow renderer, emissive pass, and rain particle pass into frame loop" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Stitches the new render layers (shadow → scene → emissive → particles → PS2 pass → post) into the main loop.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/rendering/d3d11/D3D11Renderer.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 220
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Main.cpp: complete system wiring final sweep — all 178-219 systems constructed, ordered, and shut down
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "Main.cpp: complete system wiring final sweep — all 178-219 systems constructed, ordered, and shut down" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Guarantees the entire feature set is live at runtime with zero orphaned or double-initialised systems.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 221
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WORLD_BUILDING_GUIDE.md — complete authoritative guide for story, quest, dialogue, NPC, and region authoring
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "WORLD_BUILDING_GUIDE.md — complete authoritative guide for story, quest, dialogue, NPC, and region authoring" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** After this task the user can write the full game story using only JSON files and the in-game WorldEditor.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/WORLD_BUILDING_GUIDE.md`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under the most relevant section heading.
+7. **Additional information:** LINE_BUDGET target <=200 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready markdown for this file only, with no extra files or commentary.
+
+## Task 222
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** CONTENT_CREATION_GUIDE.md — guide for adding art assets (textures, models, audio) to Content/ folders
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "CONTENT_CREATION_GUIDE.md — guide for adding art assets (textures, models, audio) to Content/ folders" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Explains how to import and register every asset type so artists can work independently from engineers.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/CONTENT_CREATION_GUIDE.md`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under the most relevant section heading.
+7. **Additional information:** LINE_BUDGET target <=200 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready markdown for this file only, with no extra files or commentary.
+
+## Task 223
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** SHIP_CHECKLIST.md: final extended checklist — all systems, content pipeline, QA gates, legal, and performance
+2. **What the task does + logic:** Implements the smallest runtime-visible or authoring-visible slice of "SHIP_CHECKLIST.md: final extended checklist — all systems, content pipeline, QA gates, legal, and performance" so the feature is testable and can be iterated safely toward a sellable build.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behaviour block, then output / render / apply result.
+4. **Game design target (FF7 Remake + PS2 + handmade):** Single definitive sign-off document confirming the game is commercially complete and release-ready.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/SHIP_CHECKLIST.md`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under the most relevant section heading.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready markdown for this file only, with no extra files or commentary.
