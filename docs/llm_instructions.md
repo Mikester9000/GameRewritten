@@ -13,6 +13,7 @@
 - **Avoid growing `src/app/Main.cpp`.** If you must touch it, keep changes tiny.
 - **Do not move/rename files.**
 - **Update docs when a task says so.**
+- **Do not mark placeholder-only stubs as complete.**
 
 If you cannot complete a task within tiny context, **split it into a smaller safe sub‑task**, then stop and report the split.
 
@@ -28,6 +29,15 @@ If you cannot complete a task within tiny context, **split it into a smaller saf
 **Goal:** Finish the remaining systems and polish passes to reach a **commercially sellable** action‑RPG build with FF7 Remake-like gameplay readability, PS2-style cost-aware visuals, and robust audio/event readiness.
 
 **Immediate focus:** Continue the **Autopilot Task Sequence** (see Section 3) through expanded open-world multi-continent scope, gameplay depth, and ship-readiness gates.
+
+### Full-System Delivery Rule
+- Any task named with words like **stub / lite / base / hook** is still treated as a **full playable v1 system**.
+- A task is done only when the feature is usable in real gameplay flow and not just scaffolding.
+
+### Executor Routing Rule (Cost Optimization)
+- Follow `docs/FULL_TASK_SEQUENCE.md` task ownership matrix.
+- Use SLM for SLM-first tasks.
+- Escalate to Copilot for Copilot-required tasks or when SLM hits repeated blockers.
 
 ---
 
@@ -169,15 +179,50 @@ Already implemented and working:
 108 Vertical-slice certification and ship checklist
 
 **Definition of done for each task:**
-- Smallest viable implementation exists.
+- Full playable vertical-slice implementation exists.
 - It is wired into runtime flow and visible/usable.
 - Low‑spec safe.
 - Docs updated if required by the task.
 
 ---
 
+## Appendix A) When Questing/NPC/Dialogue Work Starts + How To Build It
+### Start points in task list
+- **Quest + NPC core starts at Phase 3 (Task 031-045).**
+- **Dialogue/content pipeline depth starts at Phase 8 (Task 093-099).**
+- **Retail-quality progression and onboarding closes in Task 100-108.**
+
+### Professional implementation flow (apply to each relevant task)
+1. **Data contract**
+   - Define IDs, schema fields, defaults, and validation rules first.
+2. **Content authoring path**
+   - Document exact file path and format for adding:
+     - NPC definitions
+     - Dialogue entries
+     - Quest steps/objectives/rewards
+     - Texture references
+3. **Asset setup**
+   - Use GT610-safe textures (mips/compression/fallback resolution).
+4. **Runtime wiring**
+   - Load + validate + instantiate + route interactions + show feedback.
+5. **Progression continuity**
+   - Ensure quest/NPC/dialogue state survives save/load and world reloads.
+6. **QA checklist**
+   - Interaction prompt works
+   - Dialogue advances correctly
+   - Quest transitions and rewards are correct
+   - Missing assets fall back cleanly
+   - Performance stays in low-spec budget
+
+### Minimum retail-quality bar for these systems
+- Designer can add new NPC/quest/dialogue/texture without engine code rewrite.
+- Player can complete at least one full quest loop with clear UI/audio feedback.
+- No critical blockers in save/load, progression, or interaction flow.
+
+---
+
 ## 4) Commercial‑Readiness Checklist (After Task 108)
-These are required for a **sellable** build even if not fully specified in code yet. If any item is missing, create the smallest safe stub and document it.
+These are required for a **sellable** build even if not fully specified in code yet. If any item is missing, create the smallest production-safe implementation and document it.
 
 **Release‑critical:**
 - **Stability:** no crashers in 30‑minute soak run.
@@ -197,7 +242,7 @@ These are required for a **sellable** build even if not fully specified in code 
 - Clean fallback/error handling for missing assets.
 - Vertical-slice checklist passes documented in `docs/SHIP_CHECKLIST.md`.
 
-If any of these are not fully implemented, **create a minimal stub** with clear TODO notes and log it in docs.
+If any of these are not fully implemented, **create the smallest production-safe implementation** with clear TODO notes and log it in docs.
 
 ---
 
@@ -205,7 +250,7 @@ If any of these are not fully implemented, **create a minimal stub** with clear 
 1) Open this file.
 2) Determine next task (prefer `docs/NEXT_TASK.md`).
 3) Read only the files listed by the task.
-4) Implement smallest viable version.
+4) Implement the smallest shippable vertical slice.
 5) Update required docs if the task demands it.
 6) Stop.
 

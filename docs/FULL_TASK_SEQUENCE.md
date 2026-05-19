@@ -35,12 +35,51 @@ This file is the complete ordered sequence from current state to "all planned sy
 - Keep D3D11 + GT610-safe defaults.
 - If a task requires a new `.cpp`, also update `GameRewritten.vcxproj` and `GameRewritten.vcxproj.filters`.
 
+## Full-System Policy (No Placeholder-Only Completion)
+- Any task label containing **stub / lite / base / hook** must be delivered as a **playable production-ready v1 vertical slice**.
+- Do not mark a task complete for scaffolding-only code.
+- Minimum completion bar per gameplay system task:
+  1. Runtime logic path is implemented.
+  2. Player-visible feedback exists (UI/audio/animation/event).
+  3. Data/config path exists for tuning and content authoring.
+  4. Persistence/state continuity is handled when relevant.
+  5. Failure-safe fallback path is present.
+- If a full implementation does not fit one run, split into sub-tasks (A/B/C) and finish the full chain before checking the parent task.
+
+## Task Ownership Matrix (SLM vs Copilot)
+Use this as the execution owner source of truth for Task 001-108.
+
+### SLM-first
+- Primary range: **001-030**
+- Additional tasks: **046-048, 050-052, 056-058, 106**
+- Workflow: strict one-file prompts and deterministic edits.
+
+### Copilot-required
+- Primary ranges: **031-045**, **061-105**, **107-108**
+- Additional tasks: **049, 053-055, 059-060**
+- Includes high-coupling architecture, multi-system reasoning, streaming/world scale, quest/progression depth, and ship gates.
+
+### Escalation rule
+- If an SLM-assigned task fails twice, introduces compile/runtime uncertainty, or requires broad multi-file reasoning, escalate to Copilot immediately.
+
+## Professional Gameplay Content Playbook
+Use this playbook for questing, NPCs, dialogue, textures, and content quality work.
+
+1. Define content contracts first (IDs, required fields, paths, validators, fallback defaults).
+2. Build/import assets within GT610 budgets (mips, compression, low/high fallbacks).
+3. Wire loading + validation + clear error logging.
+4. Integrate runtime behavior (spawn/state/interaction/feedback/persistence).
+5. Document author workflow end-to-end (how to add NPCs, dialogue, quest steps, textures, and references).
+6. Run QA checklist (progression continuity, save/load, missing asset behavior, readability, performance).
+7. Mark done only when the full loop is playable end-to-end.
+
 ## Completion Target
 Project completion for this autopilot track means:
 - Every `❌` item from `docs/SYSTEMS.md` is implemented and flipped to `✅`.
 - No remaining unchecked tasks in this file.
 - Open-world traversal works at multi-continent scale with streaming-safe runtime behavior.
 - Release gates for packaging/legal/settings/onboarding are complete.
+- Systems are fully playable and integrated, not placeholder-only.
 
 ---
 

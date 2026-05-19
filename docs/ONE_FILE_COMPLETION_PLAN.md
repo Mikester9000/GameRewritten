@@ -16,6 +16,8 @@ Every task uses fields **0-8** and is formatted for manual copy/paste workflows.
 - Use absolute paths only.
 - Output copy-ready final text for manual paste.
 - Do not claim direct file edits.
+- Treat any "stub/lite/base/hook" task as full playable v1 delivery, not scaffold-only output.
+- Use task owner routing from `/home/runner/work/GameRewritten/GameRewritten/docs/FULL_TASK_SEQUENCE.md` (SLM-first vs Copilot-required).
 - If messages are not showing up, emit heartbeat lines:
   - `STATUS: START Task ###`
   - `STATUS: CHUNK X/N`
@@ -29,6 +31,7 @@ READ_LINES: <start-end>
 LINE_BUDGET: <max lines modified/added in this file>
 ACTION: <replace-range|insert-after-anchor>
 ANCHOR: <exact anchor text>
+EXECUTOR: <SLM|COPILOT>
 STATUS: <START|CHUNK X/N|DONE>
 PASTE_BLOCK_START
 ```<language>
@@ -38,6 +41,15 @@ PASTE_BLOCK_END
 ```
 
 ---
+
+## Full-System Completion Addendum (applies to every task card)
+- Do not output placeholder-only code blocks for completion.
+- Ensure paste-ready output can produce a playable end-to-end path for that task scope.
+- For content tasks (NPC/quest/dialogue/textures), include or update:
+  - data contract field usage,
+  - asset/reference path usage,
+  - runtime integration point,
+  - save/load continuity hook if relevant.
 
 ## Task Cards (001-108)
 
