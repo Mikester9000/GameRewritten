@@ -80,89 +80,89 @@ These tasks exist specifically because the workflow is one-file-per-task and hea
 
 ## Task H01
 0. **Single-file edit:** yes, exactly one file in this task.
-1. **Task Name:** Add Execution Rule header to base plan
-2. **What the task does + logic:** Inserts/updates the `## Execution Rule (No Thinking Required)` section directly in the base one-file plan.
-3. **Narrative logic explanation:** Locate header area, guard duplicate section creation, insert canonical execution steps, then verify order.
+1. **Task Name:** Update Execution Rule section in this continuation file
+2. **What the task does + logic:** Inserts/updates the `## Execution Rule (No Thinking Required)` section in this continuation file.
+3. **Narrative logic explanation:** Locate section at lines 13-19, guard duplicate step entries, correct or expand canonical execution steps, then verify order.
 4. **Game design target (FF7 Remake + PS2):** Keep deterministic low-reasoning workflow that supports consistent GT610-safe development output.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN.md`
-6. **Where in file to edit:** READ_LINES: 1-120; insert in top control-header block before task cards.
-7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN(CON1).md`
+6. **Where in file to edit:** READ_LINES: 13-19; replace/update only the Execution Rule block.
+7. **Additional information:** LINE_BUDGET target <=20 lines changed in this file for this run.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
 ## Task H02
 0. **Single-file edit:** yes, exactly one file in this task.
-1. **Task Name:** Add Message Visibility Fallback header to base plan
-2. **What the task does + logic:** Inserts/updates the `## Message Visibility Fallback (If outputs are not appearing)` section in the base one-file plan.
-3. **Narrative logic explanation:** Locate header area, guard duplicate markers, add START/CHUNK/DONE visibility rules, then verify order.
+1. **Task Name:** Update Message Visibility Fallback section in this continuation file
+2. **What the task does + logic:** Inserts/updates the `## Message Visibility Fallback (If outputs are not appearing)` section in this continuation file.
+3. **Narrative logic explanation:** Locate section at lines 21-27, guard duplicate markers, correct START/CHUNK/DONE visibility steps, then verify order.
 4. **Game design target (FF7 Remake + PS2):** Keep deterministic execution outputs reliable for weak local LLM workflows.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN.md`
-6. **Where in file to edit:** READ_LINES: 1-140; insert in top control-header block before task cards.
-7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN(CON1).md`
+6. **Where in file to edit:** READ_LINES: 21-27; replace/update only the Message Visibility Fallback block.
+7. **Additional information:** LINE_BUDGET target <=20 lines changed in this file for this run.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
 ## Task H03
 0. **Single-file edit:** yes, exactly one file in this task.
-1. **Task Name:** Add Mandatory micro-steps header to base plan
-2. **What the task does + logic:** Inserts/updates the `## Mandatory micro-steps per task` section in the base one-file plan.
-3. **Narrative logic explanation:** Locate header area, guard duplicate list creation, add micro-step sequence, then verify order.
+1. **Task Name:** Update Mandatory micro-steps section in this continuation file
+2. **What the task does + logic:** Inserts/updates the `## Mandatory micro-steps per task` section in this continuation file.
+3. **Narrative logic explanation:** Locate section at lines 29-36, guard duplicate step list, correct micro-step sequence, then verify order.
 4. **Game design target (FF7 Remake + PS2):** Preserve predictable one-step execution and low-risk edits for constrained hardware targets.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN.md`
-6. **Where in file to edit:** READ_LINES: 1-160; insert in top control-header block before task cards.
-7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN(CON1).md`
+6. **Where in file to edit:** READ_LINES: 29-36; replace/update only the Mandatory micro-steps block.
+7. **Additional information:** LINE_BUDGET target <=20 lines changed in this file for this run.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
 ## Task H04
 0. **Single-file edit:** yes, exactly one file in this task.
-1. **Task Name:** Add Global Constraints header to base plan
-2. **What the task does + logic:** Inserts/updates the `## Global Constraints` section in the base one-file plan.
-3. **Narrative logic explanation:** Locate header area, guard duplicates, add constraints list, then verify order and wording alignment.
+1. **Task Name:** Update Global Constraints section in this continuation file
+2. **What the task does + logic:** Inserts/updates the `## Global Constraints` section in this continuation file.
+3. **Narrative logic explanation:** Locate section at lines 38-43, guard duplicates, correct constraints list, then verify order and wording alignment.
 4. **Game design target (FF7 Remake + PS2):** Keep safe scope control and GT610 budget discipline during automated task execution.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN.md`
-6. **Where in file to edit:** READ_LINES: 1-180; insert in top control-header block before task cards.
-7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN(CON1).md`
+6. **Where in file to edit:** READ_LINES: 38-43; replace/update only the Global Constraints block.
+7. **Additional information:** LINE_BUDGET target <=20 lines changed in this file for this run.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
 ## Task H05
 0. **Single-file edit:** yes, exactly one file in this task.
-1. **Task Name:** Add Full-System Policy header to base plan
-2. **What the task does + logic:** Inserts/updates the `## Full-System Policy (No Placeholder-Only Completion)` section in the base one-file plan.
-3. **Narrative logic explanation:** Locate header area, guard duplicate policy blocks, add completion policy requirements, then verify placement.
+1. **Task Name:** Update Full-System Policy section in this continuation file
+2. **What the task does + logic:** Inserts/updates the `## Full-System Policy (No Placeholder-Only Completion)` section in this continuation file.
+3. **Narrative logic explanation:** Locate section at lines 45-48, guard duplicate policy blocks, correct completion policy requirements, then verify placement.
 4. **Game design target (FF7 Remake + PS2):** Ensure deliverables remain playable and production-usable rather than scaffold-only.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN.md`
-6. **Where in file to edit:** READ_LINES: 1-200; insert in top control-header block before task cards.
-7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN(CON1).md`
+6. **Where in file to edit:** READ_LINES: 45-48; replace/update only the Full-System Policy block.
+7. **Additional information:** LINE_BUDGET target <=20 lines changed in this file for this run.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
 ## Task H06
 0. **Single-file edit:** yes, exactly one file in this task.
-1. **Task Name:** Add Task Ownership Matrix header to base plan
-2. **What the task does + logic:** Inserts/updates the `## Task Ownership Matrix (SLM vs Copilot)` section in the base one-file plan.
-3. **Narrative logic explanation:** Locate header area, guard duplicate routing guidance, insert owner matrix, then verify alignment with source-of-truth.
+1. **Task Name:** Update Task Ownership Matrix section in this continuation file
+2. **What the task does + logic:** Inserts/updates the `## Task Ownership Matrix (SLM vs Copilot)` section in this continuation file.
+3. **Narrative logic explanation:** Locate section at lines 50-52, guard duplicate routing guidance, correct owner matrix, then verify alignment with source-of-truth.
 4. **Game design target (FF7 Remake + PS2):** Keep deterministic executor routing for minimal-reasoning local LLM workflow.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN.md`
-6. **Where in file to edit:** READ_LINES: 1-220; insert in top control-header block before task cards.
-7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN(CON1).md`
+6. **Where in file to edit:** READ_LINES: 50-52; replace/update only the Task Ownership Matrix block.
+7. **Additional information:** LINE_BUDGET target <=20 lines changed in this file for this run.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
 ## Task H07
 0. **Single-file edit:** yes, exactly one file in this task.
-1. **Task Name:** Add Completion Target header to base plan
-2. **What the task does + logic:** Inserts/updates the `## Completion Target` section in the base one-file plan.
-3. **Narrative logic explanation:** Locate header area, guard duplicate target criteria, insert completion gates, then verify list ordering.
+1. **Task Name:** Update Completion Target section in this continuation file
+2. **What the task does + logic:** Inserts/updates the `## Completion Target` section in this continuation file.
+3. **Narrative logic explanation:** Locate section at lines 54-57, guard duplicate target criteria, correct completion gates, then verify list ordering.
 4. **Game design target (FF7 Remake + PS2):** Maintain clear ship-target gates with low-spec-safe execution expectations.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN.md`
-6. **Where in file to edit:** READ_LINES: 1-240; insert in top control-header block before task cards.
-7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN(CON1).md`
+6. **Where in file to edit:** READ_LINES: 54-57; replace/update only the Completion Target block.
+7. **Additional information:** LINE_BUDGET target <=20 lines changed in this file for this run.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
 ## Task H08
 0. **Single-file edit:** yes, exactly one file in this task.
-1. **Task Name:** Header-sync verification pass for base plan
-2. **What the task does + logic:** Performs one-file verification/update pass to ensure all required control headers exist and are ordered correctly in the base one-file plan.
-3. **Narrative logic explanation:** Read top section, guard missing/misordered blocks, apply final reorder if needed, then output final normalized header block.
+1. **Task Name:** Control-header verification pass for this continuation file
+2. **What the task does + logic:** Performs one-file verification/update pass to ensure all required control headers exist and are ordered correctly in this continuation file.
+3. **Narrative logic explanation:** Read lines 1-75, guard missing/misordered blocks, apply final reorder if needed, then output final normalized header block.
 4. **Game design target (FF7 Remake + PS2):** Ensure deterministic plan execution remains stable for low-capacity local LLMs.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN.md`
-6. **Where in file to edit:** READ_LINES: 1-260; normalize only control-header block before first `## Task 001`.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN(CON1).md`
+6. **Where in file to edit:** READ_LINES: 1-75; normalize only the control-header block before first `## Required Header Sync Tasks`.
 7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
