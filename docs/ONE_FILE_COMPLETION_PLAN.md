@@ -2,6 +2,7 @@
 
 This is the single source document to finish the game track to commercial-readiness handoff.
 Each task is independent, prompt-ready, and includes exact file targets, insertion lines, modification budgets, copy-ready code blocks, and smaller ordered substeps for Qwen2.5-Coder-1.5B.
+This plan assumes the LLM cannot directly edit files: it can only return text that a human copies into files manually.
 
 ## Hard Rules
 1. One task per run.
@@ -14,13 +15,24 @@ Each task is independent, prompt-ready, and includes exact file targets, inserti
    - `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`
    - `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`
 
+## Manual Copy/Paste Output Contract (Required)
+1. The model must never claim it changed files directly.
+2. For each step, the model must output only copy-ready text for the target file(s).
+3. Every code-edit step output must include:
+   - target file absolute path
+   - anchor reference from the task card
+   - explicit action (`insert-after-anchor` or `replace-range`)
+   - one fenced code block containing the exact final text to paste
+4. No explanations outside the copy-ready payload unless the prompt explicitly asks for them.
+5. Human operator pastes output into files, saves, and only then runs the next step.
+
 ## Qwen2.5-Coder-1.5B Mode
 1. Use one prompt per step, not one prompt per whole task.
-2. Edit only one file in each code-edit step.
+2. Generate output for only one file in each code-edit step.
 3. Copy only the current step packet and the matching code context block into the model.
 4. Finish all listed code-file steps in order before the docs-update step.
 5. Do not merge multiple file edits into one response.
-6. Stop after each step and save the file before moving to the next step.
+6. Stop after each step, manually paste output into the file, and save before moving to the next step.
 7. If a step fails, retry the same step. Do not jump forward.
 8. Use the full-task prompt only if the model proves it can handle the entire task safely.
 
@@ -45,8 +57,19 @@ python tools/llm/worst_llm_guard.py complete
 Implement Task <ID>: <NAME>.
 
 Use the File Edit Plan and Code Context Blocks from this task card exactly.
+You cannot edit files directly. Output copy-ready payloads only.
 Apply append-first edits at listed Insert At Line values unless compile errors force a nearby replacement.
 Do not exceed Modify Existing Lines (max) per file.
+
+For each file output this exact format:
+FILE: <absolute path>
+ACTION: <insert-after-anchor|replace-range>
+ANCHOR: <anchor from task card>
+PASTE_BLOCK_START
+```<language>
+<exact text to paste>
+```
+PASTE_BLOCK_END
 
 After edits update:
 - /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
@@ -59,9 +82,19 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ## Universal Prompt Template (Single Step for Qwen2.5-Coder-1.5B)
 ```text
 Execute exactly one step packet from the selected task card.
-Edit only the file named in that step packet.
+You cannot edit files directly. Output copy-ready payload only.
+Target only the file named in that step packet.
 Use only the matching Code Context Block from the same task card.
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
+Output this exact shape:
+FILE: <absolute path>
+ACTION: <insert-after-anchor|replace-range>
+ANCHOR: <anchor from task card>
+PASTE_BLOCK_START
+```<language>
+<exact text to paste>
+```
+PASTE_BLOCK_END
 Stop after finishing this one step.
 ```
 
@@ -83,10 +116,10 @@ Stop after finishing this one step.
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop.
-5. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop so a human can paste them manually.
+5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop so a human can paste them manually.
 6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -96,78 +129,78 @@ Stop after finishing this one step.
 ```text
 Task 001: Pressure / stagger integration stub.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` only
 ```text
 Task 001: Pressure / stagger integration stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` only
 ```text
 Task 001: Pressure / stagger integration stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` only
 ```text
 Task 001: Pressure / stagger integration stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` only
 ```text
 Task 001: Pressure / stagger integration stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 7: Update docs only
 ```text
 Task 001: Pressure / stagger integration stub.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 7 / 7: Complete task guard
 ```text
 Task 001: Pressure / stagger integration stub.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -356,10 +389,10 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop.
-5. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop so a human can paste them manually.
+5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop so a human can paste them manually.
 6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -369,78 +402,78 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 002: Enemy reaction / interrupt-lite.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` only
 ```text
 Task 002: Enemy reaction / interrupt-lite.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` only
 ```text
 Task 002: Enemy reaction / interrupt-lite.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` only
 ```text
 Task 002: Enemy reaction / interrupt-lite.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` only
 ```text
 Task 002: Enemy reaction / interrupt-lite.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 7: Update docs only
 ```text
 Task 002: Enemy reaction / interrupt-lite.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 7 / 7: Complete task guard
 ```text
 Task 002: Enemy reaction / interrupt-lite.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -627,8 +660,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -638,52 +671,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 003: Enemy attack telegraph lite.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` only
 ```text
 Task 003: Enemy attack telegraph lite.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` only
 ```text
 Task 003: Enemy attack telegraph lite.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 003: Enemy attack telegraph lite.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 003: Enemy attack telegraph lite.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -792,8 +825,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -803,52 +836,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 004: Screen edge damage flash.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 004: Screen edge damage flash.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 004: Screen edge damage flash.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 004: Screen edge damage flash.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 004: Screen edge damage flash.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -956,7 +989,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` and stop so a human can paste them manually.
 3. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 4. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -966,39 +999,39 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 005: Hit pause / hitstop.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 4: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` only
 ```text
 Task 005: Hit pause / hitstop.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 331.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 4: Update docs only
 ```text
 Task 005: Hit pause / hitstop.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 4 / 4: Complete task guard
 ```text
 Task 005: Hit pause / hitstop.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -1068,8 +1101,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -1079,52 +1112,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 006: Stagger meter.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` only
 ```text
 Task 006: Stagger meter.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` only
 ```text
 Task 006: Stagger meter.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 006: Stagger meter.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 006: Stagger meter.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -1233,8 +1266,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -1244,52 +1277,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 007: Enemy attack telegraph.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` only
 ```text
 Task 007: Enemy attack telegraph.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` only
 ```text
 Task 007: Enemy attack telegraph.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 007: Enemy attack telegraph.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 007: Enemy attack telegraph.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -1398,8 +1431,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -1409,52 +1442,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 008: Parry / counter window.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp` only
 ```text
 Task 008: Parry / counter window.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 110.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp` only
 ```text
 Task 008: Parry / counter window.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 37.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 008: Parry / counter window.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 008: Parry / counter window.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -1563,8 +1596,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -1574,52 +1607,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 009: Weak point damage.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` only
 ```text
 Task 009: Weak point damage.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` only
 ```text
 Task 009: Weak point damage.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 009: Weak point damage.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 009: Weak point damage.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -1728,8 +1761,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -1739,52 +1772,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 010: Area name display.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 010: Area name display.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 010: Area name display.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 010: Area name display.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 010: Area name display.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -1904,7 +1937,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 011: Notification toast system.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -1912,44 +1945,44 @@ After reading, stop.
 ```text
 Task 011: Notification toast system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.hpp` only
 ```text
 Task 011: Notification toast system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 011: Notification toast system.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 011: Notification toast system.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -1994,8 +2027,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -2005,52 +2038,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 012: Letterbox event bars.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp` only
 ```text
 Task 012: Letterbox event bars.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 567.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp` only
 ```text
 Task 012: Letterbox event bars.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 124.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 012: Letterbox event bars.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 012: Letterbox event bars.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -2159,8 +2192,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -2170,52 +2203,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 013: Contextual button prompts.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 013: Contextual button prompts.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 013: Contextual button prompts.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 013: Contextual button prompts.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 013: Contextual button prompts.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -2324,8 +2357,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -2335,52 +2368,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 014: Level up screen overlay.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 014: Level up screen overlay.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 014: Level up screen overlay.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 014: Level up screen overlay.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 014: Level up screen overlay.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -2500,7 +2533,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 015: Status screen.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -2508,44 +2541,44 @@ After reading, stop.
 ```text
 Task 015: Status screen.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.hpp` only
 ```text
 Task 015: Status screen.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 015: Status screen.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 015: Status screen.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -2601,7 +2634,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 016: Map screen stub.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -2609,44 +2642,44 @@ After reading, stop.
 ```text
 Task 016: Map screen stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.hpp` only
 ```text
 Task 016: Map screen stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 016: Map screen stub.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 016: Map screen stub.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -2691,8 +2724,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -2702,52 +2735,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 017: Tooltip system.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 017: Tooltip system.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 017: Tooltip system.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 017: Tooltip system.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 017: Tooltip system.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -2856,8 +2889,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -2867,52 +2900,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 018: Saving indicator.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 018: Saving indicator.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 018: Saving indicator.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 018: Saving indicator.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 018: Saving indicator.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -3021,8 +3054,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -3032,52 +3065,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 019: Death / defeat screen.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 019: Death / defeat screen.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 019: Death / defeat screen.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 019: Death / defeat screen.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 019: Death / defeat screen.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -3186,8 +3219,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -3197,52 +3230,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 020: Camera shake.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` only
 ```text
 Task 020: Camera shake.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` only
 ```text
 Task 020: Camera shake.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 020: Camera shake.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 020: Camera shake.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -3351,8 +3384,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -3362,52 +3395,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 021: Combat camera zoom.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` only
 ```text
 Task 021: Combat camera zoom.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` only
 ```text
 Task 021: Combat camera zoom.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 021: Combat camera zoom.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 021: Combat camera zoom.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -3516,8 +3549,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -3527,52 +3560,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 022: Camera collision avoidance.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` only
 ```text
 Task 022: Camera collision avoidance.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` only
 ```text
 Task 022: Camera collision avoidance.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 022: Camera collision avoidance.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 022: Camera collision avoidance.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -3681,8 +3714,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -3692,52 +3725,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 023: Target framing adjustment.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` only
 ```text
 Task 023: Target framing adjustment.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` only
 ```text
 Task 023: Target framing adjustment.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 023: Target framing adjustment.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 023: Target framing adjustment.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -3846,8 +3879,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -3857,52 +3890,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 024: Lock-on camera recovery smoothing.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` only
 ```text
 Task 024: Lock-on camera recovery smoothing.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` only
 ```text
 Task 024: Lock-on camera recovery smoothing.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 024: Lock-on camera recovery smoothing.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 024: Lock-on camera recovery smoothing.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -4010,7 +4043,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl` and stop so a human can paste them manually.
 3. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 4. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -4020,39 +4053,39 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 025: Wind effect on trees.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 4: Edit `/home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl` only
 ```text
 Task 025: Wind effect on trees.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 40.
 Max existing lines to modify: 20.
 Target new lines to add: 35.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 4: Update docs only
 ```text
 Task 025: Wind effect on trees.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 4 / 4: Complete task guard
 ```text
 Task 025: Wind effect on trees.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -4133,7 +4166,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 026: Weather system lite.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -4141,44 +4174,44 @@ After reading, stop.
 ```text
 Task 026: Weather system lite.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.hpp` only
 ```text
 Task 026: Weather system lite.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 026: Weather system lite.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 026: Weather system lite.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -4234,7 +4267,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 027: Ambient particles.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -4242,44 +4275,44 @@ After reading, stop.
 ```text
 Task 027: Ambient particles.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.hpp` only
 ```text
 Task 027: Ambient particles.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 027: Ambient particles.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 027: Ambient particles.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -4335,7 +4368,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 028: Day/night cycle.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -4343,44 +4376,44 @@ After reading, stop.
 ```text
 Task 028: Day/night cycle.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.hpp` only
 ```text
 Task 028: Day/night cycle.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 028: Day/night cycle.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 028: Day/night cycle.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -4425,8 +4458,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -4436,52 +4469,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 029: Biome transition fade.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` only
 ```text
 Task 029: Biome transition fade.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 354.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` only
 ```text
 Task 029: Biome transition fade.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 112.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 029: Biome transition fade.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 029: Biome transition fade.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -4590,8 +4623,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -4601,52 +4634,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 030: Fog of war on minimap.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp` only
 ```text
 Task 030: Fog of war on minimap.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 149.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp` only
 ```text
 Task 030: Fog of war on minimap.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 28.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 030: Fog of war on minimap.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 030: Fog of war on minimap.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -4766,7 +4799,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 031: World event trigger zones.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -4774,44 +4807,44 @@ After reading, stop.
 ```text
 Task 031: World event trigger zones.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.hpp` only
 ```text
 Task 031: World event trigger zones.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 031: World event trigger zones.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 031: World event trigger zones.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -4867,7 +4900,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 032: Interaction hotspot registry stub.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -4875,44 +4908,44 @@ After reading, stop.
 ```text
 Task 032: Interaction hotspot registry stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp` only
 ```text
 Task 032: Interaction hotspot registry stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 032: Interaction hotspot registry stub.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 032: Interaction hotspot registry stub.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -4968,7 +5001,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 033: Landmark discovery trigger stub.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -4976,44 +5009,44 @@ After reading, stop.
 ```text
 Task 033: Landmark discovery trigger stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.hpp` only
 ```text
 Task 033: Landmark discovery trigger stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 033: Landmark discovery trigger stub.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 033: Landmark discovery trigger stub.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -5069,7 +5102,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 034: NPC actor.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -5077,44 +5110,44 @@ After reading, stop.
 ```text
 Task 034: NPC actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.hpp` only
 ```text
 Task 034: NPC actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 034: NPC actor.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 034: NPC actor.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -5170,7 +5203,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 035: Quest objective system.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -5178,44 +5211,44 @@ After reading, stop.
 ```text
 Task 035: Quest objective system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp` only
 ```text
 Task 035: Quest objective system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 035: Quest objective system.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 035: Quest objective system.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -5271,7 +5304,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 036: Treasure chest actor.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -5279,44 +5312,44 @@ After reading, stop.
 ```text
 Task 036: Treasure chest actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.hpp` only
 ```text
 Task 036: Treasure chest actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 036: Treasure chest actor.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 036: Treasure chest actor.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -5372,7 +5405,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 037: Campfire / rest point actor.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -5380,44 +5413,44 @@ After reading, stop.
 ```text
 Task 037: Campfire / rest point actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.hpp` only
 ```text
 Task 037: Campfire / rest point actor.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 037: Campfire / rest point actor.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 037: Campfire / rest point actor.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -5464,8 +5497,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 4. Create only `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp` and stop.
 5. Create only `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp` and stop.
 6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
@@ -5477,78 +5510,78 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 038: NPC interaction prompt routing stub.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 038: NPC interaction prompt routing stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 038: NPC interaction prompt routing stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 7: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp` only
 ```text
 Task 038: NPC interaction prompt routing stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 7: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp` only
 ```text
 Task 038: NPC interaction prompt routing stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 7: Update docs only
 ```text
 Task 038: NPC interaction prompt routing stub.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 7 / 7: Complete task guard
 ```text
 Task 038: NPC interaction prompt routing stub.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -5684,7 +5717,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 039: Quest flag / world-state hook.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -5692,57 +5725,57 @@ After reading, stop.
 ```text
 Task 039: Quest flag / world-state hook.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestFlags.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 6: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp` only
 ```text
 Task 039: Quest flag / world-state hook.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 6: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp` only
 ```text
 Task 039: Quest flag / world-state hook.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 6: Update docs only
 ```text
 Task 039: Quest flag / world-state hook.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 6 / 6: Complete task guard
 ```text
 Task 039: Quest flag / world-state hook.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -5796,8 +5829,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 
 1. Read this task card once. Do not open any other task card.
 2. Create only `/home/runner/work/GameRewritten/GameRewritten/src/world/SpawnTable.hpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` and stop.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` and stop so a human can paste them manually.
 5. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 6. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -5807,7 +5840,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 040: Spawn composition table stub (solo / pair / pack).
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -5815,57 +5848,57 @@ After reading, stop.
 ```text
 Task 040: Spawn composition table stub (solo / pair / pack).
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/SpawnTable.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 6: Edit `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` only
 ```text
 Task 040: Spawn composition table stub (solo / pair / pack).
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 354.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 6: Edit `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` only
 ```text
 Task 040: Spawn composition table stub (solo / pair / pack).
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 112.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 6: Update docs only
 ```text
 Task 040: Spawn composition table stub (solo / pair / pack).
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 6 / 6: Complete task guard
 ```text
 Task 040: Spawn composition table stub (solo / pair / pack).
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -5992,7 +6025,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 041: Inventory system.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -6000,44 +6033,44 @@ After reading, stop.
 ```text
 Task 041: Inventory system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.hpp` only
 ```text
 Task 041: Inventory system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 041: Inventory system.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 041: Inventory system.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -6081,7 +6114,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` and stop so a human can paste them manually.
 3. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 4. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -6091,39 +6124,39 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 042: XP / level system.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 4: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` only
 ```text
 Task 042: XP / level system.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 86.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 4: Update docs only
 ```text
 Task 042: XP / level system.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 4 / 4: Complete task guard
 ```text
 Task 042: XP / level system.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -6192,7 +6225,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` and stop so a human can paste them manually.
 3. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 4. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -6202,39 +6235,39 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 043: Status effects.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 4: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` only
 ```text
 Task 043: Status effects.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 86.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 4: Update docs only
 ```text
 Task 043: Status effects.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 4 / 4: Complete task guard
 ```text
 Task 043: Status effects.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -6315,7 +6348,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 044: Fast travel stub.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -6323,44 +6356,44 @@ After reading, stop.
 ```text
 Task 044: Fast travel stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.hpp` only
 ```text
 Task 044: Fast travel stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 044: Fast travel stub.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 044: Fast travel stub.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -6416,7 +6449,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 045: Save / load system.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -6424,44 +6457,44 @@ After reading, stop.
 ```text
 Task 045: Save / load system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.hpp` only
 ```text
 Task 045: Save / load system.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 045: Save / load system.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 045: Save / load system.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -6517,7 +6550,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 046: Quality preset enforcement.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -6525,44 +6558,44 @@ After reading, stop.
 ```text
 Task 046: Quality preset enforcement.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Create `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp` only
 ```text
 Task 046: Quality preset enforcement.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 046: Quality preset enforcement.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 046: Quality preset enforcement.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -6607,8 +6640,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -6618,52 +6651,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 047: Victory fanfare trigger.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` only
 ```text
 Task 047: Victory fanfare trigger.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` only
 ```text
 Task 047: Victory fanfare trigger.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 047: Victory fanfare trigger.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 047: Victory fanfare trigger.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -6772,8 +6805,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -6783,52 +6816,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 048: Environmental ambient audio.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` only
 ```text
 Task 048: Environmental ambient audio.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` only
 ```text
 Task 048: Environmental ambient audio.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 048: Environmental ambient audio.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 048: Environmental ambient audio.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -6937,8 +6970,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -6948,52 +6981,52 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 049: Looping BGM.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` only
 ```text
 Task 049: Looping BGM.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` only
 ```text
 Task 049: Looping BGM.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 049: Looping BGM.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 049: Looping BGM.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -7104,10 +7137,10 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp` and stop.
-5. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp` and stop so a human can paste them manually.
+5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp` and stop so a human can paste them manually.
 6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -7117,78 +7150,78 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 050: Tactical Pause enter / exit SFX.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` only
 ```text
 Task 050: Tactical Pause enter / exit SFX.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` only
 ```text
 Task 050: Tactical Pause enter / exit SFX.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp` only
 ```text
 Task 050: Tactical Pause enter / exit SFX.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 140.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp` only
 ```text
 Task 050: Tactical Pause enter / exit SFX.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 29.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 7: Update docs only
 ```text
 Task 050: Tactical Pause enter / exit SFX.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 7 / 7: Complete task guard
 ```text
 Task 050: Tactical Pause enter / exit SFX.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -7376,9 +7409,9 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp` and stop so a human can paste them manually.
 5. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 6. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -7388,65 +7421,65 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 051: Lock-on acquire / break SFX.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 6: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` only
 ```text
 Task 051: Lock-on acquire / break SFX.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 6: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` only
 ```text
 Task 051: Lock-on acquire / break SFX.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 6: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp` only
 ```text
 Task 051: Lock-on acquire / break SFX.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 137.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 6: Update docs only
 ```text
 Task 051: Lock-on acquire / break SFX.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 6 / 6: Complete task guard
 ```text
 Task 051: Lock-on acquire / break SFX.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -7596,10 +7629,10 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop.
-5. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` and stop so a human can paste them manually.
+5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` and stop so a human can paste them manually.
 6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -7609,78 +7642,78 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 052: Enemy alert bark stub.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` only
 ```text
 Task 052: Enemy alert bark stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` only
 ```text
 Task 052: Enemy alert bark stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp` only
 ```text
 Task 052: Enemy alert bark stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 215.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp` only
 ```text
 Task 052: Enemy alert bark stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 96.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 7: Update docs only
 ```text
 Task 052: Enemy alert bark stub.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 7 / 7: Complete task guard
 ```text
 Task 052: Enemy alert bark stub.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -7868,7 +7901,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 
 1. Read this task card once. Do not open any other task card.
 2. Create only `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Equipment.hpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` and stop.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -7878,7 +7911,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 053: Equipment slot stub.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -7886,44 +7919,44 @@ After reading, stop.
 ```text
 Task 053: Equipment slot stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Equipment.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` only
 ```text
 Task 053: Equipment slot stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 86.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 053: Equipment slot stub.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 053: Equipment slot stub.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -8001,7 +8034,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 
 1. Read this task card once. Do not open any other task card.
 2. Create only `/home/runner/work/GameRewritten/GameRewritten/src/game/progression/AbilityProgression.hpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` and stop.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` and stop so a human can paste them manually.
 4. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 5. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -8011,7 +8044,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 054: Ability unlock / progression hook.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -8019,44 +8052,44 @@ After reading, stop.
 ```text
 Task 054: Ability unlock / progression hook.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/progression/AbilityProgression.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 5: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp` only
 ```text
 Task 054: Ability unlock / progression hook.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 86.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 5: Update docs only
 ```text
 Task 054: Ability unlock / progression hook.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 5 / 5: Complete task guard
 ```text
 Task 054: Ability unlock / progression hook.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -8135,8 +8168,8 @@ Then run: python tools/llm/worst_llm_guard.py complete
 
 1. Read this task card once. Do not open any other task card.
 2. Create only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatModifiers.hpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop so a human can paste them manually.
 5. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 6. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -8146,7 +8179,7 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 055: Combat stat modifier pipeline stub.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
@@ -8154,57 +8187,57 @@ After reading, stop.
 ```text
 Task 055: Combat stat modifier pipeline stub.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatModifiers.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 6: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` only
 ```text
 Task 055: Combat stat modifier pipeline stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 6: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` only
 ```text
 Task 055: Combat stat modifier pipeline stub.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 6: Update docs only
 ```text
 Task 055: Combat stat modifier pipeline stub.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 6 / 6: Complete task guard
 ```text
 Task 055: Combat stat modifier pipeline stub.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -8322,10 +8355,10 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` and stop.
-5. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` and stop so a human can paste them manually.
+5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` and stop so a human can paste them manually.
 6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -8335,78 +8368,78 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 056: Combat bugfix sweep.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp` only
 ```text
 Task 056: Combat bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 167.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp` only
 ```text
 Task 056: Combat bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 72.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` only
 ```text
 Task 056: Combat bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 331.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` only
 ```text
 Task 056: Combat bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 566.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 7: Update docs only
 ```text
 Task 056: Combat bugfix sweep.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 7 / 7: Complete task guard
 ```text
 Task 056: Combat bugfix sweep.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -8595,10 +8628,10 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp` and stop.
-5. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp` and stop so a human can paste them manually.
+5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` and stop so a human can paste them manually.
 6. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 7. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -8608,78 +8641,78 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 057: Camera/input bugfix sweep.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp` only
 ```text
 Task 057: Camera/input bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 304.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp` only
 ```text
 Task 057: Camera/input bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 130.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp` only
 ```text
 Task 057: Camera/input bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/app/InputActionMap.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 88.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 7: Edit `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp` only
 ```text
 Task 057: Camera/input bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 566.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 7: Update docs only
 ```text
 Task 057: Camera/input bugfix sweep.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 7 / 7: Complete task guard
 ```text
 Task 057: Camera/input bugfix sweep.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -8870,12 +8903,12 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp` and stop.
-5. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp` and stop.
-6. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp` and stop.
-7. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp` and stop so a human can paste them manually.
+5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp` and stop so a human can paste them manually.
+6. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp` and stop so a human can paste them manually.
+7. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp` and stop so a human can paste them manually.
 8. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 9. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -8885,104 +8918,104 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp` only
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 567.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp` only
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 124.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp` only
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 140.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 7 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp` only
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/TacticalPauseMenu.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 29.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 8 / 9: Update docs only
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 9 / 9: Complete task guard
 ```text
 Task 058: UI/HUD polish and bugfix sweep.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -9251,12 +9284,12 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` and stop.
-4. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.cpp` and stop.
-5. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` and stop.
-6. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.cpp` and stop.
-7. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` and stop so a human can paste them manually.
+4. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.cpp` and stop so a human can paste them manually.
+5. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` and stop so a human can paste them manually.
+6. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.cpp` and stop so a human can paste them manually.
+7. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.hpp` and stop so a human can paste them manually.
 8. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 9. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -9266,104 +9299,104 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 059: World/runtime stability sweep.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp` only
 ```text
 Task 059: World/runtime stability sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 354.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp` only
 ```text
 Task 059: World/runtime stability sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 112.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.cpp` only
 ```text
 Task 059: World/runtime stability sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 110.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp` only
 ```text
 Task 059: World/runtime stability sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 331.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.cpp` only
 ```text
 Task 059: World/runtime stability sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/Forest.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/Forest.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 234.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 7 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/game/Forest.hpp` only
 ```text
 Task 059: World/runtime stability sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/game/Forest.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/game/Forest.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 49.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 8 / 9: Update docs only
 ```text
 Task 059: World/runtime stability sweep.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 9 / 9: Complete task guard
 ```text
 Task 059: World/runtime stability sweep.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
@@ -9632,12 +9665,12 @@ Then run: python tools/llm/worst_llm_guard.py complete
 - **Micro-step execution order (Qwen2.5-Coder-1.5B):**
 
 1. Read this task card once. Do not open any other task card.
-2. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop.
-3. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop.
+2. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` and stop so a human can paste them manually.
+3. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` and stop so a human can paste them manually.
 4. Create only `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp` and stop.
 5. Create only `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp` and stop.
-6. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop.
-7. Edit only `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop.
+6. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` and stop so a human can paste them manually.
+7. Generate copy-ready changes only for `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` and stop so a human can paste them manually.
 8. Update only `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md`, `/home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md`, and `/home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md`.
 9. Run `python tools/llm/worst_llm_guard.py complete` and stop.
 
@@ -9647,104 +9680,104 @@ Then run: python tools/llm/worst_llm_guard.py complete
 ```text
 Task 060: Audio and final quality sweep.
 Read this task card only.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 After reading, stop.
 ```
 
 #### Step 2 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp` only
 ```text
 Task 060: Audio and final quality sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 104.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 3 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp` only
 ```text
 Task 060: Audio and final quality sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 39.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 4 / 9: Create `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp` only
 ```text
 Task 060: Audio and final quality sweep.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 110.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 5 / 9: Create `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp` only
 ```text
 Task 060: Audio and final quality sweep.
 Create only this file: /home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.hpp
-Do not edit any other file in this step.
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 1.
 Max existing lines to modify: 0.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 6 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp` only
 ```text
 Task 060: Audio and final quality sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 379.
 Max existing lines to modify: 28.
 Target new lines to add: 70.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 7 / 9: Edit `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp` only
 ```text
 Task 060: Audio and final quality sweep.
-Edit only this file: /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
-Do not edit any other file in this step.
+Target file for this step (the model cannot edit it directly): /home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.hpp
+Do not generate changes for any other file in this step.
 Use the matching Code Context Block from this task card.
 Insert target: line 41.
 Max existing lines to modify: 18.
 Target new lines to add: 40.
 Implement only the smallest part of the task that belongs in this file.
-Save the file and stop.
+Output copy-ready code blocks for this file only, then stop so a human can paste them manually.
 ```
 
 #### Step 8 / 9: Update docs only
 ```text
 Task 060: Audio and final quality sweep.
-Edit only these files in this step:
+Generate copy-ready doc blocks for only these files in this step:
 /home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md
 /home/runner/work/GameRewritten/GameRewritten/docs/CHANGELOG.md
 /home/runner/work/GameRewritten/GameRewritten/docs/AGENT_WORK_LOG.md
-Do not edit any code files in this step.
+Do not generate code-file changes outside the listed doc files in this step.
 Update the docs to describe the completed task.
-Save the docs and stop.
+Output copy-ready doc blocks, manually paste them into the listed doc files, save, and stop.
 ```
 
 #### Step 9 / 9: Complete task guard
 ```text
 Task 060: Audio and final quality sweep.
-Do not edit any files in this step.
+Do not generate file changes in this step.
 Run: python tools/llm/worst_llm_guard.py complete
 Stop after the command finishes.
 ```
