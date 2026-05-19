@@ -8,8 +8,8 @@ Every task uses fields **0-8** and is formatted for manual copy/paste workflows.
 - Source of truth checked: `/home/runner/work/GameRewritten/GameRewritten/docs/FULL_TASK_SEQUENCE.md`
 - Base plan task count: **201** total — **108** primary `.cpp` feature tasks (Task 001-108) + **93** `.hpp` companion tasks (Task 001H-107H, one per `.cpp` task that needed a header pair).
 - `.hpp` companion coverage: all `.cpp` tasks in the base plan have a matching `###H` companion task already in the base plan. No `.hpp` companions are missing.
-- Addendum purpose: this file (CON1) extends the base plan with tasks that fall outside the 001-108 + 001H-107H scope: release readiness gates, plan-document maintenance, and any future gap tasks discovered during development.
-- Tasks in this addendum: **20** total — **8** plan-document maintenance tasks (H01-H08) + **12** release gate tasks (Task 109-120).
+- Addendum purpose: this file (CON1) extends the base plan with tasks that fall outside the 001-108 + 001H-107H scope: release readiness gates, plan-document maintenance, build wiring, content pipeline, PS2-era graphics, water/swimming, all vehicle types, roads/traffic AI, open-world systems (climbing, gliding, fishing, mounts, photo mode, interior portals), NPC day/night schedules, final integration sweeps, and world-building authoring guide.
+- Tasks in this addendum: **106** total — **8** plan-document maintenance tasks (H01-H08) + **12** release gate tasks (Task 109-120) + **57** open-world/graphics/feature tasks (Task 121-177) + **29** `.hpp` companion tasks (121H-169H, one per new `.cpp` task that introduces new declarations).
 
 ## Execution Rule (No Thinking Required)
 1. Read this addendum and the base one-file plan.

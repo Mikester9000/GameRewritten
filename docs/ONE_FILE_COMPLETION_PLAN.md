@@ -6,8 +6,9 @@ Every task uses fields **0-8** and is formatted for manual copy/paste workflows.
 ## Verification Summary
 - Source of truth checked: `/home/runner/work/GameRewritten/GameRewritten/docs/FULL_TASK_SEQUENCE.md`
 - Required task count found: **108** (Task 001-108).
-- Tasks listed in this plan: **108** (Task 001-108).
-- Coverage result: **108/108 included**.
+- Tasks listed in this plan: **108** (Task 001-108) primary `.cpp` feature tasks + **93** `.hpp` companion tasks (001H-107H).
+- Coverage result: **108/108 included**. All `.hpp` companions present.
+- Continuation addendum: see `ONE_FILE_COMPLETION_PLAN(CON1).md` for Tasks 109-120 (release gates), Tasks 121-177 (open-world / PS2 graphics / water / vehicles / roads / content pipeline / world-building guide), and all H companions for those new tasks. Run base tasks 001-108 first, then CON1 tasks in order.
 - Completion status reference checked: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md` (items mapped to these tasks remain tracked there).
 
 ## Global Rules
