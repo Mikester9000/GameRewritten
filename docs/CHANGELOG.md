@@ -1,3 +1,4 @@
+- 2026-05-19: Policy compliance pass: removed Tactical Pause "Coming soon" stub command rows so the panel now exposes only implemented gameplay actions, and removed nonfunctional mouse-speed placeholder UI from Pause menu Options.
 - 2026-05-17: Workflow hardening v2: added `worst_llm_guard.py doctor` preflight, enforced clean-worktree start gate, expanded deterministic docs to doctor/start/complete sequence, and appended mandatory end-of-road debugging/polish tasks (056-060).
 - 2026-05-17: Workflow hardening: added `worst_llm_guard.py` with enforced task-scope and required-doc checks, and switched start/finish docs to guarded commands for first-generation local LLM reliability.
 - 2026-05-13: Track 12.10: Added lightweight enemy hit flash blink, MISS indicator feedback, off-screen lock-on edge indicator, and Tactical Pause unavailable-command reason labels (Need Surge / No MP / Coming soon).

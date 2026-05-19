@@ -297,7 +297,7 @@ void ImGuiLayer::DrawPauseMenu()
 
         ImGui::Spacing();
 
-        // Simple inline options (placeholder).
+        // Simple inline options.
         static bool showOptions = false;
         if (ImGui::Button("Options", ImVec2(-1.0f, 0.0f)))
             showOptions = !showOptions;
@@ -305,14 +305,16 @@ void ImGuiLayer::DrawPauseMenu()
         if (showOptions)
         {
             ImGui::Indent();
-            static float mouseSpeed = 1.0f;
-            ImGui::SliderFloat("Mouse Speed", &mouseSpeed, 0.1f, 5.0f);
             if (m_audioManager)
             {
                 float bgmVolume = m_audioManager->GetBGMVolume();
                 if (ImGui::SliderFloat("BGM Volume (next play)", &bgmVolume, 0.0f, 1.0f))
                     m_audioManager->SetBGMVolume(bgmVolume);
                 ImGui::TextDisabled("tp::Audio BGM playback is one-shot.");
+            }
+            else
+            {
+                ImGui::TextDisabled("Audio manager unavailable.");
             }
             ImGui::Unindent();
         }
