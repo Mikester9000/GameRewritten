@@ -8,7 +8,7 @@ Every task uses fields **0-8** and is formatted for manual copy/paste workflows.
 - Required task count found: **108** (Task 001-108).
 - Tasks listed in this plan: **108** (Task 001-108) primary `.cpp` feature tasks + **93** `.hpp` companion tasks (001H-107H).
 - Coverage result: **108/108 included**. All `.hpp` companions present.
-- Continuation addendum: see `ONE_FILE_COMPLETION_PLAN(CON1).md` for Tasks 109-120 (release gates), Tasks 121-223 (open-world / PS2 graphics / water / vehicles / roads / shops / FF nostalgia / audio zones / accessibility / WorldEditor tools / content pipeline / world-building docs), and all H companions for those new tasks. Run base tasks 001-108 first, then CON1 tasks in order.
+- Continuation addendum: see `ONE_FILE_COMPLETION_PLAN(CON1).md` for Tasks 109-120 (release gates), Tasks 121-246 (open-world / PS2 graphics / water / vehicles / roads / shops / FF nostalgia / audio zones / accessibility / WorldEditor tools / content pipeline / world-building docs / faction reputation / wanted-crime / dynamic events / camps / companions-banter / fast travel / collectibles / bounty hunts / NG+ / endgame trials / save backup resilience), and all H companions for those new tasks. Run base tasks 001-108 first, then CON1 tasks in order.
 - Completion status reference checked: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md` (items mapped to these tasks remain tracked there).
 
 ## Global Rules

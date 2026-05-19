@@ -8,8 +8,8 @@ Every task uses fields **0-8** and is formatted for manual copy/paste workflows.
 - Source of truth checked: `/home/runner/work/GameRewritten/GameRewritten/docs/FULL_TASK_SEQUENCE.md`
 - Base plan task count: **201** total — **108** primary `.cpp` feature tasks (Task 001-108) + **93** `.hpp` companion tasks (Task 001H-107H, one per `.cpp` task that needed a header pair).
 - `.hpp` companion coverage: all `.cpp` tasks in the base plan have a matching `###H` companion task already in the base plan. No `.hpp` companions are missing.
-- Addendum purpose: this file (CON1) extends the base plan with tasks that fall outside the 001-108 + 001H-107H scope: release readiness gates, plan-document maintenance, build wiring, content pipeline, PS2-era graphics, water/swimming, all vehicle types, roads/traffic AI, open-world systems (climbing, gliding, fishing, mounts, photo mode, interior portals), NPC day/night schedules, final integration sweeps, and world-building authoring guide.
-- Tasks in this addendum: **174** total — **8** plan-document maintenance tasks (H01-H08) + **12** release gate tasks (Task 109-120) + **103** open-world/graphics/feature tasks (Task 121-223, covering build wiring, content pipeline, PS2-era graphics, water/swimming, all vehicle classes, roads/traffic AI, open-world systems, FF nostalgia features, audio zones, accessibility, WorldEditor tools, content authoring templates, final integration sweeps, and world-building documentation) + **51** `.hpp` companion tasks (one per new `.cpp` task that introduces new declarations).
+- Addendum purpose: this file (CON1) extends the base plan with tasks that fall outside the 001-108 + 001H-107H scope: release readiness gates, plan-document maintenance, build wiring, content pipeline, PS2-era graphics, water/swimming, all vehicle types, roads/traffic AI, open-world systems (climbing, gliding, fishing, mounts, photo mode, interior portals), NPC day/night schedules, final integration sweeps, and world-building authoring guide, plus modern open-world layers (faction reputation, crime/wanted response, dynamic world events, camps, companions/banter runtime, fast travel, collectibles, bounty hunts, NG+, endgame trials, and save-backup resilience).
+- Tasks in this addendum: **214** total — **8** plan-document maintenance tasks (H01-H08) + **12** release gate tasks (Task 109-120) + **126** open-world/graphics/feature tasks (Task 121-246, covering build wiring, content pipeline, PS2-era graphics, water/swimming, all vehicle classes, roads/traffic AI, open-world systems, FF nostalgia features, audio zones, accessibility, WorldEditor tools, content authoring templates, final integration sweeps, world-building documentation, and missing modern layers such as faction reputation, crime/wanted response, dynamic world events, camps, companions/banter runtime, fast travel, collectibles, bounty hunts, NG+, endgame trials, and save-backup resilience) + **68** `.hpp` companion tasks (added where declarations are required by implementation tasks).
 
 ## Execution Rule (No Thinking Required)
 1. Read this addendum and the base one-file plan.
@@ -2051,3 +2051,447 @@ These tasks bring the engine to a fully commercial, feature-complete open-world 
 6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under the most relevant section heading.
 7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
 8. **Copy-ready completion rule:** Return final paste-ready markdown for this file only, with no extra files or commentary.
+
+### Section V — Modern Open-World Systems Missing Pass (Tasks 224–235)
+
+## Task 224
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Faction reputation system — multi-faction standing with thresholds that gate shops, quests, and guard reactions
+2. **What the task does + logic:** Implements a runtime-visible reputation tracker for major world factions so player actions influence world access and social consequences.
+3. **Narrative logic explanation:** Initialize faction table, guard invalid faction ids, apply gain/loss deltas from events, then expose threshold queries for UI and quest gating.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Adds modern systemic reactivity while preserving readable JRPG progression and low-overhead logic on GT610-safe builds.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FactionReputationSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 224H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 224 (Faction reputation system)
+2. **What the task does + logic:** Adds/updates declarations required by Task 224 so implementation compiles and can be consumed by quest/UI systems.
+3. **Narrative logic explanation:** Read current declarations, add only required signatures/types, guard duplicates, then keep ordering stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep interfaces explicit and deterministic for weak local LLM execution.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FactionReputationSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 225
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Wanted / crime system — witness-based crime scoring with guard pursuit and cooldown decay
+2. **What the task does + logic:** Implements a modern open-world crime loop where illegal actions increase wanted level and trigger guard responses.
+3. **Narrative logic explanation:** Track crime events, guard invalid categories, accumulate wanted score with decay, then publish guard response state.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Adds city-law reactivity like modern RPGs while keeping simple deterministic state transitions.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/WantedSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 225H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 225 (Wanted / crime system)
+2. **What the task does + logic:** Adds/updates declarations required by Task 225 for use by AI, UI, and save systems.
+3. **Narrative logic explanation:** Read current declarations, add only needed members/signatures, guard duplicates, then keep declaration flow clear.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep external API stable for one-file-at-a-time implementation flow.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/WantedSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 226
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Dynamic world event director — ambient encounters, rescue events, convoy ambushes, and roaming bosses
+2. **What the task does + logic:** Implements weighted event spawning based on region, time, weather, and player progression flags.
+3. **Narrative logic explanation:** Build event pool, guard invalid spawn contexts, roll deterministic weighted pick, then publish active world event entry.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Makes traversal feel alive like large studios while retaining lightweight event logic.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/DynamicEventDirector.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 226H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 226 (Dynamic world event director)
+2. **What the task does + logic:** Adds/updates declarations required by Task 226 so world, quest, and map systems can query active events.
+3. **Narrative logic explanation:** Read declarations, add event structs and query signatures, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Preserve predictable interfaces for low-reasoning LLM execution.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/DynamicEventDirector.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 227
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Camp system — place camp, rest until chosen time, party healing, and camp interaction menu
+2. **What the task does + logic:** Implements a modern open-world camp loop for pacing, recovery, and time control.
+3. **Narrative logic explanation:** Validate camp placement, guard unsafe locations, open camp menu flow, then apply rest/heal/time-skip outputs.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Adds FF15-style world downtime while staying low-cost and deterministic.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/CampSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 227H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 227 (Camp system)
+2. **What the task does + logic:** Adds/updates declarations required by Task 227 for integration with day/night, party, and save systems.
+3. **Narrative logic explanation:** Read declarations, add only required signatures/state structs, guard duplicates, then keep ordering stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep camp flow integration explicit and beginner-friendly.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/CampSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 228
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Companion manager — active party member selection, swap rules, and tactical role presets
+2. **What the task does + logic:** Implements multi-companion management expected in modern party-based open-world RPGs.
+3. **Narrative logic explanation:** Initialize party slots, guard invalid swap requests, apply role preset updates, then expose active roster state.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Supports FF7-style party identity with modern role-swapping convenience.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/party/CompanionManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 228H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 228 (Companion manager)
+2. **What the task does + logic:** Adds/updates declarations required by Task 228 for RuntimeScene and UI integration.
+3. **Narrative logic explanation:** Read declarations, add only required companion state/query API, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep party APIs simple for predictable one-file implementation.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/party/CompanionManager.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 229
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Companion banter authoring template — contextual banter triggers (region, weather, quest phase, combat aftermath)
+2. **What the task does + logic:** Adds a JSON schema template for authored companion dialogue banter in open-world traversal.
+3. **Narrative logic explanation:** Define top-level keys, guard required fields, include trigger context arrays, then output canonical template.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keeps handcrafted party personality while enabling scalable authored content.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Dialogue/companion_banter_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; output full JSON template.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+## Task 230
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Fast-travel network — unlockable travel nodes, map selection, and travel cost/conditions
+2. **What the task does + logic:** Implements modern fast-travel flow with discoverable nodes and quest/region lock conditions.
+3. **Narrative logic explanation:** Load nodes, guard locked destinations, resolve travel request, then update player position and streaming prewarm hints.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Balances open-world scale with practical traversal while preserving regional identity.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravelNetwork.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 230H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 230 (Fast-travel network)
+2. **What the task does + logic:** Adds/updates declarations required by Task 230 so UI/map and world streaming can call travel APIs.
+3. **Narrative logic explanation:** Read declarations, add node structs and query methods, guard duplicates, then keep declaration ordering clear.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keeps travel integration straightforward for tiny-step LLM workflows.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravelNetwork.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 231
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Discovery log screen — records discovered landmarks, dungeons, camps, and hidden areas
+2. **What the task does + logic:** Implements a completion-tracking UI page for exploration milestones.
+3. **Narrative logic explanation:** Build discovery list model, guard duplicate entries, group by region/type, then render completion progress in UI.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Encourages exploration with visible progress while keeping UI low-cost.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/DiscoveryLogScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 231H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 231 (Discovery log screen)
+2. **What the task does + logic:** Adds/updates declarations required by Task 231 so exploration systems can push discovery entries.
+3. **Narrative logic explanation:** Read declarations, add entry structs/query methods, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keeps completion logging interface explicit and easy to maintain.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/DiscoveryLogScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 232
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Collectible system — region-based collectible sets with completion rewards and world pin hints
+2. **What the task does + logic:** Implements collectible tracking and reward unlocks expected in modern open-world progression loops.
+3. **Narrative logic explanation:** Register collectibles, guard duplicate pickups, update per-region completion, then publish reward unlock events.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Adds exploration rewards without heavy runtime cost.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/CollectibleSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 232H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 232 (Collectible system)
+2. **What the task does + logic:** Adds/updates declarations required by Task 232 for save/load, UI, and reward systems.
+3. **Narrative logic explanation:** Read declarations, add only required types and methods, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keeps collectible APIs deterministic for step-by-step execution.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/CollectibleSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 233
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Treasure map / clue system — clue text links to world regions and unlocks hidden chest markers
+2. **What the task does + logic:** Implements clue-driven treasure hunts that bridge lore text and exploration gameplay.
+3. **Narrative logic explanation:** Parse clue entries, guard unresolved clue ids, evaluate region hint conditions, then publish marker reveal events.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Adds handcrafted mystery loops with simple low-cost logic.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/TreasureClueSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 233H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 233 (Treasure map / clue system)
+2. **What the task does + logic:** Adds/updates declarations required by Task 233 for quest log and map marker integration.
+3. **Narrative logic explanation:** Read declarations, add clue structs/signatures, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Maintain clear interfaces for content-authored clue expansion.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/TreasureClueSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 234
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Bounty board system — region hunt contracts with rank tiers, timers, and reward payouts
+2. **What the task does + logic:** Implements modern hunt-contract loops for repeatable combat content and region progression.
+3. **Narrative logic explanation:** Load contracts, guard invalid target states, evaluate completion/failure, then emit payout and reputation deltas.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Adds FF12/FF15-style hunt depth while preserving simple contract flow.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/BountyBoardSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 234H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 234 (Bounty board system)
+2. **What the task does + logic:** Adds/updates declarations required by Task 234 for UI board listings and contract lifecycle hooks.
+3. **Narrative logic explanation:** Read declarations, add contract data/query APIs, guard duplicates, then keep declaration order clear.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep contract interfaces small and deterministic for low-reasoning tool execution.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/BountyBoardSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 235
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Hunt contract authoring template — contract id, target archetype, region, time window, rewards
+2. **What the task does + logic:** Adds canonical JSON schema template for bounty contract authoring.
+3. **Narrative logic explanation:** Define root keys, guard required fields, include reward and condition blocks, then output canonical contract template.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Enables rapid content expansion without C++ edits.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Content/Quests/hunt_contract_template.json`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; output full JSON template.
+7. **Additional information:** LINE_BUDGET target <=60 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready JSON for this file only, with no extra files or commentary.
+
+### Section W — Completion Depth + Large-Studio Polish Missing Pass (Tasks 236–246)
+
+## Task 236
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Photo album gallery — stores in-game screenshots with location/time metadata and browse UI
+2. **What the task does + logic:** Implements persistent photo gallery browsing to complete the photo-mode feature loop.
+3. **Narrative logic explanation:** Register capture metadata, guard invalid image references, sort/filter gallery entries, then render browse/delete UI.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Preserves the handcrafted world memory loop expected in modern RPGs.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/PhotoAlbumScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 236H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 236 (Photo album gallery)
+2. **What the task does + logic:** Adds/updates declarations required by Task 236 for save integration and UI calls.
+3. **Narrative logic explanation:** Read declarations, add only needed entry structs/methods, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep interface minimal and easy for one-file task execution.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/PhotoAlbumScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 237
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Mount summon whistle system — call nearest owned mount with cooldown and path-safe arrival
+2. **What the task does + logic:** Implements modern mount quality-of-life summon flow used in large open-world games.
+3. **Narrative logic explanation:** Validate summon request, guard blocked contexts, resolve spawn path-safe arrival point, then issue mount approach command.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keeps traversal smooth while retaining handcrafted mount identity.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/MountSummonSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 237H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 237 (Mount summon whistle system)
+2. **What the task does + logic:** Adds/updates declarations required by Task 237 for input and mount actor integration.
+3. **Narrative logic explanation:** Read declarations, add summon structs/signatures, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep mount summon API deterministic and easy to call.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/MountSummonSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 238
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Companion banter runtime player — triggers contextual banter lines and cooldown arbitration
+2. **What the task does + logic:** Implements runtime playback and conflict-resolution logic for authored companion banter entries.
+3. **Narrative logic explanation:** Pull contextual candidate lines, guard overlap conflicts, apply cooldown arbitration, then dispatch selected line to dialogue/audio.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Adds party personality density expected in modern FF-like adventures.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/dialogue/CompanionBanterRuntime.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 238H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 238 (Companion banter runtime player)
+2. **What the task does + logic:** Adds/updates declarations required by Task 238 for dialogue/audio integration points.
+3. **Narrative logic explanation:** Read declarations, add runtime structs/signatures, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep banter runtime contract simple for deterministic execution.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/dialogue/CompanionBanterRuntime.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 239
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Full keybind remap screen — editable action bindings with conflict detection and reset defaults
+2. **What the task does + logic:** Implements modern control-remapping UX needed for accessibility and player preference.
+3. **Narrative logic explanation:** List current bindings, guard invalid/repeated key assignments, apply remap with conflict prompts, then persist settings.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keeps action controls modern and configurable while preserving classic menu tone.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/KeybindSettingsScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 239H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 239 (Full keybind remap screen)
+2. **What the task does + logic:** Adds/updates declarations required by Task 239 for input settings integration.
+3. **Narrative logic explanation:** Read declarations, add remap state/query APIs, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keeps input configuration interfaces clear for one-file iteration.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/KeybindSettingsScreen.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 240
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** New Game Plus flow — carry-over rules, enemy scaling tier, and optional chapter-skip flags
+2. **What the task does + logic:** Implements replay progression expected in modern action RPG endgame loops.
+3. **Narrative logic explanation:** Validate NG+ profile data, guard incompatible carry-over fields, apply scaling tier, then initialize NG+ session flags.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Supports replay value while preserving handcrafted progression pacing.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/NewGamePlusFlow.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 240H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 240 (New Game Plus flow)
+2. **What the task does + logic:** Adds/updates declarations required by Task 240 for save/select/menu integration.
+3. **Narrative logic explanation:** Read declarations, add profile/carry-over structs and init APIs, guard duplicates, then keep ordering stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep replay APIs explicit and low risk.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/NewGamePlusFlow.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 241
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Endgame trial gates — optional high-difficulty arena/boss challenge progression with score ranks
+2. **What the task does + logic:** Implements post-story challenge structure used by large-studio action RPGs.
+3. **Narrative logic explanation:** Register trial definitions, guard invalid unlock conditions, evaluate completion score tiers, then unlock next trial/reward.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Adds long-tail mastery content without inflating base campaign complexity.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/endgame/TrialGateSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 241H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 241 (Endgame trial gates)
+2. **What the task does + logic:** Adds/updates declarations required by Task 241 so UI and reward systems can query trial status.
+3. **Narrative logic explanation:** Read declarations, add trial structs/status API, guard duplicates, then keep declaration ordering stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep endgame integration deterministic and one-file friendly.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/endgame/TrialGateSystem.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 242
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Save backup manifest — rolling backup slots and corruption recovery selection logic
+2. **What the task does + logic:** Implements robust save resilience expected in large-scale open-world games.
+3. **Narrative logic explanation:** Create backup manifest model, guard invalid slot metadata, rotate backups on save, then expose recovery candidate list.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Protects long playthroughs without heavy runtime overhead.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/save/SaveBackupManifest.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type/function and keep insertion local.
+7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 242H
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Header companion for Task 242 (Save backup manifest)
+2. **What the task does + logic:** Adds/updates declarations required by Task 242 for save/load and menu recovery integration.
+3. **Narrative logic explanation:** Read declarations, add backup manifest structs/methods, guard duplicates, then keep declaration order stable.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keep save recovery API simple and reliable.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/save/SaveBackupManifest.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near owning type declaration.
+7. **Additional information:** LINE_BUDGET target <=80 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 243
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** WORLD_BUILDING_GUIDE.md addendum — faction, event, bounty, collectible, and banter authoring workflow
+2. **What the task does + logic:** Extends world-authoring documentation with exact content pipeline for newly added modern systems.
+3. **Narrative logic explanation:** Insert new section blocks, guard duplicate headings, provide deterministic order of authoring steps, then include acceptance checks.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Keeps handmade content production scalable like a studio pipeline.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/WORLD_BUILDING_GUIDE.md`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under authoring workflow sections.
+7. **Additional information:** LINE_BUDGET target <=160 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready markdown for this file only, with no extra files or commentary.
+
+## Task 244
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** CONTENT_CREATION_GUIDE.md addendum — assets and data for camps, trials, hunt boards, and discovery collectibles
+2. **What the task does + logic:** Extends content-production guide with exact file/folder contracts for newly added systems.
+3. **Narrative logic explanation:** Add content pipeline sections, guard duplicate contracts, specify naming conventions and validation checklist, then provide publish flow.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Aligns handmade asset creation with predictable studio-grade pipeline rules.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/CONTENT_CREATION_GUIDE.md`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under content pipeline sections.
+7. **Additional information:** LINE_BUDGET target <=160 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready markdown for this file only, with no extra files or commentary.
+
+## Task 245
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** SHIP_CHECKLIST.md addendum — acceptance gates for factions, wanted system, dynamic events, camps, companions, fast travel, NG+, endgame
+2. **What the task does + logic:** Extends release readiness checklist with measurable pass/fail gates for the missing modern features.
+3. **Narrative logic explanation:** Add new ship gate blocks, guard overlap with existing entries, define measurable criteria, then include evidence capture checklist.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Ensures final release quality matches modern expectations without violating PS2-era target constraints.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/SHIP_CHECKLIST.md`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under release gate sections.
+7. **Additional information:** LINE_BUDGET target <=160 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready markdown for this file only, with no extra files or commentary.
+
+## Task 246
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Final integration sweep (modern systems pass) — wire new systems into Main.cpp lifecycle in deterministic order
+2. **What the task does + logic:** Performs one final integration/wiring pass for Tasks 224–245 so systems initialize, update, and shutdown cleanly.
+3. **Narrative logic explanation:** Add construction order block, guard null/uninitialized calls, insert update ordering, then add shutdown order and integration comments.
+4. **Game design target (FF7 action + PS2 nostalgia + handmade):** Completes modern open-world feature parity while preserving stable GT610-safe runtime behavior.
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor in startup/update/shutdown blocks and keep each insertion local.
+7. **Additional information:** LINE_BUDGET target <=180 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
