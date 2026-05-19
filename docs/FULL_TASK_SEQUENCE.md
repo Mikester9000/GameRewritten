@@ -1,6 +1,6 @@
 # Full Task Sequence (Autopilot)
 
-This file is the complete ordered sequence from current state to "all planned systems in `docs/SYSTEMS.md` marked ✅".
+This file is the complete ordered sequence from current state to "all planned systems in `docs/SYSTEMS.md` marked ✅" and ship-ready release tasks complete.
 
 ## Execution Rule (No Thinking Required)
 1. Run `python tools/llm/worst_llm_guard.py doctor`.
@@ -31,6 +31,8 @@ This file is the complete ordered sequence from current state to "all planned sy
 Project completion for this autopilot track means:
 - Every `❌` item from `docs/SYSTEMS.md` is implemented and flipped to `✅`.
 - No remaining unchecked tasks in this file.
+- Open-world traversal works at multi-continent scale with streaming-safe runtime behavior.
+- Release gates for packaging/legal/settings/onboarding are complete.
 
 ---
 
@@ -131,7 +133,6 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-
 ---
 
 ## Phase 2 — Camera + visual polish
@@ -190,7 +191,6 @@ Project completion for this autopilot track means:
   - Files: `src/ui/Minimap.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
-
 
 ---
 
@@ -271,7 +271,6 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-
 ---
 
 ## Phase 4 — Audio + quality + progression glue
@@ -332,25 +331,279 @@ Project completion for this autopilot track means:
 
 - [ ] **Task 056: Combat bugfix sweep**
   - Files: `src/game/combat/CombatSystem.cpp/hpp`, `src/game/RuntimeScene.hpp`, `src/app/Main.cpp`
-  - Steps: resolve remaining combat regressions and unsafe edge cases using minimal scoped fixes only.
-  - Done when: no known combat blockers remain in `docs/AGENT_WORK_LOG.md`, `docs/SYSTEMS.md` flipped to ✅ where applicable, changelog/log updated.
+  - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
+  - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
 - [ ] **Task 057: Camera/input bugfix sweep**
   - Files: `src/game/CameraController.cpp/hpp`, `src/app/InputActionMap.hpp`, `src/app/Main.cpp`
-  - Steps: resolve camera/input logic bugs and bad state transitions with minimal safe edits.
-  - Done when: no known camera/input blockers remain in `docs/AGENT_WORK_LOG.md`, relevant systems flipped to ✅, changelog/log updated.
+  - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
+  - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
 - [ ] **Task 058: UI/HUD polish and bugfix sweep**
   - Files: `src/ui/GameHUD.cpp/hpp`, `src/ui/ImGuiLayer.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp`
-  - Steps: fix HUD/UI defects and apply low-risk clarity polish for readability/usability.
-  - Done when: no known UI/HUD blockers remain in `docs/AGENT_WORK_LOG.md`, relevant systems flipped to ✅, changelog/log updated.
+  - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
+  - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
 - [ ] **Task 059: World/runtime stability sweep**
   - Files: `src/world/WorldGrid.cpp/hpp`, `src/game/RuntimeScene.cpp/hpp`, `src/game/Forest.cpp/hpp`
-  - Steps: fix high-impact runtime/world stability issues with smallest safe patches.
-  - Done when: no known world/runtime blockers remain in `docs/AGENT_WORK_LOG.md`, relevant systems flipped to ✅, changelog/log updated.
+  - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
+  - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
 - [ ] **Task 060: Audio and final quality sweep**
   - Files: `src/audio/AudioManager.cpp/hpp`, `src/app/QualityPreset.cpp/hpp`, `src/ui/GameHUD.cpp/hpp`
-  - Steps: fix remaining audio/quality defects and apply final GT610-safe polish pass.
-  - Done when: final quality blockers are closed in `docs/AGENT_WORK_LOG.md`, relevant systems flipped to ✅, changelog/log updated.
+  - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
+  - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
+
+---
+
+## Phase 6 — Open-world scale foundation (multi-continent)
+
+- [ ] **Task 061: World partition + region streaming core**
+  - Files: `src/world/WorldPartition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 062: Asynchronous chunk IO + prefetch queue**
+  - Files: `src/world/StreamingIO.cpp/hpp`, `src/assets/AssetLoader.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 063: Large-world coordinate rebasing**
+  - Files: `src/world/WorldOriginRebase.cpp/hpp`, `src/app/Main.cpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 064: Terrain/mesh LOD tier manager**
+  - Files: `src/world/WorldLodManager.cpp/hpp`, `src/rendering/d3d11/D3D11Renderer.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 065: Streaming budget governor (CPU/GPU/IO)**
+  - Files: `src/world/StreamingBudget.hpp`, `src/world/WorldGrid.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 066: Far-distance continent impostors**
+  - Files: `src/world/ContinentImpostor.cpp/hpp`, `Shaders/continent_impostor_vs.hlsl`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 067: Global nav tile streaming bridge**
+  - Files: `src/game/world/NavTileStream.cpp/hpp`, `ThirdParty/tp_navigation.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 068: Seamless continent transition triggers**
+  - Files: `src/world/ContinentTransition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 069: Traversal mount/vehicle framework stub**
+  - Files: `src/game/traversal/TraversalMount.cpp/hpp`, `src/game/RuntimeScene.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 070: Traversal verbs: climb/swim/glide base**
+  - Files: `src/game/traversal/TraversalController.cpp/hpp`, `src/game/CameraController.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 071: Seamless interior/exterior cell portals**
+  - Files: `src/world/CellPortal.cpp/hpp`, `src/game/world/EventZone.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 072: World map overlay with continent zoom**
+  - Files: `src/ui/WorldMap.cpp/hpp`, `src/ui/MapScreen.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 073: Discovery journal for landmarks/routes**
+  - Files: `src/game/world/DiscoveryJournal.cpp/hpp`, `src/ui/GameHUD.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 074: Biome-aware population spawn director**
+  - Files: `src/world/PopulationDirector.cpp/hpp`, `src/world/WorldGrid.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 075: World event scheduler (time/weather/region)**
+  - Files: `src/world/WorldEventScheduler.cpp/hpp`, `src/world/DayNightCycle.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 076: Region state persistence for streamed world**
+  - Files: `src/world/RegionStateStore.cpp/hpp`, `src/app/SaveSystem.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+---
+
+## Phase 7 — FF7R-style gameplay depth (party/combat/progression)
+
+- [ ] **Task 077: Party member runtime slot + follow AI**
+  - Files: `src/game/party/PartyRuntime.cpp/hpp`, `src/game/RuntimeScene.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 078: Command wheel + tactical slow-time commands**
+  - Files: `src/ui/CommandWheel.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 079: ATB-style action charge lanes**
+  - Files: `src/game/combat/AtbSystem.cpp/hpp`, `src/game/actors/PlayerStats.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 080: Ability targeting templates (single/cone/aoe)**
+  - Files: `src/game/combat/AbilityTargeting.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 081: Enemy archetype behavior profiles**
+  - Files: `src/game/ai/EnemyArchetypeProfile.hpp`, `src/game/actors/EnemyActor.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 082: Enemy squad tactics coordinator**
+  - Files: `src/game/ai/SquadCoordinator.cpp/hpp`, `src/game/RuntimeScene.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 083: Boss phase state machine framework**
+  - Files: `src/game/actors/BossActor.cpp/hpp`, `src/game/ai/BossPhaseState.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 084: Guard-break / poise combat pipeline**
+  - Files: `src/game/combat/PoiseSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 085: Elemental damage/resistance matrix**
+  - Files: `src/game/combat/ElementSystem.hpp`, `src/game/combat/CombatSystem.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 086: Status ailment counters + immunity windows**
+  - Files: `src/game/combat/StatusAilmentSystem.cpp/hpp`, `src/game/actors/PlayerStats.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 087: Equipment progression + socket rules**
+  - Files: `src/game/inventory/EquipmentProgression.cpp/hpp`, `src/game/inventory/Equipment.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 088: Skill tree graph + unlock prerequisites**
+  - Files: `src/game/progression/SkillTree.cpp/hpp`, `src/game/progression/AbilityProgression.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 089: Loot table tiers + drop weighting**
+  - Files: `src/game/loot/LootTable.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 090: Crafting + upgrade station flow**
+  - Files: `src/game/crafting/CraftingSystem.cpp/hpp`, `src/game/actors/RestPointActor.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 091: Open-world encounter director**
+  - Files: `src/game/ai/EncounterDirector.cpp/hpp`, `src/world/PopulationDirector.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 092: Combat telemetry + balance debug panel**
+  - Files: `src/ui/CombatDebugPanel.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+---
+
+## Phase 8 — Audio/content pipeline + ship readiness
+
+- [ ] **Task 093: Quest authoring schema + validator**
+  - Files: `src/game/quest/QuestSchema.hpp`, `src/game/quest/QuestSystem.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 094: Dialogue branching + localization keys**
+  - Files: `src/game/dialogue/DialogueRuntime.cpp/hpp`, `src/ui/DialogBox.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 095: Cutscene timeline stub + camera rails**
+  - Files: `src/game/cutscene/CutsceneTimeline.cpp/hpp`, `src/game/CameraController.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 096: Audio event router + mixer bus controls**
+  - Files: `src/audio/AudioRouter.cpp/hpp`, `src/audio/AudioManager.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 097: Adaptive music state machine**
+  - Files: `src/audio/MusicStateMachine.cpp/hpp`, `src/audio/AudioManager.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 098: SFX variation + distance/occlusion rules**
+  - Files: `src/audio/SfxSpatialRules.cpp/hpp`, `src/audio/AudioManager.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 099: Voice placeholder + subtitle timing pipeline**
+  - Files: `src/audio/VoicePlayback.cpp/hpp`, `src/ui/SubtitleOverlay.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 100: Save versioning + migration compatibility**
+  - Files: `src/app/SaveMigration.cpp/hpp`, `src/app/SaveSystem.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 101: Crash capture + runtime diagnostics pack**
+  - Files: `src/app/CrashDiagnostics.cpp/hpp`, `src/logger/Logger.hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 102: Full settings menu (graphics/audio/input/accessibility)**
+  - Files: `src/ui/SettingsMenu.cpp/hpp`, `src/app/QualityPreset.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 103: Input rebinding + controller glyph profiles**
+  - Files: `src/app/InputBindingProfile.cpp/hpp`, `src/ui/GameHUD.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 104: Performance HUD + auto quality scaler**
+  - Files: `src/app/AutoQualityScaler.cpp/hpp`, `src/ui/ImGuiLayer.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 105: Build packaging + release manifest scripts**
+  - Files: `tools/release/PackageBuild.ps1`, `docs/RELEASE_BUILD.md`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 106: Legal/credits/third-party attribution pass**
+  - Files: `src/ui/CreditsScreen.cpp/hpp`, `docs/THIRD_PARTY.md`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 107: New game bootstrap + onboarding tutorial**
+  - Files: `src/game/NewGameFlow.cpp/hpp`, `src/ui/TutorialOverlay.cpp/hpp`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+- [ ] **Task 108: Vertical-slice certification and ship checklist**
+  - Files: `docs/SHIP_CHECKLIST.md`, `docs/QUALITY_BAR.md`
+  - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
+  - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
+
+---

@@ -131,3 +131,99 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Equipment slot stub | ❌ | `src/game/inventory/Equipment.hpp`, `src/game/actors/PlayerStats.hpp` |
 | Ability unlock / progression hook | ❌ | `src/game/progression/AbilityProgression.hpp`, `src/game/actors/PlayerStats.hpp` |
 | Combat stat modifier pipeline stub | ❌ | `src/game/combat/CombatModifiers.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| World partition + region streaming core | ❌ | `src/world/WorldPartition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
+| Asynchronous chunk IO + prefetch queue | ❌ | `src/world/StreamingIO.cpp/hpp, src/assets/AssetLoader.hpp` |
+| Large-world coordinate rebasing | ❌ | `src/world/WorldOriginRebase.cpp/hpp, src/app/Main.cpp` |
+| Terrain/mesh LOD tier manager | ❌ | `src/world/WorldLodManager.cpp/hpp, src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
+| Streaming budget governor (CPU/GPU/IO) | ❌ | `src/world/StreamingBudget.hpp, src/world/WorldGrid.cpp/hpp` |
+| Far-distance continent impostors | ❌ | `src/world/ContinentImpostor.cpp/hpp, Shaders/continent_impostor_vs.hlsl` |
+| Global nav tile streaming bridge | ❌ | `src/game/world/NavTileStream.cpp/hpp, ThirdParty/tp_navigation.hpp` |
+| Seamless continent transition triggers | ❌ | `src/world/ContinentTransition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
+| Traversal mount/vehicle framework stub | ❌ | `src/game/traversal/TraversalMount.cpp/hpp, src/game/RuntimeScene.hpp` |
+| Traversal verbs: climb/swim/glide base | ❌ | `src/game/traversal/TraversalController.cpp/hpp, src/game/CameraController.cpp/hpp` |
+| Seamless interior/exterior cell portals | ❌ | `src/world/CellPortal.cpp/hpp, src/game/world/EventZone.cpp/hpp` |
+| World map overlay with continent zoom | ❌ | `src/ui/WorldMap.cpp/hpp, src/ui/MapScreen.cpp/hpp` |
+| Discovery journal for landmarks/routes | ❌ | `src/game/world/DiscoveryJournal.cpp/hpp, src/ui/GameHUD.cpp/hpp` |
+| Biome-aware population spawn director | ❌ | `src/world/PopulationDirector.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
+| World event scheduler (time/weather/region) | ❌ | `src/world/WorldEventScheduler.cpp/hpp, src/world/DayNightCycle.cpp/hpp` |
+| Region state persistence for streamed world | ❌ | `src/world/RegionStateStore.cpp/hpp, src/app/SaveSystem.cpp/hpp` |
+| Party member runtime slot + follow AI | ❌ | `src/game/party/PartyRuntime.cpp/hpp, src/game/RuntimeScene.hpp` |
+| Command wheel + tactical slow-time commands | ❌ | `src/ui/CommandWheel.cpp/hpp, src/ui/TacticalPauseMenu.cpp/hpp` |
+| ATB-style action charge lanes | ❌ | `src/game/combat/AtbSystem.cpp/hpp, src/game/actors/PlayerStats.hpp` |
+| Ability targeting templates (single/cone/aoe) | ❌ | `src/game/combat/AbilityTargeting.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Enemy archetype behavior profiles | ❌ | `src/game/ai/EnemyArchetypeProfile.hpp, src/game/actors/EnemyActor.cpp/hpp` |
+| Enemy squad tactics coordinator | ❌ | `src/game/ai/SquadCoordinator.cpp/hpp, src/game/RuntimeScene.hpp` |
+| Boss phase state machine framework | ❌ | `src/game/actors/BossActor.cpp/hpp, src/game/ai/BossPhaseState.hpp` |
+| Guard-break / poise combat pipeline | ❌ | `src/game/combat/PoiseSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Elemental damage/resistance matrix | ❌ | `src/game/combat/ElementSystem.hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Status ailment counters + immunity windows | ❌ | `src/game/combat/StatusAilmentSystem.cpp/hpp, src/game/actors/PlayerStats.hpp` |
+| Equipment progression + socket rules | ❌ | `src/game/inventory/EquipmentProgression.cpp/hpp, src/game/inventory/Equipment.hpp` |
+| Skill tree graph + unlock prerequisites | ❌ | `src/game/progression/SkillTree.cpp/hpp, src/game/progression/AbilityProgression.hpp` |
+| Loot table tiers + drop weighting | ❌ | `src/game/loot/LootTable.cpp/hpp, src/game/actors/EnemyActor.cpp/hpp` |
+| Crafting + upgrade station flow | ❌ | `src/game/crafting/CraftingSystem.cpp/hpp, src/game/actors/RestPointActor.cpp/hpp` |
+| Open-world encounter director | ❌ | `src/game/ai/EncounterDirector.cpp/hpp, src/world/PopulationDirector.cpp/hpp` |
+| Combat telemetry + balance debug panel | ❌ | `src/ui/CombatDebugPanel.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Quest authoring schema + validator | ❌ | `src/game/quest/QuestSchema.hpp, src/game/quest/QuestSystem.cpp/hpp` |
+| Dialogue branching + localization keys | ❌ | `src/game/dialogue/DialogueRuntime.cpp/hpp, src/ui/DialogBox.cpp/hpp` |
+| Cutscene timeline stub + camera rails | ❌ | `src/game/cutscene/CutsceneTimeline.cpp/hpp, src/game/CameraController.cpp/hpp` |
+| Audio event router + mixer bus controls | ❌ | `src/audio/AudioRouter.cpp/hpp, src/audio/AudioManager.cpp/hpp` |
+| Adaptive music state machine | ❌ | `src/audio/MusicStateMachine.cpp/hpp, src/audio/AudioManager.cpp/hpp` |
+| SFX variation + distance/occlusion rules | ❌ | `src/audio/SfxSpatialRules.cpp/hpp, src/audio/AudioManager.cpp/hpp` |
+| Voice placeholder + subtitle timing pipeline | ❌ | `src/audio/VoicePlayback.cpp/hpp, src/ui/SubtitleOverlay.cpp/hpp` |
+| Save versioning + migration compatibility | ❌ | `src/app/SaveMigration.cpp/hpp, src/app/SaveSystem.cpp/hpp` |
+| Crash capture + runtime diagnostics pack | ❌ | `src/app/CrashDiagnostics.cpp/hpp, src/logger/Logger.hpp` |
+| Full settings menu (graphics/audio/input/accessibility) | ❌ | `src/ui/SettingsMenu.cpp/hpp, src/app/QualityPreset.cpp/hpp` |
+| Input rebinding + controller glyph profiles | ❌ | `src/app/InputBindingProfile.cpp/hpp, src/ui/GameHUD.cpp/hpp` |
+| Performance HUD + auto quality scaler | ❌ | `src/app/AutoQualityScaler.cpp/hpp, src/ui/ImGuiLayer.cpp/hpp` |
+| Build packaging + release manifest scripts | ❌ | `tools/release/PackageBuild.ps1, docs/RELEASE_BUILD.md` |
+| Legal/credits/third-party attribution pass | ❌ | `src/ui/CreditsScreen.cpp/hpp, docs/THIRD_PARTY.md` |
+| New game bootstrap + onboarding tutorial | ❌ | `src/game/NewGameFlow.cpp/hpp, src/ui/TutorialOverlay.cpp/hpp` |
+| Vertical-slice certification and ship checklist | ❌ | `docs/SHIP_CHECKLIST.md, docs/QUALITY_BAR.md` |
+| World partition + region streaming core | ❌ | `src/world/WorldPartition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp` |
+| Asynchronous chunk IO + prefetch queue | ❌ | `src/world/StreamingIO.cpp/hpp`, `src/assets/AssetLoader.hpp` |
+| Large-world coordinate rebasing | ❌ | `src/world/WorldOriginRebase.cpp/hpp`, `src/app/Main.cpp` |
+| Terrain/mesh LOD tier manager | ❌ | `src/world/WorldLodManager.cpp/hpp`, `src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
+| Streaming budget governor (CPU/GPU/IO) | ❌ | `src/world/StreamingBudget.hpp`, `src/world/WorldGrid.cpp/hpp` |
+| Far-distance continent impostors | ❌ | `src/world/ContinentImpostor.cpp/hpp`, `Shaders/continent_impostor_vs.hlsl` |
+| Global nav tile streaming bridge | ❌ | `src/game/world/NavTileStream.cpp/hpp`, `ThirdParty/tp_navigation.hpp` |
+| Seamless continent transition triggers | ❌ | `src/world/ContinentTransition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp` |
+| Traversal mount/vehicle framework stub | ❌ | `src/game/traversal/TraversalMount.cpp/hpp`, `src/game/RuntimeScene.hpp` |
+| Traversal verbs: climb/swim/glide base | ❌ | `src/game/traversal/TraversalController.cpp/hpp`, `src/game/CameraController.cpp/hpp` |
+| Seamless interior/exterior cell portals | ❌ | `src/world/CellPortal.cpp/hpp`, `src/game/world/EventZone.cpp/hpp` |
+| World map overlay with continent zoom | ❌ | `src/ui/WorldMap.cpp/hpp`, `src/ui/MapScreen.cpp/hpp` |
+| Discovery journal for landmarks/routes | ❌ | `src/game/world/DiscoveryJournal.cpp/hpp`, `src/ui/GameHUD.cpp/hpp` |
+| Biome-aware population spawn director | ❌ | `src/world/PopulationDirector.cpp/hpp`, `src/world/WorldGrid.cpp/hpp` |
+| World event scheduler (time/weather/region) | ❌ | `src/world/WorldEventScheduler.cpp/hpp`, `src/world/DayNightCycle.cpp/hpp` |
+| Region state persistence for streamed world | ❌ | `src/world/RegionStateStore.cpp/hpp`, `src/app/SaveSystem.cpp/hpp` |
+| Party member runtime slot + follow AI | ❌ | `src/game/party/PartyRuntime.cpp/hpp`, `src/game/RuntimeScene.hpp` |
+| Command wheel + tactical slow-time commands | ❌ | `src/ui/CommandWheel.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp` |
+| ATB-style action charge lanes | ❌ | `src/game/combat/AtbSystem.cpp/hpp`, `src/game/actors/PlayerStats.hpp` |
+| Ability targeting templates (single/cone/aoe) | ❌ | `src/game/combat/AbilityTargeting.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Enemy archetype behavior profiles | ❌ | `src/game/ai/EnemyArchetypeProfile.hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
+| Enemy squad tactics coordinator | ❌ | `src/game/ai/SquadCoordinator.cpp/hpp`, `src/game/RuntimeScene.hpp` |
+| Boss phase state machine framework | ❌ | `src/game/actors/BossActor.cpp/hpp`, `src/game/ai/BossPhaseState.hpp` |
+| Guard-break / poise combat pipeline | ❌ | `src/game/combat/PoiseSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Elemental damage/resistance matrix | ❌ | `src/game/combat/ElementSystem.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Status ailment counters + immunity windows | ❌ | `src/game/combat/StatusAilmentSystem.cpp/hpp`, `src/game/actors/PlayerStats.hpp` |
+| Equipment progression + socket rules | ❌ | `src/game/inventory/EquipmentProgression.cpp/hpp`, `src/game/inventory/Equipment.hpp` |
+| Skill tree graph + unlock prerequisites | ❌ | `src/game/progression/SkillTree.cpp/hpp`, `src/game/progression/AbilityProgression.hpp` |
+| Loot table tiers + drop weighting | ❌ | `src/game/loot/LootTable.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
+| Crafting + upgrade station flow | ❌ | `src/game/crafting/CraftingSystem.cpp/hpp`, `src/game/actors/RestPointActor.cpp/hpp` |
+| Open-world encounter director | ❌ | `src/game/ai/EncounterDirector.cpp/hpp`, `src/world/PopulationDirector.cpp/hpp` |
+| Combat telemetry + balance debug panel | ❌ | `src/ui/CombatDebugPanel.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Quest authoring schema + validator | ❌ | `src/game/quest/QuestSchema.hpp`, `src/game/quest/QuestSystem.cpp/hpp` |
+| Dialogue branching + localization keys | ❌ | `src/game/dialogue/DialogueRuntime.cpp/hpp`, `src/ui/DialogBox.cpp/hpp` |
+| Cutscene timeline stub + camera rails | ❌ | `src/game/cutscene/CutsceneTimeline.cpp/hpp`, `src/game/CameraController.cpp/hpp` |
+| Audio event router + mixer bus controls | ❌ | `src/audio/AudioRouter.cpp/hpp`, `src/audio/AudioManager.cpp/hpp` |
+| Adaptive music state machine | ❌ | `src/audio/MusicStateMachine.cpp/hpp`, `src/audio/AudioManager.cpp/hpp` |
+| SFX variation + distance/occlusion rules | ❌ | `src/audio/SfxSpatialRules.cpp/hpp`, `src/audio/AudioManager.cpp/hpp` |
+| Voice placeholder + subtitle timing pipeline | ❌ | `src/audio/VoicePlayback.cpp/hpp`, `src/ui/SubtitleOverlay.cpp/hpp` |
+| Save versioning + migration compatibility | ❌ | `src/app/SaveMigration.cpp/hpp`, `src/app/SaveSystem.cpp/hpp` |
+| Crash capture + runtime diagnostics pack | ❌ | `src/app/CrashDiagnostics.cpp/hpp`, `src/logger/Logger.hpp` |
+| Full settings menu (graphics/audio/input/accessibility) | ❌ | `src/ui/SettingsMenu.cpp/hpp`, `src/app/QualityPreset.cpp/hpp` |
+| Input rebinding + controller glyph profiles | ❌ | `src/app/InputBindingProfile.cpp/hpp`, `src/ui/GameHUD.cpp/hpp` |
+| Performance HUD + auto quality scaler | ❌ | `src/app/AutoQualityScaler.cpp/hpp`, `src/ui/ImGuiLayer.cpp/hpp` |
+| Build packaging + release manifest scripts | ❌ | `tools/release/PackageBuild.ps1`, `docs/RELEASE_BUILD.md` |
+| Legal/credits/third-party attribution pass | ❌ | `src/ui/CreditsScreen.cpp/hpp`, `docs/THIRD_PARTY.md` |
+| New game bootstrap + onboarding tutorial | ❌ | `src/game/NewGameFlow.cpp/hpp`, `src/ui/TutorialOverlay.cpp/hpp` |
+| Vertical-slice certification and ship checklist | ❌ | `docs/SHIP_CHECKLIST.md`, `docs/QUALITY_BAR.md` |
