@@ -1,16 +1,23 @@
 # ONE_FILE_COMPLETION_PLAN.md
 
-This plan is now normalized for small-model execution.
-Every task below is **one file only** and includes required fields **0-8**.
+Commercial/retail completion plan in strict one-file task format.
+Every task uses fields **0-8** and is formatted for manual copy/paste workflows.
 
-## Global Rules (apply to every task)
-- Run exactly one task at a time.
-- Do not edit any file other than the task's target file.
-- Read only the listed `READ_FILE` and `READ_LINES` range.
-- Output copy-ready final code that a human can paste directly.
-- Keep changes small, deterministic, and reversible.
+## Verification Summary
+- Source of truth checked: `/home/runner/work/GameRewritten/GameRewritten/docs/FULL_TASK_SEQUENCE.md`
+- Required task count found: **60** (Task 001-060).
+- Tasks listed in this plan: **60** (Task 001-060).
+- Coverage result: **60/60 included**.
+- Completion status reference checked: `/home/runner/work/GameRewritten/GameRewritten/docs/SYSTEMS.md` (items mapped to these tasks remain tracked there).
 
-## Required Output Shape (for every task)
+## Global Rules
+- One task per run.
+- One file per task prompt.
+- Use absolute paths only.
+- Output copy-ready final text for manual paste.
+- Do not claim direct file edits.
+
+## Required Output Contract
 ```text
 FILE: <absolute path>
 READ_FILE: <absolute path>
@@ -26,185 +33,665 @@ PASTE_BLOCK_END
 
 ---
 
+## Task Cards (001-060)
+
 ## Task 001
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add lock-on input hint text.
-2. **What it does + logic:** Shows a simple on-screen control hint so players know lock-on and tactical controls without opening docs.
-3. **Narrative code logic:** Write one clear helper that builds the hint string, then call it in the UI draw path; keep flow `setup -> guard -> draw`.
-4. **FF7 Remake + PS2 target:** Keep UX readable like FF7R tutorials, but visually lightweight and text-only like PS2-era overlays.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
-6. **Where to edit:** `READ_LINES: 1-320`; insert after anchor `void GameHUD::Draw(` where control help text is assembled.
-7. **Additional info:** Keep it non-intrusive; no new textures, no animation.
-8. **Copy-ready finish rule:** Return full final block(s) for direct paste into this file only.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Pressure / stagger integration stub
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Pressure / stagger integration stub" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 002
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add low-cost camera sensitivity constants.
-2. **What it does + logic:** Introduces explicit low/medium/high mouse look sensitivity constants and uses low preset by default.
-3. **Narrative code logic:** Define constants once, apply them in one place, avoid magic numbers, and keep update code linear.
-4. **FF7 Remake + PS2 target:** Camera feel should be stable and cinematic, but simplified for low-end hardware.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
-6. **Where to edit:** `READ_LINES: 1-320`; replace numeric sensitivity literals in camera update logic.
-7. **Additional info:** Do not change projection near/far planes in this task.
-8. **Copy-ready finish rule:** Return final code block that includes constant definitions plus updated usage.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Enemy reaction / interrupt-lite
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Enemy reaction / interrupt-lite" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 003
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add pause-safe damage-number timing comment + guard.
-2. **What it does + logic:** Ensures damage numbers do not age while paused and clarifies why in code.
-3. **Narrative code logic:** Add one guard clause early, then run existing logic unchanged.
-4. **FF7 Remake + PS2 target:** Keep combat readability while preserving deterministic pause behavior.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/DamageNumbers.cpp`
-6. **Where to edit:** `READ_LINES: 1-260`; insert guard in update function before timer decrement.
-7. **Additional info:** Do not add new systems; small local edit only.
-8. **Copy-ready finish rule:** Return a paste-ready replacement of the edited function only.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Enemy attack telegraph lite
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Enemy attack telegraph lite" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 004
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add quality-preset struct for GT610 defaults.
-2. **What it does + logic:** Creates explicit low/medium/high values for draw-call and post-process caps.
-3. **Narrative code logic:** Define one struct, one default instance, and one accessor; keep names explicit.
-4. **FF7 Remake + PS2 target:** Targets FF7-inspired scene composition with PS2-grade fallback budgets.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp`
-6. **Where to edit:** `READ_LINES: 1-520`; insert near top-level app configuration area.
-7. **Additional info:** This task only introduces config values; no render-path rewiring yet.
-8. **Copy-ready finish rule:** Return exact block to paste and exact anchor placement.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Screen edge damage flash
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Screen edge damage flash" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 005
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add lightweight footstep one-shot call hook.
-2. **What it does + logic:** Plays a footstep sound when movement threshold is met and cooldown elapsed.
-3. **Narrative code logic:** Use clear steps: check move state, check cooldown, trigger audio, reset timer.
-4. **FF7 Remake + PS2 target:** Gives action-game feedback while using compressed low-cost one-shots.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp`
-6. **Where to edit:** `READ_LINES: 1-340`; edit movement update section where velocity is known.
-7. **Additional info:** Use existing `tp::Audio::PlayOneShot` only; no new API.
-8. **Copy-ready finish rule:** Return full edited function block for manual paste.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Hit pause / hitstop
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Hit pause / hitstop" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/RuntimeScene.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 006
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add enemy hit-react cooldown variable.
-2. **What it does + logic:** Prevents repeated hit-react retrigger every frame while still allowing regular attacks.
-3. **Narrative code logic:** Declare member, decrement timer, guard retrigger, then execute hit-react.
-4. **FF7 Remake + PS2 target:** Keeps responsive stagger feel with low-complexity state rules.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.hpp`
-6. **Where to edit:** `READ_LINES: 1-180`; add member fields in combat-state member section.
-7. **Additional info:** Header-only in this step; cpp wiring is separate task.
-8. **Copy-ready finish rule:** Return final member block only with placement anchor.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Stagger meter
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Stagger meter" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 007
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Wire enemy hit-react cooldown update.
-2. **What it does + logic:** Updates and consumes the new cooldown timer inside runtime update loop.
-3. **Narrative code logic:** Update timer first, evaluate trigger second, then run existing visual/gameplay effects.
-4. **FF7 Remake + PS2 target:** Supports clear combat rhythm without expensive animation graph complexity.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Enemy attack telegraph
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Enemy attack telegraph" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
 5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/EnemyActor.cpp`
-6. **Where to edit:** `READ_LINES: 1-320`; modify combat update/hit handling function.
-7. **Additional info:** Keep behavior deterministic and frame-rate independent using `dt`.
-8. **Copy-ready finish rule:** Return full replacement of the modified function.
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 008
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add combo HUD decay color ramp.
-2. **What it does + logic:** Changes combo text color as combo window nears expiration.
-3. **Narrative code logic:** Compute normalized timer ratio, choose color in ordered if-blocks, render once.
-4. **FF7 Remake + PS2 target:** Mimics urgency cues from modern action HUDs while using cheap 2D color changes.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
-6. **Where to edit:** `READ_LINES: 1-320`; in combo indicator draw function.
-7. **Additional info:** No gradients, shaders, or extra draw passes.
-8. **Copy-ready finish rule:** Return edited combo draw function for direct paste.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Parry / counter window
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Parry / counter window" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 009
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add lock-on camera distance clamp.
-2. **What it does + logic:** Prevents camera from zooming too close/far during lock-on tracking.
-3. **Narrative code logic:** Clamp calculated target distance with named min/max constants before assignment.
-4. **FF7 Remake + PS2 target:** Keeps readable combat framing with low-cost camera math.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
-6. **Where to edit:** `READ_LINES: 1-320`; lock-on camera positioning function.
-7. **Additional info:** Keep existing view/projection path unchanged.
-8. **Copy-ready finish rule:** Return direct-paste replacement block.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Weak point damage
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Weak point damage" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 010
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add world-streaming debug counters.
-2. **What it does + logic:** Displays current active cells and cell-load operations per frame for tuning.
-3. **Narrative code logic:** Collect counters in update step, expose const getters, keep side effects isolated.
-4. **FF7 Remake + PS2 target:** Supports controlled open-area feel by tracking low-spec streaming budgets.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp`
-6. **Where to edit:** `READ_LINES: 1-360`; update path where cells are activated/deactivated.
-7. **Additional info:** Logging/counters only; no streaming policy change.
-8. **Copy-ready finish rule:** Return updated code blocks for this file only.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Area name display
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Area name display" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 011
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add lightweight ambient volume preset constants.
-2. **What it does + logic:** Introduces explicit ambient/music/effect target levels for low preset balancing.
-3. **Narrative code logic:** Store values in named constants and use them where audio starts.
-4. **FF7 Remake + PS2 target:** Keeps emotional scene mix with compressed, low-memory audio strategy.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/Main.cpp`
-6. **Where to edit:** `READ_LINES: 1-520`; startup/audio init area.
-7. **Additional info:** No runtime slider UI in this task.
-8. **Copy-ready finish rule:** Return exact replacement/insert block with anchor text.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Notification toast system
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Notification toast system" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/NotificationSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 012
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add tactical pause control row in pause menu.
-2. **What it does + logic:** Shows current tactical pause keybind and short behavior summary in pause UI.
-3. **Narrative code logic:** Build one row helper and call it from the existing pause menu draw flow.
-4. **FF7 Remake + PS2 target:** Reinforces hybrid action+command identity using simple text UI.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Letterbox event bars
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Letterbox event bars" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
 5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/ImGuiLayer.cpp`
-6. **Where to edit:** `READ_LINES: 1-340`; pause menu drawing function.
-7. **Additional info:** Keep existing menu style; no layout rewrite.
-8. **Copy-ready finish rule:** Return one paste-ready code block for this file.
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 013
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add player movement deadzone constant.
-2. **What it does + logic:** Prevents tiny movement noise from triggering run/footstep behavior.
-3. **Narrative code logic:** Define named threshold constant and gate movement state updates through it.
-4. **FF7 Remake + PS2 target:** Keeps movement feeling deliberate and stable on low-spec frame variance.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerActor.cpp`
-6. **Where to edit:** `READ_LINES: 1-340`; movement input interpretation block.
-7. **Additional info:** Maintain current control mapping.
-8. **Copy-ready finish rule:** Return edited movement section for direct paste.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Contextual button prompts
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Contextual button prompts" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 014
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add lock-on target validity helper extraction.
-2. **What it does + logic:** Centralizes target validity checks used before lock-on keep/cycle operations.
-3. **Narrative code logic:** Create one small helper with guard checks, then reuse it in existing branches.
-4. **FF7 Remake + PS2 target:** Keeps lock-on behavior predictable with minimal CPU overhead.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/Targeting.hpp`
-6. **Where to edit:** `READ_LINES: 1-220`; inside targeting utilities section.
-7. **Additional info:** Keep public API signatures unchanged.
-8. **Copy-ready finish rule:** Return one direct-paste block with helper + callsite updates.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Level up screen overlay
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Level up screen overlay" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 015
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add concise combat HUD state labels.
-2. **What it does + logic:** Displays `LOCKED`, `FREE`, `TACTICAL` labels to improve player state awareness.
-3. **Narrative code logic:** Compute state enum/string once, draw one compact label block.
-4. **FF7 Remake + PS2 target:** Uses modern combat readability goals with low-cost static text rendering.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
-6. **Where to edit:** `READ_LINES: 1-320`; main HUD draw path after health/combo blocks.
-7. **Additional info:** Avoid flashing or per-pixel effects.
-8. **Copy-ready finish rule:** Return exact final code for the edited HUD region.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Status screen
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Status screen" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/StatusScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
 ## Task 016
-0. **Single-file edit:** yes, one file only.
-1. **Task Name:** Add docs reminder block for manual paste workflow.
-2. **What it does + logic:** Keeps contributors aligned that local LLM output must be pasted manually and verified.
-3. **Narrative code logic:** Add one short, explicit checklist block in docs.
-4. **FF7 Remake + PS2 target:** Ensures workflow quality so low-spec-compatible features are implemented reliably.
-5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/AUTOPILOT_WORKFLOW.md`
-6. **Where to edit:** `READ_LINES: 1-260`; add section near execution loop instructions.
-7. **Additional info:** Documentation-only; no code behavior change.
-8. **Copy-ready finish rule:** Return final markdown block for direct paste.
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Map screen stub
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Map screen stub" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/MapScreen.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
----
+## Task 017
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Tooltip system
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Tooltip system" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
-## Completion Notes
-- The tasks above are intentionally small so a small local model can execute safely.
-- If a task cannot be done in one file, split it into additional single-file tasks before implementation.
-- Do not merge task outputs together; complete one task, paste, save, then move to next.
+## Task 018
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Saving indicator
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Saving indicator" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 019
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Death / defeat screen
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Death / defeat screen" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 020
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Camera shake
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Camera shake" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 021
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Combat camera zoom
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Combat camera zoom" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 022
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Camera collision avoidance
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Camera collision avoidance" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 023
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Target framing adjustment
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Target framing adjustment" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 024
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Lock-on camera recovery smoothing
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Lock-on camera recovery smoothing" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 025
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Wind effect on trees
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Wind effect on trees" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/Shaders/tree_vs.hlsl`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 026
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Weather system lite
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Weather system lite" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WeatherSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 027
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Ambient particles
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Ambient particles" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/ParticleSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 028
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Day/night cycle
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Day/night cycle" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/DayNightCycle.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 029
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Biome transition fade
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Biome transition fade" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 030
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Fog of war on minimap
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Fog of war on minimap" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/Minimap.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 031
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** World event trigger zones
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "World event trigger zones" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/EventZone.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 032
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Interaction hotspot registry stub
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Interaction hotspot registry stub" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/InteractionRegistry.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 033
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Landmark discovery trigger stub
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Landmark discovery trigger stub" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/LandmarkTrigger.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 034
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** NPC actor
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "NPC actor" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/NpcActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 035
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Quest objective system
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Quest objective system" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 036
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Treasure chest actor
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Treasure chest actor" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/ChestActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 037
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Campfire / rest point actor
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Campfire / rest point actor" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/RestPointActor.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 038
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** NPC interaction prompt routing stub
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "NPC interaction prompt routing stub" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 039
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Quest flag / world-state hook
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Quest flag / world-state hook" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/quest/QuestFlags.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 040
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Spawn composition table stub (solo / pair / pack)
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Spawn composition table stub (solo / pair / pack)" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/SpawnTable.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 041
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Inventory system
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Inventory system" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Inventory.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 042
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** XP / level system
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "XP / level system" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 043
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Status effects
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Status effects" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/actors/PlayerStats.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 044
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Fast travel stub
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Fast travel stub" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/world/FastTravel.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 045
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Save / load system
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Save / load system" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/SaveSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 046
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Quality preset enforcement
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Quality preset enforcement" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/app/QualityPreset.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 047
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Victory fanfare trigger
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Victory fanfare trigger" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 048
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Environmental ambient audio
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Environmental ambient audio" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 049
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Looping BGM
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Looping BGM" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 050
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Tactical Pause enter / exit SFX
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Tactical Pause enter / exit SFX" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 051
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Lock-on acquire / break SFX
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Lock-on acquire / break SFX" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 052
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Enemy alert bark stub
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Enemy alert bark stub" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 053
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Equipment slot stub
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Equipment slot stub" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/inventory/Equipment.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 054
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Ability unlock / progression hook
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Ability unlock / progression hook" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/progression/AbilityProgression.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 055
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Combat stat modifier pipeline stub
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Combat stat modifier pipeline stub" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatModifiers.hpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 056
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Combat bugfix sweep
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Combat bugfix sweep" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 057
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Camera/input bugfix sweep
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Camera/input bugfix sweep" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/CameraController.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 058
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** UI/HUD polish and bugfix sweep
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "UI/HUD polish and bugfix sweep" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/ui/GameHUD.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 059
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** World/runtime stability sweep
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "World/runtime stability sweep" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/world/WorldGrid.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
+## Task 060
+0. **Single-file edit:** yes, exactly one file in this task.
+1. **Task Name:** Audio and final quality sweep
+2. **What the task does + logic:** Implements the smallest runtime-visible slice of "Audio and final quality sweep" so the feature is testable and can be iterated safely.
+3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
+4. **Game design target (FF7 Remake + PS2):** Match FF7 Remake readability and feedback priorities while staying PS2-era cost-conscious (simple visuals/audio logic, low-overhead execution).
+5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/audio/AudioManager.cpp`
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; anchor near the existing function/type that already owns this behavior.
+7. **Additional information:** If this file does not exist yet, generate only this file in this task and stop; integration to other files must be separate tasks.
+8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
+
