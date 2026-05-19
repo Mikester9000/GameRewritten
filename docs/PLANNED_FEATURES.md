@@ -38,11 +38,11 @@ Check docs/GAME_VISION_PLAN.md for milestone context and implementation detail.
 - [x] Limit Break move (5x damage finisher when gauge full)
 - [x] MP passive regeneration (2.0f per second)
 - [x] Tactical Pause (hold Tab — 15% time scale, command menu)
-- [x] Tactical Pause command: Basic Attack (always available)
-- [x] Tactical Pause command: Surge Strike (readiness-gated)
-- [x] Tactical Pause command: Limit Break (readiness-gated)
+  - [x] Command: Basic Attack (always available)
+  - [x] Command: Surge Strike (readiness-gated)
+  - [x] Command: Limit Break (readiness-gated)
 - [x] Lock-on moved to Q so Tab is free for Tactical Pause
-- [x] Tactical Pause command readiness reasons
+  - [x] Command readiness reasons
 
 ### Combat feedback
 - [x] Floating damage numbers
