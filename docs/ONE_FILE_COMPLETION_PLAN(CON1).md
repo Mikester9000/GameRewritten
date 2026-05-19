@@ -6,9 +6,10 @@ Every task uses fields **0-8** and is formatted for manual copy/paste workflows.
 ## Verification Summary
 - Base file reviewed: `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN.md`
 - Source of truth checked: `/home/runner/work/GameRewritten/GameRewritten/docs/FULL_TASK_SEQUENCE.md`
-- Header gap status: base plan was missing several control headers present in source-of-truth sequence.
-- Addendum purpose: restore missing control headers and append missing-item completion tasks in same format/style.
-- Continuation task count in this addendum: **12** (Task 109-120).
+- Base plan task count: **201** total — **108** primary `.cpp` feature tasks (Task 001-108) + **93** `.hpp` companion tasks (Task 001H-107H, one per `.cpp` task that needed a header pair).
+- `.hpp` companion coverage: all `.cpp` tasks in the base plan have a matching `###H` companion task already in the base plan. No `.hpp` companions are missing.
+- Addendum purpose: this file (CON1) extends the base plan with tasks that fall outside the 001-108 + 001H-107H scope: release readiness gates, plan-document maintenance, and any future gap tasks discovered during development.
+- Tasks in this addendum: **20** total — **8** plan-document maintenance tasks (H01-H08) + **12** release gate tasks (Task 109-120).
 
 ## Execution Rule (No Thinking Required)
 1. Read this addendum and the base one-file plan.
@@ -75,8 +76,13 @@ PASTE_BLOCK_END
 
 ---
 
-## Required Header Sync Tasks (apply to base file one-task-at-a-time)
-These tasks exist specifically because the workflow is one-file-per-task and header changes in the base file must be executed as their own tasks.
+## Plan Document Maintenance Tasks
+These tasks update the CONTROL SECTIONS of this CON1 addendum file itself (the workflow rules at the top of this document).
+They are **document maintenance tasks**, not C++ code tasks. Each edits one section of this file at a time.
+Run these only when the corresponding control section needs updating.
+
+> **Note:** For C++ code tasks, see the base plan (Tasks 001-108 for `.cpp` files, Tasks 001H-107H for `.hpp` companion headers).
+> All `.hpp` header companion tasks already exist in the base plan — none are missing from CON1.
 
 ## Task H01
 0. **Single-file edit:** yes, exactly one file in this task.
@@ -162,13 +168,15 @@ These tasks exist specifically because the workflow is one-file-per-task and hea
 3. **Narrative logic explanation:** Read lines 1-75, guard missing/misordered blocks, apply final reorder if needed, then output final normalized header block.
 4. **Game design target (FF7 Remake + PS2):** Ensure deterministic plan execution remains stable for low-capacity local LLMs.
 5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/ONE_FILE_COMPLETION_PLAN(CON1).md`
-6. **Where in file to edit:** READ_LINES: 1-75; normalize only the control-header block before first `## Required Header Sync Tasks`.
+6. **Where in file to edit:** READ_LINES: 1-75; normalize only the control-header block before first `## Plan Document Maintenance Tasks`.
 7. **Additional information:** LINE_BUDGET target <=100 lines changed in this file for this run.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
 ---
 
-## Task Cards (109-120)
+## Release Gate Tasks (Task 109-120)
+These tasks add release-readiness validation content to documentation files (ship checklists, QA gates, legal review, etc.).
+Each targets a single `.md` documentation file. They follow the same one-file-at-a-time rule as all code tasks.
 
 ## Task 109
 0. **Single-file edit:** yes, exactly one file in this task.
