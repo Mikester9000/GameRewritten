@@ -16,6 +16,10 @@ Every task uses fields **0-8** and is formatted for manual copy/paste workflows.
 - Use absolute paths only.
 - Output copy-ready final text for manual paste.
 - Do not claim direct file edits.
+- If messages are not showing up, emit heartbeat lines:
+  - `STATUS: START Task ###`
+  - `STATUS: CHUNK X/N`
+  - `STATUS: DONE Task ###`
 
 ## Required Output Contract
 ```text
@@ -25,6 +29,7 @@ READ_LINES: <start-end>
 LINE_BUDGET: <max lines modified/added in this file>
 ACTION: <replace-range|insert-after-anchor>
 ANCHOR: <exact anchor text>
+STATUS: <START|CHUNK X/N|DONE>
 PASTE_BLOCK_START
 ```<language>
 <exact final text to paste>

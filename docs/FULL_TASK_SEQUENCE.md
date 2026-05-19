@@ -10,6 +10,14 @@ This file is the complete ordered sequence from current state to "all planned sy
 5. Run `python tools/llm/worst_llm_guard.py complete`.
 6. Stop. Repeat next run.
 
+## Message Visibility Fallback (If outputs are not appearing)
+1. Print a one-line heartbeat first: `STATUS: START Task ###`.
+2. Print only one file payload at a time.
+3. If output is long, split into chunks and label each chunk:
+   - `STATUS: CHUNK 1/N`
+   - `STATUS: CHUNK 2/N`
+4. End with: `STATUS: DONE Task ###`.
+
 ## Mandatory micro-steps per task
 1. Read listed files once.
 2. Make only the minimum edits needed.

@@ -16,6 +16,12 @@
 
 If you cannot complete a task within tiny context, **split it into a smaller safe sub‑task**, then stop and report the split.
 
+### Output Visibility Mode (Use when messages do not appear)
+- Print `STATUS: START Task ###` before any long output.
+- Emit one file payload at a time.
+- For long responses, split into chunks and print `STATUS: CHUNK X/N` before each chunk.
+- End with `STATUS: DONE Task ###`.
+
 ---
 
 ## 1) Current Goal / Milestone (as of 2026‑05‑19)
