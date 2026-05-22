@@ -1,0 +1,9 @@
+[submodule "tools/engines/audio-engine"]
+	path = tools/engines/audio-engine
+	url = https://github.com/Mikester9000/Audio-Engine.git
+[submodule "tools/engines/animation-engine"]
+	path = tools/engines/animation-engine
+	url = https://github.com/Mikester9000/Animation-Engine.git
+[submodule "tools/engines/creation-engine"]
+	path = tools/engines/creation-engine
+	url = https://github.com/Mikester9000/Creation-Engine.git
