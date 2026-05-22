@@ -1,16 +1,20 @@
 # Animations Content
 
-Runtime animation files exported from the Animation Engine.
+Animation clips and skeleton files exported from the Animation Engine (`Mikester9000/Animation-Engine`).
+See `docs/ASSET_PIPELINE.md` for export commands and format details.
 
-## Source
-Repository: `Mikester9000/Animation-Engine` (`tools/engines/animation-engine`)
+## Formats
 
-## Expected Files
-- `*.anim` — compiled animation clips (idle, walk, run, attack, dodge, etc.)
-- `*.skel` — skeleton definition files
+- `.anim` — AnimEngine JSON 1.0 (model + skeleton + clips + morph tracks in one file)
+- `.gltf` + `.bin` — glTF 2.0 skinned mesh + animation (industry standard)
 
-## Workflow
-1. Author animations in `tools/engines/animation-engine`
-2. Run the export command (see Animation Engine README)
-3. Place exported files in this directory
-4. Update `Content/AssetRegistry.json` with new animation entries
+## Clip library
+
+The pipeline generates clips for: idle, idle_alt, idle_combat, walk, run, run_start/stop,
+sprint, strafe, crouch, jump, roll, vault, climb, attack, attack_combo_1/2/3, heavy_attack,
+aerial_attack, cast, defend, block, parry, dodge, hit_react, stagger, knockdown, get_up,
+death, interact, pickup, victory.
+
+## To import after exporting
+
+    python tools/import_assets.py --engine animation --src /path/to/anim_export
