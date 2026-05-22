@@ -48,13 +48,28 @@ CREATION_ROUTING: list[tuple[str, str]] = [
     ("_occlusion.png","Content/Textures"),
     # Generic PNG → Textures
     (".png",          "Content/Textures"),
-    # Meshes
+    # Meshes (.mtl must live alongside its .obj so relative references resolve)
     (".obj",          "Content/Models"),
-    (".mtl",          "Content/Materials"),
+    (".mtl",          "Content/Models"),
     # glTF (produced by Animation Engine but may appear here too)
     (".gltf",         "Content/Animations"),
     (".bin",          "Content/Animations"),
 ]
+
+# Maps every suffix pattern in CREATION_ROUTING to its content_target manifest key.
+# Used to deterministically select the right content_target entry for a given file.
+SUFFIX_TO_KIND: dict[str, str] = {
+    "_albedo.png":   "textures",
+    "_normal.png":   "textures",
+    "_metallic.png": "textures",
+    "_roughness.png":"textures",
+    "_occlusion.png":"textures",
+    ".png":          "textures",
+    ".obj":          "models",
+    ".mtl":          "models",
+    ".gltf":         "animations",
+    ".bin":          "animations",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -63,8 +78,12 @@ CREATION_ROUTING: list[tuple[str, str]] = [
 
 def _load_registry() -> dict:
     if REGISTRY_PATH.exists():
-        with REGISTRY_PATH.open(encoding="utf-8") as fh:
-            return json.load(fh)
+        try:
+            with REGISTRY_PATH.open(encoding="utf-8") as fh:
+                return json.load(fh)
+        except json.JSONDecodeError as exc:
+            print(f"ERROR: Malformed JSON in {REGISTRY_PATH}: {exc}", file=sys.stderr)
+            sys.exit(1)
     return {"version": 1, "assets": {}}
 
 
@@ -79,7 +98,7 @@ def _registry_key(dest: Path) -> str:
     Examples
     --------
     Content/Audio/bgm_field.ogg        -> audio.bgm_field
-    Content/Textures/Grassland1.png    -> textures.Grassland1
+    Content/Textures/Grassland1.png    -> textures.grassland1
     Content/Animations/player.anim     -> animations.player
     """
     try:
@@ -103,7 +122,7 @@ def _registry_key(dest: Path) -> str:
         "ui": "ui",
     }
     folder = folder_map.get(folder, folder)
-    stem = Path(parts[-1]).stem
+    stem = Path(parts[-1]).stem.lower()
     return f"{folder}.{stem}"
 
 
@@ -163,20 +182,26 @@ def _resolve_creation_dest(file: Path, manifest: dict | None) -> Path | None:
 
     # Skip manifest JSON and MTL (MTL lives alongside OBJ, not in Materials)
     if file.suffix.lower() == ".json":
-        # Only copy world/tilemap JSONs (they contain a "tiles" key)
+        # Tilemap/world JSONs → World/
         if manifest and "tiles" in manifest:
             return CONTENT_DIR / "World" / file.name
-        # Creation Engine manifest companion — skip the manifest itself
+        # Other parseable manifests (material/shader metadata, bundle recipes) → Bundles/
+        if manifest is not None:
+            return CONTENT_DIR / "Bundles" / file.name
         return None
 
-    # Use content_target from manifest if available
+    # Use content_target from manifest if available — look up by file kind so the
+    # result is deterministic regardless of manifest key order.
     if manifest:
         targets: dict = manifest.get("content_target", {})
-        # Find the first target that matches the file type
-        for _kind, target_dir in targets.items():
-            for suffix_pattern, _ in CREATION_ROUTING:
+        if targets:
+            file_kind: str | None = None
+            for suffix_pattern, kind in SUFFIX_TO_KIND.items():
                 if name_lower.endswith(suffix_pattern):
-                    return REPO_ROOT / target_dir / file.name
+                    file_kind = kind
+                    break
+            if file_kind is not None and file_kind in targets:
+                return REPO_ROOT / targets[file_kind] / file.name
 
     # Static fallback
     for suffix_pattern, target_dir in CREATION_ROUTING:
@@ -281,9 +306,15 @@ def main(argv: list[str] | None = None) -> int:
     if not args.dry_run:
         reg = _load_registry()
         assets: dict = reg.setdefault("assets", {})
+        # Build reverse map to detect files already registered under a different key
+        existing_path_to_key: dict[str, str] = {v: k for k, v in assets.items()}
         new_count = 0
         for key, rel_path in added:
-            if key not in assets:
+            if rel_path in existing_path_to_key:
+                # Path already registered — update in-place rather than adding a new key
+                existing_key = existing_path_to_key[rel_path]
+                assets[existing_key] = rel_path
+            elif key not in assets:
                 assets[key] = rel_path
                 new_count += 1
             else:
