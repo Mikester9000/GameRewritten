@@ -16,6 +16,9 @@
 void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
                                float playerX, float playerY, float playerZ)
 {
+    // Reset per-frame flags before any combat logic runs.
+    m_playerWasHitThisFrame = false;
+
     // Cache the up-to-date player position for enemy AI and AABB checks.
     m_playerX = playerX;
     m_playerY = playerY;
@@ -106,6 +109,7 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
         m_player.state != PlayerActionState::Dead &&
         m_player.state != PlayerActionState::Dodge) // dodge grants invincibility
     {
+        m_playerWasHitThisFrame = true;
         QueueImpactFeedback(0.045f, 0.18f, 0.16f);
         m_player.stats.TakeDamage(totalDamage);
 

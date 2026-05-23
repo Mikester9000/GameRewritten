@@ -37,6 +37,9 @@ constexpr float kTwoPi = 6.28318530f;
 constexpr int kPulseMaxAlpha = 140;
 // Width of each screen-edge warning bar in pixels.
 constexpr float kEdgeBarThickness = 28.0f;
+// Duration and max alpha of the on-hit damage flash.
+constexpr float kDamageFlashDuration = 0.25f;
+constexpr int   kDamageFlashMaxAlpha = 180;
 
 // --- Target info panel ---
 constexpr float kTargetPanelW       = 280.0f;
@@ -100,6 +103,28 @@ void DrawLowHpPulse(const ImGuiIO& io, float pulseTime, float opacity)
     float screenW = io.DisplaySize.x;
     float screenH = io.DisplaySize.y;
     float th = kEdgeBarThickness;
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    // Top bar
+    dl->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(screenW, th), color);
+    // Bottom bar
+    dl->AddRectFilled(ImVec2(0.0f, screenH - th), ImVec2(screenW, screenH), color);
+    // Left bar
+    dl->AddRectFilled(ImVec2(0.0f, th), ImVec2(th, screenH - th), color);
+    // Right bar
+    dl->AddRectFilled(ImVec2(screenW - th, th), ImVec2(screenW, screenH - th), color);
+}
+
+// Brief bright-red screen-edge flash played once when the player takes damage.
+// fraction: 1.0 = just triggered, 0.0 = fully faded out.
+void DrawDamageFlash(const ImGuiIO& io, float fraction, float opacity)
+{
+    int alpha = ScaleAlpha(static_cast<int>(fraction * static_cast<float>(kDamageFlashMaxAlpha)), opacity);
+    ImU32 color = IM_COL32(255, 40, 40, alpha);
+
+    float screenW = io.DisplaySize.x;
+    float screenH = io.DisplaySize.y;
+    float th = kEdgeBarThickness * 1.6f; // wider than the low-HP pulse bars
 
     ImDrawList* dl = ImGui::GetForegroundDrawList();
     // Top bar
@@ -190,6 +215,20 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
     // Draw screen-edge danger pulse when HP is critically low.
     if (isLowHp)
         DrawLowHpPulse(io, m_lowHpPulseTime, m_opacity);
+
+    // Draw and tick the on-hit damage flash (brief red edge flash when player is struck).
+    if (m_damageFlashTimer > 0.0f)
+    {
+        DrawDamageFlash(io, m_damageFlashTimer / kDamageFlashDuration, m_opacity);
+        m_damageFlashTimer -= dt;
+        if (m_damageFlashTimer < 0.0f)
+            m_damageFlashTimer = 0.0f;
+    }
+}
+
+void GameHUD::TriggerDamageFlash()
+{
+    m_damageFlashTimer = kDamageFlashDuration;
 }
 
 void GameHUD::DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io)

@@ -28,11 +28,12 @@ public:
     static constexpr float kLeashRadius  = 27.0f;  // return to patrol
 
     // State duration constants (seconds).
-    static constexpr float kAttackWindUpDuration  = 0.60f;  // wind-up before dealing damage
-    static constexpr float kHitStaggerDuration    = 0.30f;  // stagger after taking a hit
-    static constexpr float kHitFlashDuration      = 0.14f;  // short readability flash on hit
-    static constexpr float kHitFlashBlinkPeriod   = 0.04f;  // blink cadence during flash
-    static constexpr float kHitFlashScale         = 1.05f;  // slight pop while flashing
+    static constexpr float kAttackWindUpDuration      = 0.60f;  // wind-up before dealing damage
+    static constexpr float kHitStaggerDuration        = 0.30f;  // stagger after taking a hit
+    static constexpr float kInterruptStaggerDuration  = 0.55f;  // longer stagger when Attack wind-up is interrupted
+    static constexpr float kHitFlashDuration          = 0.14f;  // short readability flash on hit
+    static constexpr float kHitFlashBlinkPeriod       = 0.04f;  // blink cadence during flash
+    static constexpr float kHitFlashScale             = 1.05f;  // slight pop while flashing
 
     // Pressure / stagger constants.
     static constexpr float kPressurePerDamage      = 0.05f;  // pressure built per point of damage

@@ -92,10 +92,13 @@ void EnemyActor::OnHit(int damage)
         }
         else
         {
-            TransitionTo(EnemyState::Hit, kHitStaggerDuration);
+            // Interrupt bonus: longer stagger when the player breaks an attack wind-up.
+            const float staggerDur = wasInterrupted ? kInterruptStaggerDuration : kHitStaggerDuration;
+            TransitionTo(EnemyState::Hit, staggerDur);
             LOG_INFO("EnemyActor: Took " + std::to_string(damage) +
                      " damage. HP remaining: " + std::to_string(hp) +
-                     " Pressure: " + std::to_string(pressureGauge));
+                     " Pressure: " + std::to_string(pressureGauge) +
+                     (wasInterrupted ? " [INTERRUPTED]" : ""));
         }
     }
 }
@@ -239,7 +242,16 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
 
     const float staggerScale = IsStaggered() ? kStaggerVisualScale : 1.0f;
     const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
-    primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, staggerScale * hitFlashScale);
+
+    // Telegraph pulse: enemy visibly swells during attack wind-up to warn the player.
+    float telegraphScale = 1.0f;
+    if (state == EnemyState::Attack && stateTimer > 0.0f)
+    {
+        const float elapsed = kAttackWindUpDuration - stateTimer;
+        telegraphScale = 1.0f + 0.08f * fabsf(sinf(elapsed * 12.0f));
+    }
+
+    primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, staggerScale * hitFlashScale * telegraphScale);
 }
 
 bool EnemyActor::IsHitFlashVisible() const

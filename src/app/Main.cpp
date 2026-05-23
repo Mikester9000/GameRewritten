@@ -422,6 +422,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         if (runtimeScene.ConsumePendingCameraShake(shakeAmplitude, shakeDuration))
             camController.AddCameraShake(shakeAmplitude, shakeDuration);
 
+        if (runtimeScene.ConsumePlayerHitFlash())
+            gameHud.TriggerDamageFlash();
+
         if (pendingMissIndicator)
         {
             if (combat.GetRecentEnemyHitCount() > 0)

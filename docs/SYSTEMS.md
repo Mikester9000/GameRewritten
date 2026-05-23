@@ -73,12 +73,12 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Pressure / stagger integration stub | ✅ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Tactical Pause command readiness reasons | ✅ | `src/ui/TacticalPauseMenu.cpp/hpp` |
 | Off-screen lock-on target indicator | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
-| Enemy reaction / interrupt-lite | ❌ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| Enemy attack telegraph lite | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Enemy reaction / interrupt-lite | ✅ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Enemy attack telegraph lite | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Hit flash system | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
-| Screen edge damage flash | ❌ | `src/ui/GameHUD.cpp/hpp` |
-| Hit pause / hitstop | ❌ | `src/game/RuntimeScene.hpp` |
-| Stagger meter | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Screen edge damage flash | ✅ | `src/ui/GameHUD.cpp/hpp` |
+| Hit pause / hitstop | ✅ | `src/game/RuntimeScene.hpp` |
+| Stagger meter | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Enemy attack telegraph | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Parry / counter window | ❌ | `src/game/actors/PlayerActor.cpp/hpp` |
 | Miss indicator | ✅ | `src/ui/DamageNumbers.cpp/hpp`, `src/app/Main.cpp` |
@@ -95,7 +95,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Saving indicator | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Death / defeat screen | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Low HP warning pulse | ✅ | `src/ui/GameHUD.cpp/hpp` |
-| Camera shake | ❌ | `src/game/CameraController.cpp/hpp` |
+| Camera shake | ✅ | `src/game/CameraController.cpp/hpp` |
 | Combat camera zoom | ❌ | `src/game/CameraController.cpp/hpp` |
 | Camera collision avoidance | ❌ | `src/game/CameraController.cpp/hpp` |
 | Target framing adjustment | ❌ | `src/game/CameraController.cpp/hpp` |

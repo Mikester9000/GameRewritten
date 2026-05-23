@@ -244,6 +244,14 @@ public:
     // Clear the respawn flag after Main.cpp has handled the teleport.
     void ClearRespawnFlag() { m_wantsRespawn = false; }
 
+    // Returns true (once) if the player was hit this frame — used to trigger the damage flash.
+    bool ConsumePlayerHitFlash()
+    {
+        bool v = m_playerWasHitThisFrame;
+        m_playerWasHitThisFrame = false;
+        return v;
+    }
+
     // Read-only accessors for debug visualization and future systems.
     const CombatSystem& GetCombatSystem() const { return m_combatSystem; }
     const EnemyActor*   GetEnemies()      const { return m_enemies; }
@@ -322,6 +330,9 @@ private:
 
     // Set true when the player dies; cleared by Main.cpp after the camera teleport.
     bool m_wantsRespawn = false;
+
+    // Set true for one frame whenever the player takes damage; cleared by ConsumePlayerHitFlash().
+    bool m_playerWasHitThisFrame = false;
 
     // Accumulated damage from enemy attacks this frame (AABB-tested).
     int m_pendingEnemyDamage = 0;
