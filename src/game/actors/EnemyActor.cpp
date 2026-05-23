@@ -244,11 +244,23 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
     const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
 
     // Telegraph pulse: enemy visibly swells during attack wind-up to warn the player.
+    // Phase < 0.5: slow moderate pulse (early warning).
+    // Phase >= 0.5: fast intense pulse (imminent strike).
     float telegraphScale = 1.0f;
     if (state == EnemyState::Attack && stateTimer > 0.0f)
     {
         const float elapsed = kAttackWindUpDuration - stateTimer;
-        telegraphScale = 1.0f + 0.08f * fabsf(sinf(elapsed * 12.0f));
+        const float phase   = elapsed / kAttackWindUpDuration;  // 0=start, 1=end
+        if (phase < 0.5f)
+        {
+            // Early wind-up: slow moderate swell.
+            telegraphScale = 1.0f + 0.08f * fabsf(sinf(elapsed * 8.0f));
+        }
+        else
+        {
+            // Late wind-up: rapid intense throb signals imminent strike.
+            telegraphScale = 1.0f + 0.15f * fabsf(sinf(elapsed * 22.0f));
+        }
     }
 
     primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, staggerScale * hitFlashScale * telegraphScale);

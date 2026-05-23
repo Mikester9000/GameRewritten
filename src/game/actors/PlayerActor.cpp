@@ -29,7 +29,11 @@ ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraControll
 
 void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded, bool attackPressed)
 {
+    // Tight parry window at the start of every dodge (0.12 s).
+    static constexpr float kParryWindowSec = 0.12f;
+
     stateTimer = (std::max)(0.0f, stateTimer - dt);
+    parryWindowTimer = (std::max)(0.0f, parryWindowTimer - dt);
 
     if (!isGrounded)
     {
@@ -90,6 +94,8 @@ void PlayerActor::TransitionTo(PlayerActionState next, float duration)
 {
     state = next;
     stateTimer = duration;
+    if (next == PlayerActionState::Dodge)
+        parryWindowTimer = kParryWindowSec;
 }
 
 void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,

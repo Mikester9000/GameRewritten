@@ -24,6 +24,17 @@ public:
     PlayerActionState state = PlayerActionState::Idle;
     float stateTimer = 0.0f;
 
+    // Parry window: set to kParryWindowSec when a Dodge starts.
+    // While > 0, incoming enemy hits are parried instead of dealt.
+    float parryWindowTimer = 0.0f;
+
+    // Set true when a parry succeeds; the next player attack gets a bonus multiplier.
+    // Cleared by RuntimeScene after consuming via CombatSystem::SetNextHitMultiplier.
+    bool counterBonusActive = false;
+
+    // Returns true during the tight parry window at the start of a dodge.
+    bool IsParryActive() const { return parryWindowTimer > 0.0f; }
+
     void Update(float dt, const InputActionMap& input, bool isGrounded, bool attackPressed);
 
     void SubmitRuntimeVisual(const CameraController& cameraController,

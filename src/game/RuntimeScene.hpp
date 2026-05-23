@@ -155,6 +155,14 @@ public:
             if (!camController.IsGrounded())
                 return false;
 
+            // Counter bonus from a successful parry doubles the first hit's damage.
+            if (m_player.counterBonusActive)
+            {
+                m_combatSystem.SetNextHitMultiplier(2.0f);
+                m_player.counterBonusActive = false;
+                LOG_INFO("RuntimeScene: Counter bonus applied to attack.");
+            }
+
             m_combatSystem.TriggerAttack(px, py, pz, yaw, 1);
             m_player.state      = PlayerActionState::Attack1;
             m_player.stateTimer = 0.40f;

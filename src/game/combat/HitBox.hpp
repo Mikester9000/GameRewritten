@@ -32,4 +32,8 @@ struct HitBox
     // True after this hitbox has hit the player once.
     // Prevents the same hitbox dealing damage on consecutive frames.
     bool hasHitPlayer = false;
+
+    // Y-axis yaw (radians) of the attacker when this hitbox was spawned.
+    // Used by CombatSystem to detect weak-point (backstab) hits.
+    float attackerYaw = 0.0f;
 };

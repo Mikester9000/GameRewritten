@@ -84,6 +84,19 @@ public:
     // Normalised pressure level for UI display (0.0 to 1.0).
     float GetPressureGauge() const { return pressureGauge; }
 
+    // Returns true while the enemy is winding up to attack — used for overhead indicators.
+    bool IsAttackTelegraphActive() const { return state == EnemyState::Attack && stateTimer > 0.0f; }
+
+    // Normalised wind-up progress: 0.0 = just started, 1.0 = about to strike.
+    // Returns 0.0 when not telegraphing.
+    float GetTelegraphPhase() const
+    {
+        if (state != EnemyState::Attack || kAttackWindUpDuration <= 0.0f)
+            return 0.0f;
+        const float elapsed = kAttackWindUpDuration - stateTimer;
+        return (elapsed < kAttackWindUpDuration) ? (elapsed / kAttackWindUpDuration) : 1.0f;
+    }
+
     // Set starting position and patrol waypoints.
     // y is terrain-snapped on the first Update call.
     void Init(float startX, float startZ,
