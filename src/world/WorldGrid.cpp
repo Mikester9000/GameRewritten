@@ -351,3 +351,29 @@ bool WorldGrid::SaveCell(int cx, int cz)
     LOG_INFO(ss.str());
     return true;
 }
+
+// ---------------------------------------------------------------------------
+// WorldGrid::NotifyBiomeChange
+// ---------------------------------------------------------------------------
+void WorldGrid::NotifyBiomeChange(const std::string& newBiome)
+{
+    if (newBiome == m_currentBiome)
+        return; // same biome — nothing to blend
+
+    m_previousBiome   = m_currentBiome;
+    m_currentBiome    = newBiome;
+    m_biomeBlendAlpha = 0.0f; // restart blend from 0 (= fully previous biome)
+}
+
+// ---------------------------------------------------------------------------
+// WorldGrid::UpdateBiomeTransition
+// ---------------------------------------------------------------------------
+void WorldGrid::UpdateBiomeTransition(float dt)
+{
+    if (m_biomeBlendAlpha >= 1.0f || m_biomeBlendDuration <= 0.0f)
+        return;
+
+    m_biomeBlendAlpha += dt / m_biomeBlendDuration;
+    if (m_biomeBlendAlpha > 1.0f)
+        m_biomeBlendAlpha = 1.0f;
+}

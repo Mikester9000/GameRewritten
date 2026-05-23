@@ -96,15 +96,15 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Death / defeat screen | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Low HP warning pulse | ✅ | `src/ui/GameHUD.cpp/hpp` |
 | Camera shake | ✅ | `src/game/CameraController.cpp/hpp` |
-| Combat camera zoom | ❌ | `src/game/CameraController.cpp/hpp` |
-| Camera collision avoidance | ❌ | `src/game/CameraController.cpp/hpp` |
-| Target framing adjustment | ❌ | `src/game/CameraController.cpp/hpp` |
-| Lock-on camera recovery smoothing | ❌ | `src/game/CameraController.cpp/hpp` |
-| Wind effect on trees | ❌ | `Shaders/tree_vs.hlsl` |
-| Weather system lite | ❌ | `src/world/WeatherSystem.cpp/hpp` |
-| Ambient particles | ❌ | `src/game/ParticleSystem.cpp/hpp` |
-| Day/night cycle | ❌ | `src/world/DayNightCycle.cpp/hpp` |
-| Biome transition fade | ❌ | `src/world/WorldGrid.cpp/hpp` |
+| Combat camera zoom | ✅ | `src/game/CameraController.cpp/hpp` |
+| Camera collision avoidance | ✅ | `src/game/CameraController.cpp/hpp` |
+| Target framing adjustment | ✅ | `src/game/CameraController.cpp/hpp` |
+| Lock-on camera recovery smoothing | ✅ | `src/game/CameraController.cpp/hpp` |
+| Wind effect on trees | ✅ | `Shaders/tree_vs.hlsl` |
+| Weather system lite | ✅ | `src/world/WeatherSystem.cpp/hpp` |
+| Ambient particles | ✅ | `src/game/ParticleSystem.cpp/hpp` |
+| Day/night cycle | ✅ | `src/world/DayNightCycle.cpp/hpp` |
+| Biome transition fade | ✅ | `src/world/WorldGrid.cpp/hpp` |
 | Fog of war on minimap | ❌ | `src/ui/Minimap.cpp/hpp` |
 | World event trigger zones | ❌ | `src/game/world/EventZone.cpp/hpp` |
 | Interaction hotspot registry stub | ❌ | `src/game/world/InteractionRegistry.cpp/hpp` |

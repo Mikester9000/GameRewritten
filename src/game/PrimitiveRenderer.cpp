@@ -23,13 +23,17 @@ using namespace DirectX;
 
 // ---------------------------------------------------------------------------
 // Constant buffer layout (shared between VS and PS via slot b0).
-// Total = 64 + 64 + 16 = 144 bytes (multiple of 16 — valid for D3D11).
+// Total = 64 + 64 + 16 + 16 = 160 bytes (multiple of 16 — valid for D3D11).
+// windParams.x = accumulated game time (seconds) for tree sway sine wave.
+// windParams.y = wind strength [0,1] that scales sway amplitude.
+// windParams.z/w = reserved / unused.
 // ---------------------------------------------------------------------------
 struct PrimCB
 {
     XMFLOAT4X4 mvp;        // model-view-projection (row-major, transposed for HLSL)
     XMFLOAT4X4 world;      // world matrix (for normal transform + world-pos gradient)
     XMFLOAT4   tintColor;  // per-part RGBA color
+    XMFLOAT4   windParams; // x=time, y=windStrength, z=0, w=0
 };
 
 // ---------------------------------------------------------------------------
@@ -329,7 +333,9 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
             PrimCB cb;
             XMStoreFloat4x4(&cb.mvp, XMMatrixTranspose(worldMat * view * proj));
             XMStoreFloat4x4(&cb.world, XMMatrixTranspose(worldMat));
-            cb.tintColor = { dp.r, dp.g, dp.b, dp.a };
+            cb.tintColor  = { dp.r, dp.g, dp.b, dp.a };
+            // windParams: only meaningful for tree parts; harmless for others.
+            cb.windParams = { m_globalTime, m_windStrength, 0.0f, 0.0f };
 
             m_context->UpdateSubresource(m_cb, 0, nullptr, &cb, 0, 0);
             m_context->VSSetConstantBuffers(0, 1, &m_cb);

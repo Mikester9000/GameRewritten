@@ -35,6 +35,9 @@
 #include "../assets/TextureCache.hpp"
 #include "../audio/AudioManager.hpp"
 #include "../world/WorldGrid.hpp"
+#include "../world/DayNightCycle.hpp"
+#include "../world/WeatherSystem.hpp"
+#include "../game/ParticleSystem.hpp"
 #include "FrameTiming.hpp"
 #include "InputActionMap.hpp"
 #include "InputEdgeState.hpp"
@@ -116,6 +119,19 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Each cell drives terrain + forest for that chunk of the open world.
     WorldGrid worldGrid;
     worldGrid.Load("Content/World/world.json");
+
+    // --- Day/night cycle ---
+    // Advances an accelerated 24-hour clock; updates sun direction + ambient each frame.
+    DayNightCycle dayNight;
+    dayNight.Init(9.0f); // start at 9 AM
+
+    // --- Weather system ---
+    // Drives ambient modifiers and wind strength; transitions probabilistically.
+    WeatherSystem weather;
+
+    // --- Ambient particle system ---
+    // Dust motes / leaves drawn as ImGui background dots — zero extra draw calls.
+    ParticleSystem particles;
 
     // Create and initialize forest (after renderer is initialized).
     Forest forest;
@@ -233,6 +249,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     camController.SetInputActionMap(&actionMap);
     camController.SetCollisionWorld(&collisionWorld);
 
+    // Initialise ambient particles centred on the startup spawn position.
+    particles.Init(startupCellCenter, startupCellCenter);
+
+    // Accumulated game time for wind shader (starts at 0).
+    float gameTimeAccum = 0.0f;
+
     bool firstFrame = true;
     bool dialogSmokeTestShown = false;
     FrameTiming::State frameTimingState;
@@ -272,6 +294,27 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // Establish deltaTime for this frame. Everything else uses it.
         float deltaTime = FrameTiming::BeginFrame(frameTimingState);
         runtimeScene.UpdateImpactFeedback(deltaTime);
+
+        // --- 1a. Day/night cycle + weather update ---
+        dayNight.Advance(deltaTime);
+        weather.Update(deltaTime);
+        worldGrid.UpdateBiomeTransition(deltaTime);
+
+        // Accumulate game time for the wind shader (unscaled, not paused).
+        gameTimeAccum += deltaTime;
+
+        // Push sun direction and ambient to renderer.
+        {
+            float sx, sy, sz;
+            dayNight.GetSunDirection(sx, sy, sz);
+            renderer.SetSunDirection(sx, sy, sz);
+            // Combine day/night ambient with weather modifier.
+            renderer.SetAmbientStrength(dayNight.GetAmbientStrength() * weather.GetAmbientModifier());
+        }
+
+        // Push wind time and strength to primitive renderer for tree sway.
+        primRenderer.SetGlobalTime(gameTimeAccum);
+        primRenderer.SetWindStrength(weather.GetWindStrength());
 
         // --- 2. Input ---
         // Read all input for this frame. No logic yet — just read state.
@@ -386,6 +429,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                       << ") biome=" << newCell->terrainBiome;
                     LOG_INFO(cellChangeMessage.str());
                     WorldRefresh::RefreshCellVisuals(*newCell, cellRefreshContext);
+                    // Notify biome transition (WorldGrid blends smoothly over ~2.5s).
+                    worldGrid.NotifyBiomeChange(newCell->terrainBiome);
                 }
                 lastPlayerCX = playerCX;
                 lastPlayerCZ = playerCZ;
@@ -455,6 +500,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         if (!paused)
             runtimeScene.damageNumbers.Update(gameplayDt);
 
+        // Ambient particles (dust/leaves) — always update using unscaled dt so
+        // they feel natural even during Tactical Pause slow-motion.
+        particles.Update(deltaTime, weather.GetWindStrength(),
+                         camController.GetPlayerX(),
+                         0.0f,
+                         camController.GetPlayerZ());
+
         if (runtimeScene.WantsRespawn())
         {
             camController.ResetToSpawn(
@@ -523,6 +575,16 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             primRenderer.Draw(renderer);
 
             imguiLayer.BeginFrame();
+
+            // Ambient particles are drawn as ImGui background geometry so they sit
+            // between the 3-D scene and HUD without needing a dedicated render pass.
+            particles.Draw(camController.GetCamX(),
+                           camController.GetCamY(),
+                           camController.GetCamZ(),
+                           camController.GetYaw(),
+                           camController.GetPitch(),
+                           static_cast<float>(window.GetWidth()),
+                           static_cast<float>(window.GetHeight()));
             if (!imguiLayer.IsPauseMenuOpen())
             {
                 const ImGuiIO&    io     = ImGui::GetIO();
