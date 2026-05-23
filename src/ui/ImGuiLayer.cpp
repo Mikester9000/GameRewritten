@@ -663,11 +663,12 @@ void ImGuiLayer::DrawCombatDebug(
 
         switch (e.state)
         {
-        case EnemyState::Patrol: stateStr = "PATROL"; stateCol = IM_COL32(255, 255, 255, 240); break;
-        case EnemyState::Chase:  stateStr = "CHASE";  stateCol = IM_COL32(230, 220, 30, 240); break;
-        case EnemyState::Attack: stateStr = "ATTACK"; stateCol = IM_COL32(255, 160, 40, 240); break;
-        case EnemyState::Hit:    stateStr = "HIT";    stateCol = IM_COL32(255, 80, 80, 240); break;
-        case EnemyState::Dead:   stateStr = "DEAD";   stateCol = IM_COL32(150, 150, 150, 200); break;
+        case EnemyState::Patrol:    stateStr = "PATROL";    stateCol = IM_COL32(255, 255, 255, 240); break;
+        case EnemyState::Chase:     stateStr = "CHASE";     stateCol = IM_COL32(230, 220,  30, 240); break;
+        case EnemyState::Attack:    stateStr = "ATTACK";    stateCol = IM_COL32(255, 160,  40, 240); break;
+        case EnemyState::Hit:       stateStr = "HIT";       stateCol = IM_COL32(255,  80,  80, 240); break;
+        case EnemyState::Staggered: stateStr = "STAGGERED"; stateCol = IM_COL32( 40, 230, 240, 240); break;
+        case EnemyState::Dead:      stateStr = "DEAD";      stateCol = IM_COL32(150, 150, 150, 200); break;
         }
 
         dl->AddText(ImVec2(ex - 18.0f, ey), stateCol, stateStr);

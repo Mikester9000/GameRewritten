@@ -70,7 +70,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Combat HUD expansion (target info + combo step) | ✅ | `src/ui/GameHUD.hpp`, `src/ui/GameHUD.cpp`, `src/app/Main.cpp` |
 | Lock-on target cycling | ✅ | `src/game/combat/Targeting.hpp`, `src/app/Main.cpp` |
 | Auto-retarget on target death / range loss | ✅ | `src/game/combat/Targeting.hpp`, `src/game/RuntimeScene.hpp` |
-| Pressure / stagger integration stub | ❌ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Pressure / stagger integration stub | ✅ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Tactical Pause command readiness reasons | ✅ | `src/ui/TacticalPauseMenu.cpp/hpp` |
 | Off-screen lock-on target indicator | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
 | Enemy reaction / interrupt-lite | ❌ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |

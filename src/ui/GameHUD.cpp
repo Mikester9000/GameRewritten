@@ -83,9 +83,11 @@ float NormalizeValue(float value, float maxValue)
 // Returns the pixel height of the target-info panel, derived from the current
 // font size. Both DrawTargetInfo and DrawComboIndicator use this so the combo
 // panel always sits flush above the target panel even if padding changes.
+// Includes rows for: name + HP bar + pressure bar.
 float CalcTargetPanelHeight()
 {
-    return kTargetPanelPadY + ImGui::GetFontSize() + kTargetBarGap + kTargetBarH + kTargetPanelPadY;
+    return kTargetPanelPadY + ImGui::GetFontSize() + kTargetBarGap + kTargetBarH +
+           kTargetBarGap + kTargetBarH + kTargetPanelPadY;
 }
 
 void DrawLowHpPulse(const ImGuiIO& io, float pulseTime, float opacity)
@@ -259,6 +261,43 @@ void GameHUD::DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io)
     // Bar border.
     dl->AddRect(ImVec2(barX, barY),
                 ImVec2(barX + barW, barY + kTargetBarH),
+                ApplyOpacity(IM_COL32(70, 75, 110, 200), m_opacity), 2.0f);
+
+    // --- Pressure / stagger bar ---
+    const float pressureBarY = barY + kTargetBarH + kTargetBarGap;
+    const bool  isStaggered  = target->IsStaggered();
+    const float pressureFrac = target->GetPressureGauge();
+    const float pressureFillW = isStaggered ? barW : (barW * pressureFrac);
+
+    // Bar track (dark background).
+    dl->AddRectFilled(ImVec2(barX, pressureBarY),
+                      ImVec2(barX + barW, pressureBarY + kTargetBarH),
+                      ApplyOpacity(IM_COL32(28, 28, 48, 255), m_opacity), 2.0f);
+
+    // Filled portion: amber while building, bright cyan when staggered.
+    if (pressureFillW > 0.0f)
+    {
+        ImU32 pressureColor = isStaggered
+            ? IM_COL32( 40, 230, 240, 255)  // stagger active: cyan
+            : IM_COL32(230, 170,  20, 255); // building: amber/gold
+        dl->AddRectFilled(ImVec2(barX, pressureBarY),
+                          ImVec2(barX + pressureFillW, pressureBarY + kTargetBarH),
+                          ApplyOpacity(pressureColor, m_opacity), 2.0f);
+    }
+
+    // "STAGGERED" label centred in the bar when staggered; small "PRES" label otherwise.
+    if (isStaggered)
+    {
+        const char* staggerLabel = "STAGGERED";
+        const ImVec2 sz = ImGui::CalcTextSize(staggerLabel);
+        dl->AddText(ImVec2(barX + (barW - sz.x) * 0.5f,
+                           pressureBarY + (kTargetBarH - sz.y) * 0.5f),
+                    ApplyOpacity(IM_COL32(255, 255,  50, 255), m_opacity), staggerLabel);
+    }
+
+    // Bar border.
+    dl->AddRect(ImVec2(barX, pressureBarY),
+                ImVec2(barX + barW, pressureBarY + kTargetBarH),
                 ApplyOpacity(IM_COL32(70, 75, 110, 200), m_opacity), 2.0f);
 }
 
