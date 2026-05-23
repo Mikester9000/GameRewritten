@@ -1,6 +1,6 @@
 # Materials Content
 
-Hand-authored material descriptors and Creation-Engine–generated bundle manifests.
+Hand-authored material descriptors and Creation-Engine–generated material manifests normalized to `*.material.json`.
 
 ## Formats
 

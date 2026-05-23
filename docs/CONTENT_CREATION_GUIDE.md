@@ -38,31 +38,32 @@ See also:
 ## 3) Standard import workflow (required)
 
 Use `tools/import_assets.py` first. It is the primary supported importer.
+Run these commands from the repository root.
 
 ### Audio import
 ```bash
-python /tmp/workspace/Mikester9000/GameRewritten/tools/import_assets.py \
+python tools/import_assets.py \
   --engine audio \
   --src /absolute/path/to/audio_export
 ```
 
 ### Animation import
 ```bash
-python /tmp/workspace/Mikester9000/GameRewritten/tools/import_assets.py \
+python tools/import_assets.py \
   --engine animation \
   --src /absolute/path/to/anim_export
 ```
 
 ### Creation import
 ```bash
-python /tmp/workspace/Mikester9000/GameRewritten/tools/import_assets.py \
+python tools/import_assets.py \
   --engine creation \
   --src /absolute/path/to/creation_export
 ```
 
 ### Dry-run safety pass (recommended before large imports)
 ```bash
-python /tmp/workspace/Mikester9000/GameRewritten/tools/import_assets.py \
+python tools/import_assets.py \
   --engine creation \
   --src /absolute/path/to/creation_export \
   --dry-run

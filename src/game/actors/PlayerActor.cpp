@@ -16,6 +16,11 @@
 #include <algorithm>
 #include <string>
 
+namespace
+{
+constexpr float kParryWindowSec = 0.12f;
+}
+
 ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraController& cameraController) const
 {
     ActorCommon::RuntimeActorPose pose;
@@ -29,9 +34,6 @@ ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraControll
 
 void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded, bool attackPressed)
 {
-    // Tight parry window at the start of every dodge (0.12 s).
-    static constexpr float kParryWindowSec = 0.12f;
-
     stateTimer = (std::max)(0.0f, stateTimer - dt);
     parryWindowTimer = (std::max)(0.0f, parryWindowTimer - dt);
 

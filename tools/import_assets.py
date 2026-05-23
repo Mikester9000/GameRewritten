@@ -129,7 +129,12 @@ def _registry_key(dest: Path) -> str:
         "ui": "ui",
     }
     folder = folder_map.get(folder, folder)
-    stem = Path(parts[-1]).stem.lower()
+    filename = parts[-1].lower()
+    compound_suffixes = (".material.json", ".prefab.json", ".scene.json")
+    stem = next(
+        (filename[:-len(suffix)] for suffix in compound_suffixes if filename.endswith(suffix)),
+        Path(parts[-1]).stem.lower(),
+    )
 
     # Preserve nested source subdirectories in the key so assets imported from
     # different packs/folders remain individually addressable.
