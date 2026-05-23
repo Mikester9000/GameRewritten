@@ -175,7 +175,7 @@ Run these only when the corresponding control section needs updating.
 ---
 
 ## Release Gate Tasks (Task 109-120)
-These tasks add release-readiness validation content to documentation files (ship checklists, QA gates, legal review, etc.).
+These tasks add release-readiness validation content to documentation files (ship checklists, QA gates, legal review, animation compatibility gates, etc.).
 Each targets a single `.md` documentation file. They follow the same one-file-at-a-time rule as all code tasks.
 
 ## Task 109
@@ -224,12 +224,12 @@ Each targets a single `.md` documentation file. They follow the same one-file-at
 
 ## Task 113
 0. **Single-file edit:** yes, exactly one file in this task.
-1. **Task Name:** Content minimum vertical-slice gate
-2. **What the task does + logic:** Adds/updates minimum content acceptance criteria for one complete region loop (combat + NPC interaction + reward).
-3. **Narrative logic explanation:** Define required loop stages, guard incomplete progression, validate handoff outcomes, then mark completion.
-4. **Game design target (FF7 Remake + PS2):** Deliver readable action-RPG loop with constrained assets and performant world flow.
+1. **Task Name:** Content and animation compatibility vertical-slice gate
+2. **What the task does + logic:** Adds/updates minimum content acceptance criteria for one complete region loop (combat + NPC interaction + reward) and verifies completed animation clips/states remain compatible with planned animation state/event contracts.
+3. **Narrative logic explanation:** Define required loop stages and animation compatibility matrix, guard incomplete progression and missing/mismatched animation transitions/events, validate handoff outcomes, then mark completion.
+4. **Game design target (FF7 Remake + PS2):** Deliver readable action-RPG loop with constrained assets, animation continuity, and performant world flow.
 5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/QUALITY_BAR.md`
-6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under release quality gates.
+6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert under release quality gates and animation readiness checks.
 7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
 8. **Copy-ready completion rule:** Return final paste-ready text for this file only, with no extra files or commentary.
 
@@ -302,8 +302,8 @@ Each targets a single `.md` documentation file. They follow the same one-file-at
 ## Task 120
 0. **Single-file edit:** yes, exactly one file in this task.
 1. **Task Name:** Final ship-signoff manifest gate
-2. **What the task does + logic:** Adds/updates final sign-off manifest format tying technical, content, legal, and performance gates into one release approval record.
-3. **Narrative logic explanation:** Define sign-off fields, guard missing approvals, assemble final manifest, then publish final ship-ready status.
+2. **What the task does + logic:** Adds/updates final sign-off manifest format tying technical, content, animation compatibility, legal, and performance gates into one release approval record.
+3. **Narrative logic explanation:** Define sign-off fields (including animation-compatibility approval), guard missing approvals, assemble final manifest, then publish final ship-ready status.
 4. **Game design target (FF7 Remake + PS2):** Deliver commercially acceptable final package with predictable low-spec behavior.
 5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/docs/SHIP_CHECKLIST.md`
 6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; insert near end of release checklist as final gate section.

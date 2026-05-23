@@ -944,6 +944,7 @@ Within each layer, **headers come before implementations** where needed.
 - CON5: 72 tasks (335-406 with headers)
 - CON6: 14 tasks (371-384 with headers)
 - CON7: 20 tasks (383-392 with headers)
+- CON8: 32 tasks (393-408 with headers) — external engine integration: Animation-Engine .anim packs, Audio-Engine audio_plan manifests, Creation-Engine material/tilemap/mesh exports
 
 **By Phase:**
 - Phase 1 (Foundation): 150 tasks
@@ -955,6 +956,7 @@ Within each layer, **headers come before implementations** where needed.
 - Phase 7 (Endgame): 50 tasks
 - Phase 8 (Localization): 50 tasks
 - Phase 9 (Release): 39 tasks
+- Phase 10 (External Engine Integration): 32 tasks — Animation-Engine (393-398H), Audio-Engine (399-403H), Creation-Engine (404-408H)
 
 **Execution Strategy:**
 1. Start with Phase 1 (Foundation) - core systems must work first
@@ -966,5 +968,6 @@ Within each layer, **headers come before implementations** where needed.
 7. Polish Phase 7 (Endgame) - replayability features
 8. Finalize Phase 8 (Localization) - multi-language support
 9. Close Phase 9 (Release) - final integration and shipping
+10. Complete Phase 10 (External Engine Integration) - import Animation-Engine .anim packs, Audio-Engine manifests + WAV/OGG assets, Creation-Engine material/tilemap/mesh bundles; run all three engine validation gates before ship sign-off
 
 **This order ensures dependencies are met and minimizes rework.** 🎮✨
