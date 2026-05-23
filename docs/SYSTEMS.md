@@ -105,7 +105,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Ambient particles | ✅ | `src/game/ParticleSystem.cpp/hpp` |
 | Day/night cycle | ✅ | `src/world/DayNightCycle.cpp/hpp` |
 | Biome transition fade | ✅ | `src/world/WorldGrid.cpp/hpp` |
-| Fog of war on minimap | ❌ | `src/ui/Minimap.cpp/hpp` |
+| Fog of war on minimap | ✅ | `src/ui/Minimap.cpp/hpp` |
 | World event trigger zones | ❌ | `src/game/world/EventZone.cpp/hpp` |
 | Interaction hotspot registry stub | ❌ | `src/game/world/InteractionRegistry.cpp/hpp` |
 | Landmark discovery trigger stub | ❌ | `src/game/world/LandmarkTrigger.cpp/hpp` |

@@ -11,6 +11,9 @@
 // Draws a 160x160 minimap overlay in the top-right corner using ImGui draw lists.
 // Shows nearby world cells colored by biome, plus the player position and facing direction.
 
+#include <cstdint>
+#include <unordered_set>
+
 struct ImGuiIO;
 class WorldGrid;
 
@@ -24,4 +27,7 @@ public:
     void Draw(const WorldGrid& grid,
               float playerX, float playerZ, float playerYaw,
               const ImGuiIO& io);
+
+private:
+    std::unordered_set<std::uint64_t> m_visitedCells;
 };
