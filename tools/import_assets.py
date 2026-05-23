@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -129,7 +130,72 @@ def _registry_key(dest: Path) -> str:
     }
     folder = folder_map.get(folder, folder)
     stem = Path(parts[-1]).stem.lower()
-    return f"{folder}.{stem}"
+
+    # Preserve nested source subdirectories in the key so assets imported from
+    # different packs/folders remain individually addressable.
+    nested = [
+        _sanitize_key_segment(p)
+        for p in parts[1:-1]
+        if _sanitize_key_segment(p)
+    ]
+    name = ".".join([*nested, stem]) if nested else stem
+    return f"{folder}.{name}"
+
+
+def _sanitize_key_segment(value: str) -> str:
+    """Convert a path segment into a stable dotted-key token."""
+    token = re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
+    return token
+
+
+def _key_for_collision(base_key: str, rel_path: str, assets: dict[str, str]) -> str:
+    """Return a deterministic alternate key for collisions on base_key."""
+    rel = Path(rel_path)
+    ext = rel.suffix.lower().lstrip(".") or "file"
+
+    # First preference: encode file format into the key.
+    candidate = f"{base_key}.{ext}"
+    if candidate not in assets or assets[candidate] == rel_path:
+        return candidate
+
+    # Second preference: include parent folder context.
+    parent_tokens = [
+        _sanitize_key_segment(part)
+        for part in rel.parts[:-1]
+        if _sanitize_key_segment(part) and _sanitize_key_segment(part) != "content"
+    ]
+    for token in reversed(parent_tokens):
+        candidate = f"{base_key}.{token}.{ext}"
+        if candidate not in assets or assets[candidate] == rel_path:
+            return candidate
+
+    # Final fallback: numeric suffix.
+    i = 2
+    while True:
+        candidate = f"{base_key}.{ext}.{i}"
+        if candidate not in assets or assets[candidate] == rel_path:
+            return candidate
+        i += 1
+
+
+def _join_preserving_subdirs(base_dir: Path, rel_parent: Path, filename: str) -> Path:
+    """Join destination while preserving source subdirectory structure."""
+    if rel_parent == Path("."):
+        return base_dir / filename
+    return base_dir / rel_parent / filename
+
+
+def _looks_like_material_manifest(manifest: dict | None) -> bool:
+    """True when JSON payload can be consumed by AssetLoader::LoadMaterial."""
+    if not isinstance(manifest, dict):
+        return False
+    if "textures" in manifest and "params" in manifest:
+        return True
+    # Creation-Engine manifests may carry enough information to be treated as material descriptors.
+    return (
+        isinstance(manifest.get("files"), dict)
+        and any(k in manifest["files"] for k in ("albedo", "normal", "roughness", "metallic", "ao", "emissive"))
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -143,15 +209,16 @@ def _import_audio(src: Path, dry_run: bool) -> list[tuple[str, str]]:
     for f in sorted(src.rglob("*")):
         if f.suffix.lower() not in AUDIO_EXTENSIONS:
             continue
-        dest = dest_dir / f.name
+        rel = f.relative_to(src)
+        dest = dest_dir / rel
         key = _registry_key(dest)
         rel_dest = str(dest.relative_to(REPO_ROOT))
         if dry_run:
             print(f"[dry-run] COPY  {f}  →  {dest}")
         else:
-            dest_dir.mkdir(parents=True, exist_ok=True)
+            dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
-            print(f"COPY  {f.name}  →  {rel_dest}")
+            print(f"COPY  {rel}  →  {rel_dest}")
         added.append((key, rel_dest))
     return added
 
@@ -163,20 +230,21 @@ def _import_animation(src: Path, dry_run: bool) -> list[tuple[str, str]]:
     for f in sorted(src.rglob("*")):
         if f.suffix.lower() not in ANIMATION_EXTENSIONS:
             continue
-        dest = dest_dir / f.name
+        rel = f.relative_to(src)
+        dest = dest_dir / rel
         key = _registry_key(dest)
         rel_dest = str(dest.relative_to(REPO_ROOT))
         if dry_run:
             print(f"[dry-run] COPY  {f}  →  {dest}")
         else:
-            dest_dir.mkdir(parents=True, exist_ok=True)
+            dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
-            print(f"COPY  {f.name}  →  {rel_dest}")
+            print(f"COPY  {rel}  →  {rel_dest}")
         added.append((key, rel_dest))
     return added
 
 
-def _resolve_creation_dest(file: Path, manifest: dict | None) -> Path | None:
+def _resolve_creation_dest(file: Path, manifest: dict | None, rel_parent: Path = Path(".")) -> Path | None:
     """Return the destination Content/ path for a Creation Engine file.
 
     Priority:
@@ -190,10 +258,13 @@ def _resolve_creation_dest(file: Path, manifest: dict | None) -> Path | None:
     if file.suffix.lower() == ".json":
         # Tilemap/world JSONs → World/
         if manifest and "tiles" in manifest:
-            return CONTENT_DIR / "World" / file.name
+            return _join_preserving_subdirs(CONTENT_DIR / "World", rel_parent, file.name)
+        # Material-like manifest JSONs → Materials/ as *.material.json for runtime loader compatibility.
+        if _looks_like_material_manifest(manifest):
+            return _join_preserving_subdirs(CONTENT_DIR / "Materials", rel_parent, f"{file.stem}.material.json")
         # Other parseable manifests (material/shader metadata, bundle recipes) → Bundles/
         if manifest is not None:
-            return CONTENT_DIR / "Bundles" / file.name
+            return _join_preserving_subdirs(CONTENT_DIR / "Bundles", rel_parent, file.name)
         return None
 
     # Use content_target from manifest if available — look up by file kind so the
@@ -207,12 +278,12 @@ def _resolve_creation_dest(file: Path, manifest: dict | None) -> Path | None:
                     file_kind = kind
                     break
             if file_kind is not None and file_kind in targets:
-                return REPO_ROOT / targets[file_kind] / file.name
+                return _join_preserving_subdirs(REPO_ROOT / targets[file_kind], rel_parent, file.name)
 
     # Static fallback
     for suffix_pattern, target_dir in CREATION_ROUTING:
         if name_lower.endswith(suffix_pattern):
-            return REPO_ROOT / target_dir / file.name
+            return _join_preserving_subdirs(REPO_ROOT / target_dir, rel_parent, file.name)
 
     return None  # unknown type — skip
 
@@ -224,6 +295,8 @@ def _import_creation(src: Path, dry_run: bool) -> list[tuple[str, str]]:
     for f in sorted(src.rglob("*")):
         if not f.is_file():
             continue
+        rel_from_src = f.relative_to(src)
+        rel_parent = rel_from_src.parent
 
         # Try to load companion manifest (same stem, .json extension)
         manifest_path = f.with_suffix(".json")
@@ -243,18 +316,18 @@ def _import_creation(src: Path, dry_run: bool) -> list[tuple[str, str]]:
             except (json.JSONDecodeError, OSError):
                 continue
 
-        dest = _resolve_creation_dest(f, manifest)
+        dest = _resolve_creation_dest(f, manifest, rel_parent)
         if dest is None:
             continue
 
         key = _registry_key(dest)
         rel_dest = str(dest.relative_to(REPO_ROOT))
         if dry_run:
-            print(f"[dry-run] COPY  {f.name}  →  {rel_dest}")
+            print(f"[dry-run] COPY  {rel_from_src}  →  {rel_dest}")
         else:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
-            print(f"COPY  {f.name}  →  {rel_dest}")
+            print(f"COPY  {rel_from_src}  →  {rel_dest}")
         added.append((key, rel_dest))
 
     return added
@@ -324,7 +397,14 @@ def main(argv: list[str] | None = None) -> int:
                 assets[key] = rel_path
                 new_count += 1
             else:
-                assets[key] = rel_path  # update path even if key exists
+                # Preserve the original key mapping and add deterministic
+                # disambiguated keys so every imported file remains addressable.
+                existing = assets[key]
+                if existing == rel_path:
+                    continue
+                unique_key = _key_for_collision(key, rel_path, assets)
+                assets[unique_key] = rel_path
+                new_count += 1
         _save_registry(reg)
         print(f"\nAssetRegistry.json updated: {new_count} new entries ({len(added)} total).")
     else:
