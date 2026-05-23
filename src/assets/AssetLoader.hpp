@@ -58,6 +58,25 @@ struct SceneAsset
     std::vector<SceneInstance> instances;
 };
 
+struct AnimationClipAsset
+{
+    std::string name;
+    float       fps = 0.0f;
+    bool        loop = false;
+    float       durationSec = 0.0f;
+    int         channelCount = 0;
+    int         eventCount = 0;
+    bool        rootMotionEnabled = false;
+    int         rootMotionChannelIndex = -1;
+};
+
+struct AnimationAsset
+{
+    std::string                    format;
+    std::string                    version;
+    std::vector<AnimationClipAsset> clips;
+};
+
 class AssetLoader
 {
 public:
@@ -69,4 +88,7 @@ public:
 
     // Load a *.scene.json file.  Returns false on parse error.
     static bool LoadScene(const std::string& path, SceneAsset& out);
+
+    // Load an Animation Engine *.anim file. Returns false on parse error.
+    static bool LoadAnimation(const std::string& path, AnimationAsset& out);
 };
