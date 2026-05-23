@@ -65,6 +65,8 @@ public:
     void SetCollisionWorld(const CollisionWorld* collisionWorld) { m_collisionWorld = collisionWorld; }
     void BeginDodge(float dirX, float dirZ);
     void BiasYawTowardTarget(float targetX, float targetZ, float dt);
+    void SetCombatCameraFocus(bool enabled, float targetX, float targetY, float targetZ);
+    void AddCameraShake(float amplitude, float duration);
 
     // Teleport the player to a new spawn position and reset all physics and
     // dodge state. Call after a player defeat so the next frame starts clean.
@@ -120,6 +122,16 @@ private:
     float m_dodgeVelZ = 0.0f;
     float m_dodgeTimer = 0.0f;
     bool m_dodgeActive = false;
+    bool m_hasCombatFocus = false;
+    float m_focusTargetX = 0.0f;
+    float m_focusTargetY = 0.0f;
+    float m_focusTargetZ = 0.0f;
+    float m_currentCameraDistance = 4.0f;
+    float m_currentCameraHeight = 2.0f;
+    float m_shakeTimer = 0.0f;
+    float m_shakeDuration = 0.0f;
+    float m_shakeAmplitude = 0.0f;
+    float m_shakePhase = 0.0f;
     POINT m_centerPoint = {};
     const InputActionMap* m_inputActionMap = nullptr;
     const CollisionWorld* m_collisionWorld = nullptr;

@@ -50,17 +50,16 @@ public:
 
     // The game loop sets these each frame so the debug overlay can display them.
     void SetFrameStats(float fps, float dt) { currentFPS = fps; currentDT = dt; }
-    void SetRendererRef(D3D11Renderer* renderer)
-    {
-        if (m_renderer != renderer)
-            m_lightUiInitialized = false;
-        m_renderer = renderer;
-    }
+    void SetRendererRef(D3D11Renderer* renderer);
     void SetCameraInfo(float x, float y, float z, float yaw, float pitch)
     {
         camX = x; camY = y; camZ = z; camYaw = yaw; camPitch = pitch;
     }
     void SetAudioManager(AudioManager* audioManager) { m_audioManager = audioManager; }
+    bool IsVSyncEnabled() const { return m_vsyncEnabled; }
+    int GetFrameRateLimit() const;
+    float GetHudOpacity() const { return m_hudOpacity; }
+    bool UseUltrawideHudLayout(float displayAspect) const;
 
     // Returns true when the user chose "Quit" from the pause menu.
     bool WantsQuit() const { return wantsQuit; }
@@ -111,11 +110,18 @@ private:
     bool wantsQuit   = false;
     bool wantsResume = false;
     D3D11Renderer* m_renderer = nullptr;
+    bool m_showOptions = false;
     bool  m_lightUiInitialized = false;
     float m_sunDirX = 0.0f;
     float m_sunDirY = -1.0f;
     float m_sunDirZ = 0.0f;
     float m_ambientStrength = 0.25f;
+    bool m_vsyncEnabled = true;
+    int m_frameRateLimitIndex = 1;
+    int m_graphicsPresetIndex = 1;
+    int m_antiAliasingIndex = 1;
+    int m_ultrawideModeIndex = 0;
+    float m_hudOpacity = 0.80f;
     AudioManager* m_audioManager = nullptr;
 
     void DrawPauseMenu();

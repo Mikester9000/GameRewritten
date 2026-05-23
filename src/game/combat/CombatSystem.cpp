@@ -140,12 +140,18 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
             if (!HitBoxOverlapsEnemy(hitBox, enemy))
                 continue;
 
+            // Apply stagger bonus damage multiplier when the enemy is staggered.
+            int actualDamage = hitBox.damage;
+            if (enemy.IsStaggered())
+                actualDamage = static_cast<int>(actualDamage * EnemyActor::kStaggerBonusMult + 0.5f);
+
             std::ostringstream ss;
             ss << "CombatSystem: Hit enemy " << i
-               << " for " << hitBox.damage << " damage.";
+               << " for " << actualDamage << " damage"
+               << (enemy.IsStaggered() ? " (STAGGER BONUS)" : "") << ".";
             LOG_INFO(ss.str());
 
-            enemy.OnHit(hitBox.damage);
+            enemy.OnHit(actualDamage);
 
             if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
             {
@@ -153,7 +159,7 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
                 hitRecord.x = enemy.x;
                 hitRecord.y = enemy.y + DAMAGE_NUMBER_Y_OFFSET;
                 hitRecord.z = enemy.z;
-                hitRecord.damage = hitBox.damage;
+                hitRecord.damage = actualDamage;
             }
         }
     }

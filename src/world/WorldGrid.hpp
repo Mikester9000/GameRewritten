@@ -90,6 +90,20 @@ public:
     // Convert a world-space (X, Z) position into a cell grid coordinate.
     void WorldToCell(float worldX, float worldZ, int& outCX, int& outCZ) const;
 
+    // --- Biome transition ---
+    // Call when the player crosses into a new biome (e.g. on cell change).
+    // Starts a smooth blend from the previous biome to the new one.
+    void NotifyBiomeChange(const std::string& newBiome);
+
+    // Advance the transition timer by dt real seconds.
+    void UpdateBiomeTransition(float dt);
+
+    // Alpha [0, 1] of the current biome — 0 = fully previous, 1 = fully arrived.
+    float GetBiomeTransitionAlpha() const { return m_biomeBlendAlpha; }
+
+    const std::string& GetCurrentBiome()  const { return m_currentBiome;  }
+    const std::string& GetPreviousBiome() const { return m_previousBiome; }
+
     float       GetCellSize() const  { return m_cellSize; }
     const std::string& GetName() const { return m_name; }
     int         CellCount()  const  { return static_cast<int>(m_cells.size()); }
@@ -108,4 +122,10 @@ private:
     std::string           m_name;
     float                 m_cellSize = 200.0f;
     std::vector<WorldCell> m_cells;
+
+    // --- Biome transition state ---
+    std::string m_currentBiome  = "grassland";
+    std::string m_previousBiome = "grassland";
+    float       m_biomeBlendAlpha    = 1.0f;  // 1.0 = fully at currentBiome
+    float       m_biomeBlendDuration = 2.5f;  // seconds for a full biome fade
 };

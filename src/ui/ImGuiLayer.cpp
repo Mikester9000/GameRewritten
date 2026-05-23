@@ -46,6 +46,49 @@ constexpr int   kLockMarkerCircleSegments = 24;
 constexpr float kLockMarkerCircleThickness = 2.0f;
 constexpr float kLockMarkerTextOffsetX = -22.0f;
 constexpr float kLockMarkerTextOffsetY = -30.0f;
+constexpr const char* kGraphicsPresetLabels[] = { "Low", "Medium", "High", "Ultra", "Custom" };
+constexpr const char* kFrameLimitLabels[] = { "30", "60", "120", "144", "Unlimited" };
+constexpr int kFrameLimitValues[] = { 30, 60, 120, 144, 0 };
+constexpr const char* kAntiAliasingLabels[] = { "Off", "FXAA", "SMAA", "TAA" };
+constexpr const char* kUltrawideModeLabels[] = { "Auto", "Off", "On" };
+
+int FrameLimitIndexFromValue(int fps)
+{
+    for (int i = 0; i < IM_ARRAYSIZE(kFrameLimitValues); ++i)
+    {
+        if (kFrameLimitValues[i] == fps)
+            return i;
+    }
+    return 1;
+}
+
+int GraphicsPresetIndexFromValue(D3D11Renderer::GraphicsPreset preset)
+{
+    switch (preset)
+    {
+    case D3D11Renderer::GraphicsPreset::Low: return 0;
+    case D3D11Renderer::GraphicsPreset::Medium: return 1;
+    case D3D11Renderer::GraphicsPreset::High: return 2;
+    case D3D11Renderer::GraphicsPreset::Ultra: return 3;
+    case D3D11Renderer::GraphicsPreset::Custom:
+    default:
+        return 4;
+    }
+}
+
+int AntiAliasingIndexFromValue(D3D11Renderer::AntiAliasingMode mode)
+{
+    switch (mode)
+    {
+    case D3D11Renderer::AntiAliasingMode::Off: return 0;
+    case D3D11Renderer::AntiAliasingMode::FXAA: return 1;
+    case D3D11Renderer::AntiAliasingMode::SMAA: return 2;
+    case D3D11Renderer::AntiAliasingMode::TAA:
+    default:
+        return 3;
+    }
+}
+
 }
 
 static bool WorldToScreen(
@@ -159,6 +202,36 @@ static void DrawProjectedAabb(
 }
 ImGuiLayer::ImGuiLayer() = default;
 
+void ImGuiLayer::SetRendererRef(D3D11Renderer* renderer)
+{
+    if (m_renderer == renderer)
+        return;
+
+    m_renderer = renderer;
+    m_lightUiInitialized = false;
+    if (!m_renderer)
+        return;
+
+    m_vsyncEnabled = m_renderer->IsVSyncEnabled();
+    m_frameRateLimitIndex = FrameLimitIndexFromValue(m_renderer->GetFrameRateLimit());
+    m_graphicsPresetIndex = GraphicsPresetIndexFromValue(m_renderer->GetGraphicsPreset());
+    m_antiAliasingIndex = AntiAliasingIndexFromValue(m_renderer->GetAntiAliasingMode());
+}
+
+int ImGuiLayer::GetFrameRateLimit() const
+{
+    return kFrameLimitValues[m_frameRateLimitIndex];
+}
+
+bool ImGuiLayer::UseUltrawideHudLayout(float displayAspect) const
+{
+    if (m_ultrawideModeIndex == 1)
+        return false;
+    if (m_ultrawideModeIndex == 2)
+        return true;
+    return displayAspect >= 2.1f;
+}
+
 bool ImGuiLayer::Initialize(HWND hwnd,
                              ID3D11Device*        device,
                              ID3D11DeviceContext* context)
@@ -266,7 +339,7 @@ void ImGuiLayer::DrawPauseMenu()
 {
     // Centre the window on screen.
     ImGuiIO& io = ImGui::GetIO();
-    float winW = 260.0f, winH = 160.0f;
+    float winW = 360.0f, winH = m_showOptions ? 320.0f : 180.0f;
     ImGui::SetNextWindowPos(
         ImVec2((io.DisplaySize.x - winW) * 0.5f,
                (io.DisplaySize.y - winH) * 0.5f),
@@ -298,13 +371,28 @@ void ImGuiLayer::DrawPauseMenu()
         ImGui::Spacing();
 
         // Simple inline options.
-        static bool showOptions = false;
         if (ImGui::Button("Options", ImVec2(-1.0f, 0.0f)))
-            showOptions = !showOptions;
+            m_showOptions = !m_showOptions;
 
-        if (showOptions)
+        if (m_showOptions)
         {
             ImGui::Indent();
+            if (m_renderer)
+            {
+                if (ImGui::Checkbox("V-Sync", &m_vsyncEnabled))
+                    m_renderer->SetVSyncEnabled(m_vsyncEnabled);
+
+                if (ImGui::Combo("FPS Limit", &m_frameRateLimitIndex, kFrameLimitLabels, IM_ARRAYSIZE(kFrameLimitLabels)))
+                    m_renderer->SetFrameRateLimit(kFrameLimitValues[m_frameRateLimitIndex]);
+
+                ImGui::Combo("Ultrawide HUD", &m_ultrawideModeIndex, kUltrawideModeLabels, IM_ARRAYSIZE(kUltrawideModeLabels));
+                ImGui::SliderFloat("HUD Opacity", &m_hudOpacity, 0.0f, 1.0f, "%.2f");
+            }
+            else
+            {
+                ImGui::TextDisabled("Renderer unavailable.");
+            }
+
             if (m_audioManager)
             {
                 float bgmVolume = m_audioManager->GetBGMVolume();
@@ -372,6 +460,14 @@ void ImGuiLayer::DrawDebugOverlay()
 
             if (ImGui::SliderFloat("Ambient", &m_ambientStrength, 0.0f, 1.0f))
                 m_renderer->SetAmbientStrength(m_ambientStrength);
+
+            ImGui::Separator();
+            ImGui::Text("Graphics");
+            ImGui::Text("  preset  %s", kGraphicsPresetLabels[m_graphicsPresetIndex]);
+            ImGui::Text("  vsync   %s", m_vsyncEnabled ? "on" : "off");
+            ImGui::Text("  fps cap %s", kFrameLimitLabels[m_frameRateLimitIndex]);
+            ImGui::Text("  aa      %s", kAntiAliasingLabels[m_antiAliasingIndex]);
+            ImGui::Text("  hud     %.0f%%", m_hudOpacity * 100.0f);
         }
         ImGui::Separator();
         ImGui::Checkbox("Show Combat Debug", &showCombatDebug);
@@ -516,11 +612,12 @@ void ImGuiLayer::DrawCombatDebug(
 
         switch (e.state)
         {
-        case EnemyState::Patrol: stateStr = "PATROL"; stateCol = IM_COL32(255, 255, 255, 240); break;
-        case EnemyState::Chase:  stateStr = "CHASE";  stateCol = IM_COL32(230, 220, 30, 240); break;
-        case EnemyState::Attack: stateStr = "ATTACK"; stateCol = IM_COL32(255, 160, 40, 240); break;
-        case EnemyState::Hit:    stateStr = "HIT";    stateCol = IM_COL32(255, 80, 80, 240); break;
-        case EnemyState::Dead:   stateStr = "DEAD";   stateCol = IM_COL32(150, 150, 150, 200); break;
+        case EnemyState::Patrol:    stateStr = "PATROL";    stateCol = IM_COL32(255, 255, 255, 240); break;
+        case EnemyState::Chase:     stateStr = "CHASE";     stateCol = IM_COL32(230, 220,  30, 240); break;
+        case EnemyState::Attack:    stateStr = "ATTACK";    stateCol = IM_COL32(255, 160,  40, 240); break;
+        case EnemyState::Hit:       stateStr = "HIT";       stateCol = IM_COL32(255,  80,  80, 240); break;
+        case EnemyState::Staggered: stateStr = "STAGGERED"; stateCol = IM_COL32( 40, 230, 240, 240); break;
+        case EnemyState::Dead:      stateStr = "DEAD";      stateCol = IM_COL32(150, 150, 150, 200); break;
         }
 
         dl->AddText(ImVec2(ex - 18.0f, ey), stateCol, stateStr);

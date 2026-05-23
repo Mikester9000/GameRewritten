@@ -204,6 +204,8 @@ bool D3D11Renderer::Initialize(HWND windowHandle, int width, int height)
     }
 
     SetSunDirection(m_lightData.lightDirX, m_lightData.lightDirY, m_lightData.lightDirZ);
+    ApplyGraphicsPreset((featureLevel <= D3D_FEATURE_LEVEL_10_0) ? GraphicsPreset::Low
+                                                                 : GraphicsPreset::High);
     return true;
 }
 
@@ -325,7 +327,10 @@ void D3D11Renderer::ClearScreen(float red, float green, float blue, float alpha)
 
 void D3D11Renderer::PresentFrame()
 {
-    swapChain->Present(1, 0);
+    const UINT syncInterval = m_vsyncEnabled
+        ? ((m_frameRateLimit > 0 && m_frameRateLimit <= 30) ? 2U : 1U)
+        : 0U;
+    swapChain->Present(syncInterval, 0);
 }
 
 void D3D11Renderer::CreateSkyShaders()
@@ -704,6 +709,75 @@ void D3D11Renderer::SetAmbientStrength(float a)
     if (a > 1.0f) a = 1.0f;
     m_lightData.ambientStrength = a;
     UpdateLightConstantBuffer();
+}
+
+void D3D11Renderer::SetVSyncEnabled(bool enabled)
+{
+    m_vsyncEnabled = enabled;
+}
+
+void D3D11Renderer::SetFrameRateLimit(int fps)
+{
+    switch (fps)
+    {
+    case 0:
+    case 30:
+    case 60:
+    case 120:
+    case 144:
+        m_frameRateLimit = fps;
+        break;
+    default:
+        m_frameRateLimit = 60;
+        break;
+    }
+}
+
+void D3D11Renderer::ApplyGraphicsPreset(GraphicsPreset preset)
+{
+    m_graphicsPreset = preset;
+
+    if (preset == GraphicsPreset::Custom)
+        return;
+
+    switch (preset)
+    {
+    case GraphicsPreset::Low:
+        m_shadowResolution = 512;
+        m_textureQualityLevel = 0;
+        m_particleDensity = 0.35f;
+        m_lodDistanceScale = 0.75f;
+        m_antiAliasingMode = AntiAliasingMode::FXAA;
+        m_frameRateLimit = 60;
+        break;
+    case GraphicsPreset::Medium:
+        m_shadowResolution = 1024;
+        m_textureQualityLevel = 1;
+        m_particleDensity = 0.65f;
+        m_lodDistanceScale = 1.0f;
+        m_antiAliasingMode = AntiAliasingMode::FXAA;
+        m_frameRateLimit = 60;
+        break;
+    case GraphicsPreset::High:
+        m_shadowResolution = 2048;
+        m_textureQualityLevel = 2;
+        m_particleDensity = 1.0f;
+        m_lodDistanceScale = 1.25f;
+        m_antiAliasingMode = AntiAliasingMode::SMAA;
+        m_frameRateLimit = 120;
+        break;
+    case GraphicsPreset::Ultra:
+        m_shadowResolution = 4096;
+        m_textureQualityLevel = 3;
+        m_particleDensity = 1.35f;
+        m_lodDistanceScale = 1.5f;
+        m_antiAliasingMode = AntiAliasingMode::TAA;
+        m_frameRateLimit = 0;
+        break;
+    case GraphicsPreset::Custom:
+    default:
+        break;
+    }
 }
 
 void D3D11Renderer::GetSunDirection(float& x, float& y, float& z) const

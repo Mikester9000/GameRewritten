@@ -43,6 +43,7 @@ void EnemyActor::Init(float startX, float startZ,
     pendingAttackHitBox = HitBox{};
     pendingAttackHitBox.framesToLive = 0;
     hitFlashTimer = 0.0f;
+    pressureGauge = 0.0f;
 }
 
 void EnemyActor::TransitionTo(EnemyState next, float duration)
@@ -56,19 +57,50 @@ void EnemyActor::TransitionTo(EnemyState next, float duration)
 void EnemyActor::OnHit(int damage)
 {
     hitFlashTimer = kHitFlashDuration;
+
+    // Interrupt bonus: hitting during Attack wind-up builds extra pressure.
+    const bool wasInterrupted = (state == EnemyState::Attack);
+
     hp -= damage;
     if (hp <= 0)
     {
-        hp     = 0;
+        hp = 0;
         isDead = true;
+        pressureGauge = 0.0f;
         TransitionTo(EnemyState::Dead, 0.0f);
+        LOG_INFO("EnemyActor: Defeated.");
+    }
+    else if (state == EnemyState::Staggered)
+    {
+        // Already staggered — take damage without resetting the stagger state.
+        LOG_INFO("EnemyActor: Took " + std::to_string(damage) +
+                 " damage while STAGGERED. HP remaining: " + std::to_string(hp));
     }
     else
     {
-        TransitionTo(EnemyState::Hit, kHitStaggerDuration);
+        // Accumulate pressure: interrupt counts as extra fill.
+        if (wasInterrupted)
+            pressureGauge += kPressureInterruptBonus;
+        pressureGauge += damage * kPressurePerDamage;
+        if (pressureGauge > 1.0f)
+            pressureGauge = 1.0f;
+
+        if (pressureGauge >= 1.0f)
+        {
+            TransitionTo(EnemyState::Staggered, kStaggerDuration);
+            LOG_INFO("EnemyActor: STAGGERED! HP remaining: " + std::to_string(hp));
+        }
+        else
+        {
+            // Interrupt bonus: longer stagger when the player breaks an attack wind-up.
+            const float staggerDur = wasInterrupted ? kInterruptStaggerDuration : kHitStaggerDuration;
+            TransitionTo(EnemyState::Hit, staggerDur);
+            LOG_INFO("EnemyActor: Took " + std::to_string(damage) +
+                     " damage. HP remaining: " + std::to_string(hp) +
+                     " Pressure: " + std::to_string(pressureGauge) +
+                     (wasInterrupted ? " [INTERRUPTED]" : ""));
+        }
     }
-    LOG_INFO("EnemyActor: Took " + std::to_string(damage) +
-             " damage. HP remaining: " + std::to_string(hp));
 }
 
 void EnemyActor::Update(float dt, D3D11Renderer& renderer,
@@ -177,6 +209,16 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
                 TransitionTo(EnemyState::Dead, 0.0f);
         }
     }
+    else if (state == EnemyState::Staggered)
+    {
+        // Stand still during stagger; resume chasing and reset pressure when timer expires.
+        if (stateTimer <= 0.0f)
+        {
+            pressureGauge = 0.0f;
+            TransitionTo(EnemyState::Chase, 0.0f);
+            LOG_INFO("EnemyActor: Stagger ended — resuming Chase.");
+        }
+    }
     // Dead is handled by the guard at the top of this function.
 
     // Snap Y to terrain so the enemy sits on the ground.
@@ -198,8 +240,18 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
     if (!visualPrefab)
         return;
 
+    const float staggerScale = IsStaggered() ? kStaggerVisualScale : 1.0f;
     const float hitFlashScale = (hitFlashTimer > 0.0f) ? kHitFlashScale : 1.0f;
-    primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, hitFlashScale);
+
+    // Telegraph pulse: enemy visibly swells during attack wind-up to warn the player.
+    float telegraphScale = 1.0f;
+    if (state == EnemyState::Attack && stateTimer > 0.0f)
+    {
+        const float elapsed = kAttackWindUpDuration - stateTimer;
+        telegraphScale = 1.0f + 0.08f * fabsf(sinf(elapsed * 12.0f));
+    }
+
+    primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, staggerScale * hitFlashScale * telegraphScale);
 }
 
 bool EnemyActor::IsHitFlashVisible() const

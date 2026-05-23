@@ -245,6 +245,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\game\Forest.cpp" />
     <ClCompile Include="src\game\PrefabLibrary.cpp" />
     <ClCompile Include="src\game\PrimitiveRenderer.cpp" />
+    <ClCompile Include="src\game\ParticleSystem.cpp" />
     <ClCompile Include="src\game\RuntimeScene.cpp" />
     <ClCompile Include="src\logger\Logger.cpp" />
     <ClCompile Include="src\platform\win32\Win32Window.cpp" />
@@ -257,6 +258,8 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\ui\DialogBox.cpp" />
     <ClCompile Include="src\ui\Minimap.cpp" />
     <ClCompile Include="src\ui\WorldEditor.cpp" />
+    <ClCompile Include="src\world\DayNightCycle.cpp" />
+    <ClCompile Include="src\world\WeatherSystem.cpp" />
     <ClCompile Include="src\world\WorldGrid.cpp" />
     <!-- Dear ImGui core (vendored, MIT licence) -->
     <ClCompile Include="third_party\imgui\imgui.cpp" />
@@ -303,6 +306,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\game\PrefabDef.hpp" />
     <ClInclude Include="src\game\PrefabLibrary.hpp" />
     <ClInclude Include="src\game\PrimitiveRenderer.hpp" />
+    <ClInclude Include="src\game\ParticleSystem.hpp" />
     <ClInclude Include="src\logger\Logger.hpp" />
     <ClInclude Include="src\platform\win32\Win32Window.hpp" />
     <ClInclude Include="src\rendering\d3d11\D3D11RendererHelpers.hpp" />
@@ -315,6 +319,8 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\ui\DialogBox.hpp" />
     <ClInclude Include="src\ui\Minimap.hpp" />
     <ClInclude Include="src\ui\WorldEditor.hpp" />
+    <ClInclude Include="src\world\DayNightCycle.hpp" />
+    <ClInclude Include="src\world\WeatherSystem.hpp" />
     <ClInclude Include="src\world\WorldGrid.hpp" />
     
   </ItemGroup>

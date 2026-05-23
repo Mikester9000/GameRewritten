@@ -16,6 +16,9 @@ struct ImGuiIO;
 class GameHUD
 {
 public:
+    void SetOpacity(float opacity);
+    void SetUltrawideLayoutEnabled(bool enabled) { m_ultrawideLayoutEnabled = enabled; }
+
     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
 
@@ -35,6 +38,13 @@ public:
                                       float yaw, float pitch,
                                       float vpW, float vpH) const;
 
+    // Trigger a brief red screen-edge flash when the player takes damage.
+    // Call once per frame when a hit lands (e.g., from RuntimeScene::ConsumePlayerHitFlash()).
+    void TriggerDamageFlash();
+
 private:
-    float m_lowHpPulseTime = 0.0f;
+    float m_lowHpPulseTime   = 0.0f;
+    float m_damageFlashTimer = 0.0f;
+    float m_opacity = 0.80f;
+    bool m_ultrawideLayoutEnabled = false;
 };

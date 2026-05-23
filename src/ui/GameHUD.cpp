@@ -37,6 +37,9 @@ constexpr float kTwoPi = 6.28318530f;
 constexpr int kPulseMaxAlpha = 140;
 // Width of each screen-edge warning bar in pixels.
 constexpr float kEdgeBarThickness = 28.0f;
+// Duration and max alpha of the on-hit damage flash.
+constexpr float kDamageFlashDuration = 0.25f;
+constexpr int   kDamageFlashMaxAlpha = 180;
 
 // --- Target info panel ---
 constexpr float kTargetPanelW       = 280.0f;
@@ -60,6 +63,19 @@ constexpr float kOffscreenIndicatorRadius = 10.0f;
 constexpr float kOffscreenArrowSize = 8.0f;
 constexpr float kTargetIndicatorHeightOffset = 1.8f;
 
+int ScaleAlpha(int alpha, float opacity)
+{
+    const float clampedOpacity = std::clamp(opacity, 0.0f, 1.0f);
+    return static_cast<int>(std::clamp(alpha * clampedOpacity, 0.0f, 255.0f));
+}
+
+ImU32 ApplyOpacity(ImU32 color, float opacity)
+{
+    const ImVec4 unpacked = ImGui::ColorConvertU32ToFloat4(color);
+    return ImGui::ColorConvertFloat4ToU32(
+        ImVec4(unpacked.x, unpacked.y, unpacked.z, unpacked.w * std::clamp(opacity, 0.0f, 1.0f)));
+}
+
 float NormalizeValue(float value, float maxValue)
 {
     if (maxValue <= 0.0f)
@@ -70,16 +86,18 @@ float NormalizeValue(float value, float maxValue)
 // Returns the pixel height of the target-info panel, derived from the current
 // font size. Both DrawTargetInfo and DrawComboIndicator use this so the combo
 // panel always sits flush above the target panel even if padding changes.
+// Includes rows for: name + HP bar + pressure bar.
 float CalcTargetPanelHeight()
 {
-    return kTargetPanelPadY + ImGui::GetFontSize() + kTargetBarGap + kTargetBarH + kTargetPanelPadY;
+    return kTargetPanelPadY + ImGui::GetFontSize() + kTargetBarGap + kTargetBarH +
+           kTargetBarGap + kTargetBarH + kTargetPanelPadY;
 }
 
-void DrawLowHpPulse(const ImGuiIO& io, float pulseTime)
+void DrawLowHpPulse(const ImGuiIO& io, float pulseTime, float opacity)
 {
     // Pulse brightness oscillates between 0 and kPulseMaxAlpha.
     float pulseRatio = 0.5f + 0.5f * sinf(pulseTime * kPulseFrequency * kTwoPi);
-    int alpha = static_cast<int>(pulseRatio * static_cast<float>(kPulseMaxAlpha));
+    int alpha = ScaleAlpha(static_cast<int>(pulseRatio * static_cast<float>(kPulseMaxAlpha)), opacity);
     ImU32 color = IM_COL32(200, 20, 20, alpha);
 
     float screenW = io.DisplaySize.x;
@@ -96,13 +114,42 @@ void DrawLowHpPulse(const ImGuiIO& io, float pulseTime)
     // Right bar
     dl->AddRectFilled(ImVec2(screenW - th, th), ImVec2(screenW, screenH - th), color);
 }
+
+// Brief bright-red screen-edge flash played once when the player takes damage.
+// fraction: 1.0 = just triggered, 0.0 = fully faded out.
+void DrawDamageFlash(const ImGuiIO& io, float fraction, float opacity)
+{
+    int alpha = ScaleAlpha(static_cast<int>(fraction * static_cast<float>(kDamageFlashMaxAlpha)), opacity);
+    ImU32 color = IM_COL32(255, 40, 40, alpha);
+
+    float screenW = io.DisplaySize.x;
+    float screenH = io.DisplaySize.y;
+    float th = kEdgeBarThickness * 1.6f; // wider than the low-HP pulse bars
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    // Top bar
+    dl->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(screenW, th), color);
+    // Bottom bar
+    dl->AddRectFilled(ImVec2(0.0f, screenH - th), ImVec2(screenW, screenH), color);
+    // Left bar
+    dl->AddRectFilled(ImVec2(0.0f, th), ImVec2(th, screenH - th), color);
+    // Right bar
+    dl->AddRectFilled(ImVec2(screenW - th, th), ImVec2(screenW, screenH - th), color);
+}
 } // namespace
+
+void GameHUD::SetOpacity(float opacity)
+{
+    m_opacity = std::clamp(opacity, 0.0f, 1.0f);
+}
 
 void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
 {
     m_lowHpPulseTime += (dt > 0.0f) ? dt : 0.0f;
 
-    ImGui::SetNextWindowPos(ImVec2(kHudOffsetX, io.DisplaySize.y - kHudHeight - kHudBottomMargin), ImGuiCond_Always);
+    const float hudOffsetX = m_ultrawideLayoutEnabled ? 48.0f : kHudOffsetX;
+    const float hudBottomMargin = m_ultrawideLayoutEnabled ? 28.0f : kHudBottomMargin;
+    ImGui::SetNextWindowPos(ImVec2(hudOffsetX, io.DisplaySize.y - kHudHeight - hudBottomMargin), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(kHudWidth, kHudHeight), ImGuiCond_Always);
 
     const ImGuiWindowFlags flags =
@@ -118,6 +165,8 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
         ImGui::End();
         return;
     }
+
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, m_opacity);
 
     // HP bar — flash a brighter red when critically low.
     const float hpFraction = NormalizeValue(stats.hp, stats.maxHp);
@@ -160,11 +209,26 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
         ImGui::TextColored(ImVec4(0.9f, 0.4f, 1.0f, 1.0f), "READY  Shift+F");
     }
 
+    ImGui::PopStyleVar();
     ImGui::End();
 
     // Draw screen-edge danger pulse when HP is critically low.
     if (isLowHp)
-        DrawLowHpPulse(io, m_lowHpPulseTime);
+        DrawLowHpPulse(io, m_lowHpPulseTime, m_opacity);
+
+    // Draw and tick the on-hit damage flash (brief red edge flash when player is struck).
+    if (m_damageFlashTimer > 0.0f)
+    {
+        DrawDamageFlash(io, m_damageFlashTimer / kDamageFlashDuration, m_opacity);
+        m_damageFlashTimer -= dt;
+        if (m_damageFlashTimer < 0.0f)
+            m_damageFlashTimer = 0.0f;
+    }
+}
+
+void GameHUD::TriggerDamageFlash()
+{
+    m_damageFlashTimer = kDamageFlashDuration;
 }
 
 void GameHUD::DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io)
@@ -174,42 +238,43 @@ void GameHUD::DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io)
     // Calculate panel height from the current font size so it scales correctly.
     const float panelH = CalcTargetPanelHeight();
     const float fontH  = ImGui::GetFontSize();
-    const float posX   = (io.DisplaySize.x - kTargetPanelW) * 0.5f;
-    const float posY   = io.DisplaySize.y - panelH - kTargetMarginBottom;
+    const float panelW = m_ultrawideLayoutEnabled ? (kTargetPanelW + 40.0f) : kTargetPanelW;
+    const float posX   = (io.DisplaySize.x - panelW) * 0.5f;
+    const float posY   = io.DisplaySize.y - panelH - (m_ultrawideLayoutEnabled ? 34.0f : kTargetMarginBottom);
 
     ImDrawList* dl = ImGui::GetForegroundDrawList();
 
     // Dark navy background — classic FF7R command-panel style.
     dl->AddRectFilled(ImVec2(posX, posY),
-                      ImVec2(posX + kTargetPanelW, posY + panelH),
-                      IM_COL32(6, 8, 24, 215), 3.0f);
+                      ImVec2(posX + panelW, posY + panelH),
+                      ApplyOpacity(IM_COL32(6, 8, 24, 215), m_opacity), 3.0f);
 
     // Thin bright-blue accent line at the top of the panel.
     dl->AddRectFilled(ImVec2(posX, posY),
-                      ImVec2(posX + kTargetPanelW, posY + 2.0f),
-                      IM_COL32(70, 130, 240, 255));
+                      ImVec2(posX + panelW, posY + 2.0f),
+                      ApplyOpacity(IM_COL32(70, 130, 240, 255), m_opacity));
 
     // Subtle border so the panel reads cleanly against the scene.
     dl->AddRect(ImVec2(posX, posY),
-                ImVec2(posX + kTargetPanelW, posY + panelH),
-                IM_COL32(50, 60, 100, 180), 3.0f);
+                ImVec2(posX + panelW, posY + panelH),
+                ApplyOpacity(IM_COL32(50, 60, 100, 180), m_opacity), 3.0f);
 
     // --- Name row ---
     const float nameY = posY + kTargetPanelPadY;
     dl->AddText(ImVec2(posX + kTargetPanelPadX, nameY),
-                IM_COL32(220, 220, 230, 255), target->name);
+                ApplyOpacity(IM_COL32(220, 220, 230, 255), m_opacity), target->name);
 
     // HP numbers right-aligned on the same row.
     char hpText[32];
     std::snprintf(hpText, sizeof(hpText), "%d / %d", target->hp, target->maxHp);
     const ImVec2 hpTextSize = ImGui::CalcTextSize(hpText);
-    dl->AddText(ImVec2(posX + kTargetPanelW - kTargetPanelPadX - hpTextSize.x, nameY),
-                IM_COL32(190, 195, 210, 255), hpText);
+    dl->AddText(ImVec2(posX + panelW - kTargetPanelPadX - hpTextSize.x, nameY),
+                ApplyOpacity(IM_COL32(190, 195, 210, 255), m_opacity), hpText);
 
     // --- HP bar ---
     const float barX   = posX + kTargetPanelPadX;
     const float barY   = nameY + fontH + kTargetBarGap;
-    const float barW   = kTargetPanelW - kTargetPanelPadX * 2.0f;
+    const float barW   = panelW - kTargetPanelPadX * 2.0f;
     const float hpFrac = (target->maxHp > 0)
         ? std::clamp(static_cast<float>(target->hp) / static_cast<float>(target->maxHp), 0.0f, 1.0f)
         : 0.0f;
@@ -224,18 +289,55 @@ void GameHUD::DrawTargetInfo(const EnemyActor* target, const ImGuiIO& io)
     // Bar track (dark background).
     dl->AddRectFilled(ImVec2(barX, barY),
                       ImVec2(barX + barW, barY + kTargetBarH),
-                      IM_COL32(28, 28, 48, 255), 2.0f);
+                      ApplyOpacity(IM_COL32(28, 28, 48, 255), m_opacity), 2.0f);
 
     // Bar fill.
     if (filledW > 0.0f)
         dl->AddRectFilled(ImVec2(barX, barY),
                           ImVec2(barX + filledW, barY + kTargetBarH),
-                          barColor, 2.0f);
+                          ApplyOpacity(barColor, m_opacity), 2.0f);
 
     // Bar border.
     dl->AddRect(ImVec2(barX, barY),
                 ImVec2(barX + barW, barY + kTargetBarH),
-                IM_COL32(70, 75, 110, 200), 2.0f);
+                ApplyOpacity(IM_COL32(70, 75, 110, 200), m_opacity), 2.0f);
+
+    // --- Pressure / stagger bar ---
+    const float pressureBarY = barY + kTargetBarH + kTargetBarGap;
+    const bool  isStaggered  = target->IsStaggered();
+    const float pressureFrac = target->GetPressureGauge();
+    const float pressureFillW = isStaggered ? barW : (barW * pressureFrac);
+
+    // Bar track (dark background).
+    dl->AddRectFilled(ImVec2(barX, pressureBarY),
+                      ImVec2(barX + barW, pressureBarY + kTargetBarH),
+                      ApplyOpacity(IM_COL32(28, 28, 48, 255), m_opacity), 2.0f);
+
+    // Filled portion: amber while building, bright cyan when staggered.
+    if (pressureFillW > 0.0f)
+    {
+        ImU32 pressureColor = isStaggered
+            ? IM_COL32( 40, 230, 240, 255)  // stagger active: cyan
+            : IM_COL32(230, 170,  20, 255); // building: amber/gold
+        dl->AddRectFilled(ImVec2(barX, pressureBarY),
+                          ImVec2(barX + pressureFillW, pressureBarY + kTargetBarH),
+                          ApplyOpacity(pressureColor, m_opacity), 2.0f);
+    }
+
+    // "STAGGERED" label centred in the bar when staggered; small "PRES" label otherwise.
+    if (isStaggered)
+    {
+        const char* staggerLabel = "STAGGERED";
+        const ImVec2 sz = ImGui::CalcTextSize(staggerLabel);
+        dl->AddText(ImVec2(barX + (barW - sz.x) * 0.5f,
+                           pressureBarY + (kTargetBarH - sz.y) * 0.5f),
+                    ApplyOpacity(IM_COL32(255, 255,  50, 255), m_opacity), staggerLabel);
+    }
+
+    // Bar border.
+    dl->AddRect(ImVec2(barX, pressureBarY),
+                ImVec2(barX + barW, pressureBarY + kTargetBarH),
+                ApplyOpacity(IM_COL32(70, 75, 110, 200), m_opacity), 2.0f);
 }
 
 void GameHUD::DrawComboIndicator(int comboStep, float comboTimer, float comboWindowSec, const ImGuiIO& io)
@@ -246,7 +348,8 @@ void GameHUD::DrawComboIndicator(int comboStep, float comboTimer, float comboWin
     // Position the combo panel centred and sitting just above the target panel area.
     const float targetH = CalcTargetPanelHeight();
     const float posX    = (io.DisplaySize.x - kComboPanelW) * 0.5f;
-    const float posY    = io.DisplaySize.y - targetH - kTargetMarginBottom - kComboGapAbove - kComboPanelH;
+    const float comboBottomMargin = m_ultrawideLayoutEnabled ? 34.0f : kTargetMarginBottom;
+    const float posY    = io.DisplaySize.y - targetH - comboBottomMargin - kComboGapAbove - kComboPanelH;
 
     // Fade the panel softly as the combo window runs out.
     const float fade     = (comboWindowSec > 0.0f)
@@ -260,10 +363,10 @@ void GameHUD::DrawComboIndicator(int comboStep, float comboTimer, float comboWin
     // Background.
     dl->AddRectFilled(ImVec2(posX, posY),
                       ImVec2(posX + kComboPanelW, posY + kComboPanelH),
-                      IM_COL32(6, 8, 24, bgAlpha), 3.0f);
+                      ApplyOpacity(IM_COL32(6, 8, 24, bgAlpha), m_opacity), 3.0f);
     dl->AddRect(ImVec2(posX, posY),
                 ImVec2(posX + kComboPanelW, posY + kComboPanelH),
-                IM_COL32(50, 60, 100, bgAlpha), 3.0f);
+                ApplyOpacity(IM_COL32(50, 60, 100, bgAlpha), m_opacity), 3.0f);
 
     // Step squares — filled yellow for landed hit, open outline for next available input.
     const float squareY = posY + (kComboPanelH - kComboSquareSize) * 0.5f;
@@ -273,19 +376,19 @@ void GameHUD::DrawComboIndicator(int comboStep, float comboTimer, float comboWin
     // Step 1 filled (already landed).
     dl->AddRectFilled(ImVec2(sq1X, squareY),
                       ImVec2(sq1X + kComboSquareSize, squareY + kComboSquareSize),
-                      IM_COL32(255, 200, 40, fgAlpha), 2.0f);
+                      ApplyOpacity(IM_COL32(255, 200, 40, fgAlpha), m_opacity), 2.0f);
 
     // Step 2 open outline (next hit available).
     dl->AddRect(ImVec2(sq2X, squareY),
                 ImVec2(sq2X + kComboSquareSize, squareY + kComboSquareSize),
-                IM_COL32(140, 140, 160, fgAlpha), 2.0f);
+                ApplyOpacity(IM_COL32(140, 140, 160, fgAlpha), m_opacity), 2.0f);
 
     // "COMBO" label to the right of the squares.
     const char* label     = "COMBO";
     const ImVec2 labelSz  = ImGui::CalcTextSize(label);
     dl->AddText(ImVec2(sq2X + kComboSquareSize + 8.0f,
                        posY + (kComboPanelH - labelSz.y) * 0.5f),
-                IM_COL32(220, 180, 50, fgAlpha), label);
+                ApplyOpacity(IM_COL32(220, 180, 50, fgAlpha), m_opacity), label);
 }
 
 void GameHUD::DrawOffScreenTargetIndicator(const EnemyActor* target,
@@ -363,8 +466,8 @@ void GameHUD::DrawOffScreenTargetIndicator(const EnemyActor* target,
         return;
 
     const ImVec2 indicatorCenter(indicatorX, indicatorY);
-    drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(5, 10, 28, 220), 12);
-    drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, IM_COL32(90, 155, 255, 220), 12, 1.4f);
+    drawList->AddCircleFilled(indicatorCenter, kOffscreenIndicatorRadius, ApplyOpacity(IM_COL32(5, 10, 28, 220), m_opacity), 12);
+    drawList->AddCircle(indicatorCenter, kOffscreenIndicatorRadius, ApplyOpacity(IM_COL32(90, 155, 255, 220), m_opacity), 12, 1.4f);
 
     const float perpX = -dirY;
     const float perpY = dirX;
@@ -374,5 +477,5 @@ void GameHUD::DrawOffScreenTargetIndicator(const EnemyActor* target,
                       indicatorY - dirY * (kOffscreenArrowSize * 0.55f) + perpY * (kOffscreenArrowSize * 0.70f));
     const ImVec2 right(indicatorX - dirX * (kOffscreenArrowSize * 0.55f) - perpX * (kOffscreenArrowSize * 0.70f),
                        indicatorY - dirY * (kOffscreenArrowSize * 0.55f) - perpY * (kOffscreenArrowSize * 0.70f));
-    drawList->AddTriangleFilled(tip, left, right, IM_COL32(200, 225, 255, 255));
+    drawList->AddTriangleFilled(tip, left, right, ApplyOpacity(IM_COL32(200, 225, 255, 255), m_opacity));
 }

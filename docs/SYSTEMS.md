@@ -70,15 +70,15 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Combat HUD expansion (target info + combo step) | ✅ | `src/ui/GameHUD.hpp`, `src/ui/GameHUD.cpp`, `src/app/Main.cpp` |
 | Lock-on target cycling | ✅ | `src/game/combat/Targeting.hpp`, `src/app/Main.cpp` |
 | Auto-retarget on target death / range loss | ✅ | `src/game/combat/Targeting.hpp`, `src/game/RuntimeScene.hpp` |
-| Pressure / stagger integration stub | ❌ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Pressure / stagger integration stub | ✅ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Tactical Pause command readiness reasons | ✅ | `src/ui/TacticalPauseMenu.cpp/hpp` |
 | Off-screen lock-on target indicator | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
-| Enemy reaction / interrupt-lite | ❌ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| Enemy attack telegraph lite | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Enemy reaction / interrupt-lite | ✅ | `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Enemy attack telegraph lite | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Hit flash system | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
-| Screen edge damage flash | ❌ | `src/ui/GameHUD.cpp/hpp` |
-| Hit pause / hitstop | ❌ | `src/game/RuntimeScene.hpp` |
-| Stagger meter | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Screen edge damage flash | ✅ | `src/ui/GameHUD.cpp/hpp` |
+| Hit pause / hitstop | ✅ | `src/game/RuntimeScene.hpp` |
+| Stagger meter | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Enemy attack telegraph | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Parry / counter window | ❌ | `src/game/actors/PlayerActor.cpp/hpp` |
 | Miss indicator | ✅ | `src/ui/DamageNumbers.cpp/hpp`, `src/app/Main.cpp` |
@@ -95,16 +95,16 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Saving indicator | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Death / defeat screen | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Low HP warning pulse | ✅ | `src/ui/GameHUD.cpp/hpp` |
-| Camera shake | ❌ | `src/game/CameraController.cpp/hpp` |
-| Combat camera zoom | ❌ | `src/game/CameraController.cpp/hpp` |
-| Camera collision avoidance | ❌ | `src/game/CameraController.cpp/hpp` |
-| Target framing adjustment | ❌ | `src/game/CameraController.cpp/hpp` |
-| Lock-on camera recovery smoothing | ❌ | `src/game/CameraController.cpp/hpp` |
-| Wind effect on trees | ❌ | `Shaders/tree_vs.hlsl` |
-| Weather system lite | ❌ | `src/world/WeatherSystem.cpp/hpp` |
-| Ambient particles | ❌ | `src/game/ParticleSystem.cpp/hpp` |
-| Day/night cycle | ❌ | `src/world/DayNightCycle.cpp/hpp` |
-| Biome transition fade | ❌ | `src/world/WorldGrid.cpp/hpp` |
+| Camera shake | ✅ | `src/game/CameraController.cpp/hpp` |
+| Combat camera zoom | ✅ | `src/game/CameraController.cpp/hpp` |
+| Camera collision avoidance | ✅ | `src/game/CameraController.cpp/hpp` |
+| Target framing adjustment | ✅ | `src/game/CameraController.cpp/hpp` |
+| Lock-on camera recovery smoothing | ✅ | `src/game/CameraController.cpp/hpp` |
+| Wind effect on trees | ✅ | `Shaders/tree_vs.hlsl` |
+| Weather system lite | ✅ | `src/world/WeatherSystem.cpp/hpp` |
+| Ambient particles | ✅ | `src/game/ParticleSystem.cpp/hpp` |
+| Day/night cycle | ✅ | `src/world/DayNightCycle.cpp/hpp` |
+| Biome transition fade | ✅ | `src/world/WorldGrid.cpp/hpp` |
 | Fog of war on minimap | ❌ | `src/ui/Minimap.cpp/hpp` |
 | World event trigger zones | ❌ | `src/game/world/EventZone.cpp/hpp` |
 | Interaction hotspot registry stub | ❌ | `src/game/world/InteractionRegistry.cpp/hpp` |

@@ -51,6 +51,13 @@ public:
     // Release all GPU resources.
     void Shutdown();
 
+    // Set the accumulated game time (seconds since startup) used by the tree
+    // wind shader.  Call once per frame before Draw().
+    void SetGlobalTime(float t)         { m_globalTime = t; }
+
+    // Set wind strength [0,1] that scales the tree sway amplitude.
+    void SetWindStrength(float w)       { m_windStrength = w; }
+
     // Expand a prefab into WORLD (authored/static) render parts at the given world position.
     // yaw   = Y-axis rotation in radians (0 = facing +Z).
     // scale = uniform scale applied on top of each part's own scale.
@@ -126,8 +133,12 @@ private:
     ID3D11VertexShader* m_treeVS = nullptr;
     ID3D11PixelShader*  m_treePS = nullptr;
 
-    // Per-draw constant buffer (MVP + world + tint + light).
+    // Per-draw constant buffer (MVP + world + tint + wind params).
     ID3D11Buffer* m_cb = nullptr;
+
+    // Global time (seconds since startup) and wind strength forwarded to tree shader.
+    float m_globalTime   = 0.0f;
+    float m_windStrength = 0.05f;
 
     // Helper: compile + create a VS and PS from two .hlsl files.
     bool CreateShaders(const wchar_t* vsPath, const wchar_t* psPath,

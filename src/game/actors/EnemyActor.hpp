@@ -28,11 +28,19 @@ public:
     static constexpr float kLeashRadius  = 27.0f;  // return to patrol
 
     // State duration constants (seconds).
-    static constexpr float kAttackWindUpDuration = 0.60f;  // wind-up before dealing damage
-    static constexpr float kHitStaggerDuration   = 0.30f;  // stagger after taking a hit
-    static constexpr float kHitFlashDuration     = 0.14f;  // short readability flash on hit
-    static constexpr float kHitFlashBlinkPeriod  = 0.04f;  // blink cadence during flash
-    static constexpr float kHitFlashScale        = 1.05f;  // slight pop while flashing
+    static constexpr float kAttackWindUpDuration      = 0.60f;  // wind-up before dealing damage
+    static constexpr float kHitStaggerDuration        = 0.30f;  // stagger after taking a hit
+    static constexpr float kInterruptStaggerDuration  = 0.55f;  // longer stagger when Attack wind-up is interrupted
+    static constexpr float kHitFlashDuration          = 0.14f;  // short readability flash on hit
+    static constexpr float kHitFlashBlinkPeriod       = 0.04f;  // blink cadence during flash
+    static constexpr float kHitFlashScale             = 1.05f;  // slight pop while flashing
+
+    // Pressure / stagger constants.
+    static constexpr float kPressurePerDamage      = 0.05f;  // pressure built per point of damage
+    static constexpr float kPressureInterruptBonus = 0.30f;  // extra pressure from interrupting an Attack
+    static constexpr float kStaggerDuration        = 5.00f;  // how long the Staggered state lasts
+    static constexpr float kStaggerBonusMult       = 1.60f;  // damage multiplier while staggered (exposed for CombatSystem)
+    static constexpr float kStaggerVisualScale     = 1.12f;  // enemy appears slightly larger during stagger
 
     // World-space position.
     float x = 0.0f;
@@ -64,6 +72,17 @@ public:
     bool       pendingAttack = false;
     HitBox     pendingAttackHitBox{};
     float      hitFlashTimer = 0.0f;
+
+    // Pressure gauge — 0.0 to 1.0.
+    // Fills from hits and interrupt bonuses; triggers Staggered state when it reaches 1.0.
+    // Resets to 0 when the Staggered state ends.
+    float pressureGauge = 0.0f;
+
+    // Returns true while this enemy is in the Staggered state.
+    bool IsStaggered() const { return state == EnemyState::Staggered; }
+
+    // Normalised pressure level for UI display (0.0 to 1.0).
+    float GetPressureGauge() const { return pressureGauge; }
 
     // Set starting position and patrol waypoints.
     // y is terrain-snapped on the first Update call.

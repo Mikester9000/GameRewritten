@@ -19,6 +19,23 @@
 class D3D11Renderer
 {
 public:
+    enum class GraphicsPreset
+    {
+        Low,
+        Medium,
+        High,
+        Ultra,
+        Custom
+    };
+
+    enum class AntiAliasingMode
+    {
+        Off,
+        FXAA,
+        SMAA,
+        TAA
+    };
+
     // Parameters that drive biome-specific terrain generation.
     struct TerrainParams
     {
@@ -42,10 +59,22 @@ public:
     void SetCameraRotation(float yaw, float pitch);
     void SetSunDirection(float x, float y, float z);
     void SetAmbientStrength(float a);
+    void SetVSyncEnabled(bool enabled);
+    bool IsVSyncEnabled() const { return m_vsyncEnabled; }
+    void SetFrameRateLimit(int fps);
+    int GetFrameRateLimit() const { return m_frameRateLimit; }
+    void ApplyGraphicsPreset(GraphicsPreset preset);
+    GraphicsPreset GetGraphicsPreset() const { return m_graphicsPreset; }
+    void SetAntiAliasingMode(AntiAliasingMode mode) { m_antiAliasingMode = mode; }
+    AntiAliasingMode GetAntiAliasingMode() const { return m_antiAliasingMode; }
     void GetCameraPosition(float& x, float& y, float& z) const;
     void GetCameraRotation(float& yaw, float& pitch) const;
     void GetSunDirection(float& x, float& y, float& z) const;
     float GetAmbientStrength() const;
+    int GetShadowResolution() const { return m_shadowResolution; }
+    float GetLodDistanceScale() const { return m_lodDistanceScale; }
+    float GetParticleDensity() const { return m_particleDensity; }
+    int GetTextureQualityLevel() const { return m_textureQualityLevel; }
     void DrawGroundPlane();
     void DrawTerrainPatch();
     // Rebuild the terrain mesh from biome/seed parameters (called on cell transition or F5).
@@ -109,6 +138,14 @@ private:
     bool m_terrainAvailable = false;
     void UpdateLightConstantBuffer();
     std::string m_activeTerrainBiome = "grassland";
+    GraphicsPreset m_graphicsPreset = GraphicsPreset::Medium;
+    AntiAliasingMode m_antiAliasingMode = AntiAliasingMode::FXAA;
+    bool m_vsyncEnabled = true;
+    int m_frameRateLimit = 60;
+    int m_shadowResolution = 1024;
+    float m_lodDistanceScale = 1.0f;
+    float m_particleDensity = 0.65f;
+    int m_textureQualityLevel = 1;
     ID3D11Buffer* m_groundVertexBuffer = nullptr;
     ID3D11Buffer* m_groundIndexBuffer = nullptr;
     UINT m_groundIndexCount = 0;
