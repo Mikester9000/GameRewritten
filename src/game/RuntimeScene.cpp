@@ -34,12 +34,37 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
     // than light jabs so skilled play builds the bar faster.
     const CombatSystem::EnemyHitRecord* hitRecords = m_combatSystem.GetRecentEnemyHits();
     int hitCount = m_combatSystem.GetRecentEnemyHitCount();
+    float hitStopSec = 0.0f;
+    float shakeAmplitude = 0.0f;
+    float shakeDuration = 0.0f;
     for (int i = 0; i < hitCount; ++i)
     {
         const float surgeGain = (hitRecords[i].damage >= 5) ? 0.40f : 0.30f;
         m_player.stats.AddSurge(surgeGain);
         damageNumbers.Spawn(hitRecords[i].damage, hitRecords[i].x, hitRecords[i].y, hitRecords[i].z);
+
+        if (hitRecords[i].damage >= 15)
+        {
+            hitStopSec = 0.065f;
+            shakeAmplitude = 0.22f;
+            shakeDuration = 0.18f;
+        }
+        else if (hitRecords[i].damage >= 5)
+        {
+            hitStopSec = std::max(hitStopSec, 0.050f);
+            shakeAmplitude = std::max(shakeAmplitude, 0.16f);
+            shakeDuration = std::max(shakeDuration, 0.15f);
+        }
+        else
+        {
+            hitStopSec = std::max(hitStopSec, 0.035f);
+            shakeAmplitude = std::max(shakeAmplitude, 0.10f);
+            shakeDuration = std::max(shakeDuration, 0.11f);
+        }
     }
+
+    if (hitStopSec > 0.0f)
+        QueueImpactFeedback(hitStopSec, shakeAmplitude, shakeDuration);
 
     // Check for enemy attack hitboxes spawned this frame.
     // Test each hitbox against the player AABB before accumulating damage.
@@ -81,6 +106,7 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
         m_player.state != PlayerActionState::Dead &&
         m_player.state != PlayerActionState::Dodge) // dodge grants invincibility
     {
+        QueueImpactFeedback(0.045f, 0.18f, 0.16f);
         m_player.stats.TakeDamage(totalDamage);
 
         if (m_player.stats.IsDead())

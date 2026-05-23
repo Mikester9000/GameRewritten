@@ -260,6 +260,33 @@ public:
         m_targeting.RefreshLock(m_enemies, kEnemyCount, m_playerX, m_playerZ);
     }
 
+    void UpdateImpactFeedback(float dt)
+    {
+        if (m_hitStopTimer <= 0.0f || dt <= 0.0f)
+            return;
+
+        m_hitStopTimer -= dt;
+        if (m_hitStopTimer < 0.0f)
+            m_hitStopTimer = 0.0f;
+    }
+
+    float GetGameplayTimeScale() const
+    {
+        return (m_hitStopTimer > 0.0f) ? 0.05f : 1.0f;
+    }
+
+    bool ConsumePendingCameraShake(float& outAmplitude, float& outDuration)
+    {
+        if (m_pendingCameraShakeAmplitude <= 0.0f || m_pendingCameraShakeDuration <= 0.0f)
+            return false;
+
+        outAmplitude = m_pendingCameraShakeAmplitude;
+        outDuration = m_pendingCameraShakeDuration;
+        m_pendingCameraShakeAmplitude = 0.0f;
+        m_pendingCameraShakeDuration = 0.0f;
+        return true;
+    }
+
 private:
     static constexpr int kEnemyCount = 2;
 
@@ -298,9 +325,22 @@ private:
 
     // Accumulated damage from enemy attacks this frame (AABB-tested).
     int m_pendingEnemyDamage = 0;
+    float m_hitStopTimer = 0.0f;
+    float m_pendingCameraShakeAmplitude = 0.0f;
+    float m_pendingCameraShakeDuration = 0.0f;
 
     float m_lastMoveDirX = 0.0f;
     float m_lastMoveDirZ = 1.0f; // default facing forward
+
+    void QueueImpactFeedback(float hitStopSec, float shakeAmplitude, float shakeDuration)
+    {
+        if (hitStopSec > m_hitStopTimer)
+            m_hitStopTimer = hitStopSec;
+        if (shakeAmplitude > m_pendingCameraShakeAmplitude)
+            m_pendingCameraShakeAmplitude = shakeAmplitude;
+        if (shakeDuration > m_pendingCameraShakeDuration)
+            m_pendingCameraShakeDuration = shakeDuration;
+    }
 
     // Returns true if the given hitbox overlaps the player's body AABB.
     // m_playerY is the camera eye level; body center is shifted down by kPlayerBodyCenterOffset.

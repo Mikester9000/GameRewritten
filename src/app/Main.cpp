@@ -271,6 +271,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // --- 1. Frame timing ---
         // Establish deltaTime for this frame. Everything else uses it.
         float deltaTime = FrameTiming::BeginFrame(frameTimingState);
+        runtimeScene.UpdateImpactFeedback(deltaTime);
 
         // --- 2. Input ---
         // Read all input for this frame. No logic yet — just read state.
@@ -289,6 +290,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // UI, dialog, and HUD animations always use the unscaled deltaTime.
         const float kTacticalTimeScale = 0.15f;
         const float scaledDt = tacticalPauseHeld ? deltaTime * kTacticalTimeScale : deltaTime;
+        const float gameplayDt = scaledDt * runtimeScene.GetGameplayTimeScale();
 
         // --- 3. UI state ---
         // Apply pause, cursor visibility, dialog update.
@@ -336,23 +338,35 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // Update player state, stats, and dodge burst.
         // Uses input and grounded state from above.
         const bool playerIsGrounded = camController.IsGrounded();
-        runtimeScene.BeginPlayerFrame(scaledDt, actionMap, playerIsGrounded, attackPressed, camController);
+        runtimeScene.BeginPlayerFrame(gameplayDt, actionMap, playerIsGrounded, attackPressed, camController);
 
         // --- 5. Camera update ---
         // Move and rotate the camera based on input and player state.
         if (!paused)
         {
             const EnemyActor* lockedTarget = runtimeScene.GetLockedTarget();
+            if (lockedTarget)
+            {
+                camController.SetCombatCameraFocus(true, lockedTarget->x, lockedTarget->y + 1.6f, lockedTarget->z);
+            }
+            else
+            {
+                camController.SetCombatCameraFocus(false, 0.0f, 0.0f, 0.0f);
+            }
             // Apply lock-on bias before free-look input so mouse deltas and
             // lock framing blend together in one camera update path.
             if (lockedTarget)
-                camController.BiasYawTowardTarget(lockedTarget->x, lockedTarget->z, scaledDt);
+                camController.BiasYawTowardTarget(lockedTarget->x, lockedTarget->z, gameplayDt);
+        }
+        else
+        {
+            camController.SetCombatCameraFocus(false, 0.0f, 0.0f, 0.0f);
         }
 
         const bool allowMovement = !paused;
         const bool allowMouseLook = !paused && !editorActive;
         CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
-        camController.Update(scaledDt, allowMovement, allowMouseLook, firstFrame, renderer);
+        camController.Update(gameplayDt, allowMovement, allowMouseLook, firstFrame, renderer);
 
         // --- 6. World update ---
         // Cell crossing detection, asset reload, editor placement.
@@ -396,12 +410,17 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // --- 7. Combat update ---
         // Update enemies, resolve hits, spawn damage numbers.
         // Runs after world so terrain and positions are final.
-        runtimeScene.BeginFrame(scaledDt, renderer,
+        runtimeScene.BeginFrame(gameplayDt, renderer,
                                 camController.GetPlayerX(),
                                 camController.GetPlayerY(),
                                 camController.GetPlayerZ());
         runtimeScene.RefreshLockOnTarget();
         const CombatSystem& combat = runtimeScene.GetCombatSystem();
+
+        float shakeAmplitude = 0.0f;
+        float shakeDuration = 0.0f;
+        if (runtimeScene.ConsumePendingCameraShake(shakeAmplitude, shakeDuration))
+            camController.AddCameraShake(shakeAmplitude, shakeDuration);
 
         if (pendingMissIndicator)
         {
@@ -412,7 +431,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             }
             else
             {
-                pendingMissTimerSec -= scaledDt;
+                pendingMissTimerSec -= gameplayDt;
                 if (pendingMissTimerSec <= 0.0f)
                 {
                     runtimeScene.damageNumbers.SpawnMiss(
@@ -431,7 +450,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
 
         if (!paused)
-            runtimeScene.damageNumbers.Update(scaledDt);
+            runtimeScene.damageNumbers.Update(gameplayDt);
 
         if (runtimeScene.WantsRespawn())
         {
@@ -482,6 +501,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         imguiLayer.SetCameraInfo(camController.GetCamX(), camController.GetCamY(), camController.GetCamZ(),
                                  camController.GetYaw(), camController.GetPitch());
         imguiLayer.SetFrameStats(frameTimingState.displayFPS, deltaTime);
+        gameHud.SetOpacity(imguiLayer.GetHudOpacity());
+        gameHud.SetUltrawideLayoutEnabled(
+            imguiLayer.UseUltrawideHudLayout(static_cast<float>(window.GetWidth()) / static_cast<float>(window.GetHeight())));
 
         // --- 9. Draw ---
         // Clear screen, draw world, draw UI, present.
@@ -591,6 +613,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             imguiLayer.EndFrame();
 
             renderer.PresentFrame();
+            FrameTiming::ApplyFrameLimit(frameTimingState, imguiLayer.GetFrameRateLimit(), imguiLayer.IsVSyncEnabled());
         }
 
         GR_FRAME_MARK;

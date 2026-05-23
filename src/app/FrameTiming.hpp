@@ -57,4 +57,30 @@ inline float BeginFrame(State& state)
 
     return deltaTime;
 }
+
+inline void ApplyFrameLimit(const State& state, int targetFps, bool vsyncEnabled)
+{
+    if (vsyncEnabled || targetFps <= 0)
+        return;
+
+    const float targetFrameSec = 1.0f / static_cast<float>(targetFps);
+    LARGE_INTEGER currCounter{};
+    QueryPerformanceCounter(&currCounter);
+    float elapsed = static_cast<float>(currCounter.QuadPart - state.prevCounter.QuadPart) /
+                    static_cast<float>(state.perfFreq.QuadPart);
+    if (elapsed >= targetFrameSec)
+        return;
+
+    const float remainingSec = targetFrameSec - elapsed;
+    const DWORD sleepMs = static_cast<DWORD>(remainingSec * 1000.0f);
+    if (sleepMs > 1)
+        Sleep(sleepMs - 1);
+
+    do
+    {
+        QueryPerformanceCounter(&currCounter);
+        elapsed = static_cast<float>(currCounter.QuadPart - state.prevCounter.QuadPart) /
+                  static_cast<float>(state.perfFreq.QuadPart);
+    } while (elapsed < targetFrameSec);
+}
 }
