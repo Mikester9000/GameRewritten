@@ -180,9 +180,9 @@ subdirectories.
 
 | Type | Extension | Destination |
 |---|---|---|
-| PBR texture maps (`albedo`, `metallic`, `roughness`, `normal`, `occlusion`) | `{name}_{channel}.png` | `Content/Textures/` |
+| PBR texture maps (`albedo`, `metallic`, `roughness`, `normal`, `ao`, `emissive`) | `{name}_{channel}.png` | `Content/Textures/` |
 | Asset manifests (per-asset metadata) | `{name}.json` | alongside the asset |
-| 3-D meshes | `{name}.obj` + `{name}.mtl` | `Content/Models/` |
+| 3-D meshes | `{name}.obj` + `{name}.mtl` | `Content/Models/` (both files together so relative `mtllib` references resolve) |
 | World tilemaps | `{name}.json` | `Content/World/` |
 | UI icons / panels / portraits | `.png` | `Content/UI/` |
 | Full bundle | all of the above | `Content/` (routed automatically) |
@@ -245,7 +245,7 @@ Manual copy:
 ```
 cp creation_export/*_albedo.png    GameRewritten/Content/Textures/
 cp creation_export/*.obj           GameRewritten/Content/Models/
-cp creation_export/*.mtl           GameRewritten/Content/Materials/
+cp creation_export/*.mtl           GameRewritten/Content/Models/
 cp creation_export/world*.json     GameRewritten/Content/World/
 ```
 

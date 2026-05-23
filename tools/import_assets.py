@@ -40,15 +40,17 @@ ANIMATION_EXTENSIONS = {".anim", ".gltf", ".bin"}
 # Creation Engine: map suffix/name patterns to Content/ subdirectory.
 # The manifest's content_target field overrides these when present.
 CREATION_ROUTING: list[tuple[str, str]] = [
-    # PBR channel textures  (name ends with _albedo / _normal / etc.)
+    # PBR channel textures (name ends with _albedo / _normal / etc.)
+    # Channels match Creation-Engine texture_exporter.py linear_channels list.
     ("_albedo.png",   "Content/Textures"),
     ("_normal.png",   "Content/Textures"),
     ("_metallic.png", "Content/Textures"),
     ("_roughness.png","Content/Textures"),
-    ("_occlusion.png","Content/Textures"),
+    ("_ao.png",       "Content/Textures"),   # ambient-occlusion channel
+    ("_emissive.png", "Content/Textures"),   # emissive channel
     # Generic PNG → Textures
     (".png",          "Content/Textures"),
-    # Meshes (.mtl must live alongside its .obj so relative references resolve)
+    # Meshes (.mtl must live alongside its .obj so relative mtllib references resolve)
     (".obj",          "Content/Models"),
     (".mtl",          "Content/Models"),
     # glTF (produced by Animation Engine but may appear here too)
@@ -57,16 +59,20 @@ CREATION_ROUTING: list[tuple[str, str]] = [
 ]
 
 # Maps every suffix pattern in CREATION_ROUTING to its content_target manifest key.
-# Used to deterministically select the right content_target entry for a given file.
+# Keys must match what Creation-Engine exporters write into the content_target dict:
+#   mesh_exporter   → {"model": "Content/Models", "materials": "Content/Materials"}
+#   texture_exporter → {"textures": "Content/Textures", "material": "Content/Materials"}
+#   map_exporter    → {"world": "Content/World"}  (handled via tiles-key check)
 SUFFIX_TO_KIND: dict[str, str] = {
     "_albedo.png":   "textures",
     "_normal.png":   "textures",
     "_metallic.png": "textures",
     "_roughness.png":"textures",
-    "_occlusion.png":"textures",
+    "_ao.png":       "textures",
+    "_emissive.png": "textures",
     ".png":          "textures",
-    ".obj":          "models",
-    ".mtl":          "models",
+    ".obj":          "model",    # matches "model" key in mesh manifest content_target
+    ".mtl":          "model",    # .mtl goes alongside .obj in Content/Models/
     ".gltf":         "animations",
     ".bin":          "animations",
 }
