@@ -122,10 +122,6 @@ private:
     int m_antiAliasingIndex = 1;
     int m_ultrawideModeIndex = 0;
     float m_hudOpacity = 0.80f;
-    bool m_motionBlurEnabled = true;
-    bool m_chromaticAberrationEnabled = true;
-    bool m_filmGrainEnabled = true;
-    bool m_depthOfFieldEnabled = true;
     AudioManager* m_audioManager = nullptr;
 
     void DrawPauseMenu();

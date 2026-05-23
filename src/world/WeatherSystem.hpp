@@ -57,7 +57,8 @@ private:
     float        m_stateTimer = 0.0f;   // seconds remaining in this state
     float        m_blendAlpha = 1.0f;   // 0=prev, 1=current (linear blend)
     WeatherState m_prevState  = WeatherState::Clear;
+    unsigned int m_seed       = 1u;
 
-    float NextStateDuration() const;
+    float NextStateDuration();
     static WeatherState NextState(WeatherState current);
 };

@@ -89,8 +89,6 @@ void DayNightCycle::GetSunColor(float& r, float& g, float& b) const
     // Lerp helper (avoids a dependency on std::lerp across older MSVC targets).
     auto lerp = [](float a, float b, float f) { return a + (b - a) * std::clamp(f, 0.0f, 1.0f); };
 
-    auto setColor = [&](float cr, float cg, float cb) { r = cr; g = cg; b = cb; };
-
     if (t < 6.0f)
     {
         const float f = t / 6.0f;
@@ -126,7 +124,6 @@ void DayNightCycle::GetSunColor(float& r, float& g, float& b) const
         g = lerp(0.20f, 0.10f, f);
         b = lerp(0.45f, 0.22f, f);
     }
-    (void)setColor; // suppress unused-lambda warning
 }
 
 // ---------------------------------------------------------------------------

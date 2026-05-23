@@ -34,12 +34,11 @@ constexpr float kSkyR[4] = { 0.10f, 0.14f, 0.08f, 0.04f };
 constexpr float kSkyG[4] = { 0.10f, 0.13f, 0.09f, 0.05f };
 constexpr float kSkyB[4] = { 0.15f, 0.16f, 0.12f, 0.07f };
 
-// Simple LCG used as a cheap deterministic pseudo-random seed per call.
-unsigned int g_seed = 1;
-float RandFloat()
+// Simple LCG used as a cheap deterministic pseudo-random generator.
+float RandFloat(unsigned int& seed)
 {
-    g_seed = g_seed * 1664525u + 1013904223u;
-    return static_cast<float>(g_seed & 0xFFFFu) / 65535.0f;
+    seed = seed * 1664525u + 1013904223u;
+    return static_cast<float>(seed & 0xFFFFu) / 65535.0f;
 }
 }
 
@@ -54,9 +53,9 @@ WeatherSystem::WeatherSystem()
 // ---------------------------------------------------------------------------
 // WeatherSystem::NextStateDuration
 // ---------------------------------------------------------------------------
-float WeatherSystem::NextStateDuration() const
+float WeatherSystem::NextStateDuration()
 {
-    return kMinStateDuration + RandFloat() * (kMaxStateDuration - kMinStateDuration);
+    return kMinStateDuration + RandFloat(m_seed) * (kMaxStateDuration - kMinStateDuration);
 }
 
 // ---------------------------------------------------------------------------
@@ -64,9 +63,7 @@ float WeatherSystem::NextStateDuration() const
 // ---------------------------------------------------------------------------
 WeatherState WeatherSystem::NextState(WeatherState current)
 {
-    // Typical progression: Clear → Cloudy → Rain → Storm → Clear.
-    // Small chance to skip Rain or stay the same (via RandFloat already called
-    // in the duration calc, so this keeps a separate coin flip simple).
+    // Deterministic progression: Clear → Cloudy → Rain → Storm → Clear.
     return static_cast<WeatherState>((static_cast<int>(current) + 1) % 4);
 }
 

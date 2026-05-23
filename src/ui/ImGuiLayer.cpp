@@ -76,20 +76,6 @@ int GraphicsPresetIndexFromValue(D3D11Renderer::GraphicsPreset preset)
     }
 }
 
-D3D11Renderer::GraphicsPreset GraphicsPresetFromIndex(int index)
-{
-    switch (index)
-    {
-    case 0: return D3D11Renderer::GraphicsPreset::Low;
-    case 1: return D3D11Renderer::GraphicsPreset::Medium;
-    case 2: return D3D11Renderer::GraphicsPreset::High;
-    case 3: return D3D11Renderer::GraphicsPreset::Ultra;
-    case 4:
-    default:
-        return D3D11Renderer::GraphicsPreset::Custom;
-    }
-}
-
 int AntiAliasingIndexFromValue(D3D11Renderer::AntiAliasingMode mode)
 {
     switch (mode)
@@ -103,18 +89,6 @@ int AntiAliasingIndexFromValue(D3D11Renderer::AntiAliasingMode mode)
     }
 }
 
-D3D11Renderer::AntiAliasingMode AntiAliasingFromIndex(int index)
-{
-    switch (index)
-    {
-    case 0: return D3D11Renderer::AntiAliasingMode::Off;
-    case 1: return D3D11Renderer::AntiAliasingMode::FXAA;
-    case 2: return D3D11Renderer::AntiAliasingMode::SMAA;
-    case 3:
-    default:
-        return D3D11Renderer::AntiAliasingMode::TAA;
-    }
-}
 }
 
 static bool WorldToScreen(
@@ -365,7 +339,7 @@ void ImGuiLayer::DrawPauseMenu()
 {
     // Centre the window on screen.
     ImGuiIO& io = ImGui::GetIO();
-    float winW = 360.0f, winH = m_showOptions ? 430.0f : 180.0f;
+    float winW = 360.0f, winH = m_showOptions ? 320.0f : 180.0f;
     ImGui::SetNextWindowPos(
         ImVec2((io.DisplaySize.x - winW) * 0.5f,
                (io.DisplaySize.y - winH) * 0.5f),
@@ -405,39 +379,14 @@ void ImGuiLayer::DrawPauseMenu()
             ImGui::Indent();
             if (m_renderer)
             {
-                if (ImGui::Combo("Graphics Preset", &m_graphicsPresetIndex, kGraphicsPresetLabels, IM_ARRAYSIZE(kGraphicsPresetLabels)))
-                {
-                    m_renderer->ApplyGraphicsPreset(GraphicsPresetFromIndex(m_graphicsPresetIndex));
-                    m_frameRateLimitIndex = FrameLimitIndexFromValue(m_renderer->GetFrameRateLimit());
-                    m_antiAliasingIndex = AntiAliasingIndexFromValue(m_renderer->GetAntiAliasingMode());
-                }
-
                 if (ImGui::Checkbox("V-Sync", &m_vsyncEnabled))
                     m_renderer->SetVSyncEnabled(m_vsyncEnabled);
 
                 if (ImGui::Combo("FPS Limit", &m_frameRateLimitIndex, kFrameLimitLabels, IM_ARRAYSIZE(kFrameLimitLabels)))
                     m_renderer->SetFrameRateLimit(kFrameLimitValues[m_frameRateLimitIndex]);
 
-                if (ImGui::Combo("Anti-Aliasing", &m_antiAliasingIndex, kAntiAliasingLabels, IM_ARRAYSIZE(kAntiAliasingLabels)))
-                {
-                    m_renderer->SetAntiAliasingMode(AntiAliasingFromIndex(m_antiAliasingIndex));
-                    m_graphicsPresetIndex = 4;
-                }
-
                 ImGui::Combo("Ultrawide HUD", &m_ultrawideModeIndex, kUltrawideModeLabels, IM_ARRAYSIZE(kUltrawideModeLabels));
                 ImGui::SliderFloat("HUD Opacity", &m_hudOpacity, 0.0f, 1.0f, "%.2f");
-                ImGui::Separator();
-                ImGui::Text("Post-Process");
-                ImGui::Checkbox("Motion Blur", &m_motionBlurEnabled);
-                ImGui::Checkbox("Chromatic Aberration", &m_chromaticAberrationEnabled);
-                ImGui::Checkbox("Film Grain", &m_filmGrainEnabled);
-                ImGui::Checkbox("Depth of Field", &m_depthOfFieldEnabled);
-                ImGui::Separator();
-                ImGui::Text("Preset Targets");
-                ImGui::Text("Shadows: %d", m_renderer->GetShadowResolution());
-                ImGui::Text("Texture tier: %d", m_renderer->GetTextureQualityLevel());
-                ImGui::Text("Particles: %.0f%%", m_renderer->GetParticleDensity() * 100.0f);
-                ImGui::Text("LOD Distance: %.2fx", m_renderer->GetLodDistanceScale());
             }
             else
             {

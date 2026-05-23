@@ -504,7 +504,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // they feel natural even during Tactical Pause slow-motion.
         particles.Update(deltaTime, weather.GetWindStrength(),
                          camController.GetPlayerX(),
-                         0.0f,
+                         camController.GetPlayerGroundY(),
                          camController.GetPlayerZ());
 
         if (runtimeScene.WantsRespawn())

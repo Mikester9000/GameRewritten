@@ -36,28 +36,12 @@ float PRandRange(float lo, float hi) { return lo + PRand() * (hi - lo); }
 // Project a world-space point to screen space.
 // Returns false if the point is behind the camera.
 bool WorldToScreen(float wx, float wy, float wz,
-                   float camX, float camY, float camZ,
-                   float yaw, float pitch,
+                   const XMMATRIX& viewProj,
                    float vpW, float vpH,
                    float& outSX, float& outSY)
 {
-    constexpr float kPi = XM_PI;
-    (void)kPi;
-
-    const float lookX = cosf(pitch) * sinf(yaw);
-    const float lookY = sinf(pitch);
-    const float lookZ = cosf(pitch) * cosf(yaw);
-
-    XMVECTOR pos    = XMVectorSet(camX, camY, camZ, 1.0f);
-    XMVECTOR target = XMVectorSet(camX + lookX, camY + lookY, camZ + lookZ, 1.0f);
-    XMVECTOR up     = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-    XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-    XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, vpW / vpH, 0.1f, 2000.0f);
-    XMMATRIX vp   = XMMatrixMultiply(view, proj);
-
     XMVECTOR world = XMVectorSet(wx, wy, wz, 1.0f);
-    XMVECTOR clip  = XMVector4Transform(world, vp);
+    XMVECTOR clip  = XMVector4Transform(world, viewProj);
 
     const float w = XMVectorGetW(clip);
     if (w <= 0.001f)
@@ -89,7 +73,6 @@ ParticleSystem::ParticleSystem()
 // ---------------------------------------------------------------------------
 void ParticleSystem::Init(float worldX, float worldZ)
 {
-    m_count      = kMaxParticles;
     m_spawnTimer = 0.0f;
 
     for (int i = 0; i < kMaxParticles; ++i)
@@ -191,6 +174,18 @@ void ParticleSystem::Draw(float camX, float camY, float camZ,
     if (!dl)
         return;
 
+    const float lookX = cosf(pitch) * sinf(yaw);
+    const float lookY = sinf(pitch);
+    const float lookZ = cosf(pitch) * cosf(yaw);
+
+    XMVECTOR pos = XMVectorSet(camX, camY, camZ, 1.0f);
+    XMVECTOR target = XMVectorSet(camX + lookX, camY + lookY, camZ + lookZ, 1.0f);
+    XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+    XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+    XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, vpW / vpH, 0.1f, 2000.0f);
+    XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+
     for (int i = 0; i < kMaxParticles; ++i)
     {
         const Particle& p = m_particles[i];
@@ -198,8 +193,7 @@ void ParticleSystem::Draw(float camX, float camY, float camZ,
             continue;
 
         float sx, sy;
-        if (!WorldToScreen(p.x, p.y, p.z, camX, camY, camZ,
-                           yaw, pitch, vpW, vpH, sx, sy))
+        if (!WorldToScreen(p.x, p.y, p.z, viewProj, vpW, vpH, sx, sy))
             continue;
 
         // Fade alpha based on remaining life.

@@ -54,7 +54,6 @@ private:
     };
 
     Particle m_particles[kMaxParticles];
-    int      m_count      = 0;
     float    m_spawnTimer = 0.0f;
 
     void SpawnOne(float centreX, float centreY, float centreZ, float windStrength);
