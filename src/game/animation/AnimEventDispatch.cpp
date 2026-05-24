@@ -9,6 +9,13 @@
 #include "AnimEventDispatch.hpp"
 #include "../../logger/Logger.hpp"
 #include "../../../ThirdParty/src/tp_audio.hpp"
+#include <filesystem>
+
+namespace
+{
+constexpr const char* kFootstepSfxPath = "Content/Audio/sfx_attack_light.wav";
+constexpr const char* kImpactSfxPath   = "Content/Audio/sfx_combat_parry.wav";
+}
 
 // ---------------------------------------------------------------------------
 void AnimEventDispatch::Dispatch(AnimationComponent& animComp,
@@ -23,11 +30,13 @@ void AnimEventDispatch::Dispatch(AnimationComponent& animComp,
     {
         if (ev.type == "footstep")
         {
-            tp::Audio::PlayOneShot("sfx_footstep"); // placeholder path — replaced by Task 402
+            if (std::filesystem::exists(kFootstepSfxPath))
+                tp::Audio::PlayOneShot(kFootstepSfxPath);
         }
         else if (ev.type == "contact")
         {
-            tp::Audio::PlayOneShot("sfx_impact");   // placeholder path
+            if (std::filesystem::exists(kImpactSfxPath))
+                tp::Audio::PlayOneShot(kImpactSfxPath);
         }
         else if (ev.type == "hit")
         {

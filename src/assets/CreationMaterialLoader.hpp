@@ -40,7 +40,7 @@ public:
     static CreationMaterial Load(const std::string& jsonPath);
 
     // Iterate dirPath for all *.json files and call Load on each.
-    // Uses std::filesystem::directory_iterator (C++17, recursive).
+    // Uses std::filesystem::recursive_directory_iterator (C++17).
     static void LoadDir(const std::string& dirPath);
 
     // Retrieve a cached material by name. Returns nullptr if not found.

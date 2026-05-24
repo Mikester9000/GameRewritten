@@ -16,6 +16,7 @@ struct AnimKeyframe
 {
     float time      = 0.0f;
     float value[4]  = {0.0f, 0.0f, 0.0f, 1.0f};
+    std::string interpolation = "LINEAR"; // "STEP" | "LINEAR" | "CUBIC"
 };
 
 // A single bone animation channel (translation, rotation, or scale).
@@ -46,6 +47,7 @@ struct LoadedAnimClip
     std::vector<AnimEvent>   events;
     bool                    rootMotionEnabled      = false;
     int                     rootMotionChannelIndex = -1;
+    std::vector<std::string> skeletonBoneNames;
 };
 
 // Loads a single .anim JSON file and returns a LoadedAnimClip.

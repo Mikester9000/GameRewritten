@@ -10,6 +10,7 @@
 #include "../../../third_party/nlohmann/json.hpp"
 #include "../../logger/Logger.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 
@@ -32,6 +33,7 @@ static AnimKeyframe ParseKeyframe(const json& kfJson)
         if (v.size() == 3)
             kf.value[3] = 1.0f;
     }
+    kf.interpolation = kfJson.value("interp", "LINEAR");
     return kf;
 }
 
@@ -68,6 +70,42 @@ LoadedAnimClip AnimClipLoader::Load(const std::string& path)
     out.fps        = clipJson.value("fps",           30.0f);
     out.loop       = clipJson.value("loop",          false);
     out.durationSec = clipJson.value("duration_sec", 0.0f);
+    if (out.durationSec <= 0.0f && j.contains("metadata") && j["metadata"].is_object())
+    {
+        out.durationSec = j["metadata"].value("duration", 0.0f);
+    }
+
+    // Skeleton bone names (index-aligned) used by runtime channel sampling.
+    if (j.contains("model") && j["model"].is_object())
+    {
+        const auto& modelJson = j["model"];
+        if (modelJson.contains("skeleton") && modelJson["skeleton"].is_object())
+        {
+            const auto& skeletonJson = modelJson["skeleton"];
+            if (skeletonJson.contains("bones") && skeletonJson["bones"].is_array())
+            {
+                for (const auto& boneJson : skeletonJson["bones"])
+                {
+                    const std::string boneName = boneJson.value("name", "");
+                    const int boneIndex = boneJson.value("index", -1);
+                    if (boneName.empty())
+                        continue;
+                    if (boneIndex >= 0)
+                    {
+                        if (out.skeletonBoneNames.size() <= static_cast<size_t>(boneIndex))
+                            out.skeletonBoneNames.resize(static_cast<size_t>(boneIndex) + 1);
+                        out.skeletonBoneNames[static_cast<size_t>(boneIndex)] = boneName;
+                    }
+                    else
+                    {
+                        out.skeletonBoneNames.push_back(boneName);
+                    }
+                }
+            }
+        }
+    }
+
+    float maxKeyframeTime = out.durationSec;
 
     // Channels.
     if (clipJson.contains("channels") && clipJson["channels"].is_array())
@@ -82,11 +120,18 @@ LoadedAnimClip AnimClipLoader::Load(const std::string& path)
             if (chJson.contains("keyframes") && chJson["keyframes"].is_array())
             {
                 for (const auto& kfJson : chJson["keyframes"])
-                    ch.keyframes.push_back(ParseKeyframe(kfJson));
+                {
+                    AnimKeyframe kf = ParseKeyframe(kfJson);
+                    maxKeyframeTime = std::max(maxKeyframeTime, kf.time);
+                    ch.keyframes.push_back(std::move(kf));
+                }
             }
             out.channels.push_back(std::move(ch));
         }
     }
+
+    if (out.durationSec <= 0.0f)
+        out.durationSec = maxKeyframeTime;
 
     // Events — try clip-level first, then top-level fallback.
     const json* evtSource = nullptr;

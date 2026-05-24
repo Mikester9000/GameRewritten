@@ -73,10 +73,23 @@ std::vector<AnimEvent> AnimationComponent::GetFiredEvents(float prevTime, float 
     if (!activeClip)
         return fired;
 
+    const bool wrappedLoop =
+        activeClip->loop &&
+        activeClip->durationSec > 0.0f &&
+        curTime < prevTime;
+
     for (const AnimEvent& ev : activeClip->events)
     {
-        if (ev.time > prevTime && ev.time <= curTime)
+        if (!wrappedLoop)
+        {
+            if (ev.time > prevTime && ev.time <= curTime)
+                fired.push_back(ev);
+        }
+        else if ((ev.time > prevTime && ev.time <= activeClip->durationSec) ||
+                 (ev.time >= 0.0f && ev.time <= curTime))
+        {
             fired.push_back(ev);
+        }
     }
     return fired;
 }

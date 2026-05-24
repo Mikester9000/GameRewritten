@@ -8,8 +8,19 @@
 
 #include "AnimationSystem.hpp"
 #include <cstring>
+#include <unordered_map>
 
 using namespace DirectX;
+
+static const std::string& SelectInterpolationMode(const AnimChannel& ch, int keyframeIndex)
+{
+    if (keyframeIndex >= 0 && keyframeIndex < static_cast<int>(ch.keyframes.size()) &&
+        !ch.keyframes[static_cast<size_t>(keyframeIndex)].interpolation.empty())
+    {
+        return ch.keyframes[static_cast<size_t>(keyframeIndex)].interpolation;
+    }
+    return ch.interpolation;
+}
 
 // ---------------------------------------------------------------------------
 // Keyframe sampling helpers.
@@ -69,7 +80,7 @@ XMFLOAT3 AnimationSystem::SampleTranslation(const AnimChannel& ch, float t)
     const float* va = ch.keyframes[a].value;
     const float* vb = ch.keyframes[b].value;
 
-    if (ch.interpolation == "STEP" || a == b)
+    if (SelectInterpolationMode(ch, a) == "STEP" || a == b)
         return XMFLOAT3(va[0], va[1], va[2]);
 
     // LINEAR (also used as CUBIC fallback).
@@ -93,7 +104,7 @@ XMFLOAT4 AnimationSystem::SampleRotation(const AnimChannel& ch, float t)
     const float* va = ch.keyframes[a].value;
     const float* vb = ch.keyframes[b].value;
 
-    if (ch.interpolation == "STEP" || a == b)
+    if (SelectInterpolationMode(ch, a) == "STEP" || a == b)
         return XMFLOAT4(va[0], va[1], va[2], va[3]);
 
     // Slerp for smooth rotation blending.
@@ -124,11 +135,33 @@ static void SampleClip(const LoadedAnimClip& clip, float t, BoneTransformBuffer&
         buf.bones[i].rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
-    int boneIndex = 0;
+    std::unordered_map<std::string, int> boneNameToIndex;
+    for (size_t i = 0; i < clip.skeletonBoneNames.size() && i < static_cast<size_t>(BoneTransformBuffer::kMaxBones); ++i)
+    {
+        if (!clip.skeletonBoneNames[i].empty())
+            boneNameToIndex[clip.skeletonBoneNames[i]] = static_cast<int>(i);
+    }
+    int nextBoneIndex = static_cast<int>(clip.skeletonBoneNames.size());
+
     for (const AnimChannel& ch : clip.channels)
     {
-        if (boneIndex >= BoneTransformBuffer::kMaxBones)
-            break;
+        int boneIndex = -1;
+        if (!ch.boneName.empty())
+        {
+            const auto it = boneNameToIndex.find(ch.boneName);
+            if (it != boneNameToIndex.end())
+            {
+                boneIndex = it->second;
+            }
+            else if (nextBoneIndex < BoneTransformBuffer::kMaxBones)
+            {
+                boneIndex = nextBoneIndex++;
+                boneNameToIndex[ch.boneName] = boneIndex;
+            }
+        }
+
+        if (boneIndex < 0 || boneIndex >= BoneTransformBuffer::kMaxBones)
+            continue;
 
         if (ch.target == "translation" || ch.target == "TRANSLATION")
             buf.bones[boneIndex].position = AnimationSystem::SampleTranslation(ch, t);
@@ -136,10 +169,6 @@ static void SampleClip(const LoadedAnimClip& clip, float t, BoneTransformBuffer&
             buf.bones[boneIndex].rotation = AnimationSystem::SampleRotation(ch, t);
         else if (ch.target == "scale" || ch.target == "SCALE")
             buf.bones[boneIndex].scale = AnimationSystem::SampleScale(ch, t);
-
-        // Each channel targets one bone; increment per channel group.
-        // Simple mapping: one bone per channel entry (sparse packing).
-        ++boneIndex;
     }
 }
 
@@ -154,6 +183,8 @@ void AnimationSystem::Advance(float dt,
     {
         AnimationComponent& comp = components[i];
         BoneTransformBuffer& buf = outBuffers[i];
+        const float prevPlaybackTime = comp.playbackTime;
+        const LoadedAnimClip* prevActiveClip = comp.activeClip;
 
         comp.Update(dt);
 
@@ -202,7 +233,19 @@ void AnimationSystem::Advance(float dt,
             }
         }
 
-        // Root motion delta: position of root bone this frame (simple approximation).
-        buf.rootMotionDelta = buf.bones[0].position;
+        if (prevActiveClip == comp.activeClip)
+        {
+            BoneTransformBuffer prevBuf;
+            SampleClip(*comp.activeClip, prevPlaybackTime, prevBuf);
+            buf.rootMotionDelta = XMFLOAT3(
+                buf.bones[0].position.x - prevBuf.bones[0].position.x,
+                buf.bones[0].position.y - prevBuf.bones[0].position.y,
+                buf.bones[0].position.z - prevBuf.bones[0].position.z
+            );
+        }
+        else
+        {
+            buf.rootMotionDelta = XMFLOAT3(0.0f, 0.0f, 0.0f);
+        }
     }
 }
