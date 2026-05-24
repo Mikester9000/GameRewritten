@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <cmath>
 #include <sstream>   // for std::ostringstream (cell crossing log)
+#include <unordered_map>
 #include <vector>
 #include "../platform/win32/Win32Window.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
@@ -36,6 +37,12 @@
 #include "../assets/CreationMaterialLoader.hpp"
 #include "../assets/TextureCache.hpp"
 #include "../audio/AudioManager.hpp"
+#include "../game/animation/AnimPackManifestLoader.hpp"
+#include "../game/animation/AnimClipLoader.hpp"
+#include "../game/animation/AnimationComponent.hpp"
+#include "../game/animation/AnimationSystem.hpp"
+#include "../game/animation/PlayerAnimBridge.hpp"
+#include "../game/animation/AnimEventDispatch.hpp"
 #include "../world/WorldGrid.hpp"
 #include "../world/DayNightCycle.hpp"
 #include "../world/WeatherSystem.hpp"
@@ -263,6 +270,38 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             }
         }
     }
+
+    // ── Animation system — load hero_pack clips into a named library ───────
+    std::unordered_map<std::string, LoadedAnimClip> heroClipLibrary;
+    {
+        const std::vector<std::string> orderedPaths =
+            AnimPackManifestLoader::Load("hero_pack");
+
+        for (const std::string& animPath : orderedPaths)
+        {
+            LoadedAnimClip clip = AnimClipLoader::Load(animPath);
+            if (!clip.name.empty())
+                heroClipLibrary[clip.name] = std::move(clip);
+        }
+        LOG_INFO("Main: hero_pack clip library built — "
+                 + std::to_string(heroClipLibrary.size()) + " clip(s)");
+    }
+
+    // AnimationComponent for the player actor (one component per actor).
+    AnimationComponent playerAnimComp;
+    {
+        auto it = heroClipLibrary.find("idle");
+        if (it != heroClipLibrary.end())
+        {
+            playerAnimComp.activeClip = &it->second;
+            playerAnimComp.playing    = true;
+        }
+    }
+
+    // Per-frame bone transform output buffers (one per AnimationComponent).
+    std::vector<AnimationComponent> animComponents = { playerAnimComp };
+    std::vector<BoneTransformBuffer> animBuffers;
+    // ── End animation system init ──────────────────────────────────────────
 
     // ── ThirdParty subsystem smoke tests ──────────────────────────────────
     ThirdPartyBootstrap::InitializeAndRunSmokeTests();
@@ -589,6 +628,23 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                          camController.GetPlayerX(),
                          camController.GetPlayerGroundY(),
                          camController.GetPlayerZ());
+
+        // --- Animation system per-frame update ---
+        // Bridge player state → clip, then advance all components + sample bones.
+        {
+            const float prevPlayerAnimTime = animComponents.empty()
+                ? 0.0f : animComponents[0].playbackTime;
+
+            PlayerAnimBridge::Update(runtimeScene.GetPlayerActionState(),
+                                     animComponents[0],
+                                     heroClipLibrary);
+
+            AnimationSystem::Advance(gameplayDt, animComponents, animBuffers);
+
+            // Dispatch anim events (footstep SFX, hit windows, etc.).
+            AnimEventDispatch::Dispatch(animComponents[0], prevPlayerAnimTime,
+                                        runtimeScene.GetCombatSystemMutable(), gameplayDt);
+        }
 
         if (runtimeScene.WantsRespawn())
         {

@@ -306,6 +306,8 @@ public:
     const EnemyActor*   GetEnemies()      const { return m_enemies; }
     int                 GetEnemyCount()   const { return kEnemyCount; }
     const EnemyActor*   GetLockedTarget() const { return m_targeting.GetTarget(); }
+    PlayerActionState   GetPlayerActionState() const { return m_player.state; }
+    CombatSystem&       GetCombatSystemMutable() { return m_combatSystem; }
 
     void ToggleLockOn()
     {
