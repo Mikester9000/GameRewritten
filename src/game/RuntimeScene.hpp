@@ -78,7 +78,13 @@ public:
         bool attackPressed,
         CameraController& camController)
     {
-        m_player.stats.Update(dt);
+        // Update passive stats and status effects; apply any status tick damage.
+        const int statusTickDmg = m_player.stats.Update(dt);
+        if (statusTickDmg > 0)
+        {
+            m_player.stats.TakeDamage(statusTickDmg);
+            m_playerWasHitThisFrame = true; // reuse flash for status damage
+        }
         m_player.Update(dt, actionMap, isGrounded, attackPressed);
 
         // Track last known movement direction so dodge can use it as fallback
@@ -260,6 +266,41 @@ public:
         return v;
     }
 
+    // Returns true (once) if an enemy died this frame — used to trigger victory fanfare.
+    bool ConsumeEnemyDied()
+    {
+        bool v = m_enemyDiedThisFrame;
+        m_enemyDiedThisFrame = false;
+        return v;
+    }
+
+    // Returns true (once) if an enemy entered alert state this frame (spotted player).
+    bool ConsumeEnemyAlert()
+    {
+        bool v = m_enemyAlertedThisFrame;
+        m_enemyAlertedThisFrame = false;
+        return v;
+    }
+
+    // Returns true (once) if the lock-on target changed this frame.
+    // outHasTarget is true when a new target was acquired, false when lock-on was broken.
+    bool ConsumeLockOnChanged(bool& outHasTarget)
+    {
+        if (!m_lockOnChangedThisFrame)
+            return false;
+        outHasTarget = m_lockOnHasTarget;
+        m_lockOnChangedThisFrame = false;
+        return true;
+    }
+
+    // Returns true (once) if a successful parry occurred this frame.
+    bool ConsumeParryOccurred()
+    {
+        bool v = m_parryThisFrame;
+        m_parryThisFrame = false;
+        return v;
+    }
+
     // Read-only accessors for debug visualization and future systems.
     const CombatSystem& GetCombatSystem() const { return m_combatSystem; }
     const EnemyActor*   GetEnemies()      const { return m_enemies; }
@@ -341,6 +382,13 @@ private:
 
     // Set true for one frame whenever the player takes damage; cleared by ConsumePlayerHitFlash().
     bool m_playerWasHitThisFrame = false;
+
+    // Audio event flags — set in BeginFrame, consumed by Main.cpp each frame.
+    bool m_enemyDiedThisFrame     = false; // an enemy hp reached zero
+    bool m_enemyAlertedThisFrame  = false; // an enemy transitioned from Idle to Chase
+    bool m_lockOnChangedThisFrame = false; // lock-on target acquired or broken
+    bool m_lockOnHasTarget        = false; // true = acquired, false = broken
+    bool m_parryThisFrame         = false; // successful parry absorbed a hit
 
     // Accumulated damage from enemy attacks this frame (AABB-tested).
     int m_pendingEnemyDamage = 0;

@@ -244,8 +244,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // ── ThirdParty subsystem smoke tests ──────────────────────────────────
     ThirdPartyBootstrap::InitializeAndRunSmokeTests();
     AudioManager audioManager;
-    // Current tp::Audio wrapper is one-shot only; this is non-looping startup BGM.
-    audioManager.PlayBGM("Content/Audio/bgm_field.ogg");
+    // Start looping field-day BGM and forest ambient at launch.
+    audioManager.PlayBGM("Content/Audio/bgm_field_day.ogg");
+    audioManager.PlayAmbient("Content/Audio/amb_forest_day_loop.wav");
     // ── End ThirdParty smoke tests ─────────────────────────────────────────
 
     // --- Camera + player movement (now owned by CameraController) ---
@@ -289,6 +290,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasInteractActionDown = false;
     bool wasAttackActionDown = false;
     bool wasLockOnActionDown = false;
+    bool wasTacticalPauseHeld = false; // tracks edge transitions for SFX
     CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
     bool pendingMissIndicator = false;
@@ -351,6 +353,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // because it is not a combat InputAction — it controls time scale only.
         constexpr int kTacticalPauseKey   = VK_TAB;
         const bool tacticalPauseHeld = actionMap.IsVirtualKeyHeld(kTacticalPauseKey);
+
+        // Tactical Pause SFX on edge transitions.
+        if (tacticalPauseHeld && !wasTacticalPauseHeld)
+            audioManager.PlayTacticalPauseEnter();
+        else if (!tacticalPauseHeld && wasTacticalPauseHeld)
+            audioManager.PlayTacticalPauseExit();
+        wasTacticalPauseHeld = tacticalPauseHeld;
 
         // Scale gameplay delta time to 15% while Tactical Pause is open.
         // UI, dialog, and HUD animations always use the unscaled deltaTime.
@@ -499,6 +508,27 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         if (runtimeScene.ConsumePlayerHitFlash())
             gameHud.TriggerDamageFlash();
+
+        // --- Audio event hooks ---
+        if (runtimeScene.ConsumeEnemyDied())
+            audioManager.PlayVictoryFanfare();
+
+        if (runtimeScene.ConsumeEnemyAlert())
+            audioManager.PlayEnemyAlertBark();
+
+        if (runtimeScene.ConsumeParryOccurred())
+            audioManager.PlayParrySFX();
+
+        {
+            bool hasTarget = false;
+            if (runtimeScene.ConsumeLockOnChanged(hasTarget))
+            {
+                if (hasTarget)
+                    audioManager.PlayLockOnAcquire();
+                else
+                    audioManager.PlayLockOnBreak();
+            }
+        }
 
         if (pendingMissIndicator)
         {
