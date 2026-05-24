@@ -92,8 +92,18 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
 
         if (!hitBox.hasHitPlayer && HitBoxOverlapsPlayer(hitBox))
         {
-            m_pendingEnemyDamage += hitBox.damage;
-            hitBox.hasHitPlayer = true;
+            if (m_player.IsParryActive())
+            {
+                // Early-dodge parry: absorb the hit and grant the player a counter bonus.
+                m_player.counterBonusActive = true;
+                hitBox.hasHitPlayer = true;
+                LOG_INFO("RuntimeScene: Player PARRIED enemy attack — counter bonus ready.");
+            }
+            else
+            {
+                m_pendingEnemyDamage += hitBox.damage;
+                hitBox.hasHitPlayer = true;
+            }
         }
 
         --hitBox.framesToLive;

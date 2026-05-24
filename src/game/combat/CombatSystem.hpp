@@ -36,7 +36,14 @@ public:
     float comboTimer = 0.0f;
 
     // Add a new hitbox to the active pool. It will live for hitbox.framesToLive frames.
+    // If a counter-bonus multiplier was set via SetNextHitMultiplier(), it is applied
+    // to the damage of this hitbox and then reset to 1.0.
     void SpawnHitBox(const HitBox& hitbox);
+
+    // Set a one-shot damage multiplier applied to the very next hitbox spawned via
+    // SpawnHitBox or TriggerAttack.  Resets to 1.0 after consumption.
+    // Use from RuntimeScene when a parry counter is active.
+    void SetNextHitMultiplier(float mult) { m_nextHitMultiplier = mult; }
 
     // Spawn a hitbox appropriate for the given combo step (1 or 2).
     // Positions the hitbox 1.5 units in front of the player using yaw.
@@ -68,4 +75,7 @@ private:
     std::vector<HitBox> m_activeHitBoxes;
     EnemyHitRecord m_recentEnemyHits[kMaxRecentEnemyHits]{};
     int m_recentEnemyHitCount = 0;
+
+    // One-shot multiplier for the next spawned hitbox damage (parry counter bonus).
+    float m_nextHitMultiplier = 1.0f;
 };

@@ -16,6 +16,11 @@
 #include <algorithm>
 #include <string>
 
+namespace
+{
+constexpr float kParryWindowSec = 0.12f;
+}
+
 ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraController& cameraController) const
 {
     ActorCommon::RuntimeActorPose pose;
@@ -30,6 +35,7 @@ ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraControll
 void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded, bool attackPressed)
 {
     stateTimer = (std::max)(0.0f, stateTimer - dt);
+    parryWindowTimer = (std::max)(0.0f, parryWindowTimer - dt);
 
     if (!isGrounded)
     {
@@ -90,6 +96,8 @@ void PlayerActor::TransitionTo(PlayerActionState next, float duration)
 {
     state = next;
     stateTimer = duration;
+    if (next == PlayerActionState::Dodge)
+        parryWindowTimer = kParryWindowSec;
 }
 
 void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,

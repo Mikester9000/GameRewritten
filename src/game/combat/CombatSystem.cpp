@@ -37,7 +37,13 @@ static bool HitBoxOverlapsEnemy(const HitBox& hitBox, const EnemyActor& enemy)
 
 void CombatSystem::SpawnHitBox(const HitBox& hitbox)
 {
-    m_activeHitBoxes.push_back(hitbox);
+    HitBox h = hitbox;
+    if (m_nextHitMultiplier != 1.0f)
+    {
+        h.damage = static_cast<int>(h.damage * m_nextHitMultiplier + 0.5f);
+        m_nextHitMultiplier = 1.0f;
+    }
+    m_activeHitBoxes.push_back(h);
 }
 
 void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int attackStep)
@@ -105,6 +111,7 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
     }
 
     hitBox.y = py;
+    hitBox.attackerYaw = yaw;
     SpawnHitBox(hitBox);
 }
 
@@ -145,10 +152,22 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
             if (enemy.IsStaggered())
                 actualDamage = static_cast<int>(actualDamage * EnemyActor::kStaggerBonusMult + 0.5f);
 
+            // Weak point: attacking from behind deals bonus damage.
+            // Backstab condition: player facing and enemy facing agree within ~60°.
+            // cos(attackerYaw - enemy.yaw) > cos(60°) = 0.5 means both face the same way
+            // (player came from behind enemy).
+            static constexpr float kWeakPointDotThreshold = 0.5f;
+            static constexpr float kWeakPointDamageMult   = 1.5f;
+            const float dotProduct = cosf(hitBox.attackerYaw - enemy.yaw);
+            const bool isWeakPoint = (dotProduct > kWeakPointDotThreshold);
+            if (isWeakPoint)
+                actualDamage = static_cast<int>(actualDamage * kWeakPointDamageMult + 0.5f);
+
             std::ostringstream ss;
             ss << "CombatSystem: Hit enemy " << i
                << " for " << actualDamage << " damage"
-               << (enemy.IsStaggered() ? " (STAGGER BONUS)" : "") << ".";
+               << (enemy.IsStaggered() ? " (STAGGER BONUS)" : "")
+               << (isWeakPoint ? " (WEAK POINT)" : "") << ".";
             LOG_INFO(ss.str());
 
             enemy.OnHit(actualDamage);

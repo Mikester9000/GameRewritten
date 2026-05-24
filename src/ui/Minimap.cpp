@@ -13,6 +13,7 @@
 #include "../world/WorldGrid.hpp"
 
 #include <imgui.h>
+#include <cstdint>
 #include <cmath>
 #include <string>
 #include <unordered_map>
@@ -26,6 +27,8 @@ constexpr float kMapPadding = 10.0f;    // gap from screen top-right edge
 constexpr int   kGridRadius = 2;        // 5x5 cell grid (radius 2 from player cell)
 constexpr int   kGridDim    = kGridRadius * 2 + 1; // 5
 constexpr float kCellPx     = kMapSize / static_cast<float>(kGridDim); // pixels per cell
+constexpr ImU32 kFogFillColor = IM_COL32(18, 18, 22, 235);
+constexpr ImU32 kFogBorderColor = IM_COL32(0, 0, 0, 180);
 
 // Return a fill color for a given biome name.
 ImU32 BiomeColor(const std::string& biome)
@@ -52,6 +55,12 @@ const WorldCell* FindInList(const std::vector<WorldCell>& cells, int cx, int cz)
             return &c;
     return nullptr;
 }
+
+unsigned long long PackCellKey(int cx, int cz)
+{
+    return (static_cast<unsigned long long>(static_cast<std::uint32_t>(cx)) << 32ull) |
+           static_cast<unsigned long long>(static_cast<std::uint32_t>(cz));
+}
 } // namespace
 
 void Minimap::Draw(const WorldGrid& grid,
@@ -61,6 +70,7 @@ void Minimap::Draw(const WorldGrid& grid,
     // Determine the player's current cell.
     int playerCX = 0, playerCZ = 0;
     grid.WorldToCell(playerX, playerZ, playerCX, playerCZ);
+    m_visitedCells.insert(PackCellKey(playerCX, playerCZ));
 
     // Fetch the 5x5 region of loaded cells around the player.
     const std::vector<WorldCell> nearby = grid.GetActiveCells(playerCX, playerCZ, kGridRadius);
@@ -111,12 +121,14 @@ void Minimap::Draw(const WorldGrid& grid,
             const float y1 = y0 + kCellPx;
 
             const WorldCell* cell      = FindInList(nearby, cx, cz);
-            const ImU32      fillColor = cell
+            const bool       isVisited = m_visitedCells.find(PackCellKey(cx, cz)) != m_visitedCells.end();
+            const ImU32      fillColor = (cell && isVisited)
                 ? BiomeColor(cell->terrainBiome)
-                : IM_COL32(60, 60, 60, 160); // out-of-bounds / unloaded cell
+                : kFogFillColor;
 
             draw->AddRectFilled(ImVec2(x0, y0), ImVec2(x1, y1), fillColor);
-            draw->AddRect(ImVec2(x0, y0), ImVec2(x1, y1), IM_COL32(0, 0, 0, 140));
+            draw->AddRect(ImVec2(x0, y0), ImVec2(x1, y1),
+                          isVisited ? IM_COL32(0, 0, 0, 140) : kFogBorderColor);
         }
     }
 

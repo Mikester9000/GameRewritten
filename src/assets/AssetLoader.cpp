@@ -149,3 +149,63 @@ bool AssetLoader::LoadScene(const std::string& path, SceneAsset& out)
     LOG_INFO(ss.str());
     return true;
 }
+
+// ---------------------------------------------------------------------------
+// Animation
+// ---------------------------------------------------------------------------
+bool AssetLoader::LoadAnimation(const std::string& path, AnimationAsset& out)
+{
+    json j;
+    if (!ReadJsonFile(path, j))
+        return false;
+
+    out.format = j.value("format", "");
+    out.version = j.value("version", "");
+    out.clips.clear();
+
+    if (out.format != "AnimEngine")
+        LOG_WARN("AssetLoader: animation format is not 'AnimEngine' for '" + path + "'");
+    if (out.version != "1.0")
+        LOG_WARN("AssetLoader: animation version is not '1.0' for '" + path + "'");
+
+    if (j.contains("clips") && j["clips"].is_array())
+    {
+        for (const auto& clipJson : j["clips"])
+        {
+            AnimationClipAsset clip;
+            clip.name = clipJson.value("name", "unnamed");
+            clip.fps = clipJson.value("fps", 0.0f);
+            clip.loop = clipJson.value("loop", false);
+            clip.durationSec = clipJson.value("duration_sec", 0.0f);
+
+            if (clipJson.contains("channels") && clipJson["channels"].is_array())
+                clip.channelCount = static_cast<int>(clipJson["channels"].size());
+
+            if (clipJson.contains("events") && clipJson["events"].is_array())
+                clip.eventCount = static_cast<int>(clipJson["events"].size());
+            else if (j.contains("events") && j["events"].is_array())
+                clip.eventCount = static_cast<int>(j["events"].size());
+
+            if (clipJson.contains("root_motion") && clipJson["root_motion"].is_object())
+            {
+                const auto& rootMotion = clipJson["root_motion"];
+                clip.rootMotionEnabled = rootMotion.value("enabled", false);
+                clip.rootMotionChannelIndex = rootMotion.value("channel_index", -1);
+            }
+            else if (j.contains("root_motion") && j["root_motion"].is_object())
+            {
+                const auto& rootMotion = j["root_motion"];
+                clip.rootMotionEnabled = rootMotion.value("enabled", false);
+                clip.rootMotionChannelIndex = rootMotion.value("channel_index", -1);
+            }
+
+            out.clips.push_back(clip);
+        }
+    }
+
+    std::ostringstream ss;
+    ss << "Loaded animation '" << path << "' format='" << out.format
+       << "' version='" << out.version << "' clips=" << out.clips.size();
+    LOG_INFO(ss.str());
+    return true;
+}

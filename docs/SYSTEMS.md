@@ -79,10 +79,10 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Screen edge damage flash | ✅ | `src/ui/GameHUD.cpp/hpp` |
 | Hit pause / hitstop | ✅ | `src/game/RuntimeScene.hpp` |
 | Stagger meter | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
-| Enemy attack telegraph | ❌ | `src/game/actors/EnemyActor.cpp/hpp` |
-| Parry / counter window | ❌ | `src/game/actors/PlayerActor.cpp/hpp` |
+| Enemy attack telegraph | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
+| Parry / counter window | ✅ | `src/game/actors/PlayerActor.cpp/hpp`, `src/game/RuntimeScene.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Miss indicator | ✅ | `src/ui/DamageNumbers.cpp/hpp`, `src/app/Main.cpp` |
-| Weak point damage | ❌ | `src/game/combat/CombatSystem.cpp/hpp` |
+| Weak point damage | ✅ | `src/game/combat/CombatSystem.cpp/hpp`, `src/game/combat/HitBox.hpp` |
 | Combo counter display | ✅ | `src/ui/GameHUD.cpp/hpp` |
 | Area name display | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Notification toast system | ❌ | `src/ui/NotificationSystem.cpp/hpp` |
@@ -105,7 +105,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Ambient particles | ✅ | `src/game/ParticleSystem.cpp/hpp` |
 | Day/night cycle | ✅ | `src/world/DayNightCycle.cpp/hpp` |
 | Biome transition fade | ✅ | `src/world/WorldGrid.cpp/hpp` |
-| Fog of war on minimap | ❌ | `src/ui/Minimap.cpp/hpp` |
+| Fog of war on minimap | ✅ | `src/ui/Minimap.cpp/hpp` |
 | World event trigger zones | ❌ | `src/game/world/EventZone.cpp/hpp` |
 | Interaction hotspot registry stub | ❌ | `src/game/world/InteractionRegistry.cpp/hpp` |
 | Landmark discovery trigger stub | ❌ | `src/game/world/LandmarkTrigger.cpp/hpp` |

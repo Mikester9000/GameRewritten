@@ -180,9 +180,10 @@ subdirectories.
 
 | Type | Extension | Destination |
 |---|---|---|
-| PBR texture maps (`albedo`, `metallic`, `roughness`, `normal`, `occlusion`) | `{name}_{channel}.png` | `Content/Textures/` |
-| Asset manifests (per-asset metadata) | `{name}.json` | alongside the asset |
-| 3-D meshes | `{name}.obj` + `{name}.mtl` | `Content/Models/` |
+| PBR texture maps (`albedo`, `metallic`, `roughness`, `normal`, `ao`, `emissive`) | `{name}_{channel}.png` | `Content/Textures/` |
+| Material-style manifests (`textures` + `params`) | `{name}.json` | `Content/Materials/{name}.material.json` |
+| Other asset manifests / metadata | `{name}.json` | `Content/Bundles/` |
+| 3-D meshes | `{name}.obj` + `{name}.mtl` | `Content/Models/` (both files together so relative `mtllib` references resolve) |
 | World tilemaps | `{name}.json` | `Content/World/` |
 | UI icons / panels / portraits | `.png` | `Content/UI/` |
 | Full bundle | all of the above | `Content/` (routed automatically) |
@@ -245,7 +246,7 @@ Manual copy:
 ```
 cp creation_export/*_albedo.png    GameRewritten/Content/Textures/
 cp creation_export/*.obj           GameRewritten/Content/Models/
-cp creation_export/*.mtl           GameRewritten/Content/Materials/
+cp creation_export/*.mtl           GameRewritten/Content/Models/
 cp creation_export/world*.json     GameRewritten/Content/World/
 ```
 
@@ -277,6 +278,10 @@ Content/
 directory into the correct `Content/` subdirectory and updates
 `Content/AssetRegistry.json`.
 
+- Source subdirectory structure is preserved during import (prevents filename collisions).
+- Registry key collisions are disambiguated automatically (for example when both
+  `player.anim` and `player.gltf` exist).
+
 ```
 # Copy audio output
 python tools/import_assets.py --engine audio --src /path/to/audio_export
@@ -296,8 +301,9 @@ python tools/import_assets.py --engine creation --src ./creation_export --dry-ru
 ## AssetRegistry.json
 
 All content loaded at runtime is indexed in `Content/AssetRegistry.json`.
-Keys follow the pattern `<type>.<name>`, e.g. `textures.grassland` or
-`audio.bgm_field`.
+Keys follow the pattern `<type>.<name>`, with optional extra suffixes when
+needed to avoid collisions (for example format-specific keys like
+`animations.player.anim`).
 
 After any import, new entries are appended automatically by `import_assets.py`.
 To add entries manually, follow the existing format:

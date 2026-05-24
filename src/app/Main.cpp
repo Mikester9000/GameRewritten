@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <cmath>
 #include <sstream>   // for std::ostringstream (cell crossing log)
+#include <vector>
 #include "../platform/win32/Win32Window.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../game/Forest.hpp"
@@ -216,6 +217,28 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         SceneAsset scene;
         AssetLoader::LoadScene("Content/Scenes/test.scene.json", scene);
+
+        const std::vector<std::string> animationIds = registry.GetIdsByPrefix("animations.");
+        if (animationIds.empty())
+        {
+            LOG_INFO("Main: no 'animations.*' entries found in AssetRegistry.");
+        }
+        else
+        {
+            for (const std::string& animationId : animationIds)
+            {
+                const std::string animationPath = registry.GetPath(animationId);
+                if (animationPath.size() < 5 ||
+                    animationPath.compare(animationPath.size() - 5, 5, ".anim") != 0)
+                {
+                    continue;
+                }
+
+                AnimationAsset animation;
+                if (!AssetLoader::LoadAnimation(animationPath, animation))
+                    LOG_WARN("Main: failed to load animation asset id '" + animationId + "'");
+            }
+        }
     }
 
     // ── ThirdParty subsystem smoke tests ──────────────────────────────────
