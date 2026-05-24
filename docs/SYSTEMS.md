@@ -117,20 +117,20 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Quest flag / world-state hook | ❌ | `src/game/quest/QuestFlags.hpp`, `src/game/quest/QuestSystem.cpp/hpp` |
 | Spawn composition table stub (solo / pair / pack) | ❌ | `src/world/SpawnTable.hpp`, `src/world/WorldGrid.cpp/hpp` |
 | Inventory system | ❌ | `src/game/inventory/Inventory.cpp/hpp` |
-| XP / level system | ❌ | `src/game/actors/PlayerStats.hpp` |
-| Status effects | ❌ | `src/game/actors/PlayerStats.hpp` |
+| XP / level system | ✅ | `src/game/actors/PlayerStats.hpp` |
+| Status effects | ✅ | `src/game/actors/PlayerStats.hpp` |
 | Fast travel stub | ❌ | `src/game/world/FastTravel.cpp/hpp` |
 | Save / load system | ❌ | `src/app/SaveSystem.cpp/hpp` |
 | Quality preset enforcement | ❌ | `src/app/QualityPreset.cpp/hpp` |
-| Victory fanfare trigger | ❌ | `src/audio/AudioManager.cpp/hpp` |
-| Environmental ambient audio | ❌ | `src/audio/AudioManager.cpp/hpp` |
-| Looping BGM | ❌ | `src/audio/AudioManager.cpp/hpp` |
-| Tactical Pause enter / exit SFX | ❌ | `src/audio/AudioManager.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp` |
-| Lock-on acquire / break SFX | ❌ | `src/audio/AudioManager.cpp/hpp`, `src/game/combat/Targeting.hpp` |
-| Enemy alert bark stub | ❌ | `src/audio/AudioManager.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
+| Victory fanfare trigger | ✅ | `src/audio/AudioManager.cpp/hpp` |
+| Environmental ambient audio | ✅ | `src/audio/AudioManager.cpp/hpp` |
+| Looping BGM | ✅ | `src/audio/AudioManager.cpp/hpp` |
+| Tactical Pause enter / exit SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp` |
+| Lock-on acquire / break SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/combat/Targeting.hpp` |
+| Enemy alert bark stub | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
 | Equipment slot stub | ❌ | `src/game/inventory/Equipment.hpp`, `src/game/actors/PlayerStats.hpp` |
 | Ability unlock / progression hook | ❌ | `src/game/progression/AbilityProgression.hpp`, `src/game/actors/PlayerStats.hpp` |
-| Combat stat modifier pipeline stub | ❌ | `src/game/combat/CombatModifiers.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Combat stat modifier pipeline stub | ✅ | `src/game/combat/CombatModifiers.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | World partition + region streaming core | ❌ | `src/world/WorldPartition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
 | Asynchronous chunk IO + prefetch queue | ❌ | `src/world/StreamingIO.cpp/hpp, src/assets/AssetLoader.hpp` |
 | Large-world coordinate rebasing | ❌ | `src/world/WorldOriginRebase.cpp/hpp, src/app/Main.cpp` |

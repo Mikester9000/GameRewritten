@@ -16,6 +16,14 @@ namespace tp
 static ma_engine g_engine;
 static bool      g_initialized = false;
 
+// Looping BGM slot — one active streaming track at a time.
+static ma_sound  g_bgmSound;
+static bool      g_bgmActive   = false;
+
+// Looping ambient slot — one active ambient loop at a time.
+static ma_sound  g_ambSound;
+static bool      g_ambActive   = false;
+
 bool Audio::Init()
 {
     if (g_initialized)
@@ -49,10 +57,91 @@ bool Audio::PlayOneShot(const std::string& path)
     return true;
 }
 
+bool Audio::PlayBGM(const std::string& path)
+{
+    if (!g_initialized)
+    {
+        OutputDebugStringA("[ThirdParty][Audio] PlayBGM called before Init().\n");
+        return false;
+    }
+
+    // Stop existing BGM before starting a new one.
+    StopBGM();
+
+    // MA_SOUND_FLAG_STREAM avoids loading the whole file into memory.
+    ma_result r = ma_sound_init_from_file(&g_engine, path.c_str(),
+                                          MA_SOUND_FLAG_STREAM,
+                                          nullptr, nullptr, &g_bgmSound);
+    if (r != MA_SUCCESS)
+    {
+        std::string msg = "[ThirdParty][Audio] PlayBGM failed: " + path + "\n";
+        OutputDebugStringA(msg.c_str());
+        return false;
+    }
+
+    ma_sound_set_looping(&g_bgmSound, MA_TRUE);
+    ma_sound_start(&g_bgmSound);
+    g_bgmActive = true;
+    return true;
+}
+
+void Audio::StopBGM()
+{
+    if (g_bgmActive)
+    {
+        ma_sound_stop(&g_bgmSound);
+        ma_sound_uninit(&g_bgmSound);
+        g_bgmActive = false;
+    }
+}
+
+bool Audio::IsBGMPlaying()
+{
+    return g_bgmActive && ma_sound_is_playing(&g_bgmSound);
+}
+
+bool Audio::PlayAmbient(const std::string& path)
+{
+    if (!g_initialized)
+    {
+        OutputDebugStringA("[ThirdParty][Audio] PlayAmbient called before Init().\n");
+        return false;
+    }
+
+    StopAmbient();
+
+    ma_result r = ma_sound_init_from_file(&g_engine, path.c_str(),
+                                          MA_SOUND_FLAG_STREAM,
+                                          nullptr, nullptr, &g_ambSound);
+    if (r != MA_SUCCESS)
+    {
+        std::string msg = "[ThirdParty][Audio] PlayAmbient failed: " + path + "\n";
+        OutputDebugStringA(msg.c_str());
+        return false;
+    }
+
+    ma_sound_set_looping(&g_ambSound, MA_TRUE);
+    ma_sound_start(&g_ambSound);
+    g_ambActive = true;
+    return true;
+}
+
+void Audio::StopAmbient()
+{
+    if (g_ambActive)
+    {
+        ma_sound_stop(&g_ambSound);
+        ma_sound_uninit(&g_ambSound);
+        g_ambActive = false;
+    }
+}
+
 void Audio::Shutdown()
 {
     if (g_initialized)
     {
+        StopBGM();
+        StopAmbient();
         ma_engine_uninit(&g_engine);
         g_initialized = false;
         OutputDebugStringA("[ThirdParty][Audio] Shutdown.\n");

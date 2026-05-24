@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <cmath>
 #include <sstream>   // for std::ostringstream (cell crossing log)
+#include <unordered_map>
 #include <vector>
 #include "../platform/win32/Win32Window.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
@@ -33,8 +34,15 @@
 #include "../ui/WorldEditor.hpp"
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
+#include "../assets/CreationMaterialLoader.hpp"
 #include "../assets/TextureCache.hpp"
 #include "../audio/AudioManager.hpp"
+#include "../game/animation/AnimPackManifestLoader.hpp"
+#include "../game/animation/AnimClipLoader.hpp"
+#include "../game/animation/AnimationComponent.hpp"
+#include "../game/animation/AnimationSystem.hpp"
+#include "../game/animation/PlayerAnimBridge.hpp"
+#include "../game/animation/AnimEventDispatch.hpp"
 #include "../world/WorldGrid.hpp"
 #include "../world/DayNightCycle.hpp"
 #include "../world/WeatherSystem.hpp"
@@ -239,13 +247,68 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                     LOG_WARN("Main: failed to load animation asset id '" + animationId + "'");
             }
         }
+
+        // Load all registered Creation-Engine materials (materials.*).
+        {
+            const std::vector<std::string> materialIds = registry.GetIdsByPrefix("materials.");
+            if (materialIds.empty())
+            {
+                LOG_INFO("Main: no 'materials.*' entries found in AssetRegistry.");
+            }
+            else
+            {
+                for (const std::string& matId : materialIds)
+                {
+                    const std::string matPath = registry.GetPath(matId);
+                    if (matPath.size() < 5 ||
+                        matPath.compare(matPath.size() - 5, 5, ".json") != 0)
+                    {
+                        continue;
+                    }
+                    CreationMaterialLoader::Load(matPath);
+                }
+            }
+        }
     }
+
+    // ── Animation system — load hero_pack clips into a named library ───────
+    std::unordered_map<std::string, LoadedAnimClip> heroClipLibrary;
+    {
+        const std::vector<std::string> orderedPaths =
+            AnimPackManifestLoader::Load("hero_pack");
+
+        for (const std::string& animPath : orderedPaths)
+        {
+            LoadedAnimClip clip = AnimClipLoader::Load(animPath);
+            if (!clip.name.empty())
+                heroClipLibrary[clip.name] = std::move(clip);
+        }
+        LOG_INFO("Main: hero_pack clip library built — "
+                 + std::to_string(heroClipLibrary.size()) + " clip(s)");
+    }
+
+    // AnimationComponent for the player actor (one component per actor).
+    AnimationComponent playerAnimComp;
+    {
+        auto it = heroClipLibrary.find("idle");
+        if (it != heroClipLibrary.end())
+        {
+            playerAnimComp.activeClip = &it->second;
+            playerAnimComp.playing    = true;
+        }
+    }
+
+    // Per-frame bone transform output buffers (one per AnimationComponent).
+    std::vector<AnimationComponent> animComponents = { playerAnimComp };
+    std::vector<BoneTransformBuffer> animBuffers;
+    // ── End animation system init ──────────────────────────────────────────
 
     // ── ThirdParty subsystem smoke tests ──────────────────────────────────
     ThirdPartyBootstrap::InitializeAndRunSmokeTests();
     AudioManager audioManager;
-    // Current tp::Audio wrapper is one-shot only; this is non-looping startup BGM.
-    audioManager.PlayBGM("Content/Audio/bgm_field.ogg");
+    // Start looping field-day BGM and forest ambient at launch.
+    audioManager.PlayBGM("Content/Audio/bgm_field_day.ogg");
+    audioManager.PlayAmbient("Content/Audio/amb_forest_day_loop.wav");
     // ── End ThirdParty smoke tests ─────────────────────────────────────────
 
     // --- Camera + player movement (now owned by CameraController) ---
@@ -289,6 +352,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasInteractActionDown = false;
     bool wasAttackActionDown = false;
     bool wasLockOnActionDown = false;
+    bool wasTacticalPauseHeld = false; // tracks edge transitions for SFX
     CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
     bool pendingMissIndicator = false;
@@ -351,6 +415,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // because it is not a combat InputAction — it controls time scale only.
         constexpr int kTacticalPauseKey   = VK_TAB;
         const bool tacticalPauseHeld = actionMap.IsVirtualKeyHeld(kTacticalPauseKey);
+
+        // Tactical Pause SFX on edge transitions.
+        if (tacticalPauseHeld && !wasTacticalPauseHeld)
+            audioManager.PlayTacticalPauseEnter();
+        else if (!tacticalPauseHeld && wasTacticalPauseHeld)
+            audioManager.PlayTacticalPauseExit();
+        wasTacticalPauseHeld = tacticalPauseHeld;
 
         // Scale gameplay delta time to 15% while Tactical Pause is open.
         // UI, dialog, and HUD animations always use the unscaled deltaTime.
@@ -500,6 +571,27 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         if (runtimeScene.ConsumePlayerHitFlash())
             gameHud.TriggerDamageFlash();
 
+        // --- Audio event hooks ---
+        if (runtimeScene.ConsumeEnemyDied())
+            audioManager.PlayVictoryFanfare();
+
+        if (runtimeScene.ConsumeEnemyAlert())
+            audioManager.PlayEnemyAlertBark();
+
+        if (runtimeScene.ConsumeParryOccurred())
+            audioManager.PlayParrySFX();
+
+        {
+            bool hasTarget = false;
+            if (runtimeScene.ConsumeLockOnChanged(hasTarget))
+            {
+                if (hasTarget)
+                    audioManager.PlayLockOnAcquire();
+                else
+                    audioManager.PlayLockOnBreak();
+            }
+        }
+
         if (pendingMissIndicator)
         {
             if (combat.GetRecentEnemyHitCount() > 0)
@@ -536,6 +628,23 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                          camController.GetPlayerX(),
                          camController.GetPlayerGroundY(),
                          camController.GetPlayerZ());
+
+        // --- Animation system per-frame update ---
+        // Bridge player state → clip, then advance all components + sample bones.
+        {
+            const float prevPlayerAnimTime = animComponents.empty()
+                ? 0.0f : animComponents[0].playbackTime;
+
+            PlayerAnimBridge::Update(runtimeScene.GetPlayerActionState(),
+                                     animComponents[0],
+                                     heroClipLibrary);
+
+            AnimationSystem::Advance(gameplayDt, animComponents, animBuffers);
+
+            // Dispatch anim events (footstep SFX, hit windows, etc.).
+            AnimEventDispatch::Dispatch(animComponents[0], prevPlayerAnimTime,
+                                        runtimeScene.GetCombatSystemMutable(), gameplayDt);
+        }
 
         if (runtimeScene.WantsRespawn())
         {

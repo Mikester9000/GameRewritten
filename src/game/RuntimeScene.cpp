@@ -19,7 +19,11 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
                                float playerX, float playerY, float playerZ)
 {
     // Reset per-frame flags before any combat logic runs.
-    m_playerWasHitThisFrame = false;
+    m_playerWasHitThisFrame  = false;
+    m_enemyDiedThisFrame     = false;
+    m_enemyAlertedThisFrame  = false;
+    m_lockOnChangedThisFrame = false;
+    m_parryThisFrame         = false;
 
     // Cache the up-to-date player position for enemy AI and AABB checks.
     m_playerX = playerX;
@@ -28,11 +32,43 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
 
     m_primRenderer.ClearRuntimeInstances();
 
+    // Snapshot enemy states before update so we can detect transitions.
+    EnemyState prevStates[kEnemyCount];
+    bool        prevAlive[kEnemyCount];
+    for (int i = 0; i < kEnemyCount; ++i)
+    {
+        prevStates[i] = m_enemies[i].state;
+        prevAlive[i]  = (m_enemies[i].hp > 0);
+    }
+
     for (EnemyActor& enemy : m_enemies)
         enemy.Update(dt, renderer, m_playerX, m_playerZ);
 
+    // Detect enemy deaths and alert transitions after the update.
+    for (int i = 0; i < kEnemyCount; ++i)
+    {
+        const bool nowAlive = (m_enemies[i].hp > 0);
+        if (prevAlive[i] && !nowAlive)
+            m_enemyDiedThisFrame = true;
+
+        // Idle → Chase means the enemy just spotted the player.
+        if (prevStates[i] == EnemyState::Idle && m_enemies[i].state == EnemyState::Chase)
+            m_enemyAlertedThisFrame = true;
+    }
+
+    // Snapshot lock-on target before refresh.
+    const EnemyActor* prevTarget = m_targeting.GetTarget();
+
     m_combatSystem.Update(dt, m_enemies, kEnemyCount);
     m_targeting.RefreshLock(m_playerX, m_playerZ);
+
+    // Detect lock-on target changes.
+    const EnemyActor* newTarget = m_targeting.GetTarget();
+    if (prevTarget != newTarget)
+    {
+        m_lockOnChangedThisFrame = true;
+        m_lockOnHasTarget        = (newTarget != nullptr);
+    }
 
     // Fill Surge from hits landed this frame and spawn floating damage numbers.
     // Heavy hits (damage >= 5, i.e. combo step 2 or Surge Strike level) reward more Surge
@@ -99,6 +135,7 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
                 // Early-dodge parry: absorb the hit and grant the player a counter bonus.
                 m_player.counterBonusActive = true;
                 hitBox.hasHitPlayer = true;
+                m_parryThisFrame = true;
                 LOG_INFO("RuntimeScene: Player PARRIED enemy attack — counter bonus ready.");
             }
             else
