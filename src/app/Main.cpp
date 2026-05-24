@@ -33,6 +33,7 @@
 #include "../ui/WorldEditor.hpp"
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
+#include "../assets/CreationMaterialLoader.hpp"
 #include "../assets/TextureCache.hpp"
 #include "../audio/AudioManager.hpp"
 #include "../world/WorldGrid.hpp"
@@ -237,6 +238,28 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                 AnimationAsset animation;
                 if (!AssetLoader::LoadAnimation(animationPath, animation))
                     LOG_WARN("Main: failed to load animation asset id '" + animationId + "'");
+            }
+        }
+
+        // Load all registered Creation-Engine materials (materials.*).
+        {
+            const std::vector<std::string> materialIds = registry.GetIdsByPrefix("materials.");
+            if (materialIds.empty())
+            {
+                LOG_INFO("Main: no 'materials.*' entries found in AssetRegistry.");
+            }
+            else
+            {
+                for (const std::string& matId : materialIds)
+                {
+                    const std::string matPath = registry.GetPath(matId);
+                    if (matPath.size() < 5 ||
+                        matPath.compare(matPath.size() - 5, 5, ".json") != 0)
+                    {
+                        continue;
+                    }
+                    CreationMaterialLoader::Load(matPath);
+                }
             }
         }
     }
