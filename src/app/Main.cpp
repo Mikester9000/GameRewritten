@@ -384,6 +384,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         imguiLayer.ClearFrameFlags();
 
         const bool paused = imguiLayer.IsPauseMenuOpen();
+        if (paused)
+        {
+            // Freeze gameplay updates while the pause menu is open.
+            // This ensures enemy AI, player state, and combat do not advance.
+            // UI and HUD still update using the unscaled delta.
+            const_cast<float&>(gameplayDt) = 0.0f;
+        }
         const bool editorActive = worldEditor.IsEditorInteractionActive();
         const bool wantCursorVisible = paused || editorActive;
         CursorMode::ApplyCursorVisibility(cursorModeState, wantCursorVisible);

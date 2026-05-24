@@ -9,7 +9,9 @@
 // RuntimeScene.cpp
 // BeginFrame implementation for RuntimeScene.
 
+#define NOMINMAX
 #include "RuntimeScene.hpp"
+#include <windows.h>
 
 #include <string>
 
