@@ -128,8 +128,8 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Tactical Pause enter / exit SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp` |
 | Lock-on acquire / break SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/combat/Targeting.hpp` |
 | Enemy alert bark stub | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
-| Equipment slot stub | ❌ | `src/game/inventory/Equipment.hpp`, `src/game/actors/PlayerStats.hpp` |
-| Ability unlock / progression hook | ❌ | `src/game/progression/AbilityProgression.hpp`, `src/game/actors/PlayerStats.hpp` |
+| Equipment slot stub | ✅ | `src/game/inventory/Equipment.hpp`, `src/game/actors/PlayerStats.hpp` |
+| Ability unlock / progression hook | ✅ | `src/game/progression/AbilityProgression.hpp`, `src/game/progression/AbilityProgression.cpp` |
 | Combat stat modifier pipeline stub | ✅ | `src/game/combat/CombatModifiers.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | World partition + region streaming core | ❌ | `src/world/WorldPartition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
 | Asynchronous chunk IO + prefetch queue | ❌ | `src/world/StreamingIO.cpp/hpp, src/assets/AssetLoader.hpp` |

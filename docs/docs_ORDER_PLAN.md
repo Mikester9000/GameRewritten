@@ -25,93 +25,93 @@ Within each layer, **headers come before implementations** where needed.
 
 ### 1.1 Core Engine & Rendering (1-30)
 
-| Order | Task Name | Plan | Task # |
-|-------|-----------|------|--------|
-| 1 | Hit pause / hitstop | BASE | 005 |
-| 2 | Camera shake | BASE | 020 |
-| 3 | Combat camera zoom | BASE | 021 |
-| 4 | Camera collision avoidance | BASE | 022 |
-| 5 | Target framing adjustment | BASE | 023 |
-| 6 | Lock-on camera recovery smoothing | BASE | 024 |
-| 7 | Wind effect on trees | BASE | 025 |
-| 8 | Weather system lite | BASE | 026 |
-| 9 | Ambient particles | BASE | 027 |
-| 10 | Day/night cycle | BASE | 028 |
-| 11 | Biome transition fade | BASE | 029 |
-| 12 | Quality preset enforcement | BASE | 046 |
-| 13 | Large-world coordinate rebasing | BASE | 063 |
-| 14 | Terrain/mesh LOD tier manager | BASE | 064 |
-| 15 | Streaming budget governor (CPU/GPU/IO) | BASE | 065 |
-| 16 | Far-distance continent impostors | BASE | 066 |
-| 17 | World partition + region streaming core | BASE | 061 |
-| 18 | Asynchronous chunk IO + prefetch queue | BASE | 062 |
-| 19 | Graphics settings preset system (Low/Med/High/Ultra) | CON7 | 383 |
-| 20 | Graphics settings preset system header | CON7 | 383H |
-| 21 | V-sync + FPS limiter system | CON7 | 384 |
-| 22 | V-sync + FPS limiter header | CON7 | 384H |
-| 23 | Anti-aliasing options system | CON7 | 385 |
-| 24 | Anti-aliasing options header | CON7 | 385H |
-| 25 | Ultrawide monitor support system | CON7 | 389 |
-| 26 | Ultrawide monitor support header | CON7 | 389H |
-| 27 | Post-process effect toggle system | CON7 | 390 |
-| 28 | Post-process effect toggle header | CON7 | 390H |
-| 29 | HUD opacity slider | CON7 | 391 |
-| 30 | HUD opacity slider header | CON7 | 391H |
+| Order | Status | Task Name | Plan | Task # |
+|-------|--------|-----------|------|--------|
+| 1 | ✅ | Hit pause / hitstop | BASE | 005 |
+| 2 | ✅ | Camera shake | BASE | 020 |
+| 3 | ✅ | Combat camera zoom | BASE | 021 |
+| 4 | ✅ | Camera collision avoidance | BASE | 022 |
+| 5 | ✅ | Target framing adjustment | BASE | 023 |
+| 6 | ✅ | Lock-on camera recovery smoothing | BASE | 024 |
+| 7 | ✅ | Wind effect on trees | BASE | 025 |
+| 8 | ✅ | Weather system lite | BASE | 026 |
+| 9 | ✅ | Ambient particles | BASE | 027 |
+| 10 | ✅ | Day/night cycle | BASE | 028 |
+| 11 | ✅ | Biome transition fade | BASE | 029 |
+| 12 | ❌ | Quality preset enforcement | BASE | 046 |
+| 13 | ❌ | Large-world coordinate rebasing | BASE | 063 |
+| 14 | ❌ | Terrain/mesh LOD tier manager | BASE | 064 |
+| 15 | ❌ | Streaming budget governor (CPU/GPU/IO) | BASE | 065 |
+| 16 | ❌ | Far-distance continent impostors | BASE | 066 |
+| 17 | ❌ | World partition + region streaming core | BASE | 061 |
+| 18 | ❌ | Asynchronous chunk IO + prefetch queue | BASE | 062 |
+| 19 | ✅ | Graphics settings preset system (Low/Med/High/Ultra) | CON7 | 383 |
+| 20 | ✅ | Graphics settings preset system header | CON7 | 383H |
+| 21 | ✅ | V-sync + FPS limiter system | CON7 | 384 |
+| 22 | ✅ | V-sync + FPS limiter header | CON7 | 384H |
+| 23 | ✅ | Anti-aliasing options system | CON7 | 385 |
+| 24 | ✅ | Anti-aliasing options header | CON7 | 385H |
+| 25 | ✅ | Ultrawide monitor support system | CON7 | 389 |
+| 26 | ✅ | Ultrawide monitor support header | CON7 | 389H |
+| 27 | ❌ | Post-process effect toggle system | CON7 | 390 |
+| 28 | ❌ | Post-process effect toggle header | CON7 | 390H |
+| 29 | ✅ | HUD opacity slider | CON7 | 391 |
+| 30 | ✅ | HUD opacity slider header | CON7 | 391H |
 
 ### 1.2 Combat Foundation (31-80)
 
-| Order | Task Name | Plan | Task # |
-|-------|-----------|------|--------|
-| 31 | Pressure / stagger integration stub | BASE | 001 |
-| 32 | Pressure / stagger integration header | BASE | 001H |
-| 33 | Enemy reaction / interrupt-lite | BASE | 002 |
-| 34 | Enemy reaction header | BASE | 002H |
-| 35 | Enemy attack telegraph lite | BASE | 003 |
-| 36 | Enemy attack telegraph header | BASE | 003H |
-| 37 | Stagger meter | BASE | 006 |
-| 38 | Stagger meter header | BASE | 006H |
-| 39 | Enemy attack telegraph | BASE | 007 |
-| 40 | Parry / counter window | BASE | 008 |
-| 41 | Parry / counter header | BASE | 008H |
-| 42 | Weak point damage | BASE | 009 |
-| 43 | Weak point damage header | BASE | 009H |
-| 44 | XP / level system | BASE | 042 |
-| 45 | XP / level system header | BASE | 042H |
-| 46 | Status effects | BASE | 043 |
-| 47 | Status effects header | BASE | 043H |
-| 48 | Equipment slot stub | BASE | 053 |
-| 49 | Equipment slot header | BASE | 053H |
-| 50 | Ability unlock / progression hook | BASE | 054 |
-| 51 | Ability unlock header | BASE | 054H |
-| 52 | Combat stat modifier pipeline stub | BASE | 055 |
-| 53 | Combat stat modifier header | BASE | 055H |
-| 54 | Elemental damage/resistance matrix | BASE | 085 |
-| 55 | Elemental damage header | BASE | 085H |
-| 56 | Status ailment counters + immunity windows | BASE | 086 |
-| 57 | Status ailment counters header | BASE | 086H |
-| 58 | Guard-break / poise combat pipeline | BASE | 084 |
-| 59 | Guard-break header | BASE | 084H |
-| 60 | Enemy stagger/break gauge UI (FF7 Remake) | CON5 | 336 |
-| 61 | Enemy stagger gauge UI header | CON5 | 336H |
-| 62 | Combat speed slider (FF7R-style) | CON7 | 392 |
-| 63 | Combat speed slider header | CON7 | 392H |
-| 64 | Combo cancel system | CON2 | 247 |
-| 65 | Combo cancel header | CON2 | 247H |
-| 66 | Perfect dodge i-frames | CON2 | 249 |
-| 67 | Perfect dodge header | CON2 | 249H |
-| 68 | Break-state vulnerability window | CON2 | 250 |
-| 69 | Break-state header | CON2 | 250H |
-| 70 | Weak-point targeting UI overlay | CON2 | 251 |
-| 71 | Weak-point targeting header | CON2 | 251H |
-| 72 | Limit break cinematic camera | CON2 | 252 |
-| 73 | Limit break cinematic header | CON2 | 252H |
-| 74 | Enemy stagger damage multiplier | CON2 | 253 |
-| 75 | Enemy stagger multiplier header | CON2 | 253H |
-| 76 | Limit break evolution/leveling system | CON5 | 337 |
-| 77 | Limit break evolution header | CON5 | 337H |
-| 78 | Elemental weakness exploitation bonus | CON5 | 343 |
-| 79 | Elemental weakness bonus header | CON5 | 343H |
-| 80 | Combat bugfix sweep | BASE | 056 |
+| Order | Status | Task Name | Plan | Task # |
+|-------|--------|-----------|------|--------|
+| 31 | ✅ | Pressure / stagger integration stub | BASE | 001 |
+| 32 | ✅ | Pressure / stagger integration header | BASE | 001H |
+| 33 | ✅ | Enemy reaction / interrupt-lite | BASE | 002 |
+| 34 | ✅ | Enemy reaction header | BASE | 002H |
+| 35 | ✅ | Enemy attack telegraph lite | BASE | 003 |
+| 36 | ✅ | Enemy attack telegraph header | BASE | 003H |
+| 37 | ✅ | Stagger meter | BASE | 006 |
+| 38 | ✅ | Stagger meter header | BASE | 006H |
+| 39 | ✅ | Enemy attack telegraph | BASE | 007 |
+| 40 | ✅ | Parry / counter window | BASE | 008 |
+| 41 | ✅ | Parry / counter header | BASE | 008H |
+| 42 | ✅ | Weak point damage | BASE | 009 |
+| 43 | ✅ | Weak point damage header | BASE | 009H |
+| 44 | ✅ | XP / level system | BASE | 042 |
+| 45 | ✅ | XP / level system header | BASE | 042H |
+| 46 | ✅ | Status effects | BASE | 043 |
+| 47 | ✅ | Status effects header | BASE | 043H |
+| 48 | ✅ | Equipment slot stub | BASE | 053 |
+| 49 | ✅ | Equipment slot header | BASE | 053H |
+| 50 | ✅ | Ability unlock / progression hook | BASE | 054 |
+| 51 | ✅ | Ability unlock header | BASE | 054H |
+| 52 | ✅ | Combat stat modifier pipeline stub | BASE | 055 |
+| 53 | ✅ | Combat stat modifier header | BASE | 055H |
+| 54 | ❌ | Elemental damage/resistance matrix | BASE | 085 |
+| 55 | ❌ | Elemental damage header | BASE | 085H |
+| 56 | ❌ | Status ailment counters + immunity windows | BASE | 086 |
+| 57 | ❌ | Status ailment counters header | BASE | 086H |
+| 58 | ❌ | Guard-break / poise combat pipeline | BASE | 084 |
+| 59 | ❌ | Guard-break header | BASE | 084H |
+| 60 | ✅ | Enemy stagger/break gauge UI (FF7 Remake) | CON5 | 336 |
+| 61 | ✅ | Enemy stagger gauge UI header | CON5 | 336H |
+| 62 | ❌ | Combat speed slider (FF7R-style) | CON7 | 392 |
+| 63 | ❌ | Combat speed slider header | CON7 | 392H |
+| 64 | ❌ | Combo cancel system | CON2 | 247 |
+| 65 | ❌ | Combo cancel header | CON2 | 247H |
+| 66 | ❌ | Perfect dodge i-frames | CON2 | 249 |
+| 67 | ❌ | Perfect dodge header | CON2 | 249H |
+| 68 | ❌ | Break-state vulnerability window | CON2 | 250 |
+| 69 | ❌ | Break-state header | CON2 | 250H |
+| 70 | ❌ | Weak-point targeting UI overlay | CON2 | 251 |
+| 71 | ❌ | Weak-point targeting header | CON2 | 251H |
+| 72 | ❌ | Limit break cinematic camera | CON2 | 252 |
+| 73 | ❌ | Limit break cinematic header | CON2 | 252H |
+| 74 | ✅ | Enemy stagger damage multiplier | CON2 | 253 |
+| 75 | ✅ | Enemy stagger multiplier header | CON2 | 253H |
+| 76 | ❌ | Limit break evolution/leveling system | CON5 | 337 |
+| 77 | ❌ | Limit break evolution header | CON5 | 337H |
+| 78 | ❌ | Elemental weakness exploitation bonus | CON5 | 343 |
+| 79 | ❌ | Elemental weakness bonus header | CON5 | 343H |
+| 80 | ❌ | Combat bugfix sweep | BASE | 056 |
 
 ### 1.3 UI/HUD Core (81-110)
 

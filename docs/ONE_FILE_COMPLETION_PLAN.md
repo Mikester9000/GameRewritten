@@ -666,7 +666,7 @@ PASTE_BLOCK_END
 3. **Narrative logic explanation:** Write in clear narrative flow: setup values, guard invalid states, run one main behavior block, then output/render/apply result.
 4. **Game design target (FF7 Remake + PS2):** Keep FF7 Remake-like readability/feedback and action pacing, while using PS2-style cost-aware visuals and GT610-safe runtime choices for large explorable worlds.
 5. **File to edit:** `/home/runner/work/GameRewritten/GameRewritten/src/game/combat/CombatSystem.cpp`
-6. **Where in file to edit:** READ_LINES: 1-EOF for this file only; choose one exact anchor in the owning type/function and keep insertion local to that area.
+6. **Where in file to edit:** READ_LINES: 1-191; file currently has 191 lines — anchor near `CombatSystem::Update` (line ~10) or `CombatSystem::Spawn` (line ~100+); insert/patch only within the owning method block.
 7. **Additional information:** LINE_BUDGET target <=120 lines changed in this file for this run; if file does not exist yet, create only this file and stop.
 8. **Copy-ready completion rule:** Return final paste-ready code for this file only, with no extra files or commentary.
 
