@@ -37,8 +37,8 @@ void AbilityProgression::NotifyLevelUp(int newLevel)
     {
         if (ab.unlockLevel > m_lastNotifiedLevel && ab.unlockLevel <= newLevel)
         {
-            GR_LOG("[AbilityProgression] Unlocked: " + ab.displayName
-                   + " (level " + std::to_string(ab.unlockLevel) + ")");
+            LOG_INFO("[AbilityProgression] Unlocked: " + ab.displayName
+                     + " (level " + std::to_string(ab.unlockLevel) + ")");
             if (m_onUnlock) m_onUnlock(ab);
         }
     }

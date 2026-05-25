@@ -197,11 +197,11 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
         }
     }
 
-    // Consume buffered combo input as soon as attack state is cancel-ready.
-    if (m_comboSystem.ConsumeBufferedAttack())
+    // Only consume buffered combo input when the attack state is actually cancel-ready.
+    if (m_combatSystem.comboStep == 1 && m_combatSystem.comboTimer > 0.0f &&
+        m_player.state == PlayerActionState::Attack1 && m_player.stateTimer <= 0.16f)
     {
-        if (m_combatSystem.comboStep == 1 && m_combatSystem.comboTimer > 0.0f &&
-            m_player.state == PlayerActionState::Attack1 && m_player.stateTimer <= 0.16f)
+        if (m_comboSystem.ConsumeBufferedAttack())
         {
             float yaw = 0.0f;
             if (const EnemyActor* lockedTarget = m_targeting.GetTarget())

@@ -128,15 +128,15 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Tactical Pause enter / exit SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp` |
 | Lock-on acquire / break SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/combat/Targeting.hpp` |
 | Enemy alert bark stub | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
-| Equipment slot stub | ✅ | `src/game/inventory/Equipment.hpp`, `src/game/actors/PlayerStats.hpp` |
-| Ability unlock / progression hook | ✅ | `src/game/progression/AbilityProgression.hpp`, `src/game/progression/AbilityProgression.cpp` |
+| Equipment slot stub | ⚠️ stub | `src/game/inventory/Equipment.hpp` |
+| Ability unlock / progression hook | ⚠️ stub | `src/game/progression/AbilityProgression.hpp`, `src/game/progression/AbilityProgression.cpp` |
 | Combat stat modifier pipeline stub | ✅ | `src/game/combat/CombatModifiers.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | World partition + region streaming core | ✅ | `src/world/WorldPartition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
-| Asynchronous chunk IO + prefetch queue | ✅ | `src/world/StreamingIO.cpp/hpp, src/assets/AssetLoader.hpp` |
+| Asynchronous chunk IO + prefetch queue | ⚠️ stub | `src/world/StreamingIO.cpp/hpp` |
 | Large-world coordinate rebasing | ✅ | `src/world/WorldOriginRebase.cpp/hpp, src/app/Main.cpp` |
 | Terrain/mesh LOD tier manager | ✅ | `src/world/WorldLodManager.cpp/hpp, src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
 | Streaming budget governor (CPU/GPU/IO) | ✅ | `src/world/StreamingBudget.hpp, src/world/WorldGrid.cpp/hpp` |
-| Far-distance continent impostors | ✅ | `src/world/ContinentImpostor.cpp/hpp, Shaders/continent_impostor_vs.hlsl` |
+| Far-distance continent impostors | ⚠️ stub | `src/world/ContinentImpostor.cpp/hpp` |
 | Global nav tile streaming bridge | ❌ | `src/game/world/NavTileStream.cpp/hpp, ThirdParty/tp_navigation.hpp` |
 | Seamless continent transition triggers | ❌ | `src/world/ContinentTransition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
 | Traversal mount/vehicle framework stub | ❌ | `src/game/traversal/TraversalMount.cpp/hpp, src/game/RuntimeScene.hpp` |

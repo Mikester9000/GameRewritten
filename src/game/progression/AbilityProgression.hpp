@@ -3,9 +3,10 @@
 // Defines Ability entries and AbilityProgression: level-gated unlock table,
 // query helpers, and a simple unlock callback hook for runtime integration.
 
-#include <string>
-#include <vector>
 #include <functional>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace gr {
 

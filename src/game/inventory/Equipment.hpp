@@ -1,7 +1,7 @@
 #pragma once
 // Equipment.hpp — Task 053 (ORDER 48): Equipment slot stub
 // Defines EquipSlot enum and Equipment struct with per-slot stat bonuses.
-// Integrated into PlayerStats via EquipmentLoadout (flat stat sum applied each frame).
+// Stub only — not yet wired into PlayerStats at runtime.
 
 #include <string>
 #include <array>

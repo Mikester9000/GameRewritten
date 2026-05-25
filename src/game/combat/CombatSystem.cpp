@@ -56,7 +56,7 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
         return;
     }
 
-    HitBox hitBox;
+    HitBox hitBox{};
     hitBox.halfY = 1.0f;
 
     if (attackStep == 1)
