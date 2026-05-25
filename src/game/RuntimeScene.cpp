@@ -60,6 +60,7 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
     const EnemyActor* prevTarget = m_targeting.GetTarget();
 
     m_combatSystem.Update(dt, m_enemies, kEnemyCount);
+    m_limitBreakCamera.Update(dt);
     m_targeting.RefreshLock(m_playerX, m_playerZ);
 
     // Detect lock-on target changes.
@@ -138,6 +139,16 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
                 m_parryThisFrame = true;
                 LOG_INFO("RuntimeScene: Player PARRIED enemy attack — counter bonus ready.");
             }
+            else if (m_player.IsInvulnerable())
+            {
+                hitBox.hasHitPlayer = true;
+                if (m_player.ConsumePerfectDodgeTriggered())
+                {
+                    QueueImpactFeedback(0.030f, 0.08f, 0.10f);
+                    m_player.counterBonusActive = true;
+                    LOG_INFO("RuntimeScene: Perfect dodge triggered.");
+                }
+            }
             else
             {
                 m_pendingEnemyDamage += hitBox.damage;
@@ -156,7 +167,7 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
 
     if (totalDamage > 0 &&
         m_player.state != PlayerActionState::Dead &&
-        m_player.state != PlayerActionState::Dodge) // dodge grants invincibility
+        !m_player.IsInvulnerable())
     {
         m_playerWasHitThisFrame = true;
         QueueImpactFeedback(0.045f, 0.18f, 0.16f);
@@ -185,4 +196,26 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
             LOG_INFO(msg);
         }
     }
+
+    // Only consume buffered combo input when the attack state is actually cancel-ready.
+    if (m_combatSystem.comboStep == 1 && m_combatSystem.comboTimer > 0.0f &&
+        m_player.state == PlayerActionState::Attack1 && m_player.stateTimer <= 0.16f)
+    {
+        if (m_comboSystem.ConsumeBufferedAttack())
+        {
+            float yaw = 0.0f;
+            if (const EnemyActor* lockedTarget = m_targeting.GetTarget())
+            {
+                const float dx = lockedTarget->x - m_playerX;
+                const float dz = lockedTarget->z - m_playerZ;
+                yaw = atan2f(dx, dz);
+            }
+            m_combatSystem.TriggerAttack(m_playerX, m_playerY - 0.5f, m_playerZ, yaw, 2);
+            m_player.state = PlayerActionState::Attack2;
+            m_player.stateTimer = 0.40f;
+        }
+    }
+
+    if (m_limitBreakCamera.IsActive())
+        QueueImpactFeedback(0.0f, m_limitBreakCamera.GetSuggestedShakeAmplitude(), 0.08f);
 }

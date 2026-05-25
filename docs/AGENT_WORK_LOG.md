@@ -18,6 +18,11 @@ This file records every change made by an automated agent or local LLM.
 
 ## Log
 
+[2026-05-25] TASK: Complete all not-started Phase 1.1 orders (12-18, 27-28)
+  FILES CHANGED: src/app/QualityPreset.hpp, src/app/QualityPreset.cpp, src/world/WorldPartition.hpp, src/world/WorldPartition.cpp, src/world/StreamingIO.hpp, src/world/StreamingIO.cpp, src/world/WorldOriginRebase.hpp, src/world/WorldOriginRebase.cpp, src/world/WorldLodManager.hpp, src/world/WorldLodManager.cpp, src/world/StreamingBudget.hpp, src/world/ContinentImpostor.hpp, src/world/ContinentImpostor.cpp, src/renderer/PostProcessToggles.hpp, src/renderer/PostProcessToggles.cpp, src/ui/ImGuiLayer.hpp, src/ui/ImGuiLayer.cpp, GameRewritten.vcxproj, GameRewritten.vcxproj.filters, docs/docs_ORDER_PLAN.md, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Implemented lightweight modules covering quality preset enforcement, world partition/streaming/rebasing/LOD/budget/impostor systems, and post-process toggles. Wired graphics preset + anti-aliasing + post-process option toggles into pause menu UI, registered all new files in the Visual Studio project, and marked the corresponding Phase 1.1 order rows complete in planning/system docs.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
 [2026-05-19] TASK: Deliver Tactical Pause as full playable command system (no stubbed rows)
   FILES CHANGED: src/ui/TacticalPauseMenu.hpp, src/ui/TacticalPauseMenu.cpp, src/app/Main.cpp, docs/PLANNED_FEATURES.md, docs/GAME_VISION_PLAN.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
   WHAT CHANGED: Expanded Tactical Pause to production-ready commands (Basic Attack, Surge Strike, Limit Break) with readiness gating reasons, and wired all tactical commands to runtime combat execution with matching hit feedback and SFX paths.

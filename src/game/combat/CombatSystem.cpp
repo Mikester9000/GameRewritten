@@ -24,6 +24,8 @@ static constexpr float ENEMY_HALF_X = 0.5f;
 static constexpr float ENEMY_HALF_Y = 1.0f;
 static constexpr float ENEMY_HALF_Z = 0.5f;
 static constexpr float DAMAGE_NUMBER_Y_OFFSET = 2.2f; // spawn above enemy head
+static constexpr float kWeakPointDotThreshold = 0.5f;
+static constexpr float kWeakPointDamageMult   = 1.5f;
 
 static bool HitBoxOverlapsEnemy(const HitBox& hitBox, const EnemyActor& enemy)
 {
@@ -54,7 +56,7 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
         return;
     }
 
-    HitBox hitBox;
+    HitBox hitBox{};
     hitBox.halfY = 1.0f;
 
     if (attackStep == 1)
@@ -66,6 +68,9 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
         hitBox.halfZ = 0.75f;
         hitBox.damage = 3;
         hitBox.framesToLive = 2;
+        hitBox.attackElement = Element::Physical;
+        hitBox.statusAilment = HitBox::HitAilment::Poison;
+        hitBox.statusBuildUp = 0.35f;
         comboStep  = 1;
         comboTimer = kComboWindowSec;
         LOG_INFO("CombatSystem: Combo step 1 triggered.");
@@ -79,6 +84,9 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
         hitBox.halfZ = 0.90f;
         hitBox.damage = 5;
         hitBox.framesToLive = 2;
+        hitBox.attackElement = Element::Fire;
+        hitBox.statusAilment = HitBox::HitAilment::Burn;
+        hitBox.statusBuildUp = 0.60f;
         comboStep  = 0;
         comboTimer = 0.0f;
         LOG_INFO("CombatSystem: Combo step 2 triggered — combo complete.");
@@ -92,6 +100,9 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
         hitBox.halfZ = 1.0f;
         hitBox.damage = 15;
         hitBox.framesToLive = 3;
+        hitBox.attackElement = Element::Lightning;
+        hitBox.statusAilment = HitBox::HitAilment::Shock;
+        hitBox.statusBuildUp = 0.90f;
         comboStep  = 0;
         comboTimer = 0.0f;
         LOG_INFO("CombatSystem: Surge Strike triggered.");
@@ -105,6 +116,9 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
         hitBox.halfZ = 1.2f;
         hitBox.damage = 25;
         hitBox.framesToLive = 4;
+        hitBox.attackElement = Element::Ice;
+        hitBox.statusAilment = HitBox::HitAilment::Burn;
+        hitBox.statusBuildUp = 1.15f;
         comboStep  = 0;
         comboTimer = 0.0f;
         LOG_INFO("CombatSystem: Limit Break triggered.");
@@ -118,6 +132,17 @@ void CombatSystem::TriggerAttack(float px, float py, float pz, float yaw, int at
 void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
 {
     m_recentEnemyHitCount = 0;
+    if (!enemies || count <= 0)
+        return;
+
+    const int trackedCount = (count < kMaxTrackedEnemies) ? count : kMaxTrackedEnemies;
+    if (!m_trackedEnemiesInitialized || m_trackedEnemyCount != trackedCount)
+    {
+        for (int i = 0; i < trackedCount; ++i)
+            m_enemyPoise[i].Reset(100.0f);
+        m_trackedEnemiesInitialized = true;
+        m_trackedEnemyCount = trackedCount;
+    }
 
     // Tick combo window timer.
     if (comboTimer > 0.0f)
@@ -128,6 +153,29 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
             comboTimer = 0.0f;
             comboStep  = 0;
             LOG_INFO("CombatSystem: Combo window expired.");
+        }
+    }
+
+    // Tick secondary combat systems.
+    for (int i = 0; i < trackedCount; ++i)
+    {
+        m_enemyPoise[i].Update(dt);
+        m_enemyAilments[i].Update(dt);
+        if (m_enemyAilments[i].IsActive())
+        {
+            const int dotDamage = m_enemyAilments[i].ConsumeTickDamage();
+            if (dotDamage > 0 && !enemies[i].isDead)
+            {
+                enemies[i].OnHit(dotDamage);
+                if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
+                {
+                    EnemyHitRecord& hitRecord = m_recentEnemyHits[m_recentEnemyHitCount++];
+                    hitRecord.x = enemies[i].x;
+                    hitRecord.y = enemies[i].y + DAMAGE_NUMBER_Y_OFFSET;
+                    hitRecord.z = enemies[i].z;
+                    hitRecord.damage = dotDamage;
+                }
+            }
         }
     }
 
@@ -144,33 +192,49 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
             EnemyActor& enemy = enemies[i];
             if (enemy.isDead)
                 continue;
+            if (hitBox.hitEnemyMask & (1u << i))
+                continue;
             if (!HitBoxOverlapsEnemy(hitBox, enemy))
                 continue;
 
+            const ElementResolveResult elementResolved =
+                ResolveElementalDamage(hitBox.damage, hitBox.attackElement, enemy.elementProfile);
+
             // Apply stagger bonus damage multiplier when the enemy is staggered.
             int actualDamage = hitBox.damage;
+            actualDamage = elementResolved.damage;
             if (enemy.IsStaggered())
                 actualDamage = static_cast<int>(actualDamage * EnemyActor::kStaggerBonusMult + 0.5f);
-
-            // Weak point: attacking from behind deals bonus damage.
-            // Backstab condition: player facing and enemy facing agree within ~60°.
-            // cos(attackerYaw - enemy.yaw) > cos(60°) = 0.5 means both face the same way
-            // (player came from behind enemy).
-            static constexpr float kWeakPointDotThreshold = 0.5f;
-            static constexpr float kWeakPointDamageMult   = 1.5f;
             const float dotProduct = cosf(hitBox.attackerYaw - enemy.yaw);
             const bool isWeakPoint = (dotProduct > kWeakPointDotThreshold);
             if (isWeakPoint)
                 actualDamage = static_cast<int>(actualDamage * kWeakPointDamageMult + 0.5f);
+            actualDamage = m_weaknessBonus.ApplyBonus(actualDamage, elementResolved.isWeakness, isWeakPoint);
+
+            if (i < trackedCount && m_enemyPoise[i].IsBroken())
+                actualDamage = static_cast<int>(actualDamage * m_enemyPoise[i].GetBreakDamageMultiplier() + 0.5f);
 
             std::ostringstream ss;
             ss << "CombatSystem: Hit enemy " << i
                << " for " << actualDamage << " damage"
                << (enemy.IsStaggered() ? " (STAGGER BONUS)" : "")
-               << (isWeakPoint ? " (WEAK POINT)" : "") << ".";
+               << (isWeakPoint ? " (WEAK POINT)" : "")
+               << (elementResolved.isWeakness ? " (WEAKNESS)" : "")
+               << (elementResolved.isResistance ? " (RESIST)" : "")
+               << ((i < trackedCount && m_enemyPoise[i].IsBroken()) ? " (BREAK BONUS)" : "")
+               << ".";
             LOG_INFO(ss.str());
 
             enemy.OnHit(actualDamage);
+            hitBox.hitEnemyMask |= (1u << i);
+
+            if (i < trackedCount)
+            {
+                const bool broke = m_enemyPoise[i].ApplyPoiseDamage(static_cast<float>(actualDamage) * 4.0f);
+                if (broke)
+                    LOG_INFO("CombatSystem: Guard break / poise break triggered.");
+                m_enemyAilments[i].TryApply(hitBox.statusAilment, hitBox.statusBuildUp);
+            }
 
             if (m_recentEnemyHitCount < kMaxRecentEnemyHits)
             {
@@ -188,4 +252,25 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
         std::remove_if(m_activeHitBoxes.begin(), m_activeHitBoxes.end(),
                        [](const HitBox& hitBox) { return hitBox.framesToLive <= 0; }),
         m_activeHitBoxes.end());
+}
+
+float CombatSystem::GetEnemyPoiseRatio(int enemyIndex) const
+{
+    if (enemyIndex < 0 || enemyIndex >= m_trackedEnemyCount)
+        return 1.0f;
+    return m_enemyPoise[enemyIndex].GetPoiseRatio();
+}
+
+bool CombatSystem::IsEnemyBroken(int enemyIndex) const
+{
+    if (enemyIndex < 0 || enemyIndex >= m_trackedEnemyCount)
+        return false;
+    return m_enemyPoise[enemyIndex].IsBroken();
+}
+
+bool CombatSystem::IsEnemyAilmentActive(int enemyIndex) const
+{
+    if (enemyIndex < 0 || enemyIndex >= m_trackedEnemyCount)
+        return false;
+    return m_enemyAilments[enemyIndex].IsActive();
 }

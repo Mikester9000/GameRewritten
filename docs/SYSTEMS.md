@@ -121,22 +121,22 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Status effects | ✅ | `src/game/actors/PlayerStats.hpp` |
 | Fast travel stub | ❌ | `src/game/world/FastTravel.cpp/hpp` |
 | Save / load system | ❌ | `src/app/SaveSystem.cpp/hpp` |
-| Quality preset enforcement | ❌ | `src/app/QualityPreset.cpp/hpp` |
+| Quality preset enforcement | ✅ | `src/app/QualityPreset.cpp/hpp` |
 | Victory fanfare trigger | ✅ | `src/audio/AudioManager.cpp/hpp` |
 | Environmental ambient audio | ✅ | `src/audio/AudioManager.cpp/hpp` |
 | Looping BGM | ✅ | `src/audio/AudioManager.cpp/hpp` |
 | Tactical Pause enter / exit SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp` |
 | Lock-on acquire / break SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/combat/Targeting.hpp` |
 | Enemy alert bark stub | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
-| Equipment slot stub | ❌ | `src/game/inventory/Equipment.hpp`, `src/game/actors/PlayerStats.hpp` |
-| Ability unlock / progression hook | ❌ | `src/game/progression/AbilityProgression.hpp`, `src/game/actors/PlayerStats.hpp` |
+| Equipment slot stub | ⚠️ stub | `src/game/inventory/Equipment.hpp` |
+| Ability unlock / progression hook | ⚠️ stub | `src/game/progression/AbilityProgression.hpp`, `src/game/progression/AbilityProgression.cpp` |
 | Combat stat modifier pipeline stub | ✅ | `src/game/combat/CombatModifiers.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| World partition + region streaming core | ❌ | `src/world/WorldPartition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
-| Asynchronous chunk IO + prefetch queue | ❌ | `src/world/StreamingIO.cpp/hpp, src/assets/AssetLoader.hpp` |
-| Large-world coordinate rebasing | ❌ | `src/world/WorldOriginRebase.cpp/hpp, src/app/Main.cpp` |
-| Terrain/mesh LOD tier manager | ❌ | `src/world/WorldLodManager.cpp/hpp, src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
-| Streaming budget governor (CPU/GPU/IO) | ❌ | `src/world/StreamingBudget.hpp, src/world/WorldGrid.cpp/hpp` |
-| Far-distance continent impostors | ❌ | `src/world/ContinentImpostor.cpp/hpp, Shaders/continent_impostor_vs.hlsl` |
+| World partition + region streaming core | ✅ | `src/world/WorldPartition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
+| Asynchronous chunk IO + prefetch queue | ⚠️ stub | `src/world/StreamingIO.cpp/hpp` |
+| Large-world coordinate rebasing | ✅ | `src/world/WorldOriginRebase.cpp/hpp, src/app/Main.cpp` |
+| Terrain/mesh LOD tier manager | ✅ | `src/world/WorldLodManager.cpp/hpp, src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
+| Streaming budget governor (CPU/GPU/IO) | ✅ | `src/world/StreamingBudget.hpp, src/world/WorldGrid.cpp/hpp` |
+| Far-distance continent impostors | ⚠️ stub | `src/world/ContinentImpostor.cpp/hpp` |
 | Global nav tile streaming bridge | ❌ | `src/game/world/NavTileStream.cpp/hpp, ThirdParty/tp_navigation.hpp` |
 | Seamless continent transition triggers | ❌ | `src/world/ContinentTransition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
 | Traversal mount/vehicle framework stub | ❌ | `src/game/traversal/TraversalMount.cpp/hpp, src/game/RuntimeScene.hpp` |
@@ -154,9 +154,18 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Enemy archetype behavior profiles | ❌ | `src/game/ai/EnemyArchetypeProfile.hpp, src/game/actors/EnemyActor.cpp/hpp` |
 | Enemy squad tactics coordinator | ❌ | `src/game/ai/SquadCoordinator.cpp/hpp, src/game/RuntimeScene.hpp` |
 | Boss phase state machine framework | ❌ | `src/game/actors/BossActor.cpp/hpp, src/game/ai/BossPhaseState.hpp` |
-| Guard-break / poise combat pipeline | ❌ | `src/game/combat/PoiseSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
-| Elemental damage/resistance matrix | ❌ | `src/game/combat/ElementSystem.hpp, src/game/combat/CombatSystem.cpp/hpp` |
-| Status ailment counters + immunity windows | ❌ | `src/game/combat/StatusAilmentSystem.cpp/hpp, src/game/actors/PlayerStats.hpp` |
+| Guard-break / poise combat pipeline | ✅ | `src/game/combat/PoiseSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Elemental damage/resistance matrix | ✅ | `src/game/combat/ElementSystem.hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Status ailment counters + immunity windows | ✅ | `src/game/combat/StatusAilmentSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Combat speed slider | ✅ | `src/game/combat/CombatSpeedSlider.cpp/hpp, src/ui/ImGuiLayer.cpp/hpp, src/app/Main.cpp` |
+| Combo cancel system | ✅ | `src/game/combat/ComboSystem.cpp/hpp, src/game/RuntimeScene.cpp/hpp` |
+| Perfect dodge i-frames | ✅ | `src/game/actors/PlayerActor.cpp/hpp, src/game/RuntimeScene.cpp` |
+| Break-state vulnerability window | ✅ | `src/game/combat/PoiseSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Weak-point targeting UI overlay | ✅ | `src/ui/WeakPointReticle.cpp/hpp, src/app/Main.cpp` |
+| Limit break cinematic camera | ✅ | `src/game/combat/LimitBreakCamera.cpp/hpp, src/game/RuntimeScene.cpp/hpp` |
+| Limit break evolution/leveling system | ✅ | `src/game/combat/LimitBreakEvolution.cpp/hpp, src/game/RuntimeScene.cpp/hpp` |
+| Elemental weakness exploitation bonus | ✅ | `src/game/combat/ElementalWeaknessBonus.cpp/hpp, src/game/combat/CombatSystem.cpp` |
+| Combat bugfix sweep | ✅ | `src/game/combat/CombatSystem.cpp, src/ui/ImGuiLayer.cpp` |
 | Equipment progression + socket rules | ❌ | `src/game/inventory/EquipmentProgression.cpp/hpp, src/game/inventory/Equipment.hpp` |
 | Skill tree graph + unlock prerequisites | ❌ | `src/game/progression/SkillTree.cpp/hpp, src/game/progression/AbilityProgression.hpp` |
 | Loot table tiers + drop weighting | ❌ | `src/game/loot/LootTable.cpp/hpp, src/game/actors/EnemyActor.cpp/hpp` |
@@ -179,12 +188,12 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Legal/credits/third-party attribution pass | ❌ | `src/ui/CreditsScreen.cpp/hpp, docs/THIRD_PARTY.md` |
 | New game bootstrap + onboarding tutorial | ❌ | `src/game/NewGameFlow.cpp/hpp, src/ui/TutorialOverlay.cpp/hpp` |
 | Vertical-slice certification and ship checklist | ❌ | `docs/SHIP_CHECKLIST.md, docs/QUALITY_BAR.md` |
-| World partition + region streaming core | ❌ | `src/world/WorldPartition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp` |
-| Asynchronous chunk IO + prefetch queue | ❌ | `src/world/StreamingIO.cpp/hpp`, `src/assets/AssetLoader.hpp` |
-| Large-world coordinate rebasing | ❌ | `src/world/WorldOriginRebase.cpp/hpp`, `src/app/Main.cpp` |
-| Terrain/mesh LOD tier manager | ❌ | `src/world/WorldLodManager.cpp/hpp`, `src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
-| Streaming budget governor (CPU/GPU/IO) | ❌ | `src/world/StreamingBudget.hpp`, `src/world/WorldGrid.cpp/hpp` |
-| Far-distance continent impostors | ❌ | `src/world/ContinentImpostor.cpp/hpp`, `Shaders/continent_impostor_vs.hlsl` |
+| World partition + region streaming core | ✅ | `src/world/WorldPartition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp` |
+| Asynchronous chunk IO + prefetch queue | ✅ | `src/world/StreamingIO.cpp/hpp`, `src/assets/AssetLoader.hpp` |
+| Large-world coordinate rebasing | ✅ | `src/world/WorldOriginRebase.cpp/hpp`, `src/app/Main.cpp` |
+| Terrain/mesh LOD tier manager | ✅ | `src/world/WorldLodManager.cpp/hpp`, `src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
+| Streaming budget governor (CPU/GPU/IO) | ✅ | `src/world/StreamingBudget.hpp`, `src/world/WorldGrid.cpp/hpp` |
+| Far-distance continent impostors | ✅ | `src/world/ContinentImpostor.cpp/hpp`, `Shaders/continent_impostor_vs.hlsl` |
 | Global nav tile streaming bridge | ❌ | `src/game/world/NavTileStream.cpp/hpp`, `ThirdParty/tp_navigation.hpp` |
 | Seamless continent transition triggers | ❌ | `src/world/ContinentTransition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp` |
 | Traversal mount/vehicle framework stub | ❌ | `src/game/traversal/TraversalMount.cpp/hpp`, `src/game/RuntimeScene.hpp` |
@@ -202,9 +211,9 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Enemy archetype behavior profiles | ❌ | `src/game/ai/EnemyArchetypeProfile.hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
 | Enemy squad tactics coordinator | ❌ | `src/game/ai/SquadCoordinator.cpp/hpp`, `src/game/RuntimeScene.hpp` |
 | Boss phase state machine framework | ❌ | `src/game/actors/BossActor.cpp/hpp`, `src/game/ai/BossPhaseState.hpp` |
-| Guard-break / poise combat pipeline | ❌ | `src/game/combat/PoiseSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| Elemental damage/resistance matrix | ❌ | `src/game/combat/ElementSystem.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| Status ailment counters + immunity windows | ❌ | `src/game/combat/StatusAilmentSystem.cpp/hpp`, `src/game/actors/PlayerStats.hpp` |
+| Guard-break / poise combat pipeline | ✅ | `src/game/combat/PoiseSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Elemental damage/resistance matrix | ✅ | `src/game/combat/ElementSystem.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Status ailment counters + immunity windows | ✅ | `src/game/combat/StatusAilmentSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Equipment progression + socket rules | ❌ | `src/game/inventory/EquipmentProgression.cpp/hpp`, `src/game/inventory/Equipment.hpp` |
 | Skill tree graph + unlock prerequisites | ❌ | `src/game/progression/SkillTree.cpp/hpp`, `src/game/progression/AbilityProgression.hpp` |
 | Loot table tiers + drop weighting | ❌ | `src/game/loot/LootTable.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |

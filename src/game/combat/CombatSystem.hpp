@@ -11,6 +11,9 @@
 // Manages active hitboxes, ticks their lifetime, and resolves hits against enemies.
 
 #include "HitBox.hpp"
+#include "PoiseSystem.hpp"
+#include "StatusAilmentSystem.hpp"
+#include "ElementalWeaknessBonus.hpp"
 #include <vector>
 
 class EnemyActor; // forward declare — full definition only needed in CombatSystem.cpp
@@ -69,12 +72,22 @@ public:
     int GetRecentEnemyHitCount() const
     { return m_recentEnemyHitCount; }
 
+    float GetEnemyPoiseRatio(int enemyIndex) const;
+    bool IsEnemyBroken(int enemyIndex) const;
+    bool IsEnemyAilmentActive(int enemyIndex) const;
+
 private:
     static constexpr int   kMaxRecentEnemyHits = 32;
+    static constexpr int   kMaxTrackedEnemies = 16;
 
     std::vector<HitBox> m_activeHitBoxes;
     EnemyHitRecord m_recentEnemyHits[kMaxRecentEnemyHits]{};
     int m_recentEnemyHitCount = 0;
+    PoiseSystem m_enemyPoise[kMaxTrackedEnemies]{};
+    StatusAilmentSystem m_enemyAilments[kMaxTrackedEnemies]{};
+    ElementalWeaknessBonus m_weaknessBonus;
+    bool m_trackedEnemiesInitialized = false;
+    int m_trackedEnemyCount = 0;
 
     // One-shot multiplier for the next spawned hitbox damage (parry counter bonus).
     float m_nextHitMultiplier = 1.0f;

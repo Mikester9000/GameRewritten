@@ -13,6 +13,7 @@
 
 #include "ImGuiLayer.hpp"
 #include <Windows.h>
+#include "../app/QualityPreset.hpp"
 #include "../audio/AudioManager.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../game/actors/EnemyActor.hpp"
@@ -51,6 +52,7 @@ constexpr const char* kFrameLimitLabels[] = { "30", "60", "120", "144", "Unlimit
 constexpr int kFrameLimitValues[] = { 30, 60, 120, 144, 0 };
 constexpr const char* kAntiAliasingLabels[] = { "Off", "FXAA", "SMAA", "TAA" };
 constexpr const char* kUltrawideModeLabels[] = { "Auto", "Off", "On" };
+constexpr const char* kCombatSpeedLabels[] = { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x" };
 
 int FrameLimitIndexFromValue(int fps)
 {
@@ -89,6 +91,31 @@ int AntiAliasingIndexFromValue(D3D11Renderer::AntiAliasingMode mode)
     }
 }
 
+D3D11Renderer::GraphicsPreset GraphicsPresetFromIndex(int index)
+{
+    switch (index)
+    {
+    case 0: return D3D11Renderer::GraphicsPreset::Low;
+    case 1: return D3D11Renderer::GraphicsPreset::Medium;
+    case 2: return D3D11Renderer::GraphicsPreset::High;
+    case 3: return D3D11Renderer::GraphicsPreset::Ultra;
+    case 4:
+    default:
+        return D3D11Renderer::GraphicsPreset::Custom;
+    }
+}
+
+D3D11Renderer::AntiAliasingMode AntiAliasingModeFromIndex(int index)
+{
+    switch (index)
+    {
+    case 0: return D3D11Renderer::AntiAliasingMode::Off;
+    case 1: return D3D11Renderer::AntiAliasingMode::FXAA;
+    case 2: return D3D11Renderer::AntiAliasingMode::SMAA;
+    case 3:
+    default:
+        return D3D11Renderer::AntiAliasingMode::TAA;
+    }
 }
 
 static bool WorldToScreen(
@@ -379,14 +406,39 @@ void ImGuiLayer::DrawPauseMenu()
             ImGui::Indent();
             if (m_renderer)
             {
+                if (ImGui::Combo("Graphics Preset", &m_graphicsPresetIndex, kGraphicsPresetLabels, IM_ARRAYSIZE(kGraphicsPresetLabels)))
+                {
+                    const D3D11Renderer::GraphicsPreset requested = GraphicsPresetFromIndex(m_graphicsPresetIndex);
+                    QualityPresetEnforcer::Enforce(*m_renderer, false, requested);
+                    m_graphicsPresetIndex = GraphicsPresetIndexFromValue(m_renderer->GetGraphicsPreset());
+                    m_antiAliasingIndex = AntiAliasingIndexFromValue(m_renderer->GetAntiAliasingMode());
+                    m_frameRateLimitIndex = FrameLimitIndexFromValue(m_renderer->GetFrameRateLimit());
+                }
+
                 if (ImGui::Checkbox("V-Sync", &m_vsyncEnabled))
                     m_renderer->SetVSyncEnabled(m_vsyncEnabled);
 
                 if (ImGui::Combo("FPS Limit", &m_frameRateLimitIndex, kFrameLimitLabels, IM_ARRAYSIZE(kFrameLimitLabels)))
                     m_renderer->SetFrameRateLimit(kFrameLimitValues[m_frameRateLimitIndex]);
 
+                if (ImGui::Combo("Anti-Aliasing", &m_antiAliasingIndex, kAntiAliasingLabels, IM_ARRAYSIZE(kAntiAliasingLabels)))
+                {
+                    m_renderer->SetAntiAliasingMode(AntiAliasingModeFromIndex(m_antiAliasingIndex));
+                    m_renderer->ApplyGraphicsPreset(D3D11Renderer::GraphicsPreset::Custom);
+                    m_graphicsPresetIndex = GraphicsPresetIndexFromValue(m_renderer->GetGraphicsPreset());
+                }
+
                 ImGui::Combo("Ultrawide HUD", &m_ultrawideModeIndex, kUltrawideModeLabels, IM_ARRAYSIZE(kUltrawideModeLabels));
                 ImGui::SliderFloat("HUD Opacity", &m_hudOpacity, 0.0f, 1.0f, "%.2f");
+                int combatSpeedIndex = m_combatSpeed.GetIndex();
+                if (ImGui::Combo("Combat Speed", &combatSpeedIndex, kCombatSpeedLabels, IM_ARRAYSIZE(kCombatSpeedLabels)))
+                    m_combatSpeed.SetIndex(combatSpeedIndex);
+                ImGui::Text("Post-Process");
+                ImGui::Separator();
+                ImGui::Checkbox("Motion Blur", &m_postProcessToggles.motionBlur);
+                ImGui::Checkbox("Chromatic Aberration", &m_postProcessToggles.chromaticAberration);
+                ImGui::Checkbox("Film Grain", &m_postProcessToggles.filmGrain);
+                ImGui::Checkbox("Depth of Field", &m_postProcessToggles.depthOfField);
             }
             else
             {
@@ -468,6 +520,7 @@ void ImGuiLayer::DrawDebugOverlay()
             ImGui::Text("  fps cap %s", kFrameLimitLabels[m_frameRateLimitIndex]);
             ImGui::Text("  aa      %s", kAntiAliasingLabels[m_antiAliasingIndex]);
             ImGui::Text("  hud     %.0f%%", m_hudOpacity * 100.0f);
+            ImGui::Text("  postfx  %s", m_postProcessToggles.AnyEnabled() ? "on" : "off");
         }
         ImGui::Separator();
         ImGui::Checkbox("Show Combat Debug", &showCombatDebug);

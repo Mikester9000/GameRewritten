@@ -233,6 +233,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\app\Main.cpp" />
+    <ClCompile Include="src\app\QualityPreset.cpp" />
     <ClCompile Include="src\audio\AudioManager.cpp" />
     <ClCompile Include="src\assets\AssetLoader.cpp" />
     <ClCompile Include="src\assets\AssetRegistry.cpp" />
@@ -241,7 +242,15 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\game\physics\CollisionWorld.cpp" />
     <ClCompile Include="src\game\actors\PlayerActor.cpp" />
     <ClCompile Include="src\game\actors\EnemyActor.cpp" />
+    <ClCompile Include="src\game\combat\ComboSystem.cpp" />
     <ClCompile Include="src\game\combat\CombatSystem.cpp" />
+    <ClCompile Include="src\game\combat\CombatSpeedSlider.cpp" />
+    <ClCompile Include="src\game\combat\ElementalWeaknessBonus.cpp" />
+    <ClCompile Include="src\game\combat\LimitBreakCamera.cpp" />
+    <ClCompile Include="src\game\combat\LimitBreakEvolution.cpp" />
+    <ClCompile Include="src\game\combat\PoiseSystem.cpp" />
+    <ClCompile Include="src\game\combat\StatusAilmentSystem.cpp" />
+    <ClCompile Include="src\game\progression\AbilityProgression.cpp" />
     <ClCompile Include="src\game\Forest.cpp" />
     <ClCompile Include="src\game\PrefabLibrary.cpp" />
     <ClCompile Include="src\game\PrimitiveRenderer.cpp" />
@@ -255,12 +264,19 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\ui\TacticalPauseMenu.cpp" />
     <ClCompile Include="src\ui\DamageNumbers.cpp" />
     <ClCompile Include="src\ui\ImGuiLayer.cpp" />
+    <ClCompile Include="src\ui\WeakPointReticle.cpp" />
     <ClCompile Include="src\ui\DialogBox.cpp" />
     <ClCompile Include="src\ui\Minimap.cpp" />
     <ClCompile Include="src\ui\WorldEditor.cpp" />
     <ClCompile Include="src\world\DayNightCycle.cpp" />
+    <ClCompile Include="src\world\WorldPartition.cpp" />
+    <ClCompile Include="src\world\StreamingIO.cpp" />
+    <ClCompile Include="src\world\WorldOriginRebase.cpp" />
+    <ClCompile Include="src\world\WorldLodManager.cpp" />
+    <ClCompile Include="src\world\ContinentImpostor.cpp" />
     <ClCompile Include="src\world\WeatherSystem.cpp" />
     <ClCompile Include="src\world\WorldGrid.cpp" />
+    <ClCompile Include="src\renderer\PostProcessToggles.cpp" />
     <!-- Dear ImGui core (vendored, MIT licence) -->
     <ClCompile Include="third_party\imgui\imgui.cpp" />
     <ClCompile Include="third_party\imgui\imgui_draw.cpp" />
@@ -291,6 +307,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\assets\AssetLoader.hpp" />
     <ClInclude Include="src\assets\AssetRegistry.hpp" />
     <ClInclude Include="src\assets\TextureCache.hpp" />
+    <ClInclude Include="src\app\QualityPreset.hpp" />
     <ClInclude Include="src\audio\AudioManager.hpp" />
     <ClInclude Include="src\game\CameraController.hpp" />
     <ClInclude Include="src\game\physics\AABB.hpp" />
@@ -300,8 +317,18 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\game\actors\PlayerActor.hpp" />
     <ClInclude Include="src\game\actors\EnemyActor.hpp" />
     <ClInclude Include="src\game\actors\EnemyState.hpp" />
+    <ClInclude Include="src\game\combat\ComboSystem.hpp" />
     <ClInclude Include="src\game\combat\HitBox.hpp" />
     <ClInclude Include="src\game\combat\CombatSystem.hpp" />
+    <ClInclude Include="src\game\combat\CombatSpeedSlider.hpp" />
+    <ClInclude Include="src\game\combat\ElementSystem.hpp" />
+    <ClInclude Include="src\game\combat\ElementalWeaknessBonus.hpp" />
+    <ClInclude Include="src\game\combat\LimitBreakCamera.hpp" />
+    <ClInclude Include="src\game\combat\LimitBreakEvolution.hpp" />
+    <ClInclude Include="src\game\combat\PoiseSystem.hpp" />
+    <ClInclude Include="src\game\combat\StatusAilmentSystem.hpp" />
+    <ClInclude Include="src\game\inventory\Equipment.hpp" />
+    <ClInclude Include="src\game\progression\AbilityProgression.hpp" />
     <ClInclude Include="src\game\Forest.hpp" />
     <ClInclude Include="src\game\PrefabDef.hpp" />
     <ClInclude Include="src\game\PrefabLibrary.hpp" />
@@ -315,11 +342,19 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\ui\TacticalPauseMenu.hpp" />
     <ClInclude Include="src\ui\DamageNumbers.hpp" />
     <ClInclude Include="src\ui\ImGuiLayer.hpp" />
+    <ClInclude Include="src\ui\WeakPointReticle.hpp" />
     <ClInclude Include="src\ui\ScreenProjection.hpp" />
     <ClInclude Include="src\ui\DialogBox.hpp" />
     <ClInclude Include="src\ui\Minimap.hpp" />
     <ClInclude Include="src\ui\WorldEditor.hpp" />
+    <ClInclude Include="src\renderer\PostProcessToggles.hpp" />
     <ClInclude Include="src\world\DayNightCycle.hpp" />
+    <ClInclude Include="src\world\WorldPartition.hpp" />
+    <ClInclude Include="src\world\StreamingIO.hpp" />
+    <ClInclude Include="src\world\WorldOriginRebase.hpp" />
+    <ClInclude Include="src\world\WorldLodManager.hpp" />
+    <ClInclude Include="src\world\StreamingBudget.hpp" />
+    <ClInclude Include="src\world\ContinentImpostor.hpp" />
     <ClInclude Include="src\world\WeatherSystem.hpp" />
     <ClInclude Include="src\world\WorldGrid.hpp" />
     

@@ -11,8 +11,18 @@
 // A short-lived world-space AABB that deals damage to any overlapping actor.
 // Spawn one via CombatSystem::SpawnHitBox and it expires after framesToLive frames.
 
+#include "ElementSystem.hpp"
+
 struct HitBox
 {
+    enum class HitAilment : int
+    {
+        None = 0,
+        Poison,
+        Burn,
+        Shock
+    };
+
     // Center position in world space.
     float x = 0.0f;
     float y = 0.0f;
@@ -36,4 +46,12 @@ struct HitBox
     // Y-axis yaw (radians) of the attacker when this hitbox was spawned.
     // Used by CombatSystem to detect weak-point (backstab) hits.
     float attackerYaw = 0.0f;
+
+    // Element and status payload for elemental/ailment combat systems.
+    Element attackElement = Element::Physical;
+    HitAilment statusAilment = HitAilment::None;
+    float statusBuildUp = 0.0f;
+
+    // Bitmask of enemies already hit by this hitbox to avoid repeated per-frame hits.
+    unsigned int hitEnemyMask = 0u;
 };
