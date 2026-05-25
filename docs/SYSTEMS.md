@@ -121,7 +121,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Status effects | ✅ | `src/game/actors/PlayerStats.hpp` |
 | Fast travel stub | ❌ | `src/game/world/FastTravel.cpp/hpp` |
 | Save / load system | ❌ | `src/app/SaveSystem.cpp/hpp` |
-| Quality preset enforcement | ❌ | `src/app/QualityPreset.cpp/hpp` |
+| Quality preset enforcement | ✅ | `src/app/QualityPreset.cpp/hpp` |
 | Victory fanfare trigger | ✅ | `src/audio/AudioManager.cpp/hpp` |
 | Environmental ambient audio | ✅ | `src/audio/AudioManager.cpp/hpp` |
 | Looping BGM | ✅ | `src/audio/AudioManager.cpp/hpp` |
@@ -131,12 +131,12 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Equipment slot stub | ✅ | `src/game/inventory/Equipment.hpp`, `src/game/actors/PlayerStats.hpp` |
 | Ability unlock / progression hook | ✅ | `src/game/progression/AbilityProgression.hpp`, `src/game/progression/AbilityProgression.cpp` |
 | Combat stat modifier pipeline stub | ✅ | `src/game/combat/CombatModifiers.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| World partition + region streaming core | ❌ | `src/world/WorldPartition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
-| Asynchronous chunk IO + prefetch queue | ❌ | `src/world/StreamingIO.cpp/hpp, src/assets/AssetLoader.hpp` |
-| Large-world coordinate rebasing | ❌ | `src/world/WorldOriginRebase.cpp/hpp, src/app/Main.cpp` |
-| Terrain/mesh LOD tier manager | ❌ | `src/world/WorldLodManager.cpp/hpp, src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
-| Streaming budget governor (CPU/GPU/IO) | ❌ | `src/world/StreamingBudget.hpp, src/world/WorldGrid.cpp/hpp` |
-| Far-distance continent impostors | ❌ | `src/world/ContinentImpostor.cpp/hpp, Shaders/continent_impostor_vs.hlsl` |
+| World partition + region streaming core | ✅ | `src/world/WorldPartition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
+| Asynchronous chunk IO + prefetch queue | ✅ | `src/world/StreamingIO.cpp/hpp, src/assets/AssetLoader.hpp` |
+| Large-world coordinate rebasing | ✅ | `src/world/WorldOriginRebase.cpp/hpp, src/app/Main.cpp` |
+| Terrain/mesh LOD tier manager | ✅ | `src/world/WorldLodManager.cpp/hpp, src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
+| Streaming budget governor (CPU/GPU/IO) | ✅ | `src/world/StreamingBudget.hpp, src/world/WorldGrid.cpp/hpp` |
+| Far-distance continent impostors | ✅ | `src/world/ContinentImpostor.cpp/hpp, Shaders/continent_impostor_vs.hlsl` |
 | Global nav tile streaming bridge | ❌ | `src/game/world/NavTileStream.cpp/hpp, ThirdParty/tp_navigation.hpp` |
 | Seamless continent transition triggers | ❌ | `src/world/ContinentTransition.cpp/hpp, src/world/WorldGrid.cpp/hpp` |
 | Traversal mount/vehicle framework stub | ❌ | `src/game/traversal/TraversalMount.cpp/hpp, src/game/RuntimeScene.hpp` |
@@ -179,12 +179,12 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Legal/credits/third-party attribution pass | ❌ | `src/ui/CreditsScreen.cpp/hpp, docs/THIRD_PARTY.md` |
 | New game bootstrap + onboarding tutorial | ❌ | `src/game/NewGameFlow.cpp/hpp, src/ui/TutorialOverlay.cpp/hpp` |
 | Vertical-slice certification and ship checklist | ❌ | `docs/SHIP_CHECKLIST.md, docs/QUALITY_BAR.md` |
-| World partition + region streaming core | ❌ | `src/world/WorldPartition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp` |
-| Asynchronous chunk IO + prefetch queue | ❌ | `src/world/StreamingIO.cpp/hpp`, `src/assets/AssetLoader.hpp` |
-| Large-world coordinate rebasing | ❌ | `src/world/WorldOriginRebase.cpp/hpp`, `src/app/Main.cpp` |
-| Terrain/mesh LOD tier manager | ❌ | `src/world/WorldLodManager.cpp/hpp`, `src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
-| Streaming budget governor (CPU/GPU/IO) | ❌ | `src/world/StreamingBudget.hpp`, `src/world/WorldGrid.cpp/hpp` |
-| Far-distance continent impostors | ❌ | `src/world/ContinentImpostor.cpp/hpp`, `Shaders/continent_impostor_vs.hlsl` |
+| World partition + region streaming core | ✅ | `src/world/WorldPartition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp` |
+| Asynchronous chunk IO + prefetch queue | ✅ | `src/world/StreamingIO.cpp/hpp`, `src/assets/AssetLoader.hpp` |
+| Large-world coordinate rebasing | ✅ | `src/world/WorldOriginRebase.cpp/hpp`, `src/app/Main.cpp` |
+| Terrain/mesh LOD tier manager | ✅ | `src/world/WorldLodManager.cpp/hpp`, `src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
+| Streaming budget governor (CPU/GPU/IO) | ✅ | `src/world/StreamingBudget.hpp`, `src/world/WorldGrid.cpp/hpp` |
+| Far-distance continent impostors | ✅ | `src/world/ContinentImpostor.cpp/hpp`, `Shaders/continent_impostor_vs.hlsl` |
 | Global nav tile streaming bridge | ❌ | `src/game/world/NavTileStream.cpp/hpp`, `ThirdParty/tp_navigation.hpp` |
 | Seamless continent transition triggers | ❌ | `src/world/ContinentTransition.cpp/hpp`, `src/world/WorldGrid.cpp/hpp` |
 | Traversal mount/vehicle framework stub | ❌ | `src/game/traversal/TraversalMount.cpp/hpp`, `src/game/RuntimeScene.hpp` |

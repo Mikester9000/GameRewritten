@@ -38,13 +38,13 @@ Within each layer, **headers come before implementations** where needed.
 | 9 | ✅ | Ambient particles | BASE | 027 |
 | 10 | ✅ | Day/night cycle | BASE | 028 |
 | 11 | ✅ | Biome transition fade | BASE | 029 |
-| 12 | ❌ | Quality preset enforcement | BASE | 046 |
-| 13 | ❌ | Large-world coordinate rebasing | BASE | 063 |
-| 14 | ❌ | Terrain/mesh LOD tier manager | BASE | 064 |
-| 15 | ❌ | Streaming budget governor (CPU/GPU/IO) | BASE | 065 |
-| 16 | ❌ | Far-distance continent impostors | BASE | 066 |
-| 17 | ❌ | World partition + region streaming core | BASE | 061 |
-| 18 | ❌ | Asynchronous chunk IO + prefetch queue | BASE | 062 |
+| 12 | ✅ | Quality preset enforcement | BASE | 046 |
+| 13 | ✅ | Large-world coordinate rebasing | BASE | 063 |
+| 14 | ✅ | Terrain/mesh LOD tier manager | BASE | 064 |
+| 15 | ✅ | Streaming budget governor (CPU/GPU/IO) | BASE | 065 |
+| 16 | ✅ | Far-distance continent impostors | BASE | 066 |
+| 17 | ✅ | World partition + region streaming core | BASE | 061 |
+| 18 | ✅ | Asynchronous chunk IO + prefetch queue | BASE | 062 |
 | 19 | ✅ | Graphics settings preset system (Low/Med/High/Ultra) | CON7 | 383 |
 | 20 | ✅ | Graphics settings preset system header | CON7 | 383H |
 | 21 | ✅ | V-sync + FPS limiter system | CON7 | 384 |
@@ -53,8 +53,8 @@ Within each layer, **headers come before implementations** where needed.
 | 24 | ✅ | Anti-aliasing options header | CON7 | 385H |
 | 25 | ✅ | Ultrawide monitor support system | CON7 | 389 |
 | 26 | ✅ | Ultrawide monitor support header | CON7 | 389H |
-| 27 | ❌ | Post-process effect toggle system | CON7 | 390 |
-| 28 | ❌ | Post-process effect toggle header | CON7 | 390H |
+| 27 | ✅ | Post-process effect toggle system | CON7 | 390 |
+| 28 | ✅ | Post-process effect toggle header | CON7 | 390H |
 | 29 | ✅ | HUD opacity slider | CON7 | 391 |
 | 30 | ✅ | HUD opacity slider header | CON7 | 391H |
 

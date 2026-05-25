@@ -14,6 +14,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <d3d11.h>
+#include "../renderer/PostProcessToggles.hpp"
 
 class D3D11Renderer;
 class AudioManager;
@@ -60,6 +61,7 @@ public:
     int GetFrameRateLimit() const;
     float GetHudOpacity() const { return m_hudOpacity; }
     bool UseUltrawideHudLayout(float displayAspect) const;
+    const PostProcessToggles& GetPostProcessToggles() const { return m_postProcessToggles; }
 
     // Returns true when the user chose "Quit" from the pause menu.
     bool WantsQuit() const { return wantsQuit; }
@@ -122,6 +124,7 @@ private:
     int m_antiAliasingIndex = 1;
     int m_ultrawideModeIndex = 0;
     float m_hudOpacity = 0.80f;
+    PostProcessToggles m_postProcessToggles;
     AudioManager* m_audioManager = nullptr;
 
     void DrawPauseMenu();
