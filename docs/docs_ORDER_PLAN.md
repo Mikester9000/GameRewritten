@@ -85,33 +85,33 @@ Within each layer, **headers come before implementations** where needed.
 | 51 | ✅ | Ability unlock header | BASE | 054H |
 | 52 | ✅ | Combat stat modifier pipeline stub | BASE | 055 |
 | 53 | ✅ | Combat stat modifier header | BASE | 055H |
-| 54 | ❌ | Elemental damage/resistance matrix | BASE | 085 |
-| 55 | ❌ | Elemental damage header | BASE | 085H |
-| 56 | ❌ | Status ailment counters + immunity windows | BASE | 086 |
-| 57 | ❌ | Status ailment counters header | BASE | 086H |
-| 58 | ❌ | Guard-break / poise combat pipeline | BASE | 084 |
-| 59 | ❌ | Guard-break header | BASE | 084H |
+| 54 | ✅ | Elemental damage/resistance matrix | BASE | 085 |
+| 55 | ✅ | Elemental damage header | BASE | 085H |
+| 56 | ✅ | Status ailment counters + immunity windows | BASE | 086 |
+| 57 | ✅ | Status ailment counters header | BASE | 086H |
+| 58 | ✅ | Guard-break / poise combat pipeline | BASE | 084 |
+| 59 | ✅ | Guard-break header | BASE | 084H |
 | 60 | ✅ | Enemy stagger/break gauge UI (FF7 Remake) | CON5 | 336 |
 | 61 | ✅ | Enemy stagger gauge UI header | CON5 | 336H |
-| 62 | ❌ | Combat speed slider (FF7R-style) | CON7 | 392 |
-| 63 | ❌ | Combat speed slider header | CON7 | 392H |
-| 64 | ❌ | Combo cancel system | CON2 | 247 |
-| 65 | ❌ | Combo cancel header | CON2 | 247H |
-| 66 | ❌ | Perfect dodge i-frames | CON2 | 249 |
-| 67 | ❌ | Perfect dodge header | CON2 | 249H |
-| 68 | ❌ | Break-state vulnerability window | CON2 | 250 |
-| 69 | ❌ | Break-state header | CON2 | 250H |
-| 70 | ❌ | Weak-point targeting UI overlay | CON2 | 251 |
-| 71 | ❌ | Weak-point targeting header | CON2 | 251H |
-| 72 | ❌ | Limit break cinematic camera | CON2 | 252 |
-| 73 | ❌ | Limit break cinematic header | CON2 | 252H |
+| 62 | ✅ | Combat speed slider (FF7R-style) | CON7 | 392 |
+| 63 | ✅ | Combat speed slider header | CON7 | 392H |
+| 64 | ✅ | Combo cancel system | CON2 | 247 |
+| 65 | ✅ | Combo cancel header | CON2 | 247H |
+| 66 | ✅ | Perfect dodge i-frames | CON2 | 249 |
+| 67 | ✅ | Perfect dodge header | CON2 | 249H |
+| 68 | ✅ | Break-state vulnerability window | CON2 | 250 |
+| 69 | ✅ | Break-state header | CON2 | 250H |
+| 70 | ✅ | Weak-point targeting UI overlay | CON2 | 251 |
+| 71 | ✅ | Weak-point targeting header | CON2 | 251H |
+| 72 | ✅ | Limit break cinematic camera | CON2 | 252 |
+| 73 | ✅ | Limit break cinematic header | CON2 | 252H |
 | 74 | ✅ | Enemy stagger damage multiplier | CON2 | 253 |
 | 75 | ✅ | Enemy stagger multiplier header | CON2 | 253H |
-| 76 | ❌ | Limit break evolution/leveling system | CON5 | 337 |
-| 77 | ❌ | Limit break evolution header | CON5 | 337H |
-| 78 | ❌ | Elemental weakness exploitation bonus | CON5 | 343 |
-| 79 | ❌ | Elemental weakness bonus header | CON5 | 343H |
-| 80 | ❌ | Combat bugfix sweep | BASE | 056 |
+| 76 | ✅ | Limit break evolution/leveling system | CON5 | 337 |
+| 77 | ✅ | Limit break evolution header | CON5 | 337H |
+| 78 | ✅ | Elemental weakness exploitation bonus | CON5 | 343 |
+| 79 | ✅ | Elemental weakness bonus header | CON5 | 343H |
+| 80 | ✅ | Combat bugfix sweep | BASE | 056 |
 
 ### 1.3 UI/HUD Core (81-110)
 

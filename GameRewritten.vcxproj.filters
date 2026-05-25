@@ -128,7 +128,28 @@
     <ClCompile Include="src\game\actors\EnemyActor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\combat\ComboSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\combat\CombatSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\combat\CombatSpeedSlider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\combat\ElementalWeaknessBonus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\combat\LimitBreakCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\combat\LimitBreakEvolution.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\combat\PoiseSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\combat\StatusAilmentSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\GameHUD.cpp">
@@ -141,6 +162,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\ImGuiLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\WeakPointReticle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\DialogBox.cpp">
@@ -265,10 +289,34 @@
     <ClInclude Include="src\game\actors\EnemyState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\combat\ComboSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\combat\HitBox.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\game\combat\CombatSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\combat\CombatSpeedSlider.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\combat\ElementSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\combat\ElementalWeaknessBonus.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\combat\LimitBreakCamera.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\combat\LimitBreakEvolution.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\combat\PoiseSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\combat\StatusAilmentSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\GameHUD.hpp">
@@ -281,6 +329,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\ImGuiLayer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\WeakPointReticle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\ScreenProjection.hpp">

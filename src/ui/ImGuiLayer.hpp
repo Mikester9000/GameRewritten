@@ -15,6 +15,7 @@
 #include <windows.h>
 #include <d3d11.h>
 #include "../renderer/PostProcessToggles.hpp"
+#include "../game/combat/CombatSpeedSlider.hpp"
 
 class D3D11Renderer;
 class AudioManager;
@@ -60,6 +61,7 @@ public:
     bool IsVSyncEnabled() const { return m_vsyncEnabled; }
     int GetFrameRateLimit() const;
     float GetHudOpacity() const { return m_hudOpacity; }
+    float GetCombatSpeedScale() const { return m_combatSpeed.GetScale(); }
     bool UseUltrawideHudLayout(float displayAspect) const;
     const PostProcessToggles& GetPostProcessToggles() const { return m_postProcessToggles; }
 
@@ -124,6 +126,7 @@ private:
     int m_antiAliasingIndex = 1;
     int m_ultrawideModeIndex = 0;
     float m_hudOpacity = 0.80f;
+    CombatSpeedSlider m_combatSpeed;
     PostProcessToggles m_postProcessToggles;
     AudioManager* m_audioManager = nullptr;
 

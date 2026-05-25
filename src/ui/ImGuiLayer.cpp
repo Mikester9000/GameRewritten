@@ -52,6 +52,7 @@ constexpr const char* kFrameLimitLabels[] = { "30", "60", "120", "144", "Unlimit
 constexpr int kFrameLimitValues[] = { 30, 60, 120, 144, 0 };
 constexpr const char* kAntiAliasingLabels[] = { "Off", "FXAA", "SMAA", "TAA" };
 constexpr const char* kUltrawideModeLabels[] = { "Auto", "Off", "On" };
+constexpr const char* kCombatSpeedLabels[] = { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x" };
 
 int FrameLimitIndexFromValue(int fps)
 {
@@ -88,35 +89,33 @@ int AntiAliasingIndexFromValue(D3D11Renderer::AntiAliasingMode mode)
     default:
         return 3;
     }
+}
 
-    D3D11Renderer::GraphicsPreset GraphicsPresetFromIndex(int index)
+D3D11Renderer::GraphicsPreset GraphicsPresetFromIndex(int index)
+{
+    switch (index)
     {
-        switch (index)
-        {
-        case 0: return D3D11Renderer::GraphicsPreset::Low;
-        case 1: return D3D11Renderer::GraphicsPreset::Medium;
-        case 2: return D3D11Renderer::GraphicsPreset::High;
-        case 3: return D3D11Renderer::GraphicsPreset::Ultra;
-        case 4:
-        default:
-            return D3D11Renderer::GraphicsPreset::Custom;
-        }
-    }
-
-    D3D11Renderer::AntiAliasingMode AntiAliasingModeFromIndex(int index)
-    {
-        switch (index)
-        {
-        case 0: return D3D11Renderer::AntiAliasingMode::Off;
-        case 1: return D3D11Renderer::AntiAliasingMode::FXAA;
-        case 2: return D3D11Renderer::AntiAliasingMode::SMAA;
-        case 3:
-        default:
-            return D3D11Renderer::AntiAliasingMode::TAA;
-        }
+    case 0: return D3D11Renderer::GraphicsPreset::Low;
+    case 1: return D3D11Renderer::GraphicsPreset::Medium;
+    case 2: return D3D11Renderer::GraphicsPreset::High;
+    case 3: return D3D11Renderer::GraphicsPreset::Ultra;
+    case 4:
+    default:
+        return D3D11Renderer::GraphicsPreset::Custom;
     }
 }
 
+D3D11Renderer::AntiAliasingMode AntiAliasingModeFromIndex(int index)
+{
+    switch (index)
+    {
+    case 0: return D3D11Renderer::AntiAliasingMode::Off;
+    case 1: return D3D11Renderer::AntiAliasingMode::FXAA;
+    case 2: return D3D11Renderer::AntiAliasingMode::SMAA;
+    case 3:
+    default:
+        return D3D11Renderer::AntiAliasingMode::TAA;
+    }
 }
 
 static bool WorldToScreen(
@@ -431,6 +430,9 @@ void ImGuiLayer::DrawPauseMenu()
 
                 ImGui::Combo("Ultrawide HUD", &m_ultrawideModeIndex, kUltrawideModeLabels, IM_ARRAYSIZE(kUltrawideModeLabels));
                 ImGui::SliderFloat("HUD Opacity", &m_hudOpacity, 0.0f, 1.0f, "%.2f");
+                int combatSpeedIndex = m_combatSpeed.GetIndex();
+                if (ImGui::Combo("Combat Speed", &combatSpeedIndex, kCombatSpeedLabels, IM_ARRAYSIZE(kCombatSpeedLabels)))
+                    m_combatSpeed.SetIndex(combatSpeedIndex);
                 ImGui::Text("Post-Process");
                 ImGui::Separator();
                 ImGui::Checkbox("Motion Blur", &m_postProcessToggles.motionBlur);

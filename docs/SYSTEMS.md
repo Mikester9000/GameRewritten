@@ -154,9 +154,18 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Enemy archetype behavior profiles | ❌ | `src/game/ai/EnemyArchetypeProfile.hpp, src/game/actors/EnemyActor.cpp/hpp` |
 | Enemy squad tactics coordinator | ❌ | `src/game/ai/SquadCoordinator.cpp/hpp, src/game/RuntimeScene.hpp` |
 | Boss phase state machine framework | ❌ | `src/game/actors/BossActor.cpp/hpp, src/game/ai/BossPhaseState.hpp` |
-| Guard-break / poise combat pipeline | ❌ | `src/game/combat/PoiseSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
-| Elemental damage/resistance matrix | ❌ | `src/game/combat/ElementSystem.hpp, src/game/combat/CombatSystem.cpp/hpp` |
-| Status ailment counters + immunity windows | ❌ | `src/game/combat/StatusAilmentSystem.cpp/hpp, src/game/actors/PlayerStats.hpp` |
+| Guard-break / poise combat pipeline | ✅ | `src/game/combat/PoiseSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Elemental damage/resistance matrix | ✅ | `src/game/combat/ElementSystem.hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Status ailment counters + immunity windows | ✅ | `src/game/combat/StatusAilmentSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Combat speed slider | ✅ | `src/game/combat/CombatSpeedSlider.cpp/hpp, src/ui/ImGuiLayer.cpp/hpp, src/app/Main.cpp` |
+| Combo cancel system | ✅ | `src/game/combat/ComboSystem.cpp/hpp, src/game/RuntimeScene.cpp/hpp` |
+| Perfect dodge i-frames | ✅ | `src/game/actors/PlayerActor.cpp/hpp, src/game/RuntimeScene.cpp` |
+| Break-state vulnerability window | ✅ | `src/game/combat/PoiseSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
+| Weak-point targeting UI overlay | ✅ | `src/ui/WeakPointReticle.cpp/hpp, src/app/Main.cpp` |
+| Limit break cinematic camera | ✅ | `src/game/combat/LimitBreakCamera.cpp/hpp, src/game/RuntimeScene.cpp/hpp` |
+| Limit break evolution/leveling system | ✅ | `src/game/combat/LimitBreakEvolution.cpp/hpp, src/game/RuntimeScene.cpp/hpp` |
+| Elemental weakness exploitation bonus | ✅ | `src/game/combat/ElementalWeaknessBonus.cpp/hpp, src/game/combat/CombatSystem.cpp` |
+| Combat bugfix sweep | ✅ | `src/game/combat/CombatSystem.cpp, src/ui/ImGuiLayer.cpp` |
 | Equipment progression + socket rules | ❌ | `src/game/inventory/EquipmentProgression.cpp/hpp, src/game/inventory/Equipment.hpp` |
 | Skill tree graph + unlock prerequisites | ❌ | `src/game/progression/SkillTree.cpp/hpp, src/game/progression/AbilityProgression.hpp` |
 | Loot table tiers + drop weighting | ❌ | `src/game/loot/LootTable.cpp/hpp, src/game/actors/EnemyActor.cpp/hpp` |
@@ -202,9 +211,9 @@ Agents must read this before implementing anything to avoid reimplementing exist
 | Enemy archetype behavior profiles | ❌ | `src/game/ai/EnemyArchetypeProfile.hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
 | Enemy squad tactics coordinator | ❌ | `src/game/ai/SquadCoordinator.cpp/hpp`, `src/game/RuntimeScene.hpp` |
 | Boss phase state machine framework | ❌ | `src/game/actors/BossActor.cpp/hpp`, `src/game/ai/BossPhaseState.hpp` |
-| Guard-break / poise combat pipeline | ❌ | `src/game/combat/PoiseSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| Elemental damage/resistance matrix | ❌ | `src/game/combat/ElementSystem.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| Status ailment counters + immunity windows | ❌ | `src/game/combat/StatusAilmentSystem.cpp/hpp`, `src/game/actors/PlayerStats.hpp` |
+| Guard-break / poise combat pipeline | ✅ | `src/game/combat/PoiseSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Elemental damage/resistance matrix | ✅ | `src/game/combat/ElementSystem.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
+| Status ailment counters + immunity windows | ✅ | `src/game/combat/StatusAilmentSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Equipment progression + socket rules | ❌ | `src/game/inventory/EquipmentProgression.cpp/hpp`, `src/game/inventory/Equipment.hpp` |
 | Skill tree graph + unlock prerequisites | ❌ | `src/game/progression/SkillTree.cpp/hpp`, `src/game/progression/AbilityProgression.hpp` |
 | Loot table tiers + drop weighting | ❌ | `src/game/loot/LootTable.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |

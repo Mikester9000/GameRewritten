@@ -14,6 +14,7 @@
 #include "ActorCommon.hpp"
 #include "EnemyState.hpp"
 #include "../combat/HitBox.hpp"
+#include "../combat/ElementSystem.hpp"
 
 class D3D11Renderer;
 class PrefabLibrary;
@@ -77,6 +78,7 @@ public:
     // Fills from hits and interrupt bonuses; triggers Staggered state when it reaches 1.0.
     // Resets to 0 when the Staggered state ends.
     float pressureGauge = 0.0f;
+    ElementProfile elementProfile{};
 
     // Returns true while this enemy is in the Staggered state.
     bool IsStaggered() const { return state == EnemyState::Staggered; }

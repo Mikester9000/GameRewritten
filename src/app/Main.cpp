@@ -27,6 +27,7 @@
 #include "../game/RuntimeScene.hpp"
 #include "../game/physics/CollisionWorld.hpp"
 #include "../ui/GameHUD.hpp"
+#include "../ui/WeakPointReticle.hpp"
 #include "../ui/ImGuiLayer.hpp"
 #include "../ui/TacticalPauseMenu.hpp"
 #include "../ui/DialogBox.hpp"
@@ -186,6 +187,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
     // --- World Editor ---
     GameHUD gameHud;
+    WeakPointReticle weakPointReticle;
     TacticalPauseMenu tacticalPauseMenu;
     WorldEditor worldEditor;
     DialogBox dialogBox;
@@ -427,7 +429,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // UI, dialog, and HUD animations always use the unscaled deltaTime.
         const float kTacticalTimeScale = 0.15f;
         const float scaledDt = tacticalPauseHeld ? deltaTime * kTacticalTimeScale : deltaTime;
-        const float gameplayDt = scaledDt * runtimeScene.GetGameplayTimeScale();
+        float gameplayDt = scaledDt;
 
         // --- 3. UI state ---
         // Apply pause, cursor visibility, dialog update.
@@ -460,8 +462,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             // Freeze gameplay updates while the pause menu is open.
             // This ensures enemy AI, player state, and combat do not advance.
             // UI and HUD still update using the unscaled delta.
-            const_cast<float&>(gameplayDt) = 0.0f;
+            gameplayDt = 0.0f;
         }
+        const float combatDt = gameplayDt * imguiLayer.GetCombatSpeedScale() * runtimeScene.GetGameplayTimeScale();
         const bool editorActive = worldEditor.IsEditorInteractionActive();
         const bool wantCursorVisible = paused || editorActive;
         CursorMode::ApplyCursorVisibility(cursorModeState, wantCursorVisible);
@@ -482,7 +485,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // Update player state, stats, and dodge burst.
         // Uses input and grounded state from above.
         const bool playerIsGrounded = camController.IsGrounded();
-        runtimeScene.BeginPlayerFrame(gameplayDt, actionMap, playerIsGrounded, attackPressed, camController);
+        runtimeScene.BeginPlayerFrame(combatDt, actionMap, playerIsGrounded, attackPressed, camController);
 
         // --- 5. Camera update ---
         // Move and rotate the camera based on input and player state.
@@ -500,7 +503,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             // Apply lock-on bias before free-look input so mouse deltas and
             // lock framing blend together in one camera update path.
             if (lockedTarget)
-                camController.BiasYawTowardTarget(lockedTarget->x, lockedTarget->z, gameplayDt);
+                camController.BiasYawTowardTarget(lockedTarget->x, lockedTarget->z, combatDt);
         }
         else
         {
@@ -556,7 +559,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // --- 7. Combat update ---
         // Update enemies, resolve hits, spawn damage numbers.
         // Runs after world so terrain and positions are final.
-        runtimeScene.BeginFrame(gameplayDt, renderer,
+        runtimeScene.BeginFrame(combatDt, renderer,
                                 camController.GetPlayerX(),
                                 camController.GetPlayerY(),
                                 camController.GetPlayerZ());
@@ -601,7 +604,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             }
             else
             {
-                pendingMissTimerSec -= gameplayDt;
+                pendingMissTimerSec -= combatDt;
                 if (pendingMissTimerSec <= 0.0f)
                 {
                     runtimeScene.damageNumbers.SpawnMiss(
@@ -620,7 +623,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
 
         if (!paused)
-            runtimeScene.damageNumbers.Update(gameplayDt);
+            runtimeScene.damageNumbers.Update(combatDt);
 
         // Ambient particles (dust/leaves) — always update using unscaled dt so
         // they feel natural even during Tactical Pause slow-motion.
@@ -737,6 +740,15 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                                      camController.GetPitch(),
                                                      static_cast<float>(window.GetWidth()),
                                                      static_cast<float>(window.GetHeight()));
+                weakPointReticle.Draw(runtimeScene.GetLockedTarget(),
+                                      camController.GetCamX(),
+                                      camController.GetCamY(),
+                                      camController.GetCamZ(),
+                                      camController.GetYaw(),
+                                      camController.GetPitch(),
+                                      static_cast<float>(window.GetWidth()),
+                                      static_cast<float>(window.GetHeight()),
+                                      imguiLayer.GetHudOpacity());
                 gameHud.DrawComboIndicator(combat.comboStep,
                                            combat.comboTimer,
                                            CombatSystem::kComboWindowSec,

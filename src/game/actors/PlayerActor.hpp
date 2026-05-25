@@ -34,6 +34,8 @@ public:
 
     // Returns true during the tight parry window at the start of a dodge.
     bool IsParryActive() const { return parryWindowTimer > 0.0f; }
+    bool IsInvulnerable() const { return dodgeIFrameTimer > 0.0f; }
+    bool ConsumePerfectDodgeTriggered();
 
     void Update(float dt, const InputActionMap& input, bool isGrounded, bool attackPressed);
 
@@ -44,4 +46,7 @@ public:
 private:
     void TransitionTo(PlayerActionState next, float duration);
     ActorCommon::RuntimeActorPose BuildRuntimePose(const CameraController& cameraController) const;
+    float dodgeIFrameTimer = 0.0f;
+    float perfectDodgeTimer = 0.0f;
+    bool perfectDodgeTriggered = false;
 };

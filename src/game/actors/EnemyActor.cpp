@@ -44,6 +44,10 @@ void EnemyActor::Init(float startX, float startZ,
     pendingAttackHitBox.framesToLive = 0;
     hitFlashTimer = 0.0f;
     pressureGauge = 0.0f;
+    // Basic elemental profile for tactical combat checks.
+    elementProfile.fire = 0.85f;
+    elementProfile.ice = 1.35f;
+    elementProfile.lightning = 1.00f;
 }
 
 void EnemyActor::TransitionTo(EnemyState next, float duration)
