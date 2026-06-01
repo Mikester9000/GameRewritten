@@ -1,0 +1,20 @@
+{
+  "startingPoints": 3,
+  "nodes": [
+    {
+      "nodeId": "hp_boost_1",
+      "pointCost": 1,
+      "dependencies": []
+    },
+    {
+      "nodeId": "attack_boost_1",
+      "pointCost": 1,
+      "dependencies": ["hp_boost_1"]
+    },
+    {
+      "nodeId": "limit_charge_1",
+      "pointCost": 2,
+      "dependencies": ["attack_boost_1"]
+    }
+  ]
+}
