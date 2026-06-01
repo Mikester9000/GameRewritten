@@ -60,6 +60,12 @@ void EnemyActor::TransitionTo(EnemyState next, float duration)
 
 void EnemyActor::OnHit(int damage)
 {
+    if (damage <= 0)
+    {
+        LOG_INFO("EnemyActor: Ignored non-positive hit.");
+        return;
+    }
+
     hitFlashTimer = kHitFlashDuration;
 
     // Interrupt bonus: hitting during Attack wind-up builds extra pressure.

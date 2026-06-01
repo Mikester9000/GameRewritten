@@ -26,6 +26,7 @@ static constexpr float ENEMY_HALF_Z = 0.5f;
 static constexpr float DAMAGE_NUMBER_Y_OFFSET = 2.2f; // spawn above enemy head
 static constexpr float kWeakPointDotThreshold = 0.5f;
 static constexpr float kWeakPointDamageMult   = 1.5f;
+static constexpr int kMinimumCombatDamage      = 1;
 
 static bool HitBoxOverlapsEnemy(const HitBox& hitBox, const EnemyActor& enemy)
 {
@@ -213,6 +214,8 @@ void CombatSystem::Update(float dt, EnemyActor* enemies, int count)
 
             if (i < trackedCount && m_enemyPoise[i].IsBroken())
                 actualDamage = static_cast<int>(actualDamage * m_enemyPoise[i].GetBreakDamageMultiplier() + 0.5f);
+            if (actualDamage < kMinimumCombatDamage)
+                actualDamage = kMinimumCombatDamage;
 
             std::ostringstream ss;
             ss << "CombatSystem: Hit enemy " << i
