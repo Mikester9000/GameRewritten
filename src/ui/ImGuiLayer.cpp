@@ -26,6 +26,7 @@
 #include "../../third_party/imgui/backends/imgui_impl_dx11.h"
 
 #include "logger/Logger.hpp"
+#include <algorithm>
 #include <cmath>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
     HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -53,6 +54,7 @@ constexpr int kFrameLimitValues[] = { 30, 60, 120, 144, 0 };
 constexpr const char* kAntiAliasingLabels[] = { "Off", "FXAA", "SMAA", "TAA" };
 constexpr const char* kUltrawideModeLabels[] = { "Auto", "Off", "On" };
 constexpr const char* kCombatSpeedLabels[] = { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x" };
+constexpr float kLetterboxBarHeight = 72.0f;
 
 int FrameLimitIndexFromValue(int fps)
 {
@@ -330,6 +332,9 @@ void ImGuiLayer::EndFrame()
     if (!initialized)
         return;
 
+    if (m_letterboxEventActive)
+        DrawLetterboxBars();
+
     if (showPauseMenu)
         DrawPauseMenu();
 
@@ -338,6 +343,25 @@ void ImGuiLayer::EndFrame()
 
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+}
+
+void ImGuiLayer::DrawLetterboxBars()
+{
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.DisplaySize.x <= 0.0f || io.DisplaySize.y <= 0.0f)
+        return;
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    if (!dl)
+        return;
+
+    const float barH = std::min(kLetterboxBarHeight, io.DisplaySize.y * 0.25f);
+    dl->AddRectFilled(ImVec2(0.0f, 0.0f),
+                      ImVec2(io.DisplaySize.x, barH),
+                      IM_COL32(0, 0, 0, 220));
+    dl->AddRectFilled(ImVec2(0.0f, io.DisplaySize.y - barH),
+                      ImVec2(io.DisplaySize.x, io.DisplaySize.y),
+                      IM_COL32(0, 0, 0, 220));
 }
 
 void ImGuiLayer::Shutdown()

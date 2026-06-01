@@ -366,6 +366,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Initialize from the actual spawn position at the center of cell (0,0).
     int lastPlayerCX = 0, lastPlayerCZ = 0;
     worldGrid.WorldToCell(startupCellCenter, startupCellCenter, lastPlayerCX, lastPlayerCZ);
+    if (WorldCell* spawnCell = worldGrid.FindCell(lastPlayerCX, lastPlayerCZ))
+        gameHud.SetAreaName(spawnCell->terrainBiome);
     WorldReload::ReloadContext worldReloadContext{
         registry,
         worldGrid,
@@ -444,6 +446,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
 
         dialogBox.Update(deltaTime);
+        imguiLayer.SetLetterboxEventActive(dialogBox.IsOpen());
 
         if (pausePressed)
             imguiLayer.TogglePauseMenu();
@@ -535,6 +538,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                     WorldRefresh::RefreshCellVisuals(*newCell, cellRefreshContext);
                     // Notify biome transition (WorldGrid blends smoothly over ~2.5s).
                     worldGrid.NotifyBiomeChange(newCell->terrainBiome);
+                    gameHud.SetAreaName(newCell->terrainBiome);
                 }
                 lastPlayerCX = playerCX;
                 lastPlayerCZ = playerCZ;

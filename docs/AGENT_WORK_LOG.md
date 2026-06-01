@@ -18,6 +18,11 @@ This file records every change made by an automated agent or local LLM.
 
 ## Log
 
+[2026-06-01] TASK: Tasks 010-012 — area name display, notification toasts, and letterbox event bars
+  FILES CHANGED: src/ui/GameHUD.hpp, src/ui/GameHUD.cpp, src/ui/ImGuiLayer.hpp, src/ui/ImGuiLayer.cpp, src/app/Main.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added biome-aware area banner display and bounded toast notifications in GameHUD, wired from Main on spawn and biome cell transitions for low-overhead runtime feedback. Added ImGuiLayer letterbox bars and toggled them from Main during active dialog events to provide cinematic framing without introducing extra render passes or dependencies.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
 [2026-06-01] TASK: Task 001 completion pass — pressure/stagger integration hardening
   FILES CHANGED: src/game/actors/EnemyActor.cpp, src/game/combat/CombatSystem.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
   WHAT CHANGED: Added a non-positive damage guard in EnemyActor::OnHit so pressure/stagger state cannot be altered by zero/negative direct hits. Added a minimum resolved damage clamp in CombatSystem before enemy hit application to keep pressure/stagger progression deterministic across resistance/multiplier stacks, avoiding gauge desync from zero-damage overlaps.

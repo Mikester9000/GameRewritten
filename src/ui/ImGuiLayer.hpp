@@ -64,6 +64,7 @@ public:
     float GetCombatSpeedScale() const { return m_combatSpeed.GetScale(); }
     bool UseUltrawideHudLayout(float displayAspect) const;
     const PostProcessToggles& GetPostProcessToggles() const { return m_postProcessToggles; }
+    void SetLetterboxEventActive(bool active) { m_letterboxEventActive = active; }
 
     // Returns true when the user chose "Quit" from the pause menu.
     bool WantsQuit() const { return wantsQuit; }
@@ -129,7 +130,9 @@ private:
     CombatSpeedSlider m_combatSpeed;
     PostProcessToggles m_postProcessToggles;
     AudioManager* m_audioManager = nullptr;
+    bool m_letterboxEventActive = false;
 
     void DrawPauseMenu();
     void DrawDebugOverlay();
+    void DrawLetterboxBars();
 };

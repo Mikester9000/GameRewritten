@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Task 001 pressure/stagger flow hardened for non-positive hit handling and minimum combat hit damage floor.
+Latest task update: Tasks 010-012 completed with area-name banner + toast notifications in HUD and event letterbox bars in ImGuiLayer.
 
 ## Systems
 
@@ -86,9 +86,9 @@ Latest task update: Task 001 pressure/stagger flow hardened for non-positive hit
 | Miss indicator | ✅ | `src/ui/DamageNumbers.cpp/hpp`, `src/app/Main.cpp` |
 | Weak point damage | ✅ | `src/game/combat/CombatSystem.cpp/hpp`, `src/game/combat/HitBox.hpp` |
 | Combo counter display | ✅ | `src/ui/GameHUD.cpp/hpp` |
-| Area name display | ❌ | `src/ui/GameHUD.cpp/hpp` |
-| Notification toast system | ❌ | `src/ui/NotificationSystem.cpp/hpp` |
-| Letterbox event bars | ❌ | `src/ui/ImGuiLayer.cpp/hpp` |
+| Area name display | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
+| Notification toast system | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
+| Letterbox event bars | ✅ | `src/ui/ImGuiLayer.cpp/hpp`, `src/app/Main.cpp` |
 | Contextual button prompts | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Level up screen overlay | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Status screen | ❌ | `src/ui/StatusScreen.cpp/hpp` |

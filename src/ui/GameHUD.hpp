@@ -9,6 +9,8 @@
 #pragma once
 
 #include "../game/actors/PlayerStats.hpp"
+#include <deque>
+#include <string>
 
 class EnemyActor; // forward declaration — only pointer used in DrawTargetInfo
 struct ImGuiIO;
@@ -18,6 +20,7 @@ class GameHUD
 public:
     void SetOpacity(float opacity);
     void SetUltrawideLayoutEnabled(bool enabled) { m_ultrawideLayoutEnabled = enabled; }
+    void SetAreaName(const std::string& areaName);
 
     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
@@ -43,8 +46,18 @@ public:
     void TriggerDamageFlash();
 
 private:
+    struct ToastEntry
+    {
+        std::string text;
+        float life = 0.0f;
+        float maxLife = 0.0f;
+    };
+
     float m_lowHpPulseTime   = 0.0f;
     float m_damageFlashTimer = 0.0f;
     float m_opacity = 0.80f;
     bool m_ultrawideLayoutEnabled = false;
+    std::string m_currentAreaName = "Unknown Area";
+    float m_areaBannerTimer = 0.0f;
+    std::deque<ToastEntry> m_toasts;
 };

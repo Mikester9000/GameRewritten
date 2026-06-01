@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cctype>
 
 #include "../game/actors/EnemyActor.hpp"
 
@@ -40,6 +41,13 @@ constexpr float kEdgeBarThickness = 28.0f;
 // Duration and max alpha of the on-hit damage flash.
 constexpr float kDamageFlashDuration = 0.25f;
 constexpr int   kDamageFlashMaxAlpha = 180;
+constexpr float kAreaBannerDurationSec = 2.8f;
+constexpr float kToastDefaultLifeSec = 2.4f;
+constexpr int   kToastMaxVisible = 3;
+constexpr float kAreaBannerTopMargin = 28.0f;
+constexpr float kToastTopMargin = 80.0f;
+constexpr float kToastRightMargin = 20.0f;
+constexpr float kToastSpacing = 6.0f;
 
 // --- Target info panel ---
 constexpr float kTargetPanelW       = 280.0f;
@@ -81,6 +89,45 @@ float NormalizeValue(float value, float maxValue)
     if (maxValue <= 0.0f)
         return 0.0f;
     return std::clamp(value / maxValue, 0.0f, 1.0f);
+}
+
+std::string HumanizeAreaName(const std::string& rawBiome)
+{
+    if (rawBiome.empty())
+        return "Unknown Area";
+
+    std::string out;
+    out.reserve(rawBiome.size());
+    bool capitalizeNext = true;
+    for (char ch : rawBiome)
+    {
+        if (ch == '_' || ch == '-')
+        {
+            out.push_back(' ');
+            capitalizeNext = true;
+            continue;
+        }
+
+        if (capitalizeNext)
+        {
+            out.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(ch))));
+            capitalizeNext = false;
+        }
+        else
+        {
+            out.push_back(ch);
+        }
+    }
+    return out;
+}
+
+float FadeAlpha(float life, float maxLife)
+{
+    if (maxLife <= 0.0f || life <= 0.0f)
+        return 0.0f;
+
+    const float ratio = std::clamp(life / maxLife, 0.0f, 1.0f);
+    return (ratio > 0.25f) ? 1.0f : (ratio / 0.25f);
 }
 
 // Returns the pixel height of the target-info panel, derived from the current
@@ -143,8 +190,30 @@ void GameHUD::SetOpacity(float opacity)
     m_opacity = std::clamp(opacity, 0.0f, 1.0f);
 }
 
+void GameHUD::SetAreaName(const std::string& areaName)
+{
+    const std::string sanitized = HumanizeAreaName(areaName);
+    if (sanitized == m_currentAreaName)
+        return;
+
+    m_currentAreaName = sanitized;
+    m_areaBannerTimer = kAreaBannerDurationSec;
+
+    m_toasts.push_front({ "Entered " + m_currentAreaName, kToastDefaultLifeSec, kToastDefaultLifeSec });
+    while (static_cast<int>(m_toasts.size()) > kToastMaxVisible)
+        m_toasts.pop_back();
+}
+
 void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
 {
+    if (m_areaBannerTimer > 0.0f)
+        m_areaBannerTimer = std::max(0.0f, m_areaBannerTimer - dt);
+
+    for (auto& toast : m_toasts)
+        toast.life = std::max(0.0f, toast.life - dt);
+    while (!m_toasts.empty() && m_toasts.back().life <= 0.0f)
+        m_toasts.pop_back();
+
     m_lowHpPulseTime += (dt > 0.0f) ? dt : 0.0f;
 
     const float hudOffsetX = m_ultrawideLayoutEnabled ? 48.0f : kHudOffsetX;
@@ -223,6 +292,55 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
         m_damageFlashTimer -= dt;
         if (m_damageFlashTimer < 0.0f)
             m_damageFlashTimer = 0.0f;
+    }
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    if (dl && m_areaBannerTimer > 0.0f)
+    {
+        const float alpha = FadeAlpha(m_areaBannerTimer, kAreaBannerDurationSec);
+        const ImVec2 textSize = ImGui::CalcTextSize(m_currentAreaName.c_str());
+        const float boxPadX = 16.0f;
+        const float boxPadY = 7.0f;
+        const float boxW = textSize.x + boxPadX * 2.0f;
+        const float boxH = textSize.y + boxPadY * 2.0f;
+        const float boxX = (io.DisplaySize.x - boxW) * 0.5f;
+        const float boxY = kAreaBannerTopMargin;
+        const float combinedAlpha = std::clamp(alpha * m_opacity, 0.0f, 1.0f);
+
+        dl->AddRectFilled(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+                          IM_COL32(6, 8, 24, static_cast<int>(210.0f * combinedAlpha)), 4.0f);
+        dl->AddRect(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+                    IM_COL32(90, 140, 220, static_cast<int>(255.0f * combinedAlpha)), 4.0f);
+        dl->AddText(ImVec2(boxX + boxPadX, boxY + boxPadY),
+                    IM_COL32(225, 230, 240, static_cast<int>(255.0f * combinedAlpha)),
+                    m_currentAreaName.c_str());
+    }
+
+    if (dl)
+    {
+        float y = kToastTopMargin;
+        for (const ToastEntry& toast : m_toasts)
+        {
+            const float alpha = std::clamp(FadeAlpha(toast.life, toast.maxLife) * m_opacity, 0.0f, 1.0f);
+            if (alpha <= 0.0f)
+                continue;
+
+            const ImVec2 textSize = ImGui::CalcTextSize(toast.text.c_str());
+            const float boxPadX = 11.0f;
+            const float boxPadY = 6.0f;
+            const float boxW = textSize.x + boxPadX * 2.0f;
+            const float boxH = textSize.y + boxPadY * 2.0f;
+            const float x = io.DisplaySize.x - kToastRightMargin - boxW;
+
+            dl->AddRectFilled(ImVec2(x, y), ImVec2(x + boxW, y + boxH),
+                              IM_COL32(10, 15, 32, static_cast<int>(200.0f * alpha)), 4.0f);
+            dl->AddRect(ImVec2(x, y), ImVec2(x + boxW, y + boxH),
+                        IM_COL32(90, 155, 255, static_cast<int>(255.0f * alpha)), 4.0f);
+            dl->AddText(ImVec2(x + boxPadX, y + boxPadY),
+                        IM_COL32(235, 240, 250, static_cast<int>(255.0f * alpha)),
+                        toast.text.c_str());
+            y += boxH + kToastSpacing;
+        }
     }
 }
 
