@@ -1,0 +1,17 @@
+{
+  "capacity": 120,
+  "items": [
+    {
+      "itemId": "potion",
+      "category": "consumable",
+      "quantity": 5,
+      "maxStack": 99
+    },
+    {
+      "itemId": "phoenix_down",
+      "category": "consumable",
+      "quantity": 2,
+      "maxStack": 99
+    }
+  ]
+}
