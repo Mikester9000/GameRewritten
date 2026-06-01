@@ -3,8 +3,8 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 006
-**System:** Stagger meter
+**Task ID:** 007
+**System:** Enemy attack telegraph
 **Files to touch:** `src/game/actors/EnemyActor.cpp/hpp`
 
 ---
