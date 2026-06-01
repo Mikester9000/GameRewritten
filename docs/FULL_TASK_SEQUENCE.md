@@ -85,32 +85,32 @@ Project completion for this autopilot track means:
 
 ## Phase 1 — Combat + HUD foundation
 
-- [ ] **Task 001: Pressure / stagger integration stub**
+- [x] **Task 001: Pressure / stagger integration stub**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 002: Enemy reaction / interrupt-lite**
+- [x] **Task 002: Enemy reaction / interrupt-lite**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 003: Enemy attack telegraph lite**
+- [x] **Task 003: Enemy attack telegraph lite**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 004: Screen edge damage flash**
+- [x] **Task 004: Screen edge damage flash**
   - Files: `src/ui/GameHUD.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 005: Hit pause / hitstop**
+- [x] **Task 005: Hit pause / hitstop**
   - Files: `src/game/RuntimeScene.hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 006: Stagger meter**
+- [x] **Task 006: Stagger meter**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
@@ -130,17 +130,17 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 010: Area name display**
+- [x] **Task 010: Area name display**
   - Files: `src/ui/GameHUD.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 011: Notification toast system**
+- [x] **Task 011: Notification toast system**
   - Files: `src/ui/NotificationSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 012: Letterbox event bars**
+- [x] **Task 012: Letterbox event bars**
   - Files: `src/ui/ImGuiLayer.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.

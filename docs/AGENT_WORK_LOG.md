@@ -18,6 +18,16 @@ This file records every change made by an automated agent or local LLM.
 
 ## Log
 
+[2026-06-01] TASK: Tasks 010-012 — area name display, notification toasts, and letterbox event bars
+  FILES CHANGED: src/ui/GameHUD.hpp, src/ui/GameHUD.cpp, src/ui/ImGuiLayer.hpp, src/ui/ImGuiLayer.cpp, src/app/Main.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added biome-aware area banner display and bounded toast notifications in GameHUD, wired from Main on spawn and biome cell transitions for low-overhead runtime feedback. Added ImGuiLayer letterbox bars and toggled them from Main during active dialog events to provide cinematic framing without introducing extra render passes or dependencies.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-01] TASK: Task 001 completion pass — pressure/stagger integration hardening
+  FILES CHANGED: src/game/actors/EnemyActor.cpp, src/game/combat/CombatSystem.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
+  WHAT CHANGED: Added a non-positive damage guard in EnemyActor::OnHit so pressure/stagger state cannot be altered by zero/negative direct hits. Added a minimum resolved damage clamp in CombatSystem before enemy hit application to keep pressure/stagger progression deterministic across resistance/multiplier stacks, avoiding gauge desync from zero-damage overlaps.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
 [2026-05-25] TASK: Complete all not-started Phase 1.1 orders (12-18, 27-28)
   FILES CHANGED: src/app/QualityPreset.hpp, src/app/QualityPreset.cpp, src/world/WorldPartition.hpp, src/world/WorldPartition.cpp, src/world/StreamingIO.hpp, src/world/StreamingIO.cpp, src/world/WorldOriginRebase.hpp, src/world/WorldOriginRebase.cpp, src/world/WorldLodManager.hpp, src/world/WorldLodManager.cpp, src/world/StreamingBudget.hpp, src/world/ContinentImpostor.hpp, src/world/ContinentImpostor.cpp, src/renderer/PostProcessToggles.hpp, src/renderer/PostProcessToggles.cpp, src/ui/ImGuiLayer.hpp, src/ui/ImGuiLayer.cpp, GameRewritten.vcxproj, GameRewritten.vcxproj.filters, docs/docs_ORDER_PLAN.md, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
   WHAT CHANGED: Implemented lightweight modules covering quality preset enforcement, world partition/streaming/rebasing/LOD/budget/impostor systems, and post-process toggles. Wired graphics preset + anti-aliasing + post-process option toggles into pause menu UI, registered all new files in the Visual Studio project, and marked the corresponding Phase 1.1 order rows complete in planning/system docs.
@@ -81,3 +91,28 @@ This file records every change made by an automated agent or local LLM.
   FILES CHANGED: Content/Animations/hero_pack/pack_manifest.json (created), src/game/animation/AnimPackManifestLoader.hpp (created), src/game/animation/AnimPackManifestLoader.cpp (created), src/game/animation/AnimClipLoader.hpp (created), src/game/animation/AnimClipLoader.cpp (created), src/game/animation/AnimationComponent.hpp (created), src/game/animation/AnimationComponent.cpp (created), src/game/animation/AnimationSystem.hpp (created), src/game/animation/AnimationSystem.cpp (created), src/game/animation/PlayerAnimBridge.hpp (created), src/game/animation/PlayerAnimBridge.cpp (created), src/game/animation/AnimEventDispatch.hpp (created), src/game/animation/AnimEventDispatch.cpp (created), src/game/RuntimeScene.hpp, src/app/Main.cpp, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
   WHAT CHANGED: Verified 58 animations.hero_pack.* entries in AssetRegistry.json; 57 clip .anim files exist in Content/Animations/hero_pack/ (hero_source.anim is skeleton reference with 0 clips). AnimEngine 1.0 format: 1 clip per file, channels with ROTATION/TRANSLATION targets, keyframes have time + value[] + optional interp. Created pack_manifest.json listing all 57 files in ordered_files[]. Implemented full animation runtime: AnimPackManifestLoader (reads manifest, validates required clips, returns ordered paths), AnimClipLoader (parses AnimKeyframe/AnimChannel/AnimEvent/LoadedAnimClip from JSON), AnimationComponent (per-actor playback state: TransitionTo with crossfade, Update(dt), GetFiredEvents(prevTime, curTime)), AnimationSystem (CPU keyframe sampling: SampleTranslation/SampleRotation/SampleScale with STEP/LINEAR, slerp blending, 64-bone BoneTransformBuffer), PlayerAnimBridge (PlayerActionState→clip name map, 0.30s locomotion/0.20s action crossfades), AnimEventDispatch (footstep/contact→tp::Audio::PlayOneShot; hit/cancel/cast_release→LOG_INFO+TODO until CombatSystem adds hooks). Added GetPlayerActionState() and GetCombatSystemMutable() to RuntimeScene. Wired Main.cpp startup: builds heroClipLibrary from manifest, initialises playerAnimComp with idle clip; wired frame loop: PlayerAnimBridge::Update → AnimationSystem::Advance → AnimEventDispatch::Dispatch each frame under gameplayDt.
   KNOWN ISSUES: RegisterHitFrame/RegisterCancelWindow/RegisterCastRelease not yet in CombatSystem — AnimEventDispatch uses LOG_INFO + TODO for those events. Build verification not possible without Visual Studio (MSB4278 missing C++ targets).
+
+[2026-06-01] TASK: Task 002 completion pass — Enemy reaction / interrupt-lite
+  FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
+  WHAT CHANGED: Recorded guarded completion for Task 002, confirmed the existing enemy interrupt-lite implementation, and advanced NEXT_TASK to the next backlog item using the required workflow command.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-01] TASK: Task 003 completion pass — Enemy attack telegraph lite
+  FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
+  WHAT CHANGED: Recorded guarded completion for Task 003, confirmed the existing enemy telegraph-lite implementation, and advanced NEXT_TASK to the next backlog item using the required workflow command.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-01] TASK: Task 004 completion pass — Screen edge damage flash
+  FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
+  WHAT CHANGED: Recorded guarded completion for Task 004, confirmed the existing screen-edge damage flash behavior, and advanced NEXT_TASK to the next backlog item using the required workflow command.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-01] TASK: Task 005 completion pass — Hit pause / hitstop
+  FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
+  WHAT CHANGED: Recorded guarded completion for Task 005, confirmed the existing hitstop runtime support, and advanced NEXT_TASK to the next backlog item using the required workflow command.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-01] TASK: Task 006 completion pass — Stagger meter
+  FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
+  WHAT CHANGED: Recorded guarded completion for Task 006, confirmed the existing stagger-meter implementation, and advanced NEXT_TASK to the next backlog item using the required workflow command.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).

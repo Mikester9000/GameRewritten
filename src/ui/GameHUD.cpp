@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cctype>
 
 #include "../game/actors/EnemyActor.hpp"
 
@@ -40,6 +41,14 @@ constexpr float kEdgeBarThickness = 28.0f;
 // Duration and max alpha of the on-hit damage flash.
 constexpr float kDamageFlashDuration = 0.25f;
 constexpr int   kDamageFlashMaxAlpha = 180;
+constexpr float kAreaBannerDurationSec = 2.8f;
+constexpr float kToastDefaultLifeSec = 2.4f;
+constexpr int   kToastMaxVisible = 3;
+constexpr float kAreaBannerTopMargin = 28.0f;
+constexpr float kToastTopMargin = 80.0f;
+constexpr float kToastRightMargin = 20.0f;
+constexpr float kToastSpacing = 6.0f;
+constexpr float kLevelUpOverlayDurationSec = 2.2f;
 
 // --- Target info panel ---
 constexpr float kTargetPanelW       = 280.0f;
@@ -81,6 +90,45 @@ float NormalizeValue(float value, float maxValue)
     if (maxValue <= 0.0f)
         return 0.0f;
     return std::clamp(value / maxValue, 0.0f, 1.0f);
+}
+
+std::string HumanizeAreaName(const std::string& rawBiome)
+{
+    if (rawBiome.empty())
+        return "Unknown Area";
+
+    std::string out;
+    out.reserve(rawBiome.size());
+    bool capitalizeNext = true;
+    for (char ch : rawBiome)
+    {
+        if (ch == '_' || ch == '-')
+        {
+            out.push_back(' ');
+            capitalizeNext = true;
+            continue;
+        }
+
+        if (capitalizeNext)
+        {
+            out.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(ch))));
+            capitalizeNext = false;
+        }
+        else
+        {
+            out.push_back(ch);
+        }
+    }
+    return out;
+}
+
+float FadeAlpha(float life, float maxLife)
+{
+    if (maxLife <= 0.0f || life <= 0.0f)
+        return 0.0f;
+
+    const float ratio = std::clamp(life / maxLife, 0.0f, 1.0f);
+    return (ratio > 0.25f) ? 1.0f : (ratio / 0.25f);
 }
 
 // Returns the pixel height of the target-info panel, derived from the current
@@ -143,10 +191,212 @@ void GameHUD::SetOpacity(float opacity)
     m_opacity = std::clamp(opacity, 0.0f, 1.0f);
 }
 
+void GameHUD::SetAreaName(const std::string& areaName)
+{
+    const std::string sanitized = HumanizeAreaName(areaName);
+    if (sanitized == m_currentAreaName)
+        return;
+
+    m_currentAreaName = sanitized;
+    m_areaBannerTimer = kAreaBannerDurationSec;
+
+    m_toasts.push_front({ "Entered " + m_currentAreaName, kToastDefaultLifeSec, kToastDefaultLifeSec });
+    while (static_cast<int>(m_toasts.size()) > kToastMaxVisible)
+        m_toasts.pop_back();
+}
+
+void GameHUD::SetContextPrompt(const std::string& prompt, bool visible)
+{
+    m_contextPrompt = prompt;
+    m_contextPromptVisible = visible && !prompt.empty();
+}
+
+void GameHUD::TriggerLevelUpOverlay(int newLevel)
+{
+    m_lastLevelUp = std::max(newLevel, 1);
+    m_levelUpOverlayTimer = kLevelUpOverlayDurationSec;
+    m_toasts.push_front({ "Level up! Lv." + std::to_string(m_lastLevelUp), kToastDefaultLifeSec, kToastDefaultLifeSec });
+    while (static_cast<int>(m_toasts.size()) > kToastMaxVisible)
+        m_toasts.pop_back();
+}
+
+void GameHUD::TickOverlayTimers(float dt)
+{
+    if (m_areaBannerTimer > 0.0f)
+        m_areaBannerTimer = std::max(0.0f, m_areaBannerTimer - dt);
+    if (m_levelUpOverlayTimer > 0.0f)
+        m_levelUpOverlayTimer = std::max(0.0f, m_levelUpOverlayTimer - dt);
+
+    for (auto& toast : m_toasts)
+        toast.life = std::max(0.0f, toast.life - dt);
+    while (!m_toasts.empty() && m_toasts.back().life <= 0.0f)
+        m_toasts.pop_back();
+}
+
+void GameHUD::DrawAreaBanner(ImDrawList& dl, const ImGuiIO& io) const
+{
+    if (m_areaBannerTimer <= 0.0f)
+        return;
+
+    const float alpha = FadeAlpha(m_areaBannerTimer, kAreaBannerDurationSec);
+    const ImVec2 textSize = ImGui::CalcTextSize(m_currentAreaName.c_str());
+    const float boxPadX = 16.0f;
+    const float boxPadY = 7.0f;
+    const float boxW = textSize.x + boxPadX * 2.0f;
+    const float boxH = textSize.y + boxPadY * 2.0f;
+    const float boxX = (io.DisplaySize.x - boxW) * 0.5f;
+    const float boxY = kAreaBannerTopMargin;
+    const float combinedAlpha = std::clamp(alpha * m_opacity, 0.0f, 1.0f);
+
+    dl.AddRectFilled(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+                     IM_COL32(6, 8, 24, static_cast<int>(210.0f * combinedAlpha)), 4.0f);
+    dl.AddRect(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+               IM_COL32(90, 140, 220, static_cast<int>(255.0f * combinedAlpha)), 4.0f);
+    dl.AddText(ImVec2(boxX + boxPadX, boxY + boxPadY),
+               IM_COL32(225, 230, 240, static_cast<int>(255.0f * combinedAlpha)),
+               m_currentAreaName.c_str());
+}
+
+void GameHUD::DrawToasts(ImDrawList& dl, const ImGuiIO& io) const
+{
+    float y = kToastTopMargin;
+    for (const ToastEntry& toast : m_toasts)
+    {
+        const float alpha = std::clamp(FadeAlpha(toast.life, toast.maxLife) * m_opacity, 0.0f, 1.0f);
+        if (alpha <= 0.0f)
+            continue;
+
+        const ImVec2 textSize = ImGui::CalcTextSize(toast.text.c_str());
+        const float boxPadX = 11.0f;
+        const float boxPadY = 6.0f;
+        const float boxW = textSize.x + boxPadX * 2.0f;
+        const float boxH = textSize.y + boxPadY * 2.0f;
+        const float x = io.DisplaySize.x - kToastRightMargin - boxW;
+
+        dl.AddRectFilled(ImVec2(x, y), ImVec2(x + boxW, y + boxH),
+                         IM_COL32(10, 15, 32, static_cast<int>(200.0f * alpha)), 4.0f);
+        dl.AddRect(ImVec2(x, y), ImVec2(x + boxW, y + boxH),
+                   IM_COL32(90, 155, 255, static_cast<int>(255.0f * alpha)), 4.0f);
+        dl.AddText(ImVec2(x + boxPadX, y + boxPadY),
+                   IM_COL32(235, 240, 250, static_cast<int>(255.0f * alpha)),
+                   toast.text.c_str());
+        y += boxH + kToastSpacing;
+    }
+}
+
+void GameHUD::DrawContextPrompt(ImDrawList& dl, const ImGuiIO& io) const
+{
+    if (!m_contextPromptVisible)
+        return;
+
+    const ImVec2 textSize = ImGui::CalcTextSize(m_contextPrompt.c_str());
+    const float boxPadX = 12.0f;
+    const float boxPadY = 7.0f;
+    const float boxW = textSize.x + boxPadX * 2.0f;
+    const float boxH = textSize.y + boxPadY * 2.0f;
+    const float boxX = (io.DisplaySize.x - boxW) * 0.5f;
+    const float boxY = io.DisplaySize.y - boxH - 120.0f;
+    dl.AddRectFilled(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+                     IM_COL32(12, 15, 30, ScaleAlpha(210, m_opacity)), 4.0f);
+    dl.AddRect(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+               IM_COL32(80, 150, 255, ScaleAlpha(255, m_opacity)), 4.0f);
+    dl.AddText(ImVec2(boxX + boxPadX, boxY + boxPadY),
+               IM_COL32(240, 245, 255, ScaleAlpha(255, m_opacity)),
+               m_contextPrompt.c_str());
+}
+
+void GameHUD::DrawLevelUpOverlay(ImDrawList& dl, const ImGuiIO& io) const
+{
+    if (m_levelUpOverlayTimer <= 0.0f)
+        return;
+
+    const float alpha = std::clamp(FadeAlpha(m_levelUpOverlayTimer, kLevelUpOverlayDurationSec) * m_opacity, 0.0f, 1.0f);
+    const std::string levelLabel = "LEVEL UP!  Lv." + std::to_string(std::max(m_lastLevelUp, 1));
+    const ImVec2 textSize = ImGui::CalcTextSize(levelLabel.c_str());
+    const float boxPadX = 24.0f;
+    const float boxPadY = 10.0f;
+    const float boxW = textSize.x + boxPadX * 2.0f;
+    const float boxH = textSize.y + boxPadY * 2.0f;
+    const float boxX = (io.DisplaySize.x - boxW) * 0.5f;
+    const float boxY = io.DisplaySize.y * 0.18f;
+    dl.AddRectFilled(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+                     IM_COL32(22, 28, 46, static_cast<int>(220.0f * alpha)), 5.0f);
+    dl.AddRect(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+               IM_COL32(255, 205, 70, static_cast<int>(255.0f * alpha)), 5.0f);
+    dl.AddText(ImVec2(boxX + boxPadX, boxY + boxPadY),
+               IM_COL32(255, 238, 120, static_cast<int>(255.0f * alpha)),
+               levelLabel.c_str());
+}
+
+void GameHUD::DrawStatusScreen(ImDrawList& dl, const ImGuiIO& io, const PlayerStats& stats) const
+{
+    if (!m_showStatusScreen)
+        return;
+
+    const float panelW = 340.0f;
+    const float panelH = 240.0f;
+    const float x = (io.DisplaySize.x - panelW) * 0.5f;
+    const float y = (io.DisplaySize.y - panelH) * 0.5f;
+    dl.AddRectFilled(ImVec2(x, y), ImVec2(x + panelW, y + panelH),
+                     IM_COL32(6, 10, 25, ScaleAlpha(230, m_opacity)), 6.0f);
+    dl.AddRect(ImVec2(x, y), ImVec2(x + panelW, y + panelH),
+               IM_COL32(95, 155, 255, ScaleAlpha(255, m_opacity)), 6.0f);
+
+    const float tx = x + 18.0f;
+    float ty = y + 16.0f;
+    dl.AddText(ImVec2(tx, ty), IM_COL32(225, 235, 250, ScaleAlpha(255, m_opacity)), "STATUS");
+    ty += 34.0f;
+    const std::string lv = "Level: " + std::to_string(stats.level);
+    dl.AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), lv.c_str());
+    ty += 24.0f;
+    char hp[64];
+    std::snprintf(hp, sizeof(hp), "HP: %.0f / %.0f", stats.hp, stats.maxHp);
+    dl.AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), hp);
+    ty += 24.0f;
+    char mp[64];
+    std::snprintf(mp, sizeof(mp), "MP: %.0f / %.0f", stats.mp, stats.maxMp);
+    dl.AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), mp);
+    ty += 24.0f;
+    const std::string xp = "XP: " + std::to_string(stats.xp) + " / " + std::to_string(stats.xpToNextLevel);
+    dl.AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), xp.c_str());
+    ty += 24.0f;
+    const std::string status = std::string("Status Effect: ") + stats.statusEffect.GetName();
+    dl.AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), status.c_str());
+    dl.AddText(ImVec2(tx, y + panelH - 26.0f), IM_COL32(150, 170, 190, ScaleAlpha(255, m_opacity)),
+               "Press C to close");
+}
+
+void GameHUD::DrawMapScreen(ImDrawList& dl, const ImGuiIO& io) const
+{
+    if (!m_showMapScreen)
+        return;
+
+    const float panelW = 440.0f;
+    const float panelH = 280.0f;
+    const float x = (io.DisplaySize.x - panelW) * 0.5f;
+    const float y = (io.DisplaySize.y - panelH) * 0.5f;
+    dl.AddRectFilled(ImVec2(x, y), ImVec2(x + panelW, y + panelH),
+                     IM_COL32(8, 12, 24, ScaleAlpha(235, m_opacity)), 6.0f);
+    dl.AddRect(ImVec2(x, y), ImVec2(x + panelW, y + panelH),
+               IM_COL32(110, 180, 255, ScaleAlpha(255, m_opacity)), 6.0f);
+    dl.AddText(ImVec2(x + 18.0f, y + 16.0f), IM_COL32(228, 236, 248, ScaleAlpha(255, m_opacity)), "MAP");
+    dl.AddText(ImVec2(x + 18.0f, y + 48.0f), IM_COL32(180, 195, 214, ScaleAlpha(255, m_opacity)),
+               "Map screen stub: full world map data hookup pending.");
+    dl.AddRectFilled(ImVec2(x + 18.0f, y + 84.0f), ImVec2(x + panelW - 18.0f, y + panelH - 48.0f),
+                     IM_COL32(15, 20, 38, ScaleAlpha(255, m_opacity)), 4.0f);
+    dl.AddText(ImVec2(x + 30.0f, y + 104.0f), IM_COL32(110, 130, 155, ScaleAlpha(255, m_opacity)),
+               "WORLD MAP PLACEHOLDER");
+    dl.AddText(ImVec2(x + 18.0f, y + panelH - 26.0f), IM_COL32(150, 170, 190, ScaleAlpha(255, m_opacity)),
+               "Press M to close");
+}
+
 void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
 {
+    // 1) Tick timers and transient overlay state.
+    TickOverlayTimers(dt);
     m_lowHpPulseTime += (dt > 0.0f) ? dt : 0.0f;
 
+    // 2) Draw the core player HUD panel.
     const float hudOffsetX = m_ultrawideLayoutEnabled ? 48.0f : kHudOffsetX;
     const float hudBottomMargin = m_ultrawideLayoutEnabled ? 28.0f : kHudBottomMargin;
     ImGui::SetNextWindowPos(ImVec2(hudOffsetX, io.DisplaySize.y - kHudHeight - hudBottomMargin), ImGuiCond_Always);
@@ -223,6 +473,18 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
         m_damageFlashTimer -= dt;
         if (m_damageFlashTimer < 0.0f)
             m_damageFlashTimer = 0.0f;
+    }
+
+    // 4) Draw non-HUD overlays in order.
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    if (dl)
+    {
+        DrawAreaBanner(*dl, io);
+        DrawToasts(*dl, io);
+        DrawContextPrompt(*dl, io);
+        DrawLevelUpOverlay(*dl, io);
+        DrawStatusScreen(*dl, io, stats);
+        DrawMapScreen(*dl, io);
     }
 }
 

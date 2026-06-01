@@ -115,38 +115,38 @@ Within each layer, **headers come before implementations** where needed.
 
 ### 1.3 UI/HUD Core (81-110)
 
-| Order | Task Name | Plan | Task # |
-|-------|-----------|------|--------|
-| 81 | Screen edge damage flash | BASE | 004 |
-| 82 | Screen edge damage header | BASE | 004H |
-| 83 | Area name display | BASE | 010 |
-| 84 | Area name display header | BASE | 010H |
-| 85 | Notification toast system | BASE | 011 |
-| 86 | Notification toast header | BASE | 011H |
-| 87 | Letterbox event bars | BASE | 012 |
-| 88 | Letterbox event header | BASE | 012H |
-| 89 | Contextual button prompts | BASE | 013 |
-| 90 | Contextual prompts header | BASE | 013H |
-| 91 | Level up screen overlay | BASE | 014 |
-| 92 | Level up screen header | BASE | 014H |
-| 93 | Status screen | BASE | 015 |
-| 94 | Status screen header | BASE | 015H |
-| 95 | Map screen stub | BASE | 016 |
-| 96 | Map screen header | BASE | 016H |
-| 97 | Tooltip system | BASE | 017 |
-| 98 | Tooltip system header | BASE | 017H |
-| 99 | Saving indicator | BASE | 018 |
-| 100 | Saving indicator header | BASE | 018H |
-| 101 | Death / defeat screen | BASE | 019 |
-| 102 | Death screen header | BASE | 019H |
-| 103 | Auto-save indicator icon | CON6 | 361 |
-| 104 | Auto-save indicator header | CON6 | 361H |
-| 105 | Compass direction overlay | CON6 | 362 |
-| 106 | Compass overlay header | CON6 | 362H |
-| 107 | Quest waypoint distance display | CON6 | 363 |
-| 108 | Quest waypoint distance header | CON6 | 363H |
-| 109 | Tutorial/control reminder pause menu | CON6 | 364 |
-| 110 | Tutorial reminder header | CON6 | 364H |
+| Order | Status | Task Name | Plan | Task # |
+|-------|--------|-----------|------|--------|
+| 81 | ✅ | Screen edge damage flash | BASE | 004 |
+| 82 | ✅ | Screen edge damage header | BASE | 004H |
+| 83 | ✅ | Area name display | BASE | 010 |
+| 84 | ✅ | Area name display header | BASE | 010H |
+| 85 | ✅ | Notification toast system | BASE | 011 |
+| 86 | ✅ | Notification toast header | BASE | 011H |
+| 87 | ✅ | Letterbox event bars | BASE | 012 |
+| 88 | ✅ | Letterbox event header | BASE | 012H |
+| 89 | ✅ | Contextual button prompts | BASE | 013 |
+| 90 | ✅ | Contextual prompts header | BASE | 013H |
+| 91 | ✅ | Level up screen overlay | BASE | 014 |
+| 92 | ✅ | Level up screen header | BASE | 014H |
+| 93 | ✅ | Status screen | BASE | 015 |
+| 94 | ✅ | Status screen header | BASE | 015H |
+| 95 | ✅ | Map screen stub | BASE | 016 |
+| 96 | ✅ | Map screen header | BASE | 016H |
+| 97 |  | Tooltip system | BASE | 017 |
+| 98 |  | Tooltip system header | BASE | 017H |
+| 99 |  | Saving indicator | BASE | 018 |
+| 100 |  | Saving indicator header | BASE | 018H |
+| 101 |  | Death / defeat screen | BASE | 019 |
+| 102 |  | Death screen header | BASE | 019H |
+| 103 |  | Auto-save indicator icon | CON6 | 361 |
+| 104 |  | Auto-save indicator header | CON6 | 361H |
+| 105 |  | Compass direction overlay | CON6 | 362 |
+| 106 |  | Compass overlay header | CON6 | 362H |
+| 107 |  | Quest waypoint distance display | CON6 | 363 |
+| 108 |  | Quest waypoint distance header | CON6 | 363H |
+| 109 |  | Tutorial/control reminder pause menu | CON6 | 364 |
+| 110 |  | Tutorial reminder header | CON6 | 364H |
 
 ### 1.4 Inventory & Progression (111-140)
 

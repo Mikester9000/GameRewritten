@@ -9,15 +9,23 @@
 #pragma once
 
 #include "../game/actors/PlayerStats.hpp"
+#include <deque>
+#include <string>
 
 class EnemyActor; // forward declaration — only pointer used in DrawTargetInfo
 struct ImGuiIO;
+struct ImDrawList;
 
 class GameHUD
 {
 public:
     void SetOpacity(float opacity);
     void SetUltrawideLayoutEnabled(bool enabled) { m_ultrawideLayoutEnabled = enabled; }
+    void SetAreaName(const std::string& areaName);
+    void SetContextPrompt(const std::string& prompt, bool visible);
+    void SetStatusScreenOpen(bool open) { m_showStatusScreen = open; }
+    void SetMapScreenOpen(bool open) { m_showMapScreen = open; }
+    void TriggerLevelUpOverlay(int newLevel);
 
     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
@@ -43,8 +51,32 @@ public:
     void TriggerDamageFlash();
 
 private:
+    struct ToastEntry
+    {
+        std::string text;
+        float life = 0.0f;
+        float maxLife = 0.0f;
+    };
+
+    void TickOverlayTimers(float dt);
+    void DrawAreaBanner(ImDrawList& dl, const ImGuiIO& io) const;
+    void DrawToasts(ImDrawList& dl, const ImGuiIO& io) const;
+    void DrawContextPrompt(ImDrawList& dl, const ImGuiIO& io) const;
+    void DrawLevelUpOverlay(ImDrawList& dl, const ImGuiIO& io) const;
+    void DrawStatusScreen(ImDrawList& dl, const ImGuiIO& io, const PlayerStats& stats) const;
+    void DrawMapScreen(ImDrawList& dl, const ImGuiIO& io) const;
+
     float m_lowHpPulseTime   = 0.0f;
     float m_damageFlashTimer = 0.0f;
     float m_opacity = 0.80f;
     bool m_ultrawideLayoutEnabled = false;
+    std::string m_currentAreaName = "Unknown Area";
+    float m_areaBannerTimer = 0.0f;
+    std::deque<ToastEntry> m_toasts;
+    std::string m_contextPrompt;
+    bool m_contextPromptVisible = false;
+    float m_levelUpOverlayTimer = 0.0f;
+    int m_lastLevelUp = 0;
+    bool m_showStatusScreen = false;
+    bool m_showMapScreen = false;
 };

@@ -3,9 +3,9 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 001
-**System:** Pressure / stagger integration stub
-**Files to touch:** `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
+**Task ID:** 007
+**System:** Enemy attack telegraph
+**Files to touch:** `src/game/actors/EnemyActor.cpp/hpp`
 
 ---
 
