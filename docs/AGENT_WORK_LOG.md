@@ -101,3 +101,8 @@ This file records every change made by an automated agent or local LLM.
   FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
   WHAT CHANGED: Recorded guarded completion for Task 003, confirmed the existing enemy telegraph-lite implementation, and advanced NEXT_TASK to the next backlog item using the required workflow command.
   KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-01] TASK: Task 004 completion pass — Screen edge damage flash
+  FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
+  WHAT CHANGED: Recorded guarded completion for Task 004, confirmed the existing screen-edge damage flash behavior, and advanced NEXT_TASK to the next backlog item using the required workflow command.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).

@@ -3,9 +3,9 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 004
-**System:** Screen edge damage flash
-**Files to touch:** `src/ui/GameHUD.cpp/hpp`
+**Task ID:** 005
+**System:** Hit pause / hitstop
+**Files to touch:** `src/game/RuntimeScene.hpp`
 
 ---
 
