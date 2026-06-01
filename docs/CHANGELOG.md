@@ -1,3 +1,4 @@
+- 2026-06-01: Task 003 completion pass — verified enemy attack telegraph lite behavior remains implemented and advanced guarded workflow state to the next task with required documentation updates.
 - 2026-06-01: Task 002 completion pass — verified enemy reaction / interrupt-lite implementation remains in place and advanced guarded workflow state to the next task with required documentation updates.
 - 2026-06-01: Tasks 010-012 completion pass — added biome-driven area-name banner + lightweight toast notifications in GameHUD (triggered on cell/biome transitions), and added low-cost cinematic letterbox event bars in ImGuiLayer toggled from Main when dialog events are active.
 - 2026-06-01: Task 001 completion pass — hardened pressure/stagger combat flow by ignoring non-positive direct enemy hits in EnemyActor::OnHit and clamping resolved CombatSystem hit damage to a minimum of 1 before application (prevents zero/negative-damage desync in gauge progression).

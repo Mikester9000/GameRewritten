@@ -95,7 +95,7 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 003: Enemy attack telegraph lite**
+- [x] **Task 003: Enemy attack telegraph lite**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
