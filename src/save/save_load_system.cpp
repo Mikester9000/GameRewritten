@@ -48,15 +48,41 @@ SaveLoadResult SaveLoadSystem::Load(const std::string& filePath, std::string& ou
         return { false, "Save file is corrupted." };
     }
 
-    const int fileVersion = payload.value("version", -1);
+    if (!payload.is_object())
+    {
+        return { false, "Save file is corrupted." };
+    }
+
+    const auto playerIt = payload.find("player");
+    if (playerIt == payload.end() || !playerIt->is_object())
+    {
+        return { false, "Save file is corrupted." };
+    }
+
+    int fileVersion = -1;
+    std::string loadedPlayerName;
+    int loadedPlayerLevel = 1;
+    int loadedGil = 0;
+    try
+    {
+        fileVersion = payload.value("version", -1);
+        loadedPlayerName = playerIt->value("name", std::string());
+        loadedPlayerLevel = playerIt->value("level", 1);
+        loadedGil = playerIt->value("gil", 0);
+    }
+    catch (...)
+    {
+        return { false, "Save file is corrupted." };
+    }
+
     if (fileVersion != expectedVersion)
     {
         return { false, "Unsupported save version." };
     }
 
-    outPlayerName = payload["player"].value("name", std::string());
-    outPlayerLevel = payload["player"].value("level", 1);
-    outGil = payload["player"].value("gil", 0);
+    outPlayerName = loadedPlayerName;
+    outPlayerLevel = loadedPlayerLevel;
+    outGil = loadedGil;
     return { true, "Load completed." };
 }
 } // namespace gr

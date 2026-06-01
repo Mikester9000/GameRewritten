@@ -2,7 +2,7 @@
 
 namespace gr
 {
-struct Vec3Distance
+struct Vec3Position
 {
     float x = 0.0f;
     float y = 0.0f;
@@ -12,12 +12,12 @@ struct Vec3Distance
 class QuestWaypointDistance
 {
 public:
-    void SetPlayerPosition(const Vec3Distance& position) { m_player = position; }
-    void SetWaypointPosition(const Vec3Distance& position) { m_waypoint = position; }
+    void SetPlayerPosition(const Vec3Position& position) { m_player = position; }
+    void SetWaypointPosition(const Vec3Position& position) { m_waypoint = position; }
     float GetDistanceMeters() const;
 
 private:
-    Vec3Distance m_player;
-    Vec3Distance m_waypoint;
+    Vec3Position m_player;
+    Vec3Position m_waypoint;
 };
 } // namespace gr
