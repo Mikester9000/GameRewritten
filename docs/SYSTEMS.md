@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Tasks 010-012 completed with area-name banner + toast notifications in HUD and event letterbox bars in ImGuiLayer.
+Latest task update: Task 002 completed and backlog advanced with guarded workflow docs sync.
 
 ## Systems
 
