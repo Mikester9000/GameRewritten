@@ -14,6 +14,7 @@
 
 class EnemyActor; // forward declaration — only pointer used in DrawTargetInfo
 struct ImGuiIO;
+struct ImDrawList;
 
 class GameHUD
 {
@@ -56,6 +57,14 @@ private:
         float life = 0.0f;
         float maxLife = 0.0f;
     };
+
+    void TickOverlayTimers(float dt);
+    void DrawAreaBanner(ImDrawList& dl, const ImGuiIO& io) const;
+    void DrawToasts(ImDrawList& dl, const ImGuiIO& io) const;
+    void DrawContextPrompt(ImDrawList& dl, const ImGuiIO& io) const;
+    void DrawLevelUpOverlay(ImDrawList& dl, const ImGuiIO& io) const;
+    void DrawStatusScreen(ImDrawList& dl, const ImGuiIO& io, const PlayerStats& stats) const;
+    void DrawMapScreen(ImDrawList& dl, const ImGuiIO& io) const;
 
     float m_lowHpPulseTime   = 0.0f;
     float m_damageFlashTimer = 0.0f;

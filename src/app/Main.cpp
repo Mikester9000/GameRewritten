@@ -496,12 +496,20 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         if (!paused && dialogBox.IsOpen() && interactPressed)
             dialogBox.Dismiss();
-        gameHud.SetContextPrompt("Press E to continue", dialogBox.IsOpen() && !paused);
+        gameHud.SetContextPrompt("Press E to continue", dialogBox.IsOpen() && dialogBox.IsComplete() && !paused);
 
         if (!paused && !tacticalPauseHeld && statusPressed)
+        {
             statusScreenOpen = !statusScreenOpen;
+            if (statusScreenOpen)
+                mapScreenOpen = false;
+        }
         if (!paused && !tacticalPauseHeld && mapPressed)
+        {
             mapScreenOpen = !mapScreenOpen;
+            if (mapScreenOpen)
+                statusScreenOpen = false;
+        }
         if (paused)
         {
             statusScreenOpen = false;

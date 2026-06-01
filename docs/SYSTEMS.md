@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Task 006 completed and backlog advanced with guarded workflow docs sync.
+Latest task update: Tasks 010-016 completed and backlog advanced with guarded workflow docs sync.
 
 ## Systems
 
@@ -89,10 +89,10 @@ Latest task update: Task 006 completed and backlog advanced with guarded workflo
 | Area name display | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
 | Notification toast system | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
 | Letterbox event bars | ✅ | `src/ui/ImGuiLayer.cpp/hpp`, `src/app/Main.cpp` |
-| Contextual button prompts | ❌ | `src/ui/GameHUD.cpp/hpp` |
-| Level up screen overlay | ❌ | `src/ui/GameHUD.cpp/hpp` |
-| Status screen | ❌ | `src/ui/StatusScreen.cpp/hpp` |
-| Map screen stub | ❌ | `src/ui/MapScreen.cpp/hpp` |
+| Contextual button prompts | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp`, `src/ui/DialogBox.cpp/hpp` |
+| Level up screen overlay | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
+| Status screen | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
+| Map screen stub | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
 | Tooltip system | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Saving indicator | ❌ | `src/ui/GameHUD.cpp/hpp` |
 | Death / defeat screen | ❌ | `src/ui/GameHUD.cpp/hpp` |

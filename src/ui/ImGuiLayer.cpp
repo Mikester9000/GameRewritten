@@ -351,7 +351,7 @@ void ImGuiLayer::DrawLetterboxBars()
     if (io.DisplaySize.x <= 0.0f || io.DisplaySize.y <= 0.0f)
         return;
 
-    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    ImDrawList* dl = ImGui::GetBackgroundDrawList();
     if (!dl)
         return;
 
