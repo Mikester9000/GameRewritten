@@ -20,7 +20,7 @@ This file records every change made by an automated agent or local LLM.
 
 [2026-06-01] TASK: Task 001 completion pass — pressure/stagger integration hardening
   FILES CHANGED: src/game/actors/EnemyActor.cpp, src/game/combat/CombatSystem.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
-  WHAT CHANGED: Added a non-positive damage guard in EnemyActor::OnHit so pressure/stagger state cannot be altered by zero/negative direct hits. Added a minimum resolved damage clamp in CombatSystem before enemy hit application to keep pressure/stagger progression deterministic across resistance/multiplier stacks.
+  WHAT CHANGED: Added a non-positive damage guard in EnemyActor::OnHit so pressure/stagger state cannot be altered by zero/negative direct hits. Added a minimum resolved damage clamp in CombatSystem before enemy hit application to keep pressure/stagger progression deterministic across resistance/multiplier stacks, avoiding gauge desync from zero-damage overlaps.
   KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
 
 [2026-05-25] TASK: Complete all not-started Phase 1.1 orders (12-18, 27-28)

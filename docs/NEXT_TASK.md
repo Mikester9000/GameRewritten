@@ -3,8 +3,8 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 001
-**System:** Pressure / stagger integration stub
+**Task ID:** 002
+**System:** Enemy reaction / interrupt-lite
 **Files to touch:** `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
 
 ---

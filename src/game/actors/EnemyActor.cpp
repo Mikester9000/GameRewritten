@@ -62,7 +62,7 @@ void EnemyActor::OnHit(int damage)
 {
     if (damage <= 0)
     {
-        LOG_INFO("EnemyActor: Ignored non-positive hit.");
+        LOG_INFO("EnemyActor: Ignored non-positive hit (" + std::to_string(damage) + ").");
         return;
     }
 

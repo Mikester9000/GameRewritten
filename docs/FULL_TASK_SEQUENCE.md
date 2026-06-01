@@ -85,7 +85,7 @@ Project completion for this autopilot track means:
 
 ## Phase 1 — Combat + HUD foundation
 
-- [ ] **Task 001: Pressure / stagger integration stub**
+- [x] **Task 001: Pressure / stagger integration stub**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.

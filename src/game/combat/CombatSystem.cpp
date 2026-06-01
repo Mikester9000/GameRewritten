@@ -26,7 +26,7 @@ static constexpr float ENEMY_HALF_Z = 0.5f;
 static constexpr float DAMAGE_NUMBER_Y_OFFSET = 2.2f; // spawn above enemy head
 static constexpr float kWeakPointDotThreshold = 0.5f;
 static constexpr float kWeakPointDamageMult   = 1.5f;
-static constexpr int kMinimumCombatDamage      = 1;
+static constexpr int kMinimumCombatDamage      = 1; // keep pressure/stagger progression deterministic
 
 static bool HitBoxOverlapsEnemy(const HitBox& hitBox, const EnemyActor& enemy)
 {

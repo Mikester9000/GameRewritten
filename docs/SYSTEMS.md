@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Task 001 pressure/stagger flow hardened for non-positive hit handling and minimum combat hit damage.
+Latest task update: Task 001 pressure/stagger flow hardened for non-positive hit handling and minimum combat hit damage floor.
 
 ## Systems
 
