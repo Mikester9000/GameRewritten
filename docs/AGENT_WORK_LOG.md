@@ -18,6 +18,11 @@ This file records every change made by an automated agent or local LLM.
 
 ## Log
 
+[2026-06-01] TASK: Task 001 completion pass — pressure/stagger integration hardening
+  FILES CHANGED: src/game/actors/EnemyActor.cpp, src/game/combat/CombatSystem.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
+  WHAT CHANGED: Added a non-positive damage guard in EnemyActor::OnHit so pressure/stagger state cannot be altered by zero/negative direct hits. Added a minimum resolved damage clamp in CombatSystem before enemy hit application to keep pressure/stagger progression deterministic across resistance/multiplier stacks.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
 [2026-05-25] TASK: Complete all not-started Phase 1.1 orders (12-18, 27-28)
   FILES CHANGED: src/app/QualityPreset.hpp, src/app/QualityPreset.cpp, src/world/WorldPartition.hpp, src/world/WorldPartition.cpp, src/world/StreamingIO.hpp, src/world/StreamingIO.cpp, src/world/WorldOriginRebase.hpp, src/world/WorldOriginRebase.cpp, src/world/WorldLodManager.hpp, src/world/WorldLodManager.cpp, src/world/StreamingBudget.hpp, src/world/ContinentImpostor.hpp, src/world/ContinentImpostor.cpp, src/renderer/PostProcessToggles.hpp, src/renderer/PostProcessToggles.cpp, src/ui/ImGuiLayer.hpp, src/ui/ImGuiLayer.cpp, GameRewritten.vcxproj, GameRewritten.vcxproj.filters, docs/docs_ORDER_PLAN.md, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
   WHAT CHANGED: Implemented lightweight modules covering quality preset enforcement, world partition/streaming/rebasing/LOD/budget/impostor systems, and post-process toggles. Wired graphics preset + anti-aliasing + post-process option toggles into pause menu UI, registered all new files in the Visual Studio project, and marked the corresponding Phase 1.1 order rows complete in planning/system docs.
