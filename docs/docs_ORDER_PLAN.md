@@ -132,21 +132,21 @@ Within each layer, **headers come before implementations** where needed.
 | 93 | ✅ | Status screen | BASE | 015 |
 | 94 | ✅ | Status screen header | BASE | 015H |
 | 95 | ✅ | Map screen stub | BASE | 016 |
-| 96 |  | Map screen header | BASE | 016H |
-| 97 |  | Tooltip system | BASE | 017 |
-| 98 |  | Tooltip system header | BASE | 017H |
-| 99 |  | Saving indicator | BASE | 018 |
-| 100 |  | Saving indicator header | BASE | 018H |
-| 101 |  | Death / defeat screen | BASE | 019 |
-| 102 |  | Death screen header | BASE | 019H |
-| 103 |  | Auto-save indicator icon | CON6 | 361 |
-| 104 |  | Auto-save indicator header | CON6 | 361H |
-| 105 |  | Compass direction overlay | CON6 | 362 |
-| 106 |  | Compass overlay header | CON6 | 362H |
-| 107 |  | Quest waypoint distance display | CON6 | 363 |
-| 108 |  | Quest waypoint distance header | CON6 | 363H |
-| 109 |  | Tutorial/control reminder pause menu | CON6 | 364 |
-| 110 |  | Tutorial reminder header | CON6 | 364H |
+| 96 | ✅ | Map screen header | BASE | 016H |
+| 97 | ✅ | Tooltip system | BASE | 017 |
+| 98 | ✅ | Tooltip system header | BASE | 017H |
+| 99 | ✅ | Saving indicator | BASE | 018 |
+| 100 | ✅ | Saving indicator header | BASE | 018H |
+| 101 | ✅ | Death / defeat screen | BASE | 019 |
+| 102 | ✅ | Death screen header | BASE | 019H |
+| 103 | ✅ | Auto-save indicator icon | CON6 | 361 |
+| 104 | ✅ | Auto-save indicator header | CON6 | 361H |
+| 105 | ✅ | Compass direction overlay | CON6 | 362 |
+| 106 | ✅ | Compass overlay header | CON6 | 362H |
+| 107 | ✅ | Quest waypoint distance display | CON6 | 363 |
+| 108 | ✅ | Quest waypoint distance header | CON6 | 363H |
+| 109 | ✅ | Tutorial/control reminder pause menu | CON6 | 364 |
+| 110 | ✅ | Tutorial reminder header | CON6 | 364H |
 
 ### 1.4 Inventory & Progression (111-140)
 
