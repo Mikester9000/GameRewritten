@@ -3,9 +3,9 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 005
-**System:** Hit pause / hitstop
-**Files to touch:** `src/game/RuntimeScene.hpp`
+**Task ID:** 006
+**System:** Stagger meter
+**Files to touch:** `src/game/actors/EnemyActor.cpp/hpp`
 
 ---
 

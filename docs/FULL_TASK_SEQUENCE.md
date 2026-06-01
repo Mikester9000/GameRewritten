@@ -105,7 +105,7 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 005: Hit pause / hitstop**
+- [x] **Task 005: Hit pause / hitstop**
   - Files: `src/game/RuntimeScene.hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.

@@ -1,3 +1,4 @@
+- 2026-06-01: Task 005 completion pass — verified hit pause / hitstop support remains implemented and advanced guarded workflow state to the next task with required documentation updates.
 - 2026-06-01: Task 004 completion pass — verified screen-edge damage flash remains implemented and advanced guarded workflow state to the next task with required documentation updates.
 - 2026-06-01: Task 003 completion pass — verified enemy attack telegraph lite behavior remains implemented and advanced guarded workflow state to the next task with required documentation updates.
 - 2026-06-01: Task 002 completion pass — verified enemy reaction / interrupt-lite implementation remains in place and advanced guarded workflow state to the next task with required documentation updates.
