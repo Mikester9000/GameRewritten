@@ -21,6 +21,10 @@ public:
     void SetOpacity(float opacity);
     void SetUltrawideLayoutEnabled(bool enabled) { m_ultrawideLayoutEnabled = enabled; }
     void SetAreaName(const std::string& areaName);
+    void SetContextPrompt(const std::string& prompt, bool visible);
+    void SetStatusScreenOpen(bool open) { m_showStatusScreen = open; }
+    void SetMapScreenOpen(bool open) { m_showMapScreen = open; }
+    void TriggerLevelUpOverlay(int newLevel);
 
     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
@@ -60,4 +64,10 @@ private:
     std::string m_currentAreaName = "Unknown Area";
     float m_areaBannerTimer = 0.0f;
     std::deque<ToastEntry> m_toasts;
+    std::string m_contextPrompt;
+    bool m_contextPromptVisible = false;
+    float m_levelUpOverlayTimer = 0.0f;
+    int m_lastLevelUp = 0;
+    bool m_showStatusScreen = false;
+    bool m_showMapScreen = false;
 };

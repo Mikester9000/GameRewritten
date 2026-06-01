@@ -48,6 +48,7 @@ constexpr float kAreaBannerTopMargin = 28.0f;
 constexpr float kToastTopMargin = 80.0f;
 constexpr float kToastRightMargin = 20.0f;
 constexpr float kToastSpacing = 6.0f;
+constexpr float kLevelUpOverlayDurationSec = 2.2f;
 
 // --- Target info panel ---
 constexpr float kTargetPanelW       = 280.0f;
@@ -204,10 +205,27 @@ void GameHUD::SetAreaName(const std::string& areaName)
         m_toasts.pop_back();
 }
 
+void GameHUD::SetContextPrompt(const std::string& prompt, bool visible)
+{
+    m_contextPrompt = prompt;
+    m_contextPromptVisible = visible && !prompt.empty();
+}
+
+void GameHUD::TriggerLevelUpOverlay(int newLevel)
+{
+    m_lastLevelUp = std::max(newLevel, 1);
+    m_levelUpOverlayTimer = kLevelUpOverlayDurationSec;
+    m_toasts.push_front({ "Level up! Lv." + std::to_string(m_lastLevelUp), kToastDefaultLifeSec, kToastDefaultLifeSec });
+    while (static_cast<int>(m_toasts.size()) > kToastMaxVisible)
+        m_toasts.pop_back();
+}
+
 void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
 {
     if (m_areaBannerTimer > 0.0f)
         m_areaBannerTimer = std::max(0.0f, m_areaBannerTimer - dt);
+    if (m_levelUpOverlayTimer > 0.0f)
+        m_levelUpOverlayTimer = std::max(0.0f, m_levelUpOverlayTimer - dt);
 
     for (auto& toast : m_toasts)
         toast.life = std::max(0.0f, toast.life - dt);
@@ -340,6 +358,100 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
                         IM_COL32(235, 240, 250, static_cast<int>(255.0f * alpha)),
                         toast.text.c_str());
             y += boxH + kToastSpacing;
+        }
+
+        if (m_contextPromptVisible)
+        {
+            const ImVec2 textSize = ImGui::CalcTextSize(m_contextPrompt.c_str());
+            const float boxPadX = 12.0f;
+            const float boxPadY = 7.0f;
+            const float boxW = textSize.x + boxPadX * 2.0f;
+            const float boxH = textSize.y + boxPadY * 2.0f;
+            const float boxX = (io.DisplaySize.x - boxW) * 0.5f;
+            const float boxY = io.DisplaySize.y - boxH - 120.0f;
+            dl->AddRectFilled(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+                              IM_COL32(12, 15, 30, ScaleAlpha(210, m_opacity)), 4.0f);
+            dl->AddRect(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+                        IM_COL32(80, 150, 255, ScaleAlpha(255, m_opacity)), 4.0f);
+            dl->AddText(ImVec2(boxX + boxPadX, boxY + boxPadY),
+                        IM_COL32(240, 245, 255, ScaleAlpha(255, m_opacity)),
+                        m_contextPrompt.c_str());
+        }
+
+        if (m_levelUpOverlayTimer > 0.0f)
+        {
+            const float alpha = std::clamp(FadeAlpha(m_levelUpOverlayTimer, kLevelUpOverlayDurationSec) * m_opacity, 0.0f, 1.0f);
+            const std::string levelLabel = "LEVEL UP!  Lv." + std::to_string(std::max(m_lastLevelUp, 1));
+            const ImVec2 textSize = ImGui::CalcTextSize(levelLabel.c_str());
+            const float boxPadX = 24.0f;
+            const float boxPadY = 10.0f;
+            const float boxW = textSize.x + boxPadX * 2.0f;
+            const float boxH = textSize.y + boxPadY * 2.0f;
+            const float boxX = (io.DisplaySize.x - boxW) * 0.5f;
+            const float boxY = io.DisplaySize.y * 0.18f;
+            dl->AddRectFilled(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+                              IM_COL32(22, 28, 46, static_cast<int>(220.0f * alpha)), 5.0f);
+            dl->AddRect(ImVec2(boxX, boxY), ImVec2(boxX + boxW, boxY + boxH),
+                        IM_COL32(255, 205, 70, static_cast<int>(255.0f * alpha)), 5.0f);
+            dl->AddText(ImVec2(boxX + boxPadX, boxY + boxPadY),
+                        IM_COL32(255, 238, 120, static_cast<int>(255.0f * alpha)),
+                        levelLabel.c_str());
+        }
+
+        if (m_showStatusScreen)
+        {
+            const float panelW = 340.0f;
+            const float panelH = 240.0f;
+            const float x = (io.DisplaySize.x - panelW) * 0.5f;
+            const float y = (io.DisplaySize.y - panelH) * 0.5f;
+            dl->AddRectFilled(ImVec2(x, y), ImVec2(x + panelW, y + panelH),
+                              IM_COL32(6, 10, 25, ScaleAlpha(230, m_opacity)), 6.0f);
+            dl->AddRect(ImVec2(x, y), ImVec2(x + panelW, y + panelH),
+                        IM_COL32(95, 155, 255, ScaleAlpha(255, m_opacity)), 6.0f);
+
+            const float tx = x + 18.0f;
+            float ty = y + 16.0f;
+            dl->AddText(ImVec2(tx, ty), IM_COL32(225, 235, 250, ScaleAlpha(255, m_opacity)), "STATUS");
+            ty += 34.0f;
+            const std::string lv = "Level: " + std::to_string(stats.level);
+            dl->AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), lv.c_str());
+            ty += 24.0f;
+            char hp[64];
+            std::snprintf(hp, sizeof(hp), "HP: %.0f / %.0f", stats.hp, stats.maxHp);
+            dl->AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), hp);
+            ty += 24.0f;
+            char mp[64];
+            std::snprintf(mp, sizeof(mp), "MP: %.0f / %.0f", stats.mp, stats.maxMp);
+            dl->AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), mp);
+            ty += 24.0f;
+            const std::string xp = "XP: " + std::to_string(stats.xp) + " / " + std::to_string(stats.xpToNextLevel);
+            dl->AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), xp.c_str());
+            ty += 24.0f;
+            const std::string status = std::string("Status Effect: ") + stats.statusEffect.GetName();
+            dl->AddText(ImVec2(tx, ty), IM_COL32(220, 220, 230, ScaleAlpha(255, m_opacity)), status.c_str());
+            dl->AddText(ImVec2(tx, y + panelH - 26.0f), IM_COL32(150, 170, 190, ScaleAlpha(255, m_opacity)),
+                        "Press C to close");
+        }
+
+        if (m_showMapScreen)
+        {
+            const float panelW = 440.0f;
+            const float panelH = 280.0f;
+            const float x = (io.DisplaySize.x - panelW) * 0.5f;
+            const float y = (io.DisplaySize.y - panelH) * 0.5f;
+            dl->AddRectFilled(ImVec2(x, y), ImVec2(x + panelW, y + panelH),
+                              IM_COL32(8, 12, 24, ScaleAlpha(235, m_opacity)), 6.0f);
+            dl->AddRect(ImVec2(x, y), ImVec2(x + panelW, y + panelH),
+                        IM_COL32(110, 180, 255, ScaleAlpha(255, m_opacity)), 6.0f);
+            dl->AddText(ImVec2(x + 18.0f, y + 16.0f), IM_COL32(228, 236, 248, ScaleAlpha(255, m_opacity)), "MAP");
+            dl->AddText(ImVec2(x + 18.0f, y + 48.0f), IM_COL32(180, 195, 214, ScaleAlpha(255, m_opacity)),
+                        "Map screen stub: full world map data hookup pending.");
+            dl->AddRectFilled(ImVec2(x + 18.0f, y + 84.0f), ImVec2(x + panelW - 18.0f, y + panelH - 48.0f),
+                              IM_COL32(15, 20, 38, ScaleAlpha(255, m_opacity)), 4.0f);
+            dl->AddText(ImVec2(x + 30.0f, y + 104.0f), IM_COL32(110, 130, 155, ScaleAlpha(255, m_opacity)),
+                        "WORLD MAP PLACEHOLDER");
+            dl->AddText(ImVec2(x + 18.0f, y + panelH - 26.0f), IM_COL32(150, 170, 190, ScaleAlpha(255, m_opacity)),
+                        "Press M to close");
         }
     }
 }

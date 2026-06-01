@@ -355,6 +355,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasAttackActionDown = false;
     bool wasLockOnActionDown = false;
     bool wasTacticalPauseHeld = false; // tracks edge transitions for SFX
+    bool wasStatusKeyDown = false;
+    bool wasMapKeyDown = false;
+    bool statusScreenOpen = false;
+    bool mapScreenOpen = false;
+    int lastObservedPlayerLevel = playerActor.stats.level;
     CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
     bool pendingMissIndicator = false;
@@ -418,7 +423,15 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // Tab is reserved for Tactical Pause. VK_TAB is checked directly
         // because it is not a combat InputAction — it controls time scale only.
         constexpr int kTacticalPauseKey   = VK_TAB;
+        constexpr int kStatusScreenKey = 'C';
+        constexpr int kMapScreenKey = 'M';
         const bool tacticalPauseHeld = actionMap.IsVirtualKeyHeld(kTacticalPauseKey);
+        const bool statusKeyDown = actionMap.IsVirtualKeyHeld(kStatusScreenKey);
+        const bool mapKeyDown = actionMap.IsVirtualKeyHeld(kMapScreenKey);
+        const bool statusPressed = statusKeyDown && !wasStatusKeyDown;
+        const bool mapPressed = mapKeyDown && !wasMapKeyDown;
+        wasStatusKeyDown = statusKeyDown;
+        wasMapKeyDown = mapKeyDown;
 
         // Tactical Pause SFX on edge transitions.
         if (tacticalPauseHeld && !wasTacticalPauseHeld)
@@ -483,12 +496,30 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         if (!paused && dialogBox.IsOpen() && interactPressed)
             dialogBox.Dismiss();
+        gameHud.SetContextPrompt("Press E to continue", dialogBox.IsOpen() && !paused);
+
+        if (!paused && !tacticalPauseHeld && statusPressed)
+            statusScreenOpen = !statusScreenOpen;
+        if (!paused && !tacticalPauseHeld && mapPressed)
+            mapScreenOpen = !mapScreenOpen;
+        if (paused)
+        {
+            statusScreenOpen = false;
+            mapScreenOpen = false;
+        }
+        gameHud.SetStatusScreenOpen(statusScreenOpen);
+        gameHud.SetMapScreenOpen(mapScreenOpen);
 
         // --- 4. Player update ---
         // Update player state, stats, and dodge burst.
         // Uses input and grounded state from above.
         const bool playerIsGrounded = camController.IsGrounded();
         runtimeScene.BeginPlayerFrame(combatDt, actionMap, playerIsGrounded, attackPressed, camController);
+        if (playerActor.stats.level > lastObservedPlayerLevel)
+        {
+            gameHud.TriggerLevelUpOverlay(playerActor.stats.level);
+            lastObservedPlayerLevel = playerActor.stats.level;
+        }
 
         // --- 5. Camera update ---
         // Move and rotate the camera based on input and player state.
