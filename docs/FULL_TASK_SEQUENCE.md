@@ -189,12 +189,12 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [x] **Task 021: Combat camera zoom**
+- [ ] **Task 021: Combat camera zoom**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [x] **Task 022: Camera collision avoidance**
+- [ ] **Task 022: Camera collision avoidance**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
@@ -204,32 +204,32 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [x] **Task 024: Lock-on camera recovery smoothing**
+- [ ] **Task 024: Lock-on camera recovery smoothing**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [x] **Task 025: Wind effect on trees**
+- [ ] **Task 025: Wind effect on trees**
   - Files: `Shaders/tree_vs.hlsl`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [x] **Task 026: Weather system lite**
+- [ ] **Task 026: Weather system lite**
   - Files: `src/world/WeatherSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [x] **Task 027: Ambient particles**
+- [ ] **Task 027: Ambient particles**
   - Files: `src/game/ParticleSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [x] **Task 028: Day/night cycle**
+- [ ] **Task 028: Day/night cycle**
   - Files: `src/world/DayNightCycle.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [x] **Task 029: Biome transition fade**
+- [ ] **Task 029: Biome transition fade**
   - Files: `src/world/WorldGrid.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
