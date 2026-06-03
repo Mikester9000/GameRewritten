@@ -535,8 +535,8 @@ void GameHUD::DrawDeathScreen(bool& outRetry)
                 IM_COL32(225, 225, 230, static_cast<int>(255.0f * std::clamp(pulse * m_opacity, 0.0f, 1.0f))),
                 prompt);
 
-    if (ImGui::IsKeyPressed(ImGuiKey_Enter) ||
-        ImGui::IsKeyPressed(ImGuiKey_KeypadEnter) ||
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter, false) ||
+        ImGui::IsKeyPressed(ImGuiKey_KeypadEnter, false) ||
         ImGui::IsMouseClicked(ImGuiMouseButton_Left))
     {
         outRetry = true;
@@ -638,7 +638,6 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
     {
         DrawAreaBanner(*dl, io);
         DrawToasts(*dl, io);
-        DrawContextPrompt(*dl, io);
         DrawLevelUpOverlay(*dl, io);
         DrawStatusScreen(*dl, io, stats);
         DrawMapScreen(*dl, io);
