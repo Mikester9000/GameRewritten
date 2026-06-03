@@ -3,8 +3,8 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 022
-**System:** Camera collision avoidance
+**Task ID:** 023
+**System:** Target framing adjustment
 **Files to touch:** `src/game/CameraController.cpp/hpp`
 
 ---

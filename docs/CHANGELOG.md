@@ -1,4 +1,4 @@
-- 2026-06-03: Task 022 completion pass — verified CameraController already includes terrain-sampled camera collision avoidance that pulls camera in front of blocking terrain and advanced guarded workflow state.
+- 2026-06-03: Task 022 completion pass — verified CameraController already includes terrain-sampled camera collision avoidance (player-to-camera segment sampling with safe pull-forward clamp) and advanced guarded workflow state.
 - 2026-06-03: Task 019 completion — added an ImGui draw-list defeat overlay in GameHUD with retry confirmation and hooked RuntimeScene/Main to defer respawn until retry is confirmed.
 - 2026-06-03: Task 018 completion — added a timed "Saving..." HUD indicator in GameHUD and wired a runtime trigger from Main world-reload flow.
 - 2026-06-03: Task 017 completion — added a timed tooltip request/render path in GameHUD and wired tooltip drawing into the gameplay HUD overlay stack.

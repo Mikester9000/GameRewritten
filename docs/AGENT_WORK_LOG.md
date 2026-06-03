@@ -144,5 +144,5 @@ This file records every change made by an automated agent or local LLM.
 
 [2026-06-03] TASK: Task 022 — Camera collision avoidance
   FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md
-  WHAT CHANGED: Verified camera collision avoidance was already implemented in CameraController via terrain-sampled segment checks from player to desired camera, with safeT clamping that pulls the camera forward to prevent clipping into terrain. Confirmed system already ✅ and advanced the guarded workflow without reimplementing existing behavior.
+  WHAT CHANGED: Verified camera collision avoidance was already implemented in CameraController via six terrain-sampled segment checks from player to desired camera, with safeT clamping that pulls the camera forward to prevent terrain clipping. Confirmed system already ✅ and advanced the guarded workflow without reimplementing existing behavior.
   KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
