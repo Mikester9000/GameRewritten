@@ -1,3 +1,4 @@
+- 2026-06-03: Task 030 completion pass — verified minimap fog-of-war implementation remains active in `Minimap` (visited-cell persistence + dark fog for unvisited cells) and marked Task 030 complete in the ordered sequence.
 - 2026-06-03: Task 024 completion pass — verified CameraController already includes lock-on recovery smoothing via dt-clamped yaw bias blending in `BiasYawTowardTarget`, and marked the task complete in the ordered sequence.
 - 2026-06-03: Task 022 completion pass — verified CameraController already includes terrain-sampled camera collision avoidance (player-to-camera segment sampling with safe pull-forward clamp) and advanced guarded workflow state.
 - 2026-06-03: Task 019 completion — added an ImGui draw-list defeat overlay in GameHUD with retry confirmation and hooked RuntimeScene/Main to defer respawn until retry is confirmed.

@@ -151,3 +151,8 @@ This file records every change made by an automated agent or local LLM.
   FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md
   WHAT CHANGED: Verified lock-on camera recovery smoothing was already implemented in CameraController::BiasYawTowardTarget through dt-clamped yaw blending that quickly converges after long-frame stalls while remaining smooth during normal frame times. Marked Task 024 complete in the phase sequence and refreshed the systems/changelog status lines.
   KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-03] TASK: Task 030 — Fog of war on minimap completion pass
+  FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md
+  WHAT CHANGED: Verified existing minimap fog-of-war behavior remains implemented through visited-cell persistence in Minimap and dark-fog rendering for unvisited cells. Marked Task 030 complete in the ordered phase sequence and refreshed the systems/changelog status line.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).

@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Task 024 (Lock-on camera recovery smoothing) confirmed complete; existing dt-clamped yaw bias blending in CameraController already smooths lock-on camera recovery after stalls or pauses.
+Latest task update: Task 030 (Fog of war on minimap) confirmed complete; Minimap persists visited cell coordinates and renders unvisited cells as dark fog until the player enters them.
 
 ## Systems
 
