@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Task 020 (Camera shake) confirmed complete; AddCameraShake log instrumentation added.
+Latest task update: Task 021 (Combat camera zoom) confirmed complete; existing lock-on zoom/framing blend already in CameraController.
 
 ## Systems
 

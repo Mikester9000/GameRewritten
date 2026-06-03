@@ -3,8 +3,8 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 021
-**System:** Combat camera zoom
+**Task ID:** 022
+**System:** Camera collision avoidance
 **Files to touch:** `src/game/CameraController.cpp/hpp`
 
 ---

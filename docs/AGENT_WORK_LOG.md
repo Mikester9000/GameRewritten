@@ -136,3 +136,8 @@ This file records every change made by an automated agent or local LLM.
   FILES CHANGED: src/game/CameraController.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md
   WHAT CHANGED: Camera shake was already fully implemented (amplitude-max-hold blending, 18 Hz sinusoidal lateral + 0.55× vertical component, linear fade-out envelope, phase accumulator). Added LOG_INFO to AddCameraShake for per-trigger observability. Updated SYSTEMS.md latest-task line and confirmed ✅ status.
   KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-03] TASK: Task 021 — Combat camera zoom
+  FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md
+  WHAT CHANGED: Verified Combat camera zoom was already implemented in CameraController (combat-focus distance/height interpolation with bounded zoom range), confirmed system was already ✅, and advanced the guarded task sequence without reimplementing an already-complete system.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
