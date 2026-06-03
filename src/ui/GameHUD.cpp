@@ -49,6 +49,8 @@ constexpr float kToastTopMargin = 80.0f;
 constexpr float kToastRightMargin = 20.0f;
 constexpr float kToastSpacing = 6.0f;
 constexpr float kLevelUpOverlayDurationSec = 2.2f;
+constexpr float kTooltipDefaultDurationSec = 2.0f;
+constexpr float kSavingIndicatorMinDurationSec = 0.15f;
 
 // --- Target info panel ---
 constexpr float kTargetPanelW       = 280.0f;
@@ -220,6 +222,42 @@ void GameHUD::TriggerLevelUpOverlay(int newLevel)
         m_toasts.pop_back();
 }
 
+void GameHUD::ShowTooltip(const char* text, float x, float y)
+{
+    if (!text || text[0] == '\0')
+    {
+        m_tooltip.active = false;
+        m_tooltip.remaining = 0.0f;
+        return;
+    }
+
+    m_tooltip.text = text;
+    m_tooltip.screenX = x;
+    m_tooltip.screenY = y;
+    m_tooltip.duration = kTooltipDefaultDurationSec;
+    m_tooltip.remaining = m_tooltip.duration;
+    m_tooltip.active = true;
+}
+
+void GameHUD::ShowSavingIndicator(float durationSeconds)
+{
+    const float clamped = std::max(durationSeconds, 0.0f);
+    if (clamped <= 0.0f)
+        return;
+
+    const float requested = std::max(clamped, kSavingIndicatorMinDurationSec);
+    if (requested >= m_savingIndicatorTimer)
+        m_savingIndicatorMaxTime = requested;
+    m_savingIndicatorTimer = std::max(m_savingIndicatorTimer, requested);
+}
+
+bool GameHUD::ConsumeDeathRetryRequested()
+{
+    const bool requested = m_deathRetryRequested;
+    m_deathRetryRequested = false;
+    return requested;
+}
+
 void GameHUD::TickOverlayTimers(float dt)
 {
     if (m_areaBannerTimer > 0.0f)
@@ -231,6 +269,20 @@ void GameHUD::TickOverlayTimers(float dt)
         toast.life = std::max(0.0f, toast.life - dt);
     while (!m_toasts.empty() && m_toasts.back().life <= 0.0f)
         m_toasts.pop_back();
+
+    if (m_tooltip.active)
+    {
+        m_tooltip.remaining = std::max(0.0f, m_tooltip.remaining - dt);
+        if (m_tooltip.remaining <= 0.0f)
+            m_tooltip.active = false;
+    }
+
+    if (m_savingIndicatorTimer > 0.0f)
+    {
+        m_savingIndicatorTimer = std::max(0.0f, m_savingIndicatorTimer - dt);
+        if (m_savingIndicatorTimer <= 0.0f)
+            m_savingIndicatorMaxTime = 0.0f;
+    }
 }
 
 void GameHUD::DrawAreaBanner(ImDrawList& dl, const ImGuiIO& io) const
@@ -390,6 +442,108 @@ void GameHUD::DrawMapScreen(ImDrawList& dl, const ImGuiIO& io) const
                "Press M to close");
 }
 
+void GameHUD::DrawTooltip()
+{
+    if (!m_tooltip.active || m_tooltip.remaining <= 0.0f || m_tooltip.text.empty())
+        return;
+
+    const ImGuiIO& io = ImGui::GetIO();
+    const float alpha = std::clamp(FadeAlpha(m_tooltip.remaining, std::max(m_tooltip.duration, 0.01f)) * m_opacity, 0.0f, 1.0f);
+    if (alpha <= 0.0f)
+        return;
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    if (!dl)
+        return;
+
+    const ImVec2 textSize = ImGui::CalcTextSize(m_tooltip.text.c_str());
+    const float boxPadX = 10.0f;
+    const float boxPadY = 6.0f;
+    const float boxW = textSize.x + boxPadX * 2.0f;
+    const float boxH = textSize.y + boxPadY * 2.0f;
+    const float anchorOffsetX = 16.0f;
+    const float anchorOffsetY = 18.0f;
+    const float rawX = m_tooltip.screenX + anchorOffsetX;
+    const float rawY = m_tooltip.screenY - boxH - anchorOffsetY;
+    const float x = std::clamp(rawX, 8.0f, std::max(8.0f, io.DisplaySize.x - boxW - 8.0f));
+    const float y = std::clamp(rawY, 8.0f, std::max(8.0f, io.DisplaySize.y - boxH - 8.0f));
+
+    dl->AddRectFilled(ImVec2(x, y), ImVec2(x + boxW, y + boxH),
+                      IM_COL32(8, 12, 24, static_cast<int>(220.0f * alpha)), 4.0f);
+    dl->AddRect(ImVec2(x, y), ImVec2(x + boxW, y + boxH),
+                IM_COL32(100, 160, 255, static_cast<int>(255.0f * alpha)), 4.0f);
+    dl->AddText(ImVec2(x + boxPadX, y + boxPadY),
+                IM_COL32(230, 235, 245, static_cast<int>(255.0f * alpha)),
+                m_tooltip.text.c_str());
+}
+
+void GameHUD::DrawSavingIndicator()
+{
+    if (m_savingIndicatorTimer <= 0.0f)
+        return;
+
+    const ImGuiIO& io = ImGui::GetIO();
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    if (!dl)
+        return;
+
+    const char* label = "Saving...";
+    const ImVec2 textSize = ImGui::CalcTextSize(label);
+    const float boxPadX = 10.0f;
+    const float boxPadY = 6.0f;
+    const float boxW = textSize.x + boxPadX * 2.0f;
+    const float boxH = textSize.y + boxPadY * 2.0f;
+    const float x = io.DisplaySize.x - boxW - 18.0f;
+    const float y = io.DisplaySize.y - boxH - 18.0f;
+    const float alpha = std::clamp(FadeAlpha(m_savingIndicatorTimer, std::max(m_savingIndicatorMaxTime, 0.2f)) * m_opacity, 0.0f, 1.0f);
+
+    dl->AddRectFilled(ImVec2(x, y), ImVec2(x + boxW, y + boxH),
+                      IM_COL32(14, 20, 36, static_cast<int>(225.0f * alpha)), 4.0f);
+    dl->AddRect(ImVec2(x, y), ImVec2(x + boxW, y + boxH),
+                IM_COL32(130, 210, 255, static_cast<int>(255.0f * alpha)), 4.0f);
+    dl->AddText(ImVec2(x + boxPadX, y + boxPadY),
+                IM_COL32(235, 245, 255, static_cast<int>(255.0f * alpha)),
+                label);
+}
+
+void GameHUD::DrawDeathScreen(bool& outRetry)
+{
+    outRetry = false;
+    if (!m_deathScreenActive)
+        return;
+
+    const ImGuiIO& io = ImGui::GetIO();
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    if (!dl)
+        return;
+
+    dl->AddRectFilled(ImVec2(0.0f, 0.0f), io.DisplaySize, IM_COL32(0, 0, 0, ScaleAlpha(205, m_opacity)));
+
+    const char* title = "YOU DIED";
+    const char* prompt = "Press Enter or Left Click to Retry";
+    const ImVec2 titleSize = ImGui::CalcTextSize(title);
+    const ImVec2 promptSize = ImGui::CalcTextSize(prompt);
+    const float titleX = (io.DisplaySize.x - titleSize.x) * 0.5f;
+    const float titleY = io.DisplaySize.y * 0.42f;
+    const float promptX = (io.DisplaySize.x - promptSize.x) * 0.5f;
+    const float promptY = titleY + titleSize.y + 26.0f;
+    const float pulse = 0.55f + 0.45f * std::sinf(m_lowHpPulseTime * 7.0f);
+
+    dl->AddText(ImVec2(titleX + 1.0f, titleY + 1.0f), IM_COL32(20, 0, 0, ScaleAlpha(235, m_opacity)), title);
+    dl->AddText(ImVec2(titleX, titleY), IM_COL32(220, 40, 40, ScaleAlpha(255, m_opacity)), title);
+    dl->AddText(ImVec2(promptX, promptY),
+                IM_COL32(225, 225, 230, static_cast<int>(255.0f * std::clamp(pulse * m_opacity, 0.0f, 1.0f))),
+                prompt);
+
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter) ||
+        ImGui::IsKeyPressed(ImGuiKey_KeypadEnter) ||
+        ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+    {
+        outRetry = true;
+        m_deathRetryRequested = true;
+    }
+}
+
 void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
 {
     // 1) Tick timers and transient overlay state.
@@ -476,6 +630,9 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
     }
 
     // 4) Draw non-HUD overlays in order.
+    if (m_contextPromptVisible && !m_contextPrompt.empty())
+        ShowTooltip(m_contextPrompt.c_str(), io.DisplaySize.x * 0.5f, io.DisplaySize.y - 122.0f);
+
     ImDrawList* dl = ImGui::GetForegroundDrawList();
     if (dl)
     {
@@ -485,7 +642,12 @@ void GameHUD::Draw(const PlayerStats& stats, const ImGuiIO& io, float dt)
         DrawLevelUpOverlay(*dl, io);
         DrawStatusScreen(*dl, io, stats);
         DrawMapScreen(*dl, io);
+        DrawTooltip();
+        DrawSavingIndicator();
     }
+
+    bool retryRequested = false;
+    DrawDeathScreen(retryRequested);
 }
 
 void GameHUD::TriggerDamageFlash()

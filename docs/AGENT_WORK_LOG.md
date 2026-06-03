@@ -116,3 +116,18 @@ This file records every change made by an automated agent or local LLM.
   FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
   WHAT CHANGED: Recorded guarded completion for Task 006, confirmed the existing stagger-meter implementation, and advanced NEXT_TASK to the next backlog item using the required workflow command.
   KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-03] TASK: Task 017 — Tooltip system
+  FILES CHANGED: src/ui/GameHUD.hpp, src/ui/GameHUD.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md
+  WHAT CHANGED: Added GameHUD::TooltipRequest plus ShowTooltip/DrawTooltip with timed fade and screen-clamped placement, and wired tooltip drawing into the gameplay HUD overlay order so context prompts can surface a tooltip in active gameplay.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-03] TASK: Task 018 — Saving indicator
+  FILES CHANGED: src/ui/GameHUD.hpp, src/ui/GameHUD.cpp, src/app/Main.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md
+  WHAT CHANGED: Added ShowSavingIndicator/DrawSavingIndicator to GameHUD with duration-based visibility and corner rendering, then triggered it from Main when world reload runs to make the indicator testable at runtime.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-03] TASK: Task 019 — Death / defeat screen
+  FILES CHANGED: src/ui/GameHUD.hpp, src/ui/GameHUD.cpp, src/game/RuntimeScene.hpp, src/game/RuntimeScene.cpp, src/app/Main.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md
+  WHAT CHANGED: Added GameHUD::DrawDeathScreen(bool&) with full-screen dark overlay, defeat text, and retry prompt, plus RuntimeScene defeat-state gating so death now waits for retry confirmation before issuing respawn reset/teleport through the existing flow.
+  KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).

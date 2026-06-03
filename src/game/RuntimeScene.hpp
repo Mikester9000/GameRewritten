@@ -265,6 +265,7 @@ public:
     // Returns true when the player was defeated this frame and needs to be
     // teleported back to spawn. Call once per frame after BeginFrame().
     bool WantsRespawn() const { return m_wantsRespawn; }
+    bool IsDefeatScreenActive() const { return m_defeatScreenActive; }
 
     // Spawn X/Z coordinates for player respawn (set from InitEnemies center).
     float GetRespawnX() const { return m_spawnCenterX; }
@@ -272,6 +273,18 @@ public:
 
     // Clear the respawn flag after Main.cpp has handled the teleport.
     void ClearRespawnFlag() { m_wantsRespawn = false; }
+
+    void ConfirmRetryFromDefeat()
+    {
+        if (!m_defeatScreenActive)
+            return;
+
+        m_player.stats.Reset();
+        m_player.state = PlayerActionState::Idle;
+        m_player.stateTimer = 0.0f;
+        m_wantsRespawn = true;
+        m_defeatScreenActive = false;
+    }
 
     // Returns true (once) if the player was hit this frame — used to trigger the damage flash.
     bool ConsumePlayerHitFlash()
@@ -402,6 +415,7 @@ private:
 
     // Set true when the player dies; cleared by Main.cpp after the camera teleport.
     bool m_wantsRespawn = false;
+    bool m_defeatScreenActive = false;
 
     // Set true for one frame whenever the player takes damage; cleared by ConsumePlayerHitFlash().
     bool m_playerWasHitThisFrame = false;

@@ -466,7 +466,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         if (debugPressed)
             imguiLayer.ToggleDebugOverlay();
         if (reloadPressed)
+        {
             WorldReload::ReloadAssetsAndWorld(worldReloadContext);
+            gameHud.ShowSavingIndicator(1.25f);
+        }
 
         if (imguiLayer.WantsQuit())
             break;
@@ -773,7 +776,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             if (!imguiLayer.IsPauseMenuOpen())
             {
                 const ImGuiIO&    io     = ImGui::GetIO();
+                gameHud.SetDeathScreenActive(runtimeScene.IsDefeatScreenActive());
                 gameHud.Draw(playerActor.stats, io, deltaTime);
+                if (gameHud.ConsumeDeathRetryRequested())
+                    runtimeScene.ConfirmRetryFromDefeat();
                 gameHud.DrawTargetInfo(runtimeScene.GetLockedTarget(), io);
                 gameHud.DrawOffScreenTargetIndicator(runtimeScene.GetLockedTarget(),
                                                      camController.GetCamX(),

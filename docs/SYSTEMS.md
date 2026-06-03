@@ -93,9 +93,9 @@ Latest task update: Tasks 010-016 completed and backlog advanced with guarded wo
 | Level up screen overlay | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
 | Status screen | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
 | Map screen stub | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
-| Tooltip system | ❌ | `src/ui/GameHUD.cpp/hpp` |
-| Saving indicator | ❌ | `src/ui/GameHUD.cpp/hpp` |
-| Death / defeat screen | ❌ | `src/ui/GameHUD.cpp/hpp` |
+| Tooltip system | ✅ | `src/ui/GameHUD.cpp/hpp` |
+| Saving indicator | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/app/Main.cpp` |
+| Death / defeat screen | ✅ | `src/ui/GameHUD.cpp/hpp`, `src/game/RuntimeScene.cpp/hpp`, `src/app/Main.cpp` |
 | Low HP warning pulse | ✅ | `src/ui/GameHUD.cpp/hpp` |
 | Camera shake | ✅ | `src/game/CameraController.cpp/hpp` |
 | Combat camera zoom | ✅ | `src/game/CameraController.cpp/hpp` |
