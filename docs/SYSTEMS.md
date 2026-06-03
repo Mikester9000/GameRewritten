@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Task 022 (Camera collision avoidance) confirmed complete; existing six-sample terrain collision pull-forward safety check is already in CameraController.
+Latest task update: Task 024 (Lock-on camera recovery smoothing) confirmed complete; existing dt-clamped yaw bias blending in CameraController already smooths lock-on camera recovery after stalls or pauses.
 
 ## Systems
 
