@@ -3,9 +3,9 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 007
-**System:** Enemy attack telegraph
-**Files to touch:** `src/game/actors/EnemyActor.cpp/hpp`
+**Task ID:** 021
+**System:** Combat camera zoom
+**Files to touch:** `src/game/CameraController.cpp/hpp`
 
 ---
 

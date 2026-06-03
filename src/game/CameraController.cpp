@@ -17,6 +17,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <cstdio>
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -57,6 +58,12 @@ void CameraController::AddCameraShake(float amplitude, float duration)
 {
     if (amplitude <= 0.0f || duration <= 0.0f)
         return;
+
+    char shakeMsg[128];
+    std::snprintf(shakeMsg, sizeof(shakeMsg),
+        "CameraController: Camera shake triggered (amplitude=%.2f, duration=%.2fs).",
+        amplitude, duration);
+    LOG_INFO(shakeMsg);
 
     if (amplitude > m_shakeAmplitude)
         m_shakeAmplitude = amplitude;

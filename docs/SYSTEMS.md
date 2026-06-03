@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Tasks 010-016 completed and backlog advanced with guarded workflow docs sync.
+Latest task update: Task 030 (Fog of war on minimap) confirmed complete; Minimap persists visited cell coordinates and renders unvisited cells as dark fog until the player enters them.
 
 ## Systems
 
