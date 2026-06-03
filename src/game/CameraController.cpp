@@ -58,6 +58,8 @@ void CameraController::AddCameraShake(float amplitude, float duration)
     if (amplitude <= 0.0f || duration <= 0.0f)
         return;
 
+    LOG_INFO("CameraController: Camera shake triggered (amplitude=%.2f, duration=%.2fs).", amplitude, duration);
+
     if (amplitude > m_shakeAmplitude)
         m_shakeAmplitude = amplitude;
     if (duration > m_shakeTimer)
