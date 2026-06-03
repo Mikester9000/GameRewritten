@@ -19,6 +19,16 @@ struct ImDrawList;
 class GameHUD
 {
 public:
+    struct TooltipRequest
+    {
+        std::string text;
+        float screenX = 0.0f;
+        float screenY = 0.0f;
+        float duration = 0.0f;
+        float remaining = 0.0f;
+        bool active = false;
+    };
+
     void SetOpacity(float opacity);
     void SetUltrawideLayoutEnabled(bool enabled) { m_ultrawideLayoutEnabled = enabled; }
     void SetAreaName(const std::string& areaName);
@@ -26,6 +36,13 @@ public:
     void SetStatusScreenOpen(bool open) { m_showStatusScreen = open; }
     void SetMapScreenOpen(bool open) { m_showMapScreen = open; }
     void TriggerLevelUpOverlay(int newLevel);
+    void ShowTooltip(const char* text, float x, float y);
+    void DrawTooltip();
+    void ShowSavingIndicator(float durationSeconds);
+    void DrawSavingIndicator();
+    void SetDeathScreenActive(bool active) { m_deathScreenActive = active; }
+    bool ConsumeDeathRetryRequested();
+    void DrawDeathScreen(bool& outRetry);
 
     // Draw the player stats panel (HP / MP / Surge / Limit) at the bottom-left.
     void Draw(const PlayerStats& stats, const ImGuiIO& io, float dt);
@@ -79,4 +96,9 @@ private:
     int m_lastLevelUp = 0;
     bool m_showStatusScreen = false;
     bool m_showMapScreen = false;
+    TooltipRequest m_tooltip;
+    float m_savingIndicatorTimer = 0.0f;
+    float m_savingIndicatorMaxTime = 0.0f;
+    bool m_deathScreenActive = false;
+    bool m_deathRetryRequested = false;
 };

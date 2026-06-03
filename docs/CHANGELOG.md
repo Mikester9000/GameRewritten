@@ -1,3 +1,6 @@
+- 2026-06-03: Task 019 completion — added an ImGui draw-list defeat overlay in GameHUD with retry confirmation and hooked RuntimeScene/Main to defer respawn until retry is confirmed.
+- 2026-06-03: Task 018 completion — added a timed "Saving..." HUD indicator in GameHUD and wired a runtime trigger from Main world-reload flow.
+- 2026-06-03: Task 017 completion — added a timed tooltip request/render path in GameHUD and wired tooltip drawing into the gameplay HUD overlay stack.
 - 2026-06-01: Task 006 completion pass — verified stagger meter support remains implemented and advanced guarded workflow state to the next task with required documentation updates.
 - 2026-06-01: Task 005 completion pass — verified hit pause / hitstop support remains implemented and advanced guarded workflow state to the next task with required documentation updates.
 - 2026-06-01: Task 004 completion pass — verified screen-edge damage flash remains implemented and advanced guarded workflow state to the next task with required documentation updates.

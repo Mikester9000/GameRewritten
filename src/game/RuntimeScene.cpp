@@ -175,12 +175,12 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
 
         if (m_player.stats.IsDead())
         {
-            // Restore all stats and signal Main.cpp to teleport the camera.
-            m_player.stats.Reset();
-            m_player.state      = PlayerActionState::Idle;
+            // Hold on the defeat state until the HUD retry prompt is confirmed.
+            m_player.state      = PlayerActionState::Dead;
             m_player.stateTimer = 0.0f;
-            m_wantsRespawn      = true;
-            LOG_INFO("RuntimeScene: Player defeated — respawning.");
+            m_wantsRespawn      = false;
+            m_defeatScreenActive = true;
+            LOG_INFO("RuntimeScene: Player defeated — waiting for retry.");
         }
         else
         {
