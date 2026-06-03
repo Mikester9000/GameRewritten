@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Task 021 (Combat camera zoom) confirmed complete; existing lock-on zoom/framing blend already in CameraController.
+Latest task update: Task 022 (Camera collision avoidance) confirmed complete; existing terrain-sampled camera pull-forward safety check already in CameraController.
 
 ## Systems
 
