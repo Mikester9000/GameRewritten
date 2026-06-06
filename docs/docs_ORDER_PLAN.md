@@ -944,7 +944,7 @@ Within each layer, **headers come before implementations** where needed.
 ## COMPLETION SUMMARY
 
 **Total Tasks: 739**
-**Status column: restored to all phases (previously missing from Phase 1.3 onward)**
+**Status column: restored to all phases (previously missing from Phase 1.4 onward)**
 
 **By Plan File:**
 - BASE: 201 tasks (001-108 + headers)
