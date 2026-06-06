@@ -62,7 +62,7 @@ Master map of the `docs/` folder. Use this to quickly open the right file.
 | ONE_FILE_COMPLETION_PLAN.md | Main one-file plan | Task-level planning |
 | ONE_FILE_COMPLETION_PLAN(CON1).md | CON1 addendum plan | CON1 execution |
 | ONE_FILE_COMPLETION_PLAN(CON2).md | CON2 addendum plan | CON2 execution |
-| docs_ONE_FILE_COMPLETION_PLAN(CON3).md | CON3 addendum plan | CON3 execution |
+| ONE_FILE_COMPLETION_PLAN(CON3).md | CON3 addendum plan | CON3 execution |
 | docs_ONE_FILE_COMPLETION_PLAN(CON4).md | CON4 addendum plan | CON4 execution |
 | docs_ONE_FILE_COMPLETION_PLAN(CON5).md | CON5 addendum plan | CON5 execution |
 | docs_ONE_FILE_COMPLETION_PLAN(CON6).md | CON6 addendum plan | CON6 execution |

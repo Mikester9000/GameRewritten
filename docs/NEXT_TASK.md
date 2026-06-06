@@ -5,7 +5,7 @@ Do not choose a different task.
 
 **Task ID:** 031
 **System:** World event trigger zones
-**Files to touch:** `src/game/world/EventZone.cpp`, `src/game/world/EventZone.hpp`
+**Files to touch:** `src/game/world/EventZone.cpp`, `src/game/world/EventZone.hpp`, `src/app/Main.cpp`, `GameRewritten.vcxproj`, `GameRewritten.vcxproj.filters`
 
 ---
 

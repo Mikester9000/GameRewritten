@@ -27,16 +27,16 @@ Use this file at the start of every coding session.
 
 | Need | Open |
 |---|---|
-| Writing code today | `engine/ARCHITECTURE.md` + `engine/CODING_STYLE.md` |
-| Checking what exists | `engine/SYSTEMS.md` |
+| Writing code today | `Architecture.md` + `CODING_STYLE.md` |
+| Checking what exists | `SYSTEMS.md` |
 | Next task details | `NEXT_TASK.md` |
-| Visual style rules | `vision/GRAPHICS_VISION.md` |
-| Combat rules | `vision/COMBAT_VISION.md` |
+| Visual style rules | `GRAPHICS_VISION.md` |
+| Combat rules | `COMBAT_VISION.md` |
 | Story placeholder | `story/STORY_PLACEHOLDER.md` |
-| Performance rules | `engine/PERFORMANCE.md` |
+| Performance rules | `PERFORMANCE_GUARDRAILS.md` |
 
 ## Known gaps in the plan
 - Cel shader / toon shading (**CRITICAL** — FF7-style look depends on this)
 - Character outline / silhouette pass
 - Story actual content (use placeholder until engine is done)
-- `NEXT_TASK.md` is currently stale in legacy docs; real next task is **World event trigger zones**
+- `NEXT_TASK.md` currently points to **Task 031: World event trigger zones**

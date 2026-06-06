@@ -27,10 +27,9 @@ This is a prioritized reality check for what is still missing to get the engine 
 - Quest system — placeholder quests still need this scaffold
 
 ## NEXT_TASK.md status
-- Current file is stale: points to **Task 021 (Combat camera zoom)**
-- `SYSTEMS.md` already marks camera zoom as ✅
-- Real next task from ORDER_PLAN should be **World event trigger zones**
-  - Target files: `src/game/world/EventZone.cpp`, `src/game/world/EventZone.hpp`
+- Current file points to **Task 031 (World event trigger zones)**
+- This is aligned with the current planning flow
+- Target files: `src/game/world/EventZone.cpp`, `src/game/world/EventZone.hpp`
 
 ## ORDER_PLAN issues to fix later
 - Status column missing from tables after task 96
