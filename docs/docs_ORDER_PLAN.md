@@ -1,6 +1,6 @@
 # ORDER_PLAN.md
 
-**Execution order for all 739 tasks across 8 plan files**  
+**Execution order for all 745 tasks across 8 plan files**
 Format: `Number -> Task Name -> Plan File -> Task Number in That Plan`
 
 ---
@@ -45,18 +45,16 @@ Within each layer, **headers come before implementations** where needed.
 | 16 | ✅ | Far-distance continent impostors | BASE | 066 |
 | 17 | ✅ | World partition + region streaming core | BASE | 061 |
 | 18 | ✅ | Asynchronous chunk IO + prefetch queue | BASE | 062 |
-| 19 | ✅ | Graphics settings preset system (Low/Med/High/Ultra) | CON7 | 383 |
-| 20 | ✅ | Graphics settings preset system header | CON7 | 383H |
-| 21 | ✅ | V-sync + FPS limiter system | CON7 | 384 |
-| 22 | ✅ | V-sync + FPS limiter header | CON7 | 384H |
-| 23 | ✅ | Anti-aliasing options system | CON7 | 385 |
-| 24 | ✅ | Anti-aliasing options header | CON7 | 385H |
-| 25 | ✅ | Ultrawide monitor support system | CON7 | 389 |
-| 26 | ✅ | Ultrawide monitor support header | CON7 | 389H |
-| 27 | ✅ | Post-process effect toggle system | CON7 | 390 |
-| 28 | ✅ | Post-process effect toggle header | CON7 | 390H |
-| 29 | ✅ | HUD opacity slider | CON7 | 391 |
-| 30 | ✅ | HUD opacity slider header | CON7 | 391H |
+| 19 |  | Cel/toon shader (3-step NdotL shading) | NEW | — |
+| 20 |  | Cel shader header | NEW | — |
+| 21 |  | Silhouette/outline pass | NEW | — |
+| 22 |  | Silhouette pass header | NEW | — |
+| 23 |  | Color grading / LUT post-process pass | NEW | — |
+| 24 |  | Color grading header | NEW | — |
+
+> ⚠️ Tasks 19–24 are newly added rendering tasks not present in any CON plan file.
+> Files to create: `Shaders/cel_ps.hlsl`, `Shaders/cel_vs.hlsl`, `Shaders/outline_ps.hlsl`, `Shaders/outline_vs.hlsl`, `Shaders/lut_ps.hlsl`
+> These are critical for the FF7/FF8-style visual identity. Implement before content tasks.
 
 ### 1.2 Combat Foundation (31-80)
 
@@ -749,6 +747,18 @@ Within each layer, **headers come before implementations** where needed.
 | 598 |  | Adaptive triggers header | CON1 | 214H |
 | 599 |  | Haptic feedback (DualSense) | CON1 | 214 |
 | 600 |  | Haptic feedback header | CON1 | 214H |
+| 601 |  | Graphics settings preset system (Low/Med/High/Ultra) | CON7 | 383 |
+| 602 |  | Graphics settings preset system header | CON7 | 383H |
+| 603 |  | V-sync + FPS limiter system | CON7 | 384 |
+| 604 |  | V-sync + FPS limiter header | CON7 | 384H |
+| 605 |  | Anti-aliasing options system | CON7 | 385 |
+| 606 |  | Anti-aliasing options header | CON7 | 385H |
+| 607 |  | Ultrawide monitor support system | CON7 | 389 |
+| 608 |  | Ultrawide monitor support header | CON7 | 389H |
+| 609 |  | Post-process effect toggle system | CON7 | 390 |
+| 610 |  | Post-process effect toggle header | CON7 | 390H |
+| 611 |  | HUD opacity slider | CON7 | 391 |
+| 612 |  | HUD opacity slider header | CON7 | 391H |
 
 > † These task numbers appear in multiple sections. Refer to the CON3 plan file for the authoritative task definition.
 
@@ -943,8 +953,10 @@ Within each layer, **headers come before implementations** where needed.
 
 ## COMPLETION SUMMARY
 
-**Total Tasks: 739**
+**Total Tasks: 745**
 **Status column: restored to all phases (previously missing from Phase 1.4 onward)**
+**Pass 4 changes:** Cel shader tasks added to Phase 1.1 (orders 19–24). PC release features (graphics presets, V-sync, AA, ultrawide, post-process toggles, HUD opacity) moved from Phase 1.1 to Phase 6.2 where they belong. Total task count remains 739 + 6 new cel shader tasks = 745.
+**Phase 1 scope:** Now limited to core rendering and gameplay foundation work; PC release polish/settings tasks have been moved out to Phase 6.2.
 
 **By Plan File:**
 - BASE: 201 tasks (001-108 + headers)
@@ -958,12 +970,12 @@ Within each layer, **headers come before implementations** where needed.
 - CON8: 32 tasks (393-408 with headers) — external engine integration: Animation-Engine .anim packs, Audio-Engine audio_plan manifests, Creation-Engine material/tilemap/mesh exports
 
 **By Phase:**
-- Phase 1 (Foundation): 150 tasks
+- Phase 1 (Foundation): 144 tasks
 - Phase 2 (World Systems): 150 tasks
 - Phase 3 (Combat Depth): 100 tasks
 - Phase 4 (World Content): 100 tasks
 - Phase 5 (Narrative): 50 tasks
-- Phase 6 (Accessibility): 50 tasks
+- Phase 6 (Accessibility): 62 tasks
 - Phase 7 (Endgame): 50 tasks
 - Phase 8 (Localization): 50 tasks
 - Phase 9 (Release): 39 tasks
