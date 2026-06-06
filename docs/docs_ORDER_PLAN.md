@@ -1,6 +1,6 @@
 # ORDER_PLAN.md
 
-**Execution order for all 739 tasks across 8 plan files**  
+**Execution order for all 745 tasks across 8 plan files**
 Format: `Number -> Task Name -> Plan File -> Task Number in That Plan`
 
 ---
@@ -23,7 +23,7 @@ Within each layer, **headers come before implementations** where needed.
 
 ## PHASE 1: FOUNDATION & CORE SYSTEMS (Tasks 1-150)
 
-### 1.1 Core Engine & Rendering (1-30)
+### 1.1 Core Engine & Rendering (1-24)
 
 | Order | Status | Task Name | Plan | Task # |
 |-------|--------|-----------|------|--------|
@@ -45,18 +45,17 @@ Within each layer, **headers come before implementations** where needed.
 | 16 | ✅ | Far-distance continent impostors | BASE | 066 |
 | 17 | ✅ | World partition + region streaming core | BASE | 061 |
 | 18 | ✅ | Asynchronous chunk IO + prefetch queue | BASE | 062 |
-| 19 | ✅ | Graphics settings preset system (Low/Med/High/Ultra) | CON7 | 383 |
-| 20 | ✅ | Graphics settings preset system header | CON7 | 383H |
-| 21 | ✅ | V-sync + FPS limiter system | CON7 | 384 |
-| 22 | ✅ | V-sync + FPS limiter header | CON7 | 384H |
-| 23 | ✅ | Anti-aliasing options system | CON7 | 385 |
-| 24 | ✅ | Anti-aliasing options header | CON7 | 385H |
-| 25 | ✅ | Ultrawide monitor support system | CON7 | 389 |
-| 26 | ✅ | Ultrawide monitor support header | CON7 | 389H |
-| 27 | ✅ | Post-process effect toggle system | CON7 | 390 |
-| 28 | ✅ | Post-process effect toggle header | CON7 | 390H |
-| 29 | ✅ | HUD opacity slider | CON7 | 391 |
-| 30 | ✅ | HUD opacity slider header | CON7 | 391H |
+| 19 |  | Cel/toon shader (3-step NdotL shading) | NEW | — |
+| 20 |  | Cel shader header | NEW | — |
+| 21 |  | Silhouette/outline pass | NEW | — |
+| 22 |  | Silhouette pass header | NEW | — |
+| 23 |  | Color grading / LUT post-process pass | NEW | — |
+| 24 |  | Color grading header | NEW | — |
+
+> ⚠️ Tasks 19–24 are newly added rendering tasks not present in any CON plan file.
+> Files to create: `Shaders/cel_ps.hlsl`, `Shaders/cel_vs.hlsl`, `Shaders/outline_ps.hlsl`, `Shaders/outline_vs.hlsl`, `Shaders/lut_ps.hlsl`
+> These are critical for the FF7/FF8-style visual identity. Implement before content tasks.
+> Order slots 25–30 are intentionally unused after the completed PC graphics/settings tasks were relocated to Phase 6.2.
 
 ### 1.2 Combat Foundation (31-80)
 
@@ -688,7 +687,7 @@ Within each layer, **headers come before implementations** where needed.
 
 ---
 
-## PHASE 6: ACCESSIBILITY & SETTINGS (Tasks 551-600)
+## PHASE 6: ACCESSIBILITY & SETTINGS (Tasks 551-612)
 
 ### 6.1 Accessibility Features (551-580)
 
@@ -725,7 +724,7 @@ Within each layer, **headers come before implementations** where needed.
 | 579 |  | Loading screen gameplay tips | CON6 | 365 |
 | 580 |  | Loading screen tips header | CON6 | 365H |
 
-### 6.2 Controller & Input (581-600)
+### 6.2 Controller & Input (581-612)
 
 | Order | Status | Task Name | Plan | Task # |
 |-------|--------|-----------|------|--------|
@@ -749,202 +748,216 @@ Within each layer, **headers come before implementations** where needed.
 | 598 |  | Adaptive triggers header | CON1 | 214H |
 | 599 |  | Haptic feedback (DualSense) | CON1 | 214 |
 | 600 |  | Haptic feedback header | CON1 | 214H |
+| 601 | ✅ | Graphics settings preset system (Low/Med/High/Ultra) | CON7 | 383 |
+| 602 | ✅ | Graphics settings preset system header | CON7 | 383H |
+| 603 | ✅ | V-sync + FPS limiter system | CON7 | 384 |
+| 604 | ✅ | V-sync + FPS limiter header | CON7 | 384H |
+| 605 | ✅ | Anti-aliasing options system | CON7 | 385 |
+| 606 | ✅ | Anti-aliasing options header | CON7 | 385H |
+| 607 | ✅ | Ultrawide monitor support system | CON7 | 389 |
+| 608 | ✅ | Ultrawide monitor support header | CON7 | 389H |
+| 609 | ✅ | Post-process effect toggle system | CON7 | 390 |
+| 610 | ✅ | Post-process effect toggle header | CON7 | 390H |
+| 611 | ✅ | HUD opacity slider | CON7 | 391 |
+| 612 | ✅ | HUD opacity slider header | CON7 | 391H |
 
 > † These task numbers appear in multiple sections. Refer to the CON3 plan file for the authoritative task definition.
 
 ---
 
-## PHASE 7: ENDGAME & REPLAYABILITY (Tasks 601-650)
+## PHASE 7: ENDGAME & REPLAYABILITY (Tasks 613-662)
 
-### 7.1 New Game Plus & Challenges (601-630)
+### 7.1 New Game Plus & Challenges (613-642)
 
 | Order | Status | Task Name | Plan | Task # |
 |-------|--------|-----------|------|--------|
-| 601 |  | New Game Plus system | CON1 | 217 |
-| 602 |  | New Game Plus header | CON1 | 217H |
-| 603 |  | NG+ carry-over items | CON1 | 218 |
-| 604 |  | NG+ carry-over header | CON1 | 218H |
-| 605 |  | NG+ increased difficulty | CON1 | 219 |
-| 606 |  | NG+ difficulty header | CON1 | 219H |
-| 607 |  | Endgame trial challenges | CON1 | 220 |
-| 608 |  | Endgame trial header | CON1 | 220H |
-| 609 |  | Time attack mode | CON1 | 221 |
-| 610 |  | Time attack header | CON1 | 221H |
-| 611 |  | Survival arena mode | CON2 | 290 |
-| 612 |  | Survival arena header | CON2 | 290H |
-| 613 |  | Wave-based enemy spawns | CON2 | 291 |
-| 614 |  | Wave-based spawns header | CON2 | 291H |
-| 615 |  | Arena leaderboards (local) | CON2 | 292 |
-| 616 |  | Arena leaderboards header | CON2 | 292H |
-| 617 |  | Superboss encounters | CON2 | 293 |
-| 618 |  | Superboss encounters header | CON2 | 293H |
-| 619 |  | Legendary weapon quests | CON2 | 294 |
-| 620 |  | Legendary weapon header | CON2 | 294H |
-| 621 |  | Completion percentage tracker | CON3 | 304 |
-| 622 |  | Completion tracker header | CON3 | 304H |
-| 623 |  | Bestiary completion† | CON3 | 287 |
-| 624 |  | Bestiary completion header | CON3 | 287H |
-| 625 |  | Item collection checklist† | CON3 | 288 |
-| 626 |  | Item checklist header | CON3 | 288H |
-| 627 |  | Location discovery checklist† | CON3 | 289 |
-| 628 |  | Location checklist header | CON3 | 289H |
-| 629 |  | FF nostalgia Easter eggs | CON1 | 190 |
-| 630 |  | FF Easter eggs header | CON1 | 190H |
+| 613 |  | New Game Plus system | CON1 | 217 |
+| 614 |  | New Game Plus header | CON1 | 217H |
+| 615 |  | NG+ carry-over items | CON1 | 218 |
+| 616 |  | NG+ carry-over header | CON1 | 218H |
+| 617 |  | NG+ increased difficulty | CON1 | 219 |
+| 618 |  | NG+ difficulty header | CON1 | 219H |
+| 619 |  | Endgame trial challenges | CON1 | 220 |
+| 620 |  | Endgame trial header | CON1 | 220H |
+| 621 |  | Time attack mode | CON1 | 221 |
+| 622 |  | Time attack header | CON1 | 221H |
+| 623 |  | Survival arena mode | CON2 | 290 |
+| 624 |  | Survival arena header | CON2 | 290H |
+| 625 |  | Wave-based enemy spawns | CON2 | 291 |
+| 626 |  | Wave-based spawns header | CON2 | 291H |
+| 627 |  | Arena leaderboards (local) | CON2 | 292 |
+| 628 |  | Arena leaderboards header | CON2 | 292H |
+| 629 |  | Superboss encounters | CON2 | 293 |
+| 630 |  | Superboss encounters header | CON2 | 293H |
+| 631 |  | Legendary weapon quests | CON2 | 294 |
+| 632 |  | Legendary weapon header | CON2 | 294H |
+| 633 |  | Completion percentage tracker | CON3 | 304 |
+| 634 |  | Completion tracker header | CON3 | 304H |
+| 635 |  | Bestiary completion† | CON3 | 287 |
+| 636 |  | Bestiary completion header | CON3 | 287H |
+| 637 |  | Item collection checklist† | CON3 | 288 |
+| 638 |  | Item checklist header | CON3 | 288H |
+| 639 |  | Location discovery checklist† | CON3 | 289 |
+| 640 |  | Location checklist header | CON3 | 289H |
+| 641 |  | FF nostalgia Easter eggs | CON1 | 190 |
+| 642 |  | FF Easter eggs header | CON1 | 190H |
 
 > † These task numbers appear in multiple sections. Refer to the CON3 plan file for the authoritative task definition.
 
-### 7.2 FF Tradition & Polish (631-650)
+### 7.2 FF Tradition & Polish (643-662)
 
 | Order | Status | Task Name | Plan | Task # |
 |-------|--------|-----------|------|--------|
-| 631 |  | Moogle save points | CON1 | 191 |
-| 632 |  | Moogle save points header | CON1 | 191H |
-| 633 |  | Cactuar hidden collectibles | CON1 | 192 |
-| 634 |  | Cactuar collectibles header | CON1 | 192H |
-| 635 |  | Tonberry encounters | CON1 | 193 |
-| 636 |  | Tonberry encounters header | CON1 | 193H |
-| 637 |  | Crystal theme world aesthetics | CON1 | 194 |
-| 638 |  | Crystal theme header | CON1 | 194H |
-| 639 |  | Save point crystal pillar VFX | CON4 | 329 |
-| 640 |  | Save point crystal VFX header | CON4 | 329H |
-| 641 |  | Chocobo theme music variants | CON4 | 330 |
-| 642 |  | Chocobo theme variants header | CON4 | 330H |
-| 643 |  | Urban district design (FF7 Midgar)† | CON3 | 287 |
-| 644 |  | Urban district header | CON3 | 287H |
-| 645 |  | Industrial zone design (FF7 reactors)† | CON3 | 288 |
-| 646 |  | Industrial zone header | CON3 | 288H |
-| 647 |  | Slum/lower city districts† | CON3 | 289 |
-| 648 |  | Slum districts header | CON3 | 289H |
-| 649 |  | Upper city/rich districts† | CON3 | 290 |
-| 650 |  | Upper city header | CON3 | 290H |
+| 643 |  | Moogle save points | CON1 | 191 |
+| 644 |  | Moogle save points header | CON1 | 191H |
+| 645 |  | Cactuar hidden collectibles | CON1 | 192 |
+| 646 |  | Cactuar collectibles header | CON1 | 192H |
+| 647 |  | Tonberry encounters | CON1 | 193 |
+| 648 |  | Tonberry encounters header | CON1 | 193H |
+| 649 |  | Crystal theme world aesthetics | CON1 | 194 |
+| 650 |  | Crystal theme header | CON1 | 194H |
+| 651 |  | Save point crystal pillar VFX | CON4 | 329 |
+| 652 |  | Save point crystal VFX header | CON4 | 329H |
+| 653 |  | Chocobo theme music variants | CON4 | 330 |
+| 654 |  | Chocobo theme variants header | CON4 | 330H |
+| 655 |  | Urban district design (FF7 Midgar)† | CON3 | 287 |
+| 656 |  | Urban district header | CON3 | 287H |
+| 657 |  | Industrial zone design (FF7 reactors)† | CON3 | 288 |
+| 658 |  | Industrial zone header | CON3 | 288H |
+| 659 |  | Slum/lower city districts† | CON3 | 289 |
+| 660 |  | Slum districts header | CON3 | 289H |
+| 661 |  | Upper city/rich districts† | CON3 | 290 |
+| 662 |  | Upper city header | CON3 | 290H |
 
 > † These task numbers appear in multiple sections. Refer to the CON3 plan file for the authoritative task definition.
 
 ---
 
-## PHASE 8: LOCALIZATION & PLATFORM (Tasks 651-700)
+## PHASE 8: LOCALIZATION & PLATFORM (Tasks 663-712)
 
-### 8.1 Multi-Language Support (651-670)
+### 8.1 Multi-Language Support (663-682)
 
 | Order | Status | Task Name | Plan | Task # |
 |-------|--------|-----------|------|--------|
-| 651 |  | String table localization loader | CON6 | 371 |
-| 652 |  | String table loader header | CON6 | 371H |
-| 653 |  | Unicode font renderer | CON6 | 372 |
-| 654 |  | Unicode font renderer header | CON6 | 372H |
-| 655 |  | Language selector UI | CON6 | 373 |
-| 656 |  | Language selector UI header | CON6 | 373H |
-| 657 |  | Runtime text hot-swap system | CON6 | 374 |
-| 658 |  | Runtime text hot-swap header | CON6 | 374H |
-| 659 |  | Subtitle background opacity | CON3 | 311 |
-| 660 |  | Subtitle background header | CON3 | 311H |
-| 661 |  | Text speed adjustment | CON3 | 312 |
-| 662 |  | Text speed header | CON3 | 312H |
-| 663 |  | Font size options† | CON3 | 287 |
-| 664 |  | Font size options header | CON3 | 287H |
-| 665 |  | Character limit per text box† | CON3 | 288 |
-| 666 |  | Character limit header | CON3 | 288H |
-| 667 |  | Right-to-left text support† | CON3 | 289 |
-| 668 |  | RTL text support header | CON3 | 289H |
-| 669 |  | Japanese vertical text layout† | CON3 | 290 |
-| 670 |  | Vertical text layout header | CON3 | 290H |
+| 663 |  | String table localization loader | CON6 | 371 |
+| 664 |  | String table loader header | CON6 | 371H |
+| 665 |  | Unicode font renderer | CON6 | 372 |
+| 666 |  | Unicode font renderer header | CON6 | 372H |
+| 667 |  | Language selector UI | CON6 | 373 |
+| 668 |  | Language selector UI header | CON6 | 373H |
+| 669 |  | Runtime text hot-swap system | CON6 | 374 |
+| 670 |  | Runtime text hot-swap header | CON6 | 374H |
+| 671 |  | Subtitle background opacity | CON3 | 311 |
+| 672 |  | Subtitle background header | CON3 | 311H |
+| 673 |  | Text speed adjustment | CON3 | 312 |
+| 674 |  | Text speed header | CON3 | 312H |
+| 675 |  | Font size options† | CON3 | 287 |
+| 676 |  | Font size options header | CON3 | 287H |
+| 677 |  | Character limit per text box† | CON3 | 288 |
+| 678 |  | Character limit header | CON3 | 288H |
+| 679 |  | Right-to-left text support† | CON3 | 289 |
+| 680 |  | RTL text support header | CON3 | 289H |
+| 681 |  | Japanese vertical text layout† | CON3 | 290 |
+| 682 |  | Vertical text layout header | CON3 | 290H |
 
 > † These task numbers appear in multiple sections. Refer to the CON3 plan file for the authoritative task definition.
 
-### 8.2 Content Pipeline & Tools (671-700)
+### 8.2 Content Pipeline & Tools (683-712)
 
 | Order | Status | Task Name | Plan | Task # |
 |-------|--------|-----------|------|--------|
-| 671 |  | Build wiring & content pipeline | CON1 | 121 |
-| 672 |  | Build wiring header | CON1 | 121H |
-| 673 |  | Asset import toolchain | CON1 | 122 |
-| 674 |  | Asset import header | CON1 | 122H |
-| 675 |  | Texture compression pipeline | CON1 | 123 |
-| 676 |  | Texture compression header | CON1 | 123H |
-| 677 |  | Audio compression pipeline | CON1 | 124 |
-| 678 |  | Audio compression header | CON1 | 124H |
-| 679 |  | Mesh optimization tool | CON1 | 125 |
-| 680 |  | Mesh optimization header | CON1 | 125H |
-| 681 |  | WorldEditor base framework | CON1 | 207 |
-| 682 |  | WorldEditor base header | CON1 | 207H |
-| 683 |  | Terrain sculpting tools | CON1 | 208 |
-| 684 |  | Terrain sculpting header | CON1 | 208H |
-| 685 |  | Entity placement editor | CON1 | 209 |
-| 686 |  | Entity placement header | CON1 | 209H |
-| 687 |  | Content authoring templates | CON1 | 223 |
-| 688 |  | Authoring templates header | CON1 | 223H |
-| 689 |  | NPC behavior scripting | CON1 | 224 |
-| 690 |  | NPC behavior scripting header | CON1 | 224H |
-| 691 |  | Quest authoring template | CON1 | 225 |
-| 692 |  | Quest authoring header | CON1 | 225H |
-| 693 |  | Dialogue tree editor | CON1 | 226 |
-| 694 |  | Dialogue tree editor header | CON1 | 226H |
-| 695 |  | Encounter design template | CON1 | 227 |
-| 696 |  | Encounter design header | CON1 | 227H |
-| 697 |  | Loot table generator | CON1 | 228 |
-| 698 |  | Loot table generator header | CON1 | 228H |
-| 699 |  | Area transition editor | CON1 | 229 |
-| 700 |  | Area transition header | CON1 | 229H |
+| 683 |  | Build wiring & content pipeline | CON1 | 121 |
+| 684 |  | Build wiring header | CON1 | 121H |
+| 685 |  | Asset import toolchain | CON1 | 122 |
+| 686 |  | Asset import header | CON1 | 122H |
+| 687 |  | Texture compression pipeline | CON1 | 123 |
+| 688 |  | Texture compression header | CON1 | 123H |
+| 689 |  | Audio compression pipeline | CON1 | 124 |
+| 690 |  | Audio compression header | CON1 | 124H |
+| 691 |  | Mesh optimization tool | CON1 | 125 |
+| 692 |  | Mesh optimization header | CON1 | 125H |
+| 693 |  | WorldEditor base framework | CON1 | 207 |
+| 694 |  | WorldEditor base header | CON1 | 207H |
+| 695 |  | Terrain sculpting tools | CON1 | 208 |
+| 696 |  | Terrain sculpting header | CON1 | 208H |
+| 697 |  | Entity placement editor | CON1 | 209 |
+| 698 |  | Entity placement header | CON1 | 209H |
+| 699 |  | Content authoring templates | CON1 | 223 |
+| 700 |  | Authoring templates header | CON1 | 223H |
+| 701 |  | NPC behavior scripting | CON1 | 224 |
+| 702 |  | NPC behavior scripting header | CON1 | 224H |
+| 703 |  | Quest authoring template | CON1 | 225 |
+| 704 |  | Quest authoring header | CON1 | 225H |
+| 705 |  | Dialogue tree editor | CON1 | 226 |
+| 706 |  | Dialogue tree editor header | CON1 | 226H |
+| 707 |  | Encounter design template | CON1 | 227 |
+| 708 |  | Encounter design header | CON1 | 227H |
+| 709 |  | Loot table generator | CON1 | 228 |
+| 710 |  | Loot table generator header | CON1 | 228H |
+| 711 |  | Area transition editor | CON1 | 229 |
+| 712 |  | Area transition header | CON1 | 229H |
 
 ---
 
-## PHASE 9: FINAL INTEGRATION & RELEASE (Tasks 701-739)
+## PHASE 9: FINAL INTEGRATION & RELEASE (Tasks 713-751)
 
-### 9.1 Release Gates & Final Integration (701-720)
-
-| Order | Status | Task Name | Plan | Task # |
-|-------|--------|-----------|------|--------|
-| 701 |  | H01: Plan file maintenance | CON1 | H01 |
-| 702 |  | H02: SYSTEMS.md sync | CON1 | H02 |
-| 703 |  | H03: FULL_TASK_SEQUENCE.md update | CON1 | H03 |
-| 704 |  | H04: Cross-reference verification | CON1 | H04 |
-| 705 |  | H05: Task number collision check | CON1 | H05 |
-| 706 |  | H06: Completion percentage calculation | CON1 | H06 |
-| 707 |  | H07: Release note generation | CON1 | H07 |
-| 708 |  | H08: Plan document consolidation | CON1 | H08 |
-| 709 |  | Task 109: Core combat playable | CON1 | 109 |
-| 710 |  | Task 110: World traversal working | CON1 | 110 |
-| 711 |  | Task 111: Save/load resilient | CON1 | 111 |
-| 712 |  | Task 112: Performance verified GT610 | CON1 | 112 |
-| 713 |  | Task 113: Audio fully integrated | CON1 | 113 |
-| 714 |  | Task 114: UI accessibility complete | CON1 | 114 |
-| 715 |  | Task 115: Content pipeline ready | CON1 | 115 |
-| 716 |  | Task 116: First playable milestone | CON1 | 116 |
-| 717 |  | Task 117: Alpha build gate | CON1 | 117 |
-| 718 |  | Task 118: Beta build gate | CON1 | 118 |
-| 719 |  | Task 119: Release candidate | CON1 | 119 |
-| 720 |  | Task 120: Gold master | CON1 | 120 |
-
-### 9.2 Final Polish & Documentation (721-739)
+### 9.1 Release Gates & Final Integration (713-732)
 
 | Order | Status | Task Name | Plan | Task # |
 |-------|--------|-----------|------|--------|
-| 721 |  | Final integration sweep 1 | CON1 | 230 |
-| 722 |  | Final integration sweep 1 header | CON1 | 230H |
-| 723 |  | Final integration sweep 2 | CON1 | 231 |
-| 724 |  | Final integration sweep 2 header | CON1 | 231H |
-| 725 |  | Regression test suite | CON1 | 232 |
-| 726 |  | Regression test header | CON1 | 232H |
-| 727 |  | Performance profiling pass | CON1 | 233 |
-| 728 |  | Performance profiling header | CON1 | 233H |
-| 729 |  | Memory leak detection | CON1 | 234 |
-| 730 |  | Memory leak detection header | CON1 | 234H |
-| 731 |  | Save-backup resilience | CON1 | 235 |
-| 732 |  | Save-backup header | CON1 | 235H |
-| 733 |  | World-building documentation | CON1 | 236 |
-| 734 |  | World-building docs header | CON1 | 236H |
-| 735 |  | Lore consistency guide | CON1 | 237 |
-| 736 |  | Lore consistency header | CON1 | 237H |
-| 737 |  | Character bio reference | CON1 | 238 |
-| 738 |  | Character bio header | CON1 | 238H |
-| 739 |  | Location atlas documentation | CON1 | 239 |
+| 713 |  | H01: Plan file maintenance | CON1 | H01 |
+| 714 |  | H02: SYSTEMS.md sync | CON1 | H02 |
+| 715 |  | H03: FULL_TASK_SEQUENCE.md update | CON1 | H03 |
+| 716 |  | H04: Cross-reference verification | CON1 | H04 |
+| 717 |  | H05: Task number collision check | CON1 | H05 |
+| 718 |  | H06: Completion percentage calculation | CON1 | H06 |
+| 719 |  | H07: Release note generation | CON1 | H07 |
+| 720 |  | H08: Plan document consolidation | CON1 | H08 |
+| 721 |  | Task 109: Core combat playable | CON1 | 109 |
+| 722 |  | Task 110: World traversal working | CON1 | 110 |
+| 723 |  | Task 111: Save/load resilient | CON1 | 111 |
+| 724 |  | Task 112: Performance verified GT610 | CON1 | 112 |
+| 725 |  | Task 113: Audio fully integrated | CON1 | 113 |
+| 726 |  | Task 114: UI accessibility complete | CON1 | 114 |
+| 727 |  | Task 115: Content pipeline ready | CON1 | 115 |
+| 728 |  | Task 116: First playable milestone | CON1 | 116 |
+| 729 |  | Task 117: Alpha build gate | CON1 | 117 |
+| 730 |  | Task 118: Beta build gate | CON1 | 118 |
+| 731 |  | Task 119: Release candidate | CON1 | 119 |
+| 732 |  | Task 120: Gold master | CON1 | 120 |
+
+### 9.2 Final Polish & Documentation (733-751)
+
+| Order | Status | Task Name | Plan | Task # |
+|-------|--------|-----------|------|--------|
+| 733 |  | Final integration sweep 1 | CON1 | 230 |
+| 734 |  | Final integration sweep 1 header | CON1 | 230H |
+| 735 |  | Final integration sweep 2 | CON1 | 231 |
+| 736 |  | Final integration sweep 2 header | CON1 | 231H |
+| 737 |  | Regression test suite | CON1 | 232 |
+| 738 |  | Regression test header | CON1 | 232H |
+| 739 |  | Performance profiling pass | CON1 | 233 |
+| 740 |  | Performance profiling header | CON1 | 233H |
+| 741 |  | Memory leak detection | CON1 | 234 |
+| 742 |  | Memory leak detection header | CON1 | 234H |
+| 743 |  | Save-backup resilience | CON1 | 235 |
+| 744 |  | Save-backup header | CON1 | 235H |
+| 745 |  | World-building documentation | CON1 | 236 |
+| 746 |  | World-building docs header | CON1 | 236H |
+| 747 |  | Lore consistency guide | CON1 | 237 |
+| 748 |  | Lore consistency header | CON1 | 237H |
+| 749 |  | Character bio reference | CON1 | 238 |
+| 750 |  | Character bio header | CON1 | 238H |
+| 751 |  | Location atlas documentation | CON1 | 239 |
 
 ---
 
 ## COMPLETION SUMMARY
 
-**Total Tasks: 739**
+**Total Tasks: 745**
 **Status column: restored to all phases (previously missing from Phase 1.4 onward)**
+**Pass 4 changes:** Cel shader tasks added to Phase 1.1 (orders 19–24). PC release features (graphics presets, V-sync, AA, ultrawide, post-process toggles, HUD opacity) moved from Phase 1.1 to Phase 6.2 where they belong. Total task count remains 739 + 6 new cel shader tasks = 745.
+**Phase 1 scope:** Now limited to core rendering and gameplay foundation work; PC release polish/settings tasks have been moved out to Phase 6.2.
 
 **By Plan File:**
 - BASE: 201 tasks (001-108 + headers)
@@ -958,12 +971,12 @@ Within each layer, **headers come before implementations** where needed.
 - CON8: 32 tasks (393-408 with headers) — external engine integration: Animation-Engine .anim packs, Audio-Engine audio_plan manifests, Creation-Engine material/tilemap/mesh exports
 
 **By Phase:**
-- Phase 1 (Foundation): 150 tasks
+- Phase 1 (Foundation): 144 tasks
 - Phase 2 (World Systems): 150 tasks
 - Phase 3 (Combat Depth): 100 tasks
 - Phase 4 (World Content): 100 tasks
 - Phase 5 (Narrative): 50 tasks
-- Phase 6 (Accessibility): 50 tasks
+- Phase 6 (Accessibility): 62 tasks
 - Phase 7 (Endgame): 50 tasks
 - Phase 8 (Localization): 50 tasks
 - Phase 9 (Release): 39 tasks
