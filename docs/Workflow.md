@@ -24,7 +24,7 @@ Check these files in order:
 
 1. `docs/START_HERE.md`
 2. `docs/NEXT_TASK.md`
-3. `docs/ARCHITECTURE.md`
+3. `docs/Architecture.md`
 
 Use:
 - START_HERE for current project priorities and known gaps
@@ -181,7 +181,7 @@ Update docs when:
 Minimum docs to keep current:
 - `docs/START_HERE.md`
 - `docs/NEXT_TASK.md`
-- `docs/ARCHITECTURE.md`
+- `docs/Architecture.md`
 - `docs/Workflow.md`
 
 ---
