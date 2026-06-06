@@ -25,10 +25,10 @@ If you cannot complete a task within tiny context, **split it into a smaller saf
 
 ---
 
-## 1) Current Goal / Milestone (as of 2026‑05‑19)
+## 1) Current Goal / Milestone (as of 2026‑06‑06)
 **Goal:** Finish the remaining systems and polish passes to reach a **commercially sellable** action‑RPG build with FF7 Remake-like gameplay readability, PS2-style cost-aware visuals, and robust audio/event readiness.
 
-**Immediate focus:** Continue the **Autopilot Task Sequence** (see Section 3) through expanded open-world multi-continent scope, gameplay depth, and ship-readiness gates.
+**Immediate focus:** Continue the **Autopilot Task Sequence** (see Section 3), starting with world event systems while inserting the missing cel-shader/toon-shading tasks in Phase 2 before broader progression work.
 
 ### Full-System Delivery Rule
 - Any task named with words like **stub / lite / base / hook** is still treated as a **full playable v1 system**.
@@ -87,6 +87,12 @@ Already implemented and working:
 028 Day/night cycle
 029 Biome transition fade
 030 Fog of war on minimap
+030A Cel shading band quantization
+030B Cel shader shadow tint + rim gate
+030C Cel specular step highlights
+030D Cel shader material parameter plumbing
+030E Character outline pass (inverted hull)
+030F Cel shader debug controls + fallback path
 
 ### Phase 3 — World + quest + progression core
 031 World event trigger zones

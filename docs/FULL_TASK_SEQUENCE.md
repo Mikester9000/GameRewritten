@@ -189,47 +189,47 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 021: Combat camera zoom**
+- [x] **Task 021: Combat camera zoom**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 022: Camera collision avoidance**
+- [x] **Task 022: Camera collision avoidance**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 023: Target framing adjustment**
+- [x] **Task 023: Target framing adjustment**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 024: Lock-on camera recovery smoothing**
+- [x] **Task 024: Lock-on camera recovery smoothing**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 025: Wind effect on trees**
+- [x] **Task 025: Wind effect on trees**
   - Files: `Shaders/tree_vs.hlsl`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 026: Weather system lite**
+- [x] **Task 026: Weather system lite**
   - Files: `src/world/WeatherSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 027: Ambient particles**
+- [x] **Task 027: Ambient particles**
   - Files: `src/game/ParticleSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 028: Day/night cycle**
+- [x] **Task 028: Day/night cycle**
   - Files: `src/world/DayNightCycle.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 029: Biome transition fade**
+- [x] **Task 029: Biome transition fade**
   - Files: `src/world/WorldGrid.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
@@ -238,6 +238,36 @@ Project completion for this autopilot track means:
   - Files: `src/ui/Minimap.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
+
+- [ ] **Task 030A: Cel shading band quantization**
+  - Files: `Shaders/basic3d_ps.hlsl`, `src/rendering/d3d11/D3D11Renderer.cpp`
+  - Steps: add quantized diffuse lighting bands and wire cel-shading constants into the basic 3D pass.
+  - Done when: toon bands render on runtime actors and shader constants are runtime-configurable.
+
+- [ ] **Task 030B: Cel shader shadow tint + rim gate**
+  - Files: `Shaders/basic3d_ps.hlsl`
+  - Steps: add shadow tint control and gated rim light for silhouette readability without full-screen cost.
+  - Done when: backlit silhouettes stay readable while preserving low-spec lighting cost.
+
+- [ ] **Task 030C: Cel specular step highlights**
+  - Files: `Shaders/basic3d_ps.hlsl`
+  - Steps: replace smooth specular with thresholded highlight bands to match FF-style stylized materials.
+  - Done when: metallic/highlight response uses stepped specular instead of continuous gloss.
+
+- [ ] **Task 030D: Cel shader material parameter plumbing**
+  - Files: `src/rendering/d3d11/D3D11Renderer.cpp`, `src/assets/AssetLoader.cpp/hpp`
+  - Steps: expose cel parameters (band count, rim amount, shadow tint, spec threshold) through renderer/material load path.
+  - Done when: materials can override cel defaults without shader recompilation.
+
+- [ ] **Task 030E: Character outline pass (inverted hull)**
+  - Files: `Shaders/basic3d_vs.hlsl`, `Shaders/basic3d_ps.hlsl`, `src/rendering/d3d11/D3D11Renderer.cpp`
+  - Steps: add low-cost outline pass using expanded backfaces and depth-tested dark silhouette color.
+  - Done when: player/enemy silhouettes remain readable in busy environments.
+
+- [ ] **Task 030F: Cel shader debug controls + fallback path**
+  - Files: `src/ui/ImGuiLayer.cpp/hpp`, `src/rendering/d3d11/D3D11Renderer.cpp`
+  - Steps: add debug toggles and a safe fallback to legacy shading for validation and low-risk rollout.
+  - Done when: cel shading can be toggled live and fallback path renders identically to current baseline.
 
 ---
 
