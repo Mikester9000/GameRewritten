@@ -4,6 +4,7 @@
 - New gameplay code → `src/game/*`
 - New UI code → `src/ui/*`
 - New world data logic → `src/world/*`
+- New world/gameplay hybrid systems → `src/game/world/*`
 - New asset/lookup parsing logic → `src/assets/*`
 
 ## Main.cpp default

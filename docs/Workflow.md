@@ -22,13 +22,13 @@ Prefer small, reversible changes over large mixed refactors.
 
 Check these files in order:
 
-1. `docs/Development Roadmap.txt`
-2. `docs/Engine Cleanup Checklist.txt`
+1. `docs/START_HERE.md`
+2. `docs/NEXT_TASK.md`
 3. `docs/ARCHITECTURE.md`
 
 Use:
-- roadmap for long-term direction
-- cleanup checklist for small useful improvements
+- START_HERE for current project priorities and known gaps
+- NEXT_TASK for the single active implementation target
 - architecture doc for deciding where code belongs
 
 ---
@@ -159,12 +159,12 @@ After each change:
 ## 9. Current Recommended Feature Order
 
 Near-term:
-1. runtime/static split in primitive rendering
-2. FF7-style player blockout prefab
-3. runtime player visual hookup
-4. player state machine
-5. first attack
-6. first enemy
+1. world event trigger zones (Task 031)
+2. interaction hotspot registry baseline (Task 032)
+3. NPC actor baseline (Task 034)
+4. save/load system (Task 045)
+5. cel shader/toon shading pass (Tasks 030A-030F)
+6. quest + progression foundation (Tasks 035-043)
 
 Do not jump ahead to high-end rendering before the actor/gameplay path is stable.
 
@@ -179,10 +179,10 @@ Update docs when:
 - an engine-wide convention changes
 
 Minimum docs to keep current:
-- `docs/Development Roadmap.txt`
-- `docs/Engine Cleanup Checklist.txt`
+- `docs/START_HERE.md`
+- `docs/NEXT_TASK.md`
 - `docs/ARCHITECTURE.md`
-- `docs/WORKFLOW.md`
+- `docs/Workflow.md`
 
 ---
 

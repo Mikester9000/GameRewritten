@@ -32,3 +32,15 @@ See also: [CURRENT_STATE.md](./CURRENT_STATE.md), [SAFE_REFACTOR_RULES.md](./SAF
 - **Likely files:** `src/ui/*`, `src/rendering/*`.
 - **Status:** monitor.
 - **Avoid unless asked:** no, but keep features guarded/toggled.
+
+## 6) FULL_TASK_SEQUENCE checkbox drift (Phase 2 legacy rows)
+- **Impact:** task status can be misread, causing duplicate or skipped work.
+- **Likely files:** `docs/FULL_TASK_SEQUENCE.md`.
+- **Status:** recently identified; keep status in sync with `docs/SYSTEMS.md` and work logs.
+- **Avoid unless asked:** no (safe doc correction).
+
+## 7) ORDER_PLAN missing cel shader/toon tasks
+- **Impact:** visual roadmap omits a critical style dependency and can mis-prioritize implementation.
+- **Likely files:** `docs/docs_ORDER_PLAN.md`, phase ordering docs.
+- **Status:** active doc gap.
+- **Avoid unless asked:** no (planning accuracy fix).

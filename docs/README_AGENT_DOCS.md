@@ -3,11 +3,14 @@
 Start here: [AGENT_JOB.md](./AGENT_JOB.md)
 
 ## Source-of-truth docs (highest priority)
+- [START_HERE.md](./START_HERE.md) — current entry point + priority stack.
+- [NEXT_TASK.md](./NEXT_TASK.md) — single active task card.
 - [CURRENT_STATE.md](./CURRENT_STATE.md) — what exists now.
 - [SYSTEM_OWNERSHIP.md](./SYSTEM_OWNERSHIP.md) — where code belongs.
 - [DECISION_DEFAULTS.md](./DECISION_DEFAULTS.md) — default choices.
 - [MAIN_CPP_PROTECTION.md](./MAIN_CPP_PROTECTION.md) — Main.cpp guardrails.
 - [QUALITY_BAR.md](./QUALITY_BAR.md) — minimum acceptable quality.
+- [engine/MISSING_SYSTEMS.md](./engine/MISSING_SYSTEMS.md) — explicit missing engine systems.
 
 ## Foundation / agent guidance
 - `AUTOPILOT_WORKFLOW.md` — deterministic run loop for small local LLM execution.
@@ -23,8 +26,7 @@ Start here: [AGENT_JOB.md](./AGENT_JOB.md)
 
 ## Vision / final destination
 - `FINAL_GOAL.md`
-- `FINAL_FANTASY_FEEL.md`
-- `DESIGN_PHILOSOPHY.md`
+- `vision/GAME_DESIGN_BIBLE.md`
 
 ## Visual / presentation direction
 - `ARTISTIC_STYLE.md`
@@ -45,9 +47,7 @@ Start here: [AGENT_JOB.md](./AGENT_JOB.md)
 - `PARTY_SYSTEM_DIRECTION.md`
 
 ## Story / tone direction
-- `STORY_TONE.md`
-- `WORLD_LORE_DIRECTION.md`
-- `REGION_IDENTITY_GUIDE.md`
+- `story/STORY_PLACEHOLDER.md`
 
 ## Implementation / production rules
 - `FEATURE_ROADMAP_STRUCTURE.md`
