@@ -1,6 +1,10 @@
+
+#define NOMINMAX
+
 #pragma once
 
 #include <algorithm>
+#include <windows.h>
 
 // Damage elements used by combat attacks.
 enum class Element : int
@@ -46,6 +50,6 @@ inline ElementResolveResult ResolveElementalDamage(int baseDamage, Element eleme
     result.multiplier = ElementMultiplier(element, profile);
     result.isWeakness = (result.multiplier >= 1.25f);
     result.isResistance = (result.multiplier <= 0.85f);
-    result.damage = static_cast<int>(std::max(1.0f, baseDamage * result.multiplier));
+    result.damage = static_cast<int>((std::max)(1.0f, baseDamage * result.multiplier));
     return result;
 }
