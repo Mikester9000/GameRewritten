@@ -19,6 +19,8 @@
 namespace
 {
 constexpr float kParryWindowSec = 0.12f;
+constexpr float kDodgeIFrameSec = 0.16f;
+constexpr float kPerfectDodgeWindowSec = 0.08f;
 }
 
 ActorCommon::RuntimeActorPose PlayerActor::BuildRuntimePose(const CameraController& cameraController) const
@@ -36,6 +38,8 @@ void PlayerActor::Update(float dt, const InputActionMap& input, bool isGrounded,
 {
     stateTimer = (std::max)(0.0f, stateTimer - dt);
     parryWindowTimer = (std::max)(0.0f, parryWindowTimer - dt);
+    dodgeIFrameTimer = (std::max)(0.0f, dodgeIFrameTimer - dt);
+    perfectDodgeTimer = (std::max)(0.0f, perfectDodgeTimer - dt);
 
     if (!isGrounded)
     {
@@ -97,7 +101,21 @@ void PlayerActor::TransitionTo(PlayerActionState next, float duration)
     state = next;
     stateTimer = duration;
     if (next == PlayerActionState::Dodge)
+    {
         parryWindowTimer = kParryWindowSec;
+        dodgeIFrameTimer = kDodgeIFrameSec;
+        perfectDodgeTimer = kPerfectDodgeWindowSec;
+        perfectDodgeTriggered = false;
+    }
+}
+
+bool PlayerActor::ConsumePerfectDodgeTriggered()
+{
+    if (perfectDodgeTriggered || perfectDodgeTimer <= 0.0f)
+        return false;
+
+    perfectDodgeTriggered = true;
+    return true;
 }
 
 void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,

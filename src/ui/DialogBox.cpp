@@ -55,6 +55,11 @@ bool DialogBox::IsOpen() const
     return m_isOpen;
 }
 
+bool DialogBox::IsComplete() const
+{
+    return m_isComplete;
+}
+
 void DialogBox::Update(float dt)
 {
     if (!m_isOpen || m_isComplete)

@@ -44,6 +44,10 @@ void EnemyActor::Init(float startX, float startZ,
     pendingAttackHitBox.framesToLive = 0;
     hitFlashTimer = 0.0f;
     pressureGauge = 0.0f;
+    // Basic elemental profile for tactical combat checks.
+    elementProfile.fire = 0.85f;
+    elementProfile.ice = 1.35f;
+    elementProfile.lightning = 1.00f;
 }
 
 void EnemyActor::TransitionTo(EnemyState next, float duration)
@@ -56,6 +60,12 @@ void EnemyActor::TransitionTo(EnemyState next, float duration)
 
 void EnemyActor::OnHit(int damage)
 {
+    if (damage <= 0)
+    {
+        LOG_INFO("EnemyActor: Ignored non-positive hit (" + std::to_string(damage) + ").");
+        return;
+    }
+
     hitFlashTimer = kHitFlashDuration;
 
     // Interrupt bonus: hitting during Attack wind-up builds extra pressure.

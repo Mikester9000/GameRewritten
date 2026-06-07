@@ -32,6 +32,9 @@
 #include "PrimitiveRenderer.hpp"
 #include "combat/CombatSystem.hpp"
 #include "combat/Targeting.hpp"
+#include "combat/ComboSystem.hpp"
+#include "combat/LimitBreakCamera.hpp"
+#include "combat/LimitBreakEvolution.hpp"
 #include "CameraController.hpp"
 #include "../ui/DamageNumbers.hpp"
 #include "../app/InputActionMap.hpp"
@@ -86,6 +89,7 @@ public:
             m_playerWasHitThisFrame = true; // reuse flash for status damage
         }
         m_player.Update(dt, actionMap, isGrounded, attackPressed);
+        m_comboSystem.Update(dt);
 
         // Track last known movement direction so dodge can use it as fallback
         const float yaw = camController.GetYaw();
@@ -157,7 +161,11 @@ public:
             // Step 1 — only allowed from Idle or Move while grounded.
             const PlayerActionState s = m_player.state;
             if (s != PlayerActionState::Idle && s != PlayerActionState::Move)
+            {
+                if (m_comboSystem.CanCancelFromState(s, m_player.stateTimer))
+                    m_comboSystem.BufferAttackInput();
                 return false;
+            }
             if (!camController.IsGrounded())
                 return false;
 
@@ -182,7 +190,11 @@ public:
             if (s != PlayerActionState::Attack1 &&
                 s != PlayerActionState::Idle    &&
                 s != PlayerActionState::Move)
+            {
+                if (m_comboSystem.CanCancelFromState(s, m_player.stateTimer))
+                    m_comboSystem.BufferAttackInput();
                 return false;
+            }
 
             m_combatSystem.TriggerAttack(px, py, pz, yaw, 2);
             m_player.state      = PlayerActionState::Attack2;
@@ -239,10 +251,13 @@ public:
         const float yaw = GetAttackYaw(camController);
 
         m_player.stats.SpendLimit();
+        m_limitBreakEvolution.RecordUse();
         m_player.stats.AddSurge(0.50f); // half a Surge bar as bonus for landing Limit Break
+        m_combatSystem.SetNextHitMultiplier(m_limitBreakEvolution.GetDamageMultiplier());
         m_combatSystem.TriggerAttack(px, py, pz, yaw, 4);
         m_player.state      = PlayerActionState::Attack2;
         m_player.stateTimer = 0.60f;
+        m_limitBreakCamera.Start();
         LOG_INFO("RuntimeScene: Limit Break triggered.");
         return true;
     }
@@ -250,6 +265,7 @@ public:
     // Returns true when the player was defeated this frame and needs to be
     // teleported back to spawn. Call once per frame after BeginFrame().
     bool WantsRespawn() const { return m_wantsRespawn; }
+    bool IsDefeatScreenActive() const { return m_defeatScreenActive; }
 
     // Spawn X/Z coordinates for player respawn (set from InitEnemies center).
     float GetRespawnX() const { return m_spawnCenterX; }
@@ -257,6 +273,18 @@ public:
 
     // Clear the respawn flag after Main.cpp has handled the teleport.
     void ClearRespawnFlag() { m_wantsRespawn = false; }
+
+    void ConfirmRetryFromDefeat()
+    {
+        if (!m_defeatScreenActive)
+            return;
+
+        m_player.stats.Reset();
+        m_player.state = PlayerActionState::Idle;
+        m_player.stateTimer = 0.0f;
+        m_wantsRespawn = true;
+        m_defeatScreenActive = false;
+    }
 
     // Returns true (once) if the player was hit this frame — used to trigger the damage flash.
     bool ConsumePlayerHitFlash()
@@ -331,8 +359,11 @@ public:
 
     float GetGameplayTimeScale() const
     {
-        return (m_hitStopTimer > 0.0f) ? 0.05f : 1.0f;
+        const float impactScale = (m_hitStopTimer > 0.0f) ? 0.05f : 1.0f;
+        return impactScale * m_limitBreakCamera.GetTimeScale();
     }
+
+    const char* GetCurrentLimitBreakName() const { return m_limitBreakEvolution.GetCurrentLimitName(); }
 
     bool ConsumePendingCameraShake(float& outAmplitude, float& outDuration)
     {
@@ -369,6 +400,9 @@ private:
     EnemyActor         m_enemies[kEnemyCount];
     CombatSystem       m_combatSystem;
     Targeting          m_targeting;
+    ComboSystem        m_comboSystem;
+    LimitBreakCamera   m_limitBreakCamera;
+    LimitBreakEvolution m_limitBreakEvolution;
 
     // Player position updated each frame in BeginFrame (after camController.Update()).
     float m_playerX = 0.0f;
@@ -381,6 +415,7 @@ private:
 
     // Set true when the player dies; cleared by Main.cpp after the camera teleport.
     bool m_wantsRespawn = false;
+    bool m_defeatScreenActive = false;
 
     // Set true for one frame whenever the player takes damage; cleared by ConsumePlayerHitFlash().
     bool m_playerWasHitThisFrame = false;

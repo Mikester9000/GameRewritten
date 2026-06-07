@@ -85,97 +85,97 @@ Project completion for this autopilot track means:
 
 ## Phase 1 — Combat + HUD foundation
 
-- [ ] **Task 001: Pressure / stagger integration stub**
+- [x] **Task 001: Pressure / stagger integration stub**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 002: Enemy reaction / interrupt-lite**
+- [x] **Task 002: Enemy reaction / interrupt-lite**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 003: Enemy attack telegraph lite**
+- [x] **Task 003: Enemy attack telegraph lite**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 004: Screen edge damage flash**
+- [x] **Task 004: Screen edge damage flash**
   - Files: `src/ui/GameHUD.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 005: Hit pause / hitstop**
+- [x] **Task 005: Hit pause / hitstop**
   - Files: `src/game/RuntimeScene.hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 006: Stagger meter**
+- [x] **Task 006: Stagger meter**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 007: Enemy attack telegraph**
+- [x] **Task 007: Enemy attack telegraph**
   - Files: `src/game/actors/EnemyActor.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 008: Parry / counter window**
+- [x] **Task 008: Parry / counter window**
   - Files: `src/game/actors/PlayerActor.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 009: Weak point damage**
+- [x] **Task 009: Weak point damage**
   - Files: `src/game/combat/CombatSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 010: Area name display**
+- [x] **Task 010: Area name display**
   - Files: `src/ui/GameHUD.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 011: Notification toast system**
+- [x] **Task 011: Notification toast system**
   - Files: `src/ui/NotificationSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 012: Letterbox event bars**
+- [x] **Task 012: Letterbox event bars**
   - Files: `src/ui/ImGuiLayer.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 013: Contextual button prompts**
+- [x] **Task 013: Contextual button prompts**
   - Files: `src/ui/GameHUD.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 014: Level up screen overlay**
+- [x] **Task 014: Level up screen overlay**
   - Files: `src/ui/GameHUD.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 015: Status screen**
+- [x] **Task 015: Status screen**
   - Files: `src/ui/StatusScreen.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 016: Map screen stub**
+- [x] **Task 016: Map screen stub**
   - Files: `src/ui/MapScreen.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 017: Tooltip system**
+- [x] **Task 017: Tooltip system**
   - Files: `src/ui/GameHUD.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 018: Saving indicator**
+- [x] **Task 018: Saving indicator**
   - Files: `src/ui/GameHUD.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 019: Death / defeat screen**
+- [x] **Task 019: Death / defeat screen**
   - Files: `src/ui/GameHUD.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
@@ -184,60 +184,90 @@ Project completion for this autopilot track means:
 
 ## Phase 2 — Camera + visual polish
 
-- [ ] **Task 020: Camera shake**
+- [x] **Task 020: Camera shake**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 021: Combat camera zoom**
+- [x] **Task 021: Combat camera zoom**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 022: Camera collision avoidance**
+- [x] **Task 022: Camera collision avoidance**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 023: Target framing adjustment**
+- [x] **Task 023: Target framing adjustment**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 024: Lock-on camera recovery smoothing**
+- [x] **Task 024: Lock-on camera recovery smoothing**
   - Files: `src/game/CameraController.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 025: Wind effect on trees**
+- [x] **Task 025: Wind effect on trees**
   - Files: `Shaders/tree_vs.hlsl`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 026: Weather system lite**
+- [x] **Task 026: Weather system lite**
   - Files: `src/world/WeatherSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 027: Ambient particles**
+- [x] **Task 027: Ambient particles**
   - Files: `src/game/ParticleSystem.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 028: Day/night cycle**
+- [x] **Task 028: Day/night cycle**
   - Files: `src/world/DayNightCycle.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 029: Biome transition fade**
+- [x] **Task 029: Biome transition fade**
   - Files: `src/world/WorldGrid.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 030: Fog of war on minimap**
+- [x] **Task 030: Fog of war on minimap**
   - Files: `src/ui/Minimap.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
+
+- [ ] **Task 030A: Cel shading band quantization**
+  - Files: `Shaders/basic3d_ps.hlsl`, `src/rendering/d3d11/D3D11Renderer.cpp`
+  - Steps: add quantized diffuse lighting bands and wire cel-shading constants into the basic 3D pass.
+  - Done when: toon bands render on runtime actors and shader constants are runtime-configurable.
+
+- [ ] **Task 030B: Cel shader shadow tint + rim gate**
+  - Files: `Shaders/basic3d_ps.hlsl`
+  - Steps: add shadow tint control and gated rim light for silhouette readability without full-screen cost.
+  - Done when: backlit silhouettes stay readable while preserving low-spec lighting cost.
+
+- [ ] **Task 030C: Cel specular step highlights**
+  - Files: `Shaders/basic3d_ps.hlsl`
+  - Steps: replace smooth specular with thresholded highlight bands to match FF-style stylized materials.
+  - Done when: metallic/highlight response uses stepped specular instead of continuous gloss.
+
+- [ ] **Task 030D: Cel shader material parameter plumbing**
+  - Files: `src/rendering/d3d11/D3D11Renderer.cpp`, `src/assets/AssetLoader.cpp/hpp`
+  - Steps: expose cel parameters (band count, rim amount, shadow tint, spec threshold) through renderer/material load path.
+  - Done when: materials can override cel defaults without shader recompilation.
+
+- [ ] **Task 030E: Character outline pass (inverted hull)**
+  - Files: `Shaders/basic3d_vs.hlsl`, `Shaders/basic3d_ps.hlsl`, `src/rendering/d3d11/D3D11Renderer.cpp`
+  - Steps: add low-cost outline pass using expanded backfaces and depth-tested dark silhouette color.
+  - Done when: player/enemy silhouettes remain readable in busy environments.
+
+- [ ] **Task 030F: Cel shader debug controls + fallback path**
+  - Files: `src/ui/ImGuiLayer.cpp/hpp`, `src/rendering/d3d11/D3D11Renderer.cpp`
+  - Steps: add debug toggles and a safe fallback to legacy shading for validation and low-risk rollout.
+  - Done when: cel shading can be toggled live and fallback path renders identically to current baseline.
 
 ---
 

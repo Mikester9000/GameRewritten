@@ -21,6 +21,7 @@ public:
     void Show(const std::string& speaker, const std::string& text);
     void Dismiss();
     bool IsOpen() const;
+    bool IsComplete() const;
     void Update(float dt);
     void Draw(const ImGuiIO& io);
 
