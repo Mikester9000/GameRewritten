@@ -17,7 +17,27 @@ float4 main(PSInput input) : SV_TARGET
 {
     float3 normalIn = input.normal;
     float3 n = (dot(normalIn, normalIn) > 0.000001f) ? normalize(normalIn) : float3(0.0f, 1.0f, 0.0f);
-    float diff = saturate(dot(n, -lightDir));
-    float3 litColor = input.color.rgb * (lightColor * diff + float3(ambientStrength, ambientStrength, ambientStrength));
+
+    // Calculate the diffuse factor N dot L
+    float NdotL = saturate(dot(n, -lightDir));
+    
+    // Cel/Toon shading (3-step quantization of lighting intensity)
+    float lightIntensity;
+    if (NdotL > 0.7f)
+    { // High Intensity / Highlight step
+        lightIntensity = 1.0f;
+    }
+    else if (NdotL > 0.3f)
+    { // Mid-tone step
+        lightIntensity = 0.5f;
+    }
+    else
+    { // Shadow/Base step
+        lightIntensity = 0.2f;
+    }
+
+    // Apply lighting model: input color * ((Colored Light * Quantized Intensity) + Ambient)
+    float3 litColor = input.color.rgb * (lightColor * lightIntensity + float3(ambientStrength, ambientStrength, ambientStrength));
     return float4(litColor, input.color.a);
 }
+

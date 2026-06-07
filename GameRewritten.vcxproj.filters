@@ -70,8 +70,9 @@
     <None Include="third_party\DirectXTex\LICENSE.txt" />
     <None Include="docs\Architecture.md" />
     <None Include="docs\Workflow.md" />
-    <None Include="x64\.md" />
     <None Include=".editorconfig" />
+    <None Include="Content\Data\default_inventory.json" />
+    <None Include="Content\Data\skill_tree_data.json" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\app\Main.cpp">
@@ -306,6 +307,30 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\camera\sensitivity_controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rendering\d3d11\D3D11RendererHelpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\CreationMaterialLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\animation\AnimClipLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\animation\AnimPackManifestLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\animation\AnimationSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\animation\PlayerAnimBridge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\animation\AnimEventDispatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\animation\AnimationComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -547,6 +572,9 @@
     <ClInclude Include="src\camera\sensitivity_controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\rendering\d3d11\D3D11RendererHelpers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ground_vs.hlsl" />
@@ -555,12 +583,14 @@
     <FxCompile Include="Shaders\sky_ps.hlsl" />
     <FxCompile Include="Shaders\basic3d_ps.hlsl" />
     <FxCompile Include="Shaders\basic3d_vs.hlsl" />
+    <FxCompile Include="Shaders\cel_ps.hlsl" />
+    <FxCompile Include="Shaders\cel_vs.hlsl" />
+    <FxCompile Include="Shaders\outline_ps.hlsl" />
+    <FxCompile Include="Shaders\outline_vs.hlsl" />
+    <FxCompile Include="Shaders\lut_ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="docs\Development Roadmap.txt" />
     <Text Include="docs\Engine Cleanup Checklist.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="x64\.xaml" />
   </ItemGroup>
 </Project>
