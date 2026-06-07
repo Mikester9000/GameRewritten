@@ -125,7 +125,7 @@ XMFLOAT3 AnimationSystem::SampleScale(const AnimChannel& ch, float t)
 
 // ---------------------------------------------------------------------------
 // Build a BoneTransformBuffer by sampling all channels of one clip at time t.
-static void SampleClip(const LoadedAnimClip& clip, float t, BoneTransformBuffer& buf)
+void AnimationSystem::SampleClip(const LoadedAnimClip& clip, float t, BoneTransformBuffer& buf)
 {
     std::memset(&buf, 0, sizeof(buf));
     // Default rotations to identity.

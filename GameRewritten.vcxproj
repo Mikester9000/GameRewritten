@@ -322,6 +322,13 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\world\DayNightCycle.hpp" />
     <ClInclude Include="src\world\WeatherSystem.hpp" />
     <ClInclude Include="src\world\WorldGrid.hpp" />
+<ClCompile Include="src\assets\CreationMaterialLoader.cpp" />
+<ClCompile Include="src\game\animation\AnimClipLoader.cpp" />
+<ClCompile Include="src\game\animation\AnimPackManifestLoader.cpp" />
+<ClCompile Include="src\game\animation\AnimationSystem.cpp" />
+<ClCompile Include="src\game\animation\PlayerAnimBridge.cpp" />
+<ClCompile Include="src\game\animation\AnimEventDispatch.cpp" />
+<ClCompile Include="src\game\animation\AnimationComponent.cpp" />
     
   </ItemGroup>
   <ItemGroup>

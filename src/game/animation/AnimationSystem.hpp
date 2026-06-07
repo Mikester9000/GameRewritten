@@ -45,4 +45,6 @@ private:
     static DirectX::XMFLOAT4 SampleRotation(const AnimChannel& ch, float t);
     // Sample a scale channel at time t → XMFLOAT3.
     static DirectX::XMFLOAT3 SampleScale(const AnimChannel& ch, float t);
+
+    static void SampleClip(const LoadedAnimClip& clip, float t, BoneTransformBuffer& buf);
 };

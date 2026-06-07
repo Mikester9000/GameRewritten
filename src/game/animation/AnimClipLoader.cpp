@@ -5,12 +5,13 @@
 // DO NOT: Modify unrelated systems or break subsystem boundaries.
 // OWNS: AnimClipLoader module behavior and local implementation details.
 // ============================================================
-
+#define NOMINMAX
 #include "AnimClipLoader.hpp"
 #include "../../../third_party/nlohmann/json.hpp"
 #include "../../logger/Logger.hpp"
 
 #include <algorithm>
+#include <Windows.h>
 #include <fstream>
 #include <sstream>
 

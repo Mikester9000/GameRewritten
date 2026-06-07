@@ -51,8 +51,8 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
         if (prevAlive[i] && !nowAlive)
             m_enemyDiedThisFrame = true;
 
-        // Idle → Chase means the enemy just spotted the player.
-        if (prevStates[i] == EnemyState::Idle && m_enemies[i].state == EnemyState::Chase)
+        // Patrol → Chase means the enemy just spotted the player.
+        if (prevStates[i] == EnemyState::Patrol && m_enemies[i].state == EnemyState::Chase)
             m_enemyAlertedThisFrame = true;
     }
 
