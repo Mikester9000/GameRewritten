@@ -484,8 +484,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             gameplayDt = 0.0f;
         }
         const float combatDt = gameplayDt * imguiLayer.GetCombatSpeedScale() * runtimeScene.GetGameplayTimeScale();
+      
+
         const bool editorActive = worldEditor.IsEditorInteractionActive();
-        const bool wantCursorVisible = paused || editorActive;
+        const bool tacticalMenuActive = tacticalPauseHeld;
+        const bool wantCursorVisible = paused || editorActive || tacticalMenuActive;
         CursorMode::ApplyCursorVisibility(cursorModeState, wantCursorVisible);
 
         if (!paused)
@@ -555,8 +558,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             camController.SetCombatCameraFocus(false, 0.0f, 0.0f, 0.0f);
         }
 
+       
+
         const bool allowMovement = !paused;
-        const bool allowMouseLook = !paused && !editorActive;
+        const bool allowMouseLook = !paused && !editorActive && !tacticalMenuActive;
         CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
         camController.Update(gameplayDt, allowMovement, allowMouseLook, firstFrame, renderer);
 

@@ -30,7 +30,7 @@ public:
         if (amount <= 0.0f || IsBroken())
             return false;
 
-        m_poise = std::max(0.0f, m_poise - amount);
+        m_poise = (std::max)(0.0f, m_poise - amount);
         if (m_poise > 0.0f)
             return false;
 

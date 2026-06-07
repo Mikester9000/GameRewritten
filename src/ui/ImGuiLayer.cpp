@@ -40,193 +40,194 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 
 namespace
 {
-// Visual tuning for lock marker readability at 720p/1080p:
-// marker is placed above enemy torso/head and "LOCK" is centered above it.
-constexpr float kLockMarkerHeightOffset = 2.8f;
-constexpr float kLockMarkerCircleRadius = 14.0f;
-constexpr int   kLockMarkerCircleSegments = 24;
-constexpr float kLockMarkerCircleThickness = 2.0f;
-constexpr float kLockMarkerTextOffsetX = -22.0f;
-constexpr float kLockMarkerTextOffsetY = -30.0f;
-constexpr const char* kGraphicsPresetLabels[] = { "Low", "Medium", "High", "Ultra", "Custom" };
-constexpr const char* kFrameLimitLabels[] = { "30", "60", "120", "144", "Unlimited" };
-constexpr int kFrameLimitValues[] = { 30, 60, 120, 144, 0 };
-constexpr const char* kAntiAliasingLabels[] = { "Off", "FXAA", "SMAA", "TAA" };
-constexpr const char* kUltrawideModeLabels[] = { "Auto", "Off", "On" };
-constexpr const char* kCombatSpeedLabels[] = { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x" };
-constexpr float kLetterboxBarHeight = 72.0f;
+    // Visual tuning for lock marker readability at 720p/1080p:
+    // marker is placed above enemy torso/head and "LOCK" is centered above it.
+    constexpr float kLockMarkerHeightOffset = 2.8f;
+    constexpr float kLockMarkerCircleRadius = 14.0f;
+    constexpr int   kLockMarkerCircleSegments = 24;
+    constexpr float kLockMarkerCircleThickness = 2.0f;
+    constexpr float kLockMarkerTextOffsetX = -22.0f;
+    constexpr float kLockMarkerTextOffsetY = -30.0f;
+    constexpr const char* kGraphicsPresetLabels[] = { "Low", "Medium", "High", "Ultra", "Custom" };
+    constexpr const char* kFrameLimitLabels[] = { "30", "60", "120", "144", "Unlimited" };
+    constexpr int kFrameLimitValues[] = { 30, 60, 120, 144, 0 };
+    constexpr const char* kAntiAliasingLabels[] = { "Off", "FXAA", "SMAA", "TAA" };
+    constexpr const char* kUltrawideModeLabels[] = { "Auto", "Off", "On" };
+    constexpr const char* kCombatSpeedLabels[] = { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x" };
+    constexpr float kLetterboxBarHeight = 72.0f;
 
-int FrameLimitIndexFromValue(int fps)
-{
-    for (int i = 0; i < IM_ARRAYSIZE(kFrameLimitValues); ++i)
+    int FrameLimitIndexFromValue(int fps)
     {
-        if (kFrameLimitValues[i] == fps)
-            return i;
+        for (int i = 0; i < IM_ARRAYSIZE(kFrameLimitValues); ++i)
+        {
+            if (kFrameLimitValues[i] == fps)
+                return i;
+        }
+        return 1;
     }
-    return 1;
-}
 
-int GraphicsPresetIndexFromValue(D3D11Renderer::GraphicsPreset preset)
-{
-    switch (preset)
+    int GraphicsPresetIndexFromValue(D3D11Renderer::GraphicsPreset preset)
     {
-    case D3D11Renderer::GraphicsPreset::Low: return 0;
-    case D3D11Renderer::GraphicsPreset::Medium: return 1;
-    case D3D11Renderer::GraphicsPreset::High: return 2;
-    case D3D11Renderer::GraphicsPreset::Ultra: return 3;
-    case D3D11Renderer::GraphicsPreset::Custom:
-    default:
-        return 4;
+        switch (preset)
+        {
+        case D3D11Renderer::GraphicsPreset::Low: return 0;
+        case D3D11Renderer::GraphicsPreset::Medium: return 1;
+        case D3D11Renderer::GraphicsPreset::High: return 2;
+        case D3D11Renderer::GraphicsPreset::Ultra: return 3;
+        case D3D11Renderer::GraphicsPreset::Custom:
+        default:
+            return 4;
+        }
     }
-}
 
-int AntiAliasingIndexFromValue(D3D11Renderer::AntiAliasingMode mode)
-{
-    switch (mode)
+    int AntiAliasingIndexFromValue(D3D11Renderer::AntiAliasingMode mode)
     {
-    case D3D11Renderer::AntiAliasingMode::Off: return 0;
-    case D3D11Renderer::AntiAliasingMode::FXAA: return 1;
-    case D3D11Renderer::AntiAliasingMode::SMAA: return 2;
-    case D3D11Renderer::AntiAliasingMode::TAA:
-    default:
-        return 3;
+        switch (mode)
+        {
+        case D3D11Renderer::AntiAliasingMode::Off: return 0;
+        case D3D11Renderer::AntiAliasingMode::FXAA: return 1;
+        case D3D11Renderer::AntiAliasingMode::SMAA: return 2;
+        case D3D11Renderer::AntiAliasingMode::TAA:
+        default:
+            return 3;
+        }
     }
-}
 
-D3D11Renderer::GraphicsPreset GraphicsPresetFromIndex(int index)
-{
-    switch (index)
+    D3D11Renderer::GraphicsPreset GraphicsPresetFromIndex(int index)
     {
-    case 0: return D3D11Renderer::GraphicsPreset::Low;
-    case 1: return D3D11Renderer::GraphicsPreset::Medium;
-    case 2: return D3D11Renderer::GraphicsPreset::High;
-    case 3: return D3D11Renderer::GraphicsPreset::Ultra;
-    case 4:
-    default:
-        return D3D11Renderer::GraphicsPreset::Custom;
+        switch (index)
+        {
+        case 0: return D3D11Renderer::GraphicsPreset::Low;
+        case 1: return D3D11Renderer::GraphicsPreset::Medium;
+        case 2: return D3D11Renderer::GraphicsPreset::High;
+        case 3: return D3D11Renderer::GraphicsPreset::Ultra;
+        case 4:
+        default:
+            return D3D11Renderer::GraphicsPreset::Custom;
+        }
     }
-}
 
-D3D11Renderer::AntiAliasingMode AntiAliasingModeFromIndex(int index)
-{
-    switch (index)
+    D3D11Renderer::AntiAliasingMode AntiAliasingModeFromIndex(int index)
     {
-    case 0: return D3D11Renderer::AntiAliasingMode::Off;
-    case 1: return D3D11Renderer::AntiAliasingMode::FXAA;
-    case 2: return D3D11Renderer::AntiAliasingMode::SMAA;
-    case 3:
-    default:
-        return D3D11Renderer::AntiAliasingMode::TAA;
+        switch (index)
+        {
+        case 0: return D3D11Renderer::AntiAliasingMode::Off;
+        case 1: return D3D11Renderer::AntiAliasingMode::FXAA;
+        case 2: return D3D11Renderer::AntiAliasingMode::SMAA;
+        case 3:
+        default:
+            return D3D11Renderer::AntiAliasingMode::TAA;
+        }
     }
-}
 
-static bool WorldToScreen(
-    float wx, float wy, float wz,
-    float camX, float camY, float camZ,
-    float yaw, float pitch,
-    float vpW, float vpH,
-    float& outSx, float& outSy)
-{
-    // Build the exact same look direction the renderer uses
-    float lookDirX = cosf(pitch) * sinf(yaw);
-    float lookDirY = sinf(pitch);
-    float lookDirZ = cosf(pitch) * cosf(yaw);
-
-    DirectX::XMVECTOR camPos = DirectX::XMVectorSet(camX, camY, camZ, 1.0f);
-    DirectX::XMVECTOR camTarget = DirectX::XMVectorSet(camX + lookDirX,
-        camY + lookDirY,
-        camZ + lookDirZ, 1.0f);
-    DirectX::XMVECTOR camUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-    // Match renderer exactly — LookAtLH, 45 degree FOV, near 0.1, far 2000
-    DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(camPos, camTarget, camUp);
-    DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(
-        DirectX::XM_PIDIV4,
-        vpW / vpH,
-        0.1f, 2000.0f);
-
-    // DirectXMath uses row vectors: clip = worldPos * view * proj
-    // XMMatrixMultiply(A,B) = A*B, XMVector4Transform(v,M) = v*M
-    // NO transpose needed here
-    DirectX::XMMATRIX viewProj = DirectX::XMMatrixMultiply(view, proj);
-
-    DirectX::XMVECTOR worldPos = DirectX::XMVectorSet(wx, wy, wz, 1.0f);
-    DirectX::XMVECTOR clip = DirectX::XMVector4Transform(worldPos, viewProj);
-
-    // W check — behind camera
-    float w = DirectX::XMVectorGetW(clip);
-    if (w <= 0.0f)
-        return false;
-
-    // Perspective divide to NDC
-    float ndcX = DirectX::XMVectorGetX(clip) / w;
-    float ndcY = DirectX::XMVectorGetY(clip) / w;
-
-    // NDC to screen pixels
-    outSx = (ndcX + 1.0f) * 0.5f * vpW;
-    outSy = (1.0f - ndcY) * 0.5f * vpH;
-
-    // Cull if off screen
-    if (outSx < -50.0f || outSx > vpW + 50.0f) return false;
-    if (outSy < -50.0f || outSy > vpH + 50.0f) return false;
-
-    return true;
-}
-static void DrawProjectedAabb(
-    ImDrawList* dl,
-    float centerX, float centerY, float centerZ,
-    float halfX, float halfY, float halfZ,
-    float camX, float camY, float camZ,
-    float yaw, float pitch,
-    float vpW, float vpH,
-    ImU32 color,
-    float thickness)
-{
-    struct ScreenPoint
+    static bool WorldToScreen(
+        float wx, float wy, float wz,
+        float camX, float camY, float camZ,
+        float yaw, float pitch,
+        float vpW, float vpH,
+        float& outSx, float& outSy)
     {
-        float x = 0.0f;
-        float y = 0.0f;
-        bool  visible = false;
-    };
+        // Build the exact same look direction the renderer uses
+        float lookDirX = cosf(pitch) * sinf(yaw);
+        float lookDirY = sinf(pitch);
+        float lookDirZ = cosf(pitch) * cosf(yaw);
 
-    ScreenPoint pts[8];
+        DirectX::XMVECTOR camPos = DirectX::XMVectorSet(camX, camY, camZ, 1.0f);
+        DirectX::XMVECTOR camTarget = DirectX::XMVectorSet(camX + lookDirX,
+            camY + lookDirY,
+            camZ + lookDirZ, 1.0f);
+        DirectX::XMVECTOR camUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-    const float minX = centerX - halfX;
-    const float maxX = centerX + halfX;
-    const float minY = centerY - halfY;
-    const float maxY = centerY + halfY;
-    const float minZ = centerZ - halfZ;
-    const float maxZ = centerZ + halfZ;
+        // Match renderer exactly — LookAtLH, 45 degree FOV, near 0.1, far 2000
+        DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(camPos, camTarget, camUp);
+        DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(
+            DirectX::XM_PIDIV4,
+            vpW / vpH,
+            0.1f, 2000.0f);
 
-    pts[0].visible = WorldToScreen(minX, minY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[0].x, pts[0].y);
-    pts[1].visible = WorldToScreen(maxX, minY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[1].x, pts[1].y);
-    pts[2].visible = WorldToScreen(maxX, maxY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[2].x, pts[2].y);
-    pts[3].visible = WorldToScreen(minX, maxY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[3].x, pts[3].y);
+        // DirectXMath uses row vectors: clip = worldPos * view * proj
+        // XMMatrixMultiply(A,B) = A*B, XMVector4Transform(v,M) = v*M
+        // NO transpose needed here
+        DirectX::XMMATRIX viewProj = DirectX::XMMatrixMultiply(view, proj);
 
-    pts[4].visible = WorldToScreen(minX, minY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[4].x, pts[4].y);
-    pts[5].visible = WorldToScreen(maxX, minY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[5].x, pts[5].y);
-    pts[6].visible = WorldToScreen(maxX, maxY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[6].x, pts[6].y);
-    pts[7].visible = WorldToScreen(minX, maxY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[7].x, pts[7].y);
+        DirectX::XMVECTOR worldPos = DirectX::XMVectorSet(wx, wy, wz, 1.0f);
+        DirectX::XMVECTOR clip = DirectX::XMVector4Transform(worldPos, viewProj);
 
-    const int edges[][2] =
+        // W check — behind camera
+        float w = DirectX::XMVectorGetW(clip);
+        if (w <= 0.0f)
+            return false;
+
+        // Perspective divide to NDC
+        float ndcX = DirectX::XMVectorGetX(clip) / w;
+        float ndcY = DirectX::XMVectorGetY(clip) / w;
+
+        // NDC to screen pixels
+        outSx = (ndcX + 1.0f) * 0.5f * vpW;
+        outSy = (1.0f - ndcY) * 0.5f * vpH;
+
+        // Cull if off screen
+        if (outSx < -50.0f || outSx > vpW + 50.0f) return false;
+        if (outSy < -50.0f || outSy > vpH + 50.0f) return false;
+
+        return true;
+    }
+    static void DrawProjectedAabb(
+        ImDrawList* dl,
+        float centerX, float centerY, float centerZ,
+        float halfX, float halfY, float halfZ,
+        float camX, float camY, float camZ,
+        float yaw, float pitch,
+        float vpW, float vpH,
+        ImU32 color,
+        float thickness)
     {
-        {0, 1}, {1, 2}, {2, 3}, {3, 0},
-        {4, 5}, {5, 6}, {6, 7}, {7, 4},
-        {0, 4}, {1, 5}, {2, 6}, {3, 7}
-    };
+        struct ScreenPoint
+        {
+            float x = 0.0f;
+            float y = 0.0f;
+            bool  visible = false;
+        };
 
-    for (const auto& edge : edges)
-    {
-        const int a = edge[0];
-        const int b = edge[1];
-        if (!pts[a].visible || !pts[b].visible)
-            continue;
+        ScreenPoint pts[8];
 
-        dl->AddLine(
-            ImVec2(pts[a].x, pts[a].y),
-            ImVec2(pts[b].x, pts[b].y),
-            color,
-            thickness);
+        const float minX = centerX - halfX;
+        const float maxX = centerX + halfX;
+        const float minY = centerY - halfY;
+        const float maxY = centerY + halfY;
+        const float minZ = centerZ - halfZ;
+        const float maxZ = centerZ + halfZ;
+
+        pts[0].visible = WorldToScreen(minX, minY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[0].x, pts[0].y);
+        pts[1].visible = WorldToScreen(maxX, minY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[1].x, pts[1].y);
+        pts[2].visible = WorldToScreen(maxX, maxY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[2].x, pts[2].y);
+        pts[3].visible = WorldToScreen(minX, maxY, minZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[3].x, pts[3].y);
+
+        pts[4].visible = WorldToScreen(minX, minY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[4].x, pts[4].y);
+        pts[5].visible = WorldToScreen(maxX, minY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[5].x, pts[5].y);
+        pts[6].visible = WorldToScreen(maxX, maxY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[6].x, pts[6].y);
+        pts[7].visible = WorldToScreen(minX, maxY, maxZ, camX, camY, camZ, yaw, pitch, vpW, vpH, pts[7].x, pts[7].y);
+
+        const int edges[][2] =
+        {
+            {0, 1}, {1, 2}, {2, 3}, {3, 0},
+            {4, 5}, {5, 6}, {6, 7}, {7, 4},
+            {0, 4}, {1, 5}, {2, 6}, {3, 7}
+        };
+
+        for (const auto& edge : edges)
+        {
+            const int a = edge[0];
+            const int b = edge[1];
+            if (!pts[a].visible || !pts[b].visible)
+                continue;
+
+            dl->AddLine(
+                ImVec2(pts[a].x, pts[a].y),
+                ImVec2(pts[b].x, pts[b].y),
+                color,
+                thickness);
+        }
     }
 }
 ImGuiLayer::ImGuiLayer() = default;
@@ -355,7 +356,7 @@ void ImGuiLayer::DrawLetterboxBars()
     if (!dl)
         return;
 
-    const float barH = std::min(kLetterboxBarHeight, io.DisplaySize.y * 0.25f);
+    const float barH = (std::min)(kLetterboxBarHeight, io.DisplaySize.y * 0.25f);
     dl->AddRectFilled(ImVec2(0.0f, 0.0f),
                       ImVec2(io.DisplaySize.x, barH),
                       IM_COL32(0, 0, 0, 220));

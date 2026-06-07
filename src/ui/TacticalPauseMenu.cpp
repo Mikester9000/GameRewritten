@@ -49,8 +49,12 @@ bool DrawCommandRow(const char* label, bool available, const char* suffix)
     if (!available)
         ImGui::BeginDisabled();
 
+    // Disable Tab-based focus cycling for this row.
+    // Arrow-key navigation still works through ImGui's directional nav.
+    ImGui::PushItemFlag(ImGuiItemFlags_NoTabStop, true);
     const bool activated = ImGui::Selectable(label, false, ImGuiSelectableFlags_None,
-                                             ImVec2(kSelectableStretchWidth, kSelectableHeight));
+        ImVec2(kSelectableStretchWidth, kSelectableHeight));
+    ImGui::PopItemFlag();
 
     if (!available)
         ImGui::EndDisabled();
