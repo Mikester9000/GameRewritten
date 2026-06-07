@@ -1,3 +1,4 @@
+- 2026-06-07: Added Windows VS Code workflow support with `.vscode/tasks.json` (MSBuild Debug/Release x64) and `.vscode/launch.json` (`cppvsdbg`), plus README instructions while preserving existing Visual Studio `.slnx/.vcxproj` workflow.
 - 2026-06-03: Task 030 completion pass — verified minimap fog-of-war implementation remains active in `Minimap` (visited-cell persistence + dark fog for unvisited cells) and marked Task 030 complete in the ordered sequence.
 - 2026-06-03: Task 019 completion — added an ImGui draw-list defeat overlay in GameHUD with retry confirmation and hooked RuntimeScene/Main to defer respawn until retry is confirmed.
 - 2026-06-03: Task 018 completion — added a timed "Saving..." HUD indicator in GameHUD and wired a runtime trigger from Main world-reload flow.

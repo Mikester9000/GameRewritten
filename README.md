@@ -12,6 +12,41 @@ first, then the game executable.
 
 ---
 
+## Running/Debugging in VS Code (Windows)
+
+This repository keeps the Visual Studio solution/project workflow intact
+(`GameRewritten.slnx`, `GameRewritten.vcxproj`, `ThirdParty.vcxproj`) and adds
+VS Code-only configuration under `.vscode/`.
+
+### Prerequisites
+
+- Visual Studio 2022 / Build Tools with **Desktop development with C++**
+  (MSBuild + MSVC + Windows SDK)
+- VS Code extension: **C/C++** (Microsoft)
+
+### Build in VS Code
+
+- Run task: **Build Debug x64 (MSBuild)** or **Build Release x64 (MSBuild)**.
+- Tasks build `GameRewritten.slnx` via `msbuild`, so they use the same project
+  graph as Visual Studio (including `ThirdParty`).
+
+### Debug in VS Code
+
+- Use launch config: **Debug GameRewritten (x64)** (or release variant).
+- VS Code uses `cppvsdbg`, launches:
+  - `x64\\Debug\\GameRewritten.exe` or `x64\\Release\\GameRewritten.exe`
+  - `cwd = ${workspaceFolder}` so runtime-relative `Content/...` and
+    `Shaders/...` paths resolve correctly.
+- The existing project post-build step still copies shaders to `$(OutDir)Shaders`
+  for Visual Studio/MSBuild builds.
+
+### Visual Studio Insiders compatibility
+
+No `.slnx`/`.vcxproj` files were removed or renamed; Visual Studio Insiders
+build/debug workflow remains supported as-is.
+
+---
+
 ## Tracy Profiler (Debug only)
 
 [Tracy](https://github.com/wolfpld/tracy) is a low-overhead CPU frame

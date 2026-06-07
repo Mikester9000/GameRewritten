@@ -112,6 +112,11 @@ This file records every change made by an automated agent or local LLM.
   WHAT CHANGED: Recorded guarded completion for Task 005, confirmed the existing hitstop runtime support, and advanced NEXT_TASK to the next backlog item using the required workflow command.
   KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
 
+[2026-06-07] TASK: VS Code Windows build/debug setup while preserving Visual Studio workflow
+  FILES CHANGED: .vscode/tasks.json, .vscode/launch.json, README.md, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added MSBuild Debug/Release x64 VS Code tasks targeting GameRewritten.slnx, added cppvsdbg launch configs targeting x64 output binaries, set VS Code launch cwd to repo root for Content/Shaders runtime paths, and documented prerequisites + dual-IDE usage in README.
+  KNOWN ISSUES: Build/debug execution cannot be validated in this Linux sandbox; repository still requires Visual Studio C++ targets on Windows (MSB4278 when using dotnet CLI here).
+
 [2026-06-01] TASK: Task 006 completion pass — Stagger meter
   FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md, docs/NEXT_TASK.md
   WHAT CHANGED: Recorded guarded completion for Task 006, confirmed the existing stagger-meter implementation, and advanced NEXT_TASK to the next backlog item using the required workflow command.
