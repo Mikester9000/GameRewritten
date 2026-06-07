@@ -14,7 +14,7 @@
       "preLaunchTask": "Build Debug x64 (MSBuild)"
     },
     {
-      "name": "Debug GameRewritten Release (x64)",
+      "name": "Release GameRewritten (x64)",
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${workspaceFolder}\\x64\\Release\\GameRewritten.exe",

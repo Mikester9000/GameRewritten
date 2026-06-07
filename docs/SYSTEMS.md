@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: VS Code Windows build/debug workflow added via `.vscode/tasks.json` + `.vscode/launch.json` targeting existing MSBuild solution/project outputs with repo-root runtime `cwd` for `Content/` and `Shaders/` resolution.
+Latest task update: Task 030 (Fog of war on minimap) confirmed complete; Minimap persists visited cell coordinates and renders unvisited cells as dark fog until the player enters them.
 
 ## Systems
 

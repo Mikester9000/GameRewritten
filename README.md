@@ -27,12 +27,14 @@ VS Code-only configuration under `.vscode/`.
 ### Build in VS Code
 
 - Run task: **Build Debug x64 (MSBuild)** or **Build Release x64 (MSBuild)**.
-- Tasks build `GameRewritten.slnx` via `msbuild`, so they use the same project
-  graph as Visual Studio (including `ThirdParty`).
+- Tasks build `GameRewritten.vcxproj` via `msbuild`; that project already
+  references `ThirdParty.vcxproj`, so dependencies still build in the same
+  order as Visual Studio.
 
 ### Debug in VS Code
 
-- Use launch config: **Debug GameRewritten (x64)** (or release variant).
+- Use launch config: **Debug GameRewritten (x64)** or
+  **Release GameRewritten (x64)**.
 - VS Code uses `cppvsdbg`, launches:
   - `x64\\Debug\\GameRewritten.exe` or `x64\\Release\\GameRewritten.exe`
   - `cwd = ${workspaceFolder}` so runtime-relative `Content/...` and

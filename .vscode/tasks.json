@@ -6,7 +6,7 @@
       "type": "shell",
       "command": "msbuild",
       "args": [
-        "${workspaceFolder}\\GameRewritten.slnx",
+        "${workspaceFolder}\\GameRewritten.vcxproj",
         "/t:Build",
         "/p:Configuration=Debug;Platform=x64",
         "/m",
@@ -28,7 +28,7 @@
       "type": "shell",
       "command": "msbuild",
       "args": [
-        "${workspaceFolder}\\GameRewritten.slnx",
+        "${workspaceFolder}\\GameRewritten.vcxproj",
         "/t:Build",
         "/p:Configuration=Release;Platform=x64",
         "/m",
