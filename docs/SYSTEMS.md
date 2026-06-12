@@ -113,10 +113,10 @@ Latest task update: Tasks 031-034 completed; world event zones now trigger one-s
 | World event trigger zones | ✅ | `src/game/world/EventZone.cpp/hpp`, `src/app/Main.cpp` |
 | Interaction hotspot registry stub | ❌ | `src/game/world/InteractionRegistry.cpp/hpp` |
 | Landmark discovery trigger stub | ❌ | `src/game/world/LandmarkTrigger.cpp/hpp` |
-| NPC actor | ❌ | `src/game/actors/NpcActor.cpp/hpp` |
+| NPC actor | ✅ | `src/game/actors/NpcActor.cpp/hpp` |
 | Quest objective system | ❌ | `src/game/quest/QuestSystem.cpp/hpp` |
 | Treasure chest actor | ❌ | `src/game/actors/ChestActor.cpp/hpp` |
-| Campfire / rest point actor | ❌ | `src/game/actors/RestPointActor.cpp/hpp` |
+| Campfire / rest point actor | ✅ | `src/game/actors/RestPointActor.cpp/hpp` |
 | NPC interaction prompt routing stub | ❌ | `src/ui/GameHUD.cpp/hpp`, `src/game/world/InteractionRegistry.cpp/hpp` |
 | Quest flag / world-state hook | ❌ | `src/game/quest/QuestFlags.hpp`, `src/game/quest/QuestSystem.cpp/hpp` |
 | Spawn composition table stub (solo / pair / pack) | ❌ | `src/world/SpawnTable.hpp`, `src/world/WorldGrid.cpp/hpp` |
@@ -156,7 +156,7 @@ Latest task update: Tasks 031-034 completed; world event zones now trigger one-s
 | Command wheel + tactical slow-time commands | ❌ | `src/ui/CommandWheel.cpp/hpp, src/ui/TacticalPauseMenu.cpp/hpp` |
 | ATB-style action charge lanes | ❌ | `src/game/combat/AtbSystem.cpp/hpp, src/game/actors/PlayerStats.hpp` |
 | Ability targeting templates (single/cone/aoe) | ❌ | `src/game/combat/AbilityTargeting.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
-| Enemy archetype behavior profiles | ❌ | `src/game/ai/EnemyArchetypeProfile.hpp, src/game/actors/EnemyActor.cpp/hpp` |
+| Enemy archetype behavior profiles | ✅ | `src/game/ai/EnemyArchetypeProfile.hpp, src/game/actors/EnemyActor.cpp/hpp` |
 | Enemy squad tactics coordinator | ❌ | `src/game/ai/SquadCoordinator.cpp/hpp, src/game/RuntimeScene.hpp` |
 | Boss phase state machine framework | ❌ | `src/game/actors/BossActor.cpp/hpp, src/game/ai/BossPhaseState.hpp` |
 | Guard-break / poise combat pipeline | ✅ | `src/game/combat/PoiseSystem.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
@@ -173,7 +173,7 @@ Latest task update: Tasks 031-034 completed; world event zones now trigger one-s
 | Combat bugfix sweep | ✅ | `src/game/combat/CombatSystem.cpp, src/ui/ImGuiLayer.cpp` |
 | Equipment progression + socket rules | ❌ | `src/game/inventory/EquipmentProgression.cpp/hpp, src/game/inventory/Equipment.hpp` |
 | Skill tree graph + unlock prerequisites | ❌ | `src/game/progression/SkillTree.cpp/hpp, src/game/progression/AbilityProgression.hpp` |
-| Loot table tiers + drop weighting | ❌ | `src/game/loot/LootTable.cpp/hpp, src/game/actors/EnemyActor.cpp/hpp` |
+| Loot table tiers + drop weighting | ✅ | `src/game/loot/LootTable.cpp/hpp, src/game/actors/EnemyActor.cpp/hpp` |
 | Crafting + upgrade station flow | ❌ | `src/game/crafting/CraftingSystem.cpp/hpp, src/game/actors/RestPointActor.cpp/hpp` |
 | Open-world encounter director | ❌ | `src/game/ai/EncounterDirector.cpp/hpp, src/world/PopulationDirector.cpp/hpp` |
 | Combat telemetry + balance debug panel | ❌ | `src/ui/CombatDebugPanel.cpp/hpp, src/game/combat/CombatSystem.cpp/hpp` |
@@ -213,7 +213,7 @@ Latest task update: Tasks 031-034 completed; world event zones now trigger one-s
 | Command wheel + tactical slow-time commands | ❌ | `src/ui/CommandWheel.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp` |
 | ATB-style action charge lanes | ❌ | `src/game/combat/AtbSystem.cpp/hpp`, `src/game/actors/PlayerStats.hpp` |
 | Ability targeting templates (single/cone/aoe) | ❌ | `src/game/combat/AbilityTargeting.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
-| Enemy archetype behavior profiles | ❌ | `src/game/ai/EnemyArchetypeProfile.hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
+| Enemy archetype behavior profiles | ✅ | `src/game/ai/EnemyArchetypeProfile.hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
 | Enemy squad tactics coordinator | ❌ | `src/game/ai/SquadCoordinator.cpp/hpp`, `src/game/RuntimeScene.hpp` |
 | Boss phase state machine framework | ❌ | `src/game/actors/BossActor.cpp/hpp`, `src/game/ai/BossPhaseState.hpp` |
 | Guard-break / poise combat pipeline | ✅ | `src/game/combat/PoiseSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
@@ -221,7 +221,7 @@ Latest task update: Tasks 031-034 completed; world event zones now trigger one-s
 | Status ailment counters + immunity windows | ✅ | `src/game/combat/StatusAilmentSystem.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Equipment progression + socket rules | ❌ | `src/game/inventory/EquipmentProgression.cpp/hpp`, `src/game/inventory/Equipment.hpp` |
 | Skill tree graph + unlock prerequisites | ❌ | `src/game/progression/SkillTree.cpp/hpp`, `src/game/progression/AbilityProgression.hpp` |
-| Loot table tiers + drop weighting | ❌ | `src/game/loot/LootTable.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
+| Loot table tiers + drop weighting | ✅ | `src/game/loot/LootTable.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |
 | Crafting + upgrade station flow | ❌ | `src/game/crafting/CraftingSystem.cpp/hpp`, `src/game/actors/RestPointActor.cpp/hpp` |
 | Open-world encounter director | ❌ | `src/game/ai/EncounterDirector.cpp/hpp`, `src/world/PopulationDirector.cpp/hpp` |
 | Combat telemetry + balance debug panel | ❌ | `src/ui/CombatDebugPanel.cpp/hpp`, `src/game/combat/CombatSystem.cpp/hpp` |

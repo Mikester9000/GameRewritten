@@ -161,3 +161,23 @@ This file records every change made by an automated agent or local LLM.
   FILES CHANGED: src/audio/AudioManager.hpp, src/audio/AudioManager.cpp, src/app/Main.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
   WHAT CHANGED: Added AudioManager::SetCombatState(bool) to switch between exploration and battle BGM with guard against per-frame churn. Main now routes enemy chase/attack activity into a 5-second delayed combat-exit flow before returning to exploration music.
   KNOWN ISSUES: dotnet build fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-12] TASK: Task A — NPC Actor
+  FILES CHANGED: src/game/actors/NpcActor.hpp, src/game/actors/NpcActor.cpp, src/game/RuntimeScene.hpp, src/app/Main.cpp, GameRewritten.vcxproj, GameRewritten.vcxproj.filters, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added NpcActor with XMFLOAT3 pos, name, dialogLine, interactRadius. Update() opens DialogBox::Show when player is within radius and E is pressed. SubmitVisual draws a colored box primitive; DrawNameTag renders the name via ImGui foreground draw list using world-to-screen projection. Two test NPCs registered in RuntimeScene init and wired through Main frame loop.
+  KNOWN ISSUES: dotnet build fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-12] TASK: Task B — Loot Table + Enemy Drop
+  FILES CHANGED: src/game/loot/LootTable.hpp, src/game/loot/LootTable.cpp, src/game/actors/EnemyActor.hpp, src/game/actors/EnemyActor.cpp, src/game/RuntimeScene.cpp, src/app/Main.cpp, GameRewritten.vcxproj, GameRewritten.vcxproj.filters, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added LootTable singleton with weighted-random Roll() using rand() and per-enemy type entry vectors. ItemName() returns display name for itemIDs 1-2. EnemyActor got enemyType and deathDropped fields; RuntimeScene rolls loot on enemy death transition (gated by deathDropped to prevent duplicates). Main registers enemyType 0 with 70%/30% weights and polls ConsumeLootToast() each frame.
+  KNOWN ISSUES: dotnet build fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-12] TASK: Task C — Campfire / Rest Point Actor
+  FILES CHANGED: src/game/actors/RestPointActor.hpp, src/game/actors/RestPointActor.cpp, src/game/RuntimeScene.hpp, src/app/Main.cpp, GameRewritten.vcxproj, GameRewritten.vcxproj.filters, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added RestPointActor with pos, radius, and usedThisVisit state. Update() restores PlayerStats::hp/mp to max and shows a HUD toast on E press when within radius; resets usedThisVisit when player moves beyond radius*2 away. Draws an orange box primitive. One test campfire registered in RuntimeScene and wired through Main.
+  KNOWN ISSUES: dotnet build fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-12] TASK: Task D — Enemy Archetype Behavior Profiles
+  FILES CHANGED: src/game/ai/EnemyArchetypeProfile.hpp, src/game/actors/EnemyActor.hpp, src/game/actors/EnemyActor.cpp, src/game/RuntimeScene.hpp, GameRewritten.vcxproj, GameRewritten.vcxproj.filters, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added header-only EnemyArchetypeProfile.hpp with EnemyArchetype enum (Patrol/Aggressive/Skirmisher) and constexpr GetProfile() returning preset chaseRadius/attackRadius/attackCooldown/moveSpeed/aggroOnDamage values. EnemyActor Init() now accepts an archetype param and applies the profile to per-instance AI fields replacing former static constants. RuntimeScene spawns one of each archetype. Aggressive/Skirmisher enemies also enter Chase state on any hit (aggroOnDamage=true).
+  KNOWN ISSUES: dotnet build fails in this environment due to missing Visual Studio C++ targets (MSB4278).

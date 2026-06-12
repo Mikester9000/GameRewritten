@@ -13,6 +13,7 @@
 #include "RuntimeScene.hpp"
 #include <windows.h>
 
+#include "loot/LootTable.hpp"
 #include <string>
 
 void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
@@ -49,7 +50,18 @@ void RuntimeScene::BeginFrame(float dt, D3D11Renderer& renderer,
     {
         const bool nowAlive = (m_enemies[i].hp > 0);
         if (prevAlive[i] && !nowAlive)
+        {
             m_enemyDiedThisFrame = true;
+
+            // Roll loot once per death (gate on deathDropped to prevent duplicate toasts).
+            if (!m_enemies[i].deathDropped)
+            {
+                m_enemies[i].deathDropped = true;
+                const int droppedItem = LootTable::Get().Roll(m_enemies[i].enemyType);
+                if (droppedItem >= 0)
+                    m_pendingLootToasts.push_back(std::string("Dropped: ") + LootTable::ItemName(droppedItem));
+            }
+        }
 
         // Patrol → Chase means the enemy just spotted the player.
         if (prevStates[i] == EnemyState::Patrol && m_enemies[i].state == EnemyState::Chase)

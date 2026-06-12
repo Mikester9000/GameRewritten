@@ -273,7 +273,7 @@ Project completion for this autopilot track means:
 
 ## Phase 3 — World + quest + progression core
 
-- [ ] **Task 031: World event trigger zones**
+- [x] **Task 031: World event trigger zones**
   - Files: `src/game/world/EventZone.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
@@ -288,7 +288,7 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 034: NPC actor**
+- [x] **Task 034: NPC actor**
   - Files: `src/game/actors/NpcActor.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
@@ -303,7 +303,7 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 037: Campfire / rest point actor**
+- [x] **Task 037: Campfire / rest point actor**
   - Files: `src/game/actors/RestPointActor.cpp/hpp`
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
@@ -539,7 +539,7 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
   - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
 
-- [ ] **Task 081: Enemy archetype behavior profiles**
+- [x] **Task 081: Enemy archetype behavior profiles**
   - Files: `src/game/ai/EnemyArchetypeProfile.hpp`, `src/game/actors/EnemyActor.cpp/hpp`
   - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
   - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
@@ -579,7 +579,7 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
   - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.
 
-- [ ] **Task 089: Loot table tiers + drop weighting**
+- [x] **Task 089: Loot table tiers + drop weighting**
   - Files: `src/game/loot/LootTable.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp`
   - Steps: implement smallest viable ship-path slice in listed files, keep GT610-safe defaults, and avoid cross-task scope creep.
   - Done when: runtime or tooling behavior is usable, tracking row in `docs/SYSTEMS.md` is flipped to ✅ when implemented, changelog/log updated.

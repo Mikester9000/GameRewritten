@@ -15,6 +15,7 @@
 #include "EnemyState.hpp"
 #include "../combat/HitBox.hpp"
 #include "../combat/ElementSystem.hpp"
+#include "../ai/EnemyArchetypeProfile.hpp"
 
 class D3D11Renderer;
 class PrefabLibrary;
@@ -59,8 +60,21 @@ public:
     int  maxHp = 10;
     bool isDead = false;
 
-    // Movement speed in world units per second.
+    // Movement speed in world units per second (overridden by archetype at Init time).
     float moveSpeed = 3.0f;
+
+    // Per-instance behavior radii (overridden by archetype at Init time).
+    float chaseRadius    = kDetectRadius;       // distance at which the enemy starts chasing
+    float attackRadius   = kAttackRadius;       // distance at which the enemy attacks
+    float attackWindUp   = kAttackWindUpDuration; // seconds of wind-up before the hit fires
+    bool  aggroOnDamage  = false;               // skip stagger and go straight to Chase when hit in Patrol
+
+    // Archetype assigned at Init time.  Drives the per-instance behavior fields above.
+    EnemyArchetype archetype = EnemyArchetype::Patrol;
+
+    // Loot drop tracking.
+    int  enemyType    = 0;    // used as a key into LootTable
+    bool deathDropped = false; // true after the first loot roll on death
 
     // Patrol waypoints: the enemy shuttles between index 0 and 1.
     float waypointX[2] = {};
@@ -93,18 +107,22 @@ public:
     // Returns 0.0 when not telegraphing.
     float GetTelegraphPhase() const
     {
-        if (state != EnemyState::Attack || kAttackWindUpDuration <= 0.0f)
+        if (state != EnemyState::Attack || attackWindUp <= 0.0f)
             return 0.0f;
-        const float elapsed = kAttackWindUpDuration - stateTimer;
-        return (elapsed < kAttackWindUpDuration) ? (elapsed / kAttackWindUpDuration) : 1.0f;
+        const float elapsed = attackWindUp - stateTimer;
+        if (elapsed <= 0.0f)
+            return 0.0f;
+        return (elapsed < attackWindUp) ? (elapsed / attackWindUp) : 1.0f;
     }
 
     // Set starting position and patrol waypoints.
+    // archetype determines chase/attack radii and move speed.
     // y is terrain-snapped on the first Update call.
     void Init(float startX, float startZ,
               float wpAx, float wpAz,
               float wpBx, float wpBz,
-              int   startHp = 10);
+              int   startHp = 10,
+              EnemyArchetype archetypeParam = EnemyArchetype::Patrol);
 
     // Advance state machine, move, snap Y to terrain.
     // playerX/playerZ are the current player world-space XZ position.
