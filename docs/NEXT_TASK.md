@@ -3,9 +3,9 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 035
-**System:** Quest objective system
-**Files to touch:** `src/game/quest/QuestSystem.cpp/hpp`
+**Task ID:** 032
+**System:** Interaction hotspot registry stub
+**Files to touch:** `src/game/world/InteractionRegistry.cpp/hpp`
 
 ---
 

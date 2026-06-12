@@ -49,6 +49,7 @@
 #include "../world/WeatherSystem.hpp"
 #include "../game/ParticleSystem.hpp"
 #include "../game/world/EventZone.hpp"
+#include "../game/loot/LootTable.hpp"
 #include "FrameTiming.hpp"
 #include "InputActionMap.hpp"
 #include "InputEdgeState.hpp"
@@ -380,6 +381,14 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // any cell-boundary void on the first frame.
     camController.Init(startupCellCenter, 0.0f, startupCellCenter, 0.0f, -0.5f);
     runtimeScene.InitEnemies(startupCellCenter, startupCellCenter);
+    runtimeScene.InitNpcs(startupCellCenter, startupCellCenter);
+    runtimeScene.InitRestPoints(startupCellCenter, startupCellCenter);
+
+    // Register enemy drop tables: enemyType 0 → 70% Health Herb, 30% Ore Shard.
+    LootTable::Get().Register(0, {
+        { 1, 70.0f, 1 },   // itemID 1 = Health Herb
+        { 2, 30.0f, 1 }    // itemID 2 = Ore Shard
+    });
 
     EventZoneRegistry eventZoneRegistry;
     eventZoneRegistry.AddZone({
@@ -688,6 +697,21 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         runtimeScene.RefreshLockOnTarget();
         const CombatSystem& combat = runtimeScene.GetCombatSystem();
 
+        // Update NPC dialog and rest point healing (both use cached player position from BeginFrame).
+        if (!paused)
+        {
+            runtimeScene.UpdateNpcs(interactPressed, dialogBox);
+            if (runtimeScene.UpdateRestPoint(interactPressed))
+                gameHud.PushToast("Rested — HP and MP restored");
+        }
+
+        // Show loot drop toast if an enemy died and dropped something.
+        {
+            std::string lootToastMsg;
+            if (runtimeScene.ConsumeLootToast(lootToastMsg))
+                gameHud.PushToast(lootToastMsg);
+        }
+
         float shakeAmplitude = 0.0f;
         float shakeDuration = 0.0f;
         if (runtimeScene.ConsumePendingCameraShake(shakeAmplitude, shakeDuration))
@@ -921,6 +945,14 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                                                 static_cast<float>(window.GetWidth()),
                                                 static_cast<float>(window.GetHeight()));
                 dialogBox.Draw(io);
+                runtimeScene.DrawNpcNameTags(
+                    camController.GetCamX(),
+                    camController.GetCamY(),
+                    camController.GetCamZ(),
+                    camController.GetYaw(),
+                    camController.GetPitch(),
+                    static_cast<float>(window.GetWidth()),
+                    static_cast<float>(window.GetHeight()));
                 minimap.Draw(worldGrid,
                              camController.GetPlayerX(), camController.GetPlayerZ(),
                              camController.GetYaw(), io);

@@ -1,3 +1,7 @@
+- 2026-06-12: Task A — added `NpcActor` (`src/game/actors/NpcActor.cpp/hpp`) with proximity dialog trigger and ImGui world-space name tag.
+- 2026-06-12: Task B — added `LootTable` singleton (`src/game/loot/LootTable.cpp/hpp`) with weighted drop roll and enemy death integration.
+- 2026-06-12: Task C — added `RestPointActor` (`src/game/actors/RestPointActor.cpp/hpp`) campfire with HP/MP restore and single-use guard.
+- 2026-06-12: Task D — added `EnemyArchetypeProfile` (`src/game/ai/EnemyArchetypeProfile.hpp`) with Patrol/Aggressive/Skirmisher presets applied to `EnemyActor` per-instance AI fields.
 - 2026-06-12: Task 031 — added `EventZoneRegistry` (`src/game/world/EventZone.cpp/hpp`) and wired per-frame zone updates in `Main.cpp` for one-shot AABB trigger events.
 - 2026-06-12: Task 032 — added GT610-safe cel/toon shader path (`Shaders/CelShading.hlsl`) and renderer wiring so player/enemy runtime visuals use cel shading with outline.
 - 2026-06-12: Task 033 — added two world test zones that trigger distinct one-shot dialog lines plus HUD toast feedback via `EventZoneRegistry` callbacks.

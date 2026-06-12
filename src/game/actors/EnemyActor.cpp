@@ -23,7 +23,8 @@
 void EnemyActor::Init(float startX, float startZ,
                       float wpAx, float wpAz,
                       float wpBx, float wpBz,
-                      int   startHp)
+                      int   startHp,
+                      EnemyArchetype archetypeParam)
 {
     x = startX;
     y = 0.0f;
@@ -33,7 +34,6 @@ void EnemyActor::Init(float startX, float startZ,
     hp    = startHp;
     maxHp = startHp;
     isDead = false;
-    moveSpeed = 3.0f;
     currentWaypoint = 0;
     waypointX[0] = wpAx;  waypointZ[0] = wpAz;
     waypointX[1] = wpBx;  waypointZ[1] = wpBz;
@@ -44,6 +44,17 @@ void EnemyActor::Init(float startX, float startZ,
     pendingAttackHitBox.framesToLive = 0;
     hitFlashTimer = 0.0f;
     pressureGauge = 0.0f;
+    deathDropped  = false;
+
+    // Apply archetype behavior profile.
+    archetype    = archetypeParam;
+    const EnemyArchetypeProfile profile = GetProfile(archetypeParam);
+    moveSpeed    = profile.moveSpeed;
+    chaseRadius  = profile.chaseRadius;
+    attackRadius = profile.attackRadius;
+    attackWindUp = profile.attackCooldown;
+    aggroOnDamage = profile.aggroOnDamage;
+
     // Basic elemental profile for tactical combat checks.
     elementProfile.fire = 0.85f;
     elementProfile.ice = 1.35f;
@@ -99,6 +110,12 @@ void EnemyActor::OnHit(int damage)
         {
             TransitionTo(EnemyState::Staggered, kStaggerDuration);
             LOG_INFO("EnemyActor: STAGGERED! HP remaining: " + std::to_string(hp));
+        }
+        else if (aggroOnDamage && state == EnemyState::Patrol)
+        {
+            // Aggro archetypes skip the stagger and immediately chase when hit in Patrol.
+            TransitionTo(EnemyState::Chase, 0.0f);
+            LOG_INFO("EnemyActor: AggroOnDamage — skipped stagger, entering Chase.");
         }
         else
         {
@@ -166,7 +183,7 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
             yaw = atan2f(distXToWaypoint, distZToWaypoint);
         }
 
-        if (distanceToPlayer < kDetectRadius)
+        if (distanceToPlayer < chaseRadius)
         {
             TransitionTo(EnemyState::Chase, 0.0f);
             LOG_INFO("EnemyActor: Detected player — entering Chase.");
@@ -185,9 +202,9 @@ void EnemyActor::Update(float dt, D3D11Renderer& renderer,
             yaw = atan2f(distXToPlayer, distZToPlayer);
         }
 
-        if (distanceToPlayer < kAttackRadius)
+        if (distanceToPlayer < attackRadius)
         {
-            TransitionTo(EnemyState::Attack, kAttackWindUpDuration);
+            TransitionTo(EnemyState::Attack, attackWindUp);
             LOG_INFO("EnemyActor: In attack range — winding up.");
         }
         else if (distanceToPlayer > kLeashRadius)

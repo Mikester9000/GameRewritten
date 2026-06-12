@@ -242,6 +242,9 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\game\physics\CollisionWorld.cpp" />
     <ClCompile Include="src\game\actors\PlayerActor.cpp" />
     <ClCompile Include="src\game\actors\EnemyActor.cpp" />
+    <ClCompile Include="src\game\actors\NpcActor.cpp" />
+    <ClCompile Include="src\game\actors\RestPointActor.cpp" />
+    <ClCompile Include="src\game\loot\LootTable.cpp" />
     <ClCompile Include="src\game\combat\ComboSystem.cpp" />
     <ClCompile Include="src\game\combat\CombatSystem.cpp" />
     <ClCompile Include="src\game\combat\CombatSpeedSlider.cpp" />
@@ -347,6 +350,10 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\game\actors\PlayerActor.hpp" />
     <ClInclude Include="src\game\actors\EnemyActor.hpp" />
     <ClInclude Include="src\game\actors\EnemyState.hpp" />
+    <ClInclude Include="src\game\actors\NpcActor.hpp" />
+    <ClInclude Include="src\game\actors\RestPointActor.hpp" />
+    <ClInclude Include="src\game\ai\EnemyArchetypeProfile.hpp" />
+    <ClInclude Include="src\game\loot\LootTable.hpp" />
     <ClInclude Include="src\game\combat\ComboSystem.hpp" />
     <ClInclude Include="src\game\combat\HitBox.hpp" />
     <ClInclude Include="src\game\combat\CombatSystem.hpp" />

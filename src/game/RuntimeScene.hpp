@@ -29,6 +29,8 @@
 
 #include "actors/PlayerActor.hpp"
 #include "actors/EnemyActor.hpp"
+#include "actors/NpcActor.hpp"
+#include "actors/RestPointActor.hpp"
 #include "PrimitiveRenderer.hpp"
 #include "combat/CombatSystem.hpp"
 #include "combat/Targeting.hpp"
@@ -40,11 +42,19 @@
 #include "../app/InputActionMap.hpp"
 #include <cmath>
 #include <logger/Logger.hpp>
+#include <string>
 
 // Forward-declared to avoid pulling their full headers into every file that
 // includes RuntimeScene.
 class D3D11Renderer;
 class PrefabLibrary;
+
+// Guard against Win32 "DialogBox" macro from windows.h (defines DialogBox→DialogBoxA/W).
+// NpcActor.hpp and DialogBox.hpp both handle this; RuntimeScene must also guard here
+// because InputActionMap.hpp pulls in windows.h before this class definition.
+#ifdef DialogBox
+#undef DialogBox
+#endif
 
 class RuntimeScene
 {
@@ -52,7 +62,7 @@ public:
     RuntimeScene(PlayerActor& player, PrimitiveRenderer& primRenderer)
         : m_player(player), m_primRenderer(primRenderer) {}
 
-    // Place two patrol enemies near the player's spawn center.
+    // Place patrol enemies near the player's spawn center with mixed archetypes.
     // Stores the spawn center for later player respawns.
     // Call once after camController.Init().
     void InitEnemies(float centerX, float centerZ)
@@ -60,15 +70,77 @@ public:
         m_spawnCenterX = centerX;
         m_spawnCenterZ = centerZ;
 
-        // Enemy 0 patrols east-west; starts at the midpoint of the route.
+        // Enemy 0 — Patrol: slow, only detects the player at close range.
         m_enemies[0].Init(centerX + 20.0f, centerZ + 10.0f,
                           centerX + 10.0f, centerZ + 10.0f,
-                          centerX + 30.0f, centerZ + 10.0f);
+                          centerX + 30.0f, centerZ + 10.0f,
+                          10, EnemyArchetype::Patrol);
 
-        // Enemy 1 patrols north-south; starts at the midpoint of the route.
+        // Enemy 1 — Aggressive: fast, charges from far away, reacts to damage.
         m_enemies[1].Init(centerX + 10.0f, centerZ + 40.0f,
                           centerX + 10.0f, centerZ + 30.0f,
-                          centerX + 10.0f, centerZ + 50.0f);
+                          centerX + 10.0f, centerZ + 50.0f,
+                          10, EnemyArchetype::Aggressive);
+
+        // Enemy 2 — Skirmisher: medium range, fast attack cooldown, attacks from afar.
+        m_enemies[2].Init(centerX - 15.0f, centerZ + 25.0f,
+                          centerX - 20.0f, centerZ + 20.0f,
+                          centerX - 10.0f, centerZ + 30.0f,
+                          10, EnemyArchetype::Skirmisher);
+    }
+
+    // Place two hardcoded test NPCs in the world.
+    // Call once after InitEnemies().
+    void InitNpcs(float centerX, float centerZ)
+    {
+        m_npcs[0].Init(centerX + 5.0f, centerZ - 5.0f,
+                       "Mira", "Safe travels, stranger. Watch out for the goblins to the east.");
+        m_npcs[1].Init(centerX - 8.0f, centerZ + 3.0f,
+                       "Old Tam", "They say a campfire beyond the ridge can mend any wound.");
+    }
+
+    // Place one test campfire rest point.
+    // Call once after InitEnemies().
+    void InitRestPoints(float centerX, float centerZ)
+    {
+        m_restPoint.Init(centerX + 35.0f, centerZ - 10.0f, 4.0f);
+    }
+
+    // Update NPCs: check proximity and trigger dialog on E press.
+    // Must be called after BeginFrame() so m_playerX/Z are current.
+    void UpdateNpcs(bool interactPressed, DialogBox& dialogBox)
+    {
+        for (NpcActor& npc : m_npcs)
+            npc.Update(m_playerX, m_playerZ, interactPressed, dialogBox);
+    }
+
+    // Update the rest point: heal player on E press if in range and not yet used.
+    // Returns true the frame the player rests (caller shows the toast).
+    bool UpdateRestPoint(bool interactPressed)
+    {
+        return m_restPoint.Update(m_playerX, m_playerZ, interactPressed, m_player.stats);
+    }
+
+    // Submit NPC name tags using ImGui world-to-screen projection.
+    // Must be called inside an active ImGui frame.
+    void DrawNpcNameTags(float camX, float camY, float camZ,
+                         float yaw, float pitch,
+                         float vpW, float vpH) const
+    {
+        for (const NpcActor& npc : m_npcs)
+            npc.DrawNameTag(camX, camY, camZ, yaw, pitch, vpW, vpH);
+    }
+
+    // Consume a pending loot drop toast message.
+    // Returns true once and copies the message into outMessage.
+    bool ConsumeLootToast(std::string& outMessage)
+    {
+        if (!m_hasPendingLootToast)
+            return false;
+        outMessage           = m_pendingLootToast;
+        m_hasPendingLootToast = false;
+        m_pendingLootToast.clear();
+        return true;
     }
 
     DamageNumbers damageNumbers;
@@ -144,6 +216,11 @@ public:
 
         for (const EnemyActor& enemy : m_enemies)
             enemy.SubmitRuntimeVisual(prefabLibrary, m_primRenderer);
+
+        for (const NpcActor& npc : m_npcs)
+            npc.SubmitVisual(m_primRenderer);
+
+        m_restPoint.SubmitVisual(m_primRenderer);
     }
 
     // Spawn a hitbox for the current combo step.
@@ -378,7 +455,8 @@ public:
     }
 
 private:
-    static constexpr int kEnemyCount = 2;
+    static constexpr int kEnemyCount = 3;
+    static constexpr int kNpcCount   = 2;
 
     // Enemy attack hitbox parameters.
     static constexpr float kEnemyAttackHalfX  = 1.2f;
@@ -398,6 +476,8 @@ private:
     PlayerActor&       m_player;
     PrimitiveRenderer& m_primRenderer;
     EnemyActor         m_enemies[kEnemyCount];
+    NpcActor           m_npcs[kNpcCount];
+    RestPointActor     m_restPoint;
     CombatSystem       m_combatSystem;
     Targeting          m_targeting;
     ComboSystem        m_comboSystem;
@@ -435,6 +515,10 @@ private:
 
     float m_lastMoveDirX = 0.0f;
     float m_lastMoveDirZ = 1.0f; // default facing forward
+
+    // Loot drop toast queued from BeginFrame, consumed by Main.cpp each frame.
+    std::string m_pendingLootToast;
+    bool        m_hasPendingLootToast = false;
 
     void QueueImpactFeedback(float hitStopSec, float shakeAmplitude, float shakeDuration)
     {
