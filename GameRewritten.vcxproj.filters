@@ -21,6 +21,7 @@
     <None Include="packages.config" />
     <None Include=".github\copilot-instructions.md" />
     <None Include="Shaders\triangle_ps.hlsl" />
+    <None Include="Shaders\CelShading.hlsl" />
     <None Include="Content\AssetRegistry.json" />
     <None Include="Content\Audio\README.md" />
     <None Include="Content\Materials\default.material.json" />
@@ -594,7 +595,6 @@
     <FxCompile Include="Shaders\outline_ps.hlsl" />
     <FxCompile Include="Shaders\outline_vs.hlsl" />
     <FxCompile Include="Shaders\lut_ps.hlsl" />
-    <FxCompile Include="Shaders\CelShading.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="docs\Development Roadmap.txt" />

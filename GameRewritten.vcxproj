@@ -326,9 +326,9 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Shaders\CelShading.hlsl">
+    <None Include="Shaders\CelShading.hlsl">
       <FileType>Document</FileType>
-    </FxCompile>
+    </None>
     <None Include="Shaders\triangle_ps.hlsl">
       <FileType>Document</FileType>
     </None>

@@ -181,7 +181,6 @@ void AudioManager::SetCombatState(bool inCombat)
     if (m_inCombat == inCombat)
         return;
 
-    m_inCombat = inCombat;
     const std::string trackPath = inCombat ? kBgmBattleStandard : kBgmFieldDay;
     if (!PlayBGM(trackPath))
     {
@@ -189,6 +188,7 @@ void AudioManager::SetCombatState(bool inCombat)
         return;
     }
 
+    m_inCombat = inCombat;
     LOG_INFO(std::string("AudioManager: combat BGM state -> ") + (inCombat ? "battle" : "explore"));
 }
 
