@@ -107,10 +107,12 @@ public:
     // Returns 0.0 when not telegraphing.
     float GetTelegraphPhase() const
     {
-        if (state != EnemyState::Attack || kAttackWindUpDuration <= 0.0f)
+        if (state != EnemyState::Attack || attackWindUp <= 0.0f)
             return 0.0f;
-        const float elapsed = kAttackWindUpDuration - stateTimer;
-        return (elapsed < kAttackWindUpDuration) ? (elapsed / kAttackWindUpDuration) : 1.0f;
+        const float elapsed = attackWindUp - stateTimer;
+        if (elapsed <= 0.0f)
+            return 0.0f;
+        return (elapsed < attackWindUp) ? (elapsed / attackWindUp) : 1.0f;
     }
 
     // Set starting position and patrol waypoints.

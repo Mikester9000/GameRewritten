@@ -111,9 +111,9 @@ void EnemyActor::OnHit(int damage)
             TransitionTo(EnemyState::Staggered, kStaggerDuration);
             LOG_INFO("EnemyActor: STAGGERED! HP remaining: " + std::to_string(hp));
         }
-        else if (aggroOnDamage && state == EnemyState::Patrol)
+        else if (aggroOnDamage)
         {
-            // Aggro archetypes skip the stagger and immediately chase when hit in Patrol.
+            // Aggro archetypes skip hit-stagger and immediately re-enter Chase when hit.
             TransitionTo(EnemyState::Chase, 0.0f);
             LOG_INFO("EnemyActor: AggroOnDamage — skipped stagger, entering Chase.");
         }
@@ -276,8 +276,9 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
     float telegraphScale = 1.0f;
     if (state == EnemyState::Attack && stateTimer > 0.0f)
     {
-        const float elapsed = kAttackWindUpDuration - stateTimer;
-        const float phase   = elapsed / kAttackWindUpDuration;  // 0=start, 1=end
+        const float windUpDuration = (attackWindUp > 0.0f) ? attackWindUp : kAttackWindUpDuration;
+        const float elapsed = windUpDuration - stateTimer;
+        const float phase   = elapsed / windUpDuration;  // 0=start, 1=end
         if (phase < 0.5f)
         {
             // Early wind-up: slow moderate swell.

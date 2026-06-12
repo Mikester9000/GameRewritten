@@ -41,6 +41,7 @@
 #include "../ui/DamageNumbers.hpp"
 #include "../app/InputActionMap.hpp"
 #include <cmath>
+#include <deque>
 #include <logger/Logger.hpp>
 #include <string>
 
@@ -135,11 +136,10 @@ public:
     // Returns true once and copies the message into outMessage.
     bool ConsumeLootToast(std::string& outMessage)
     {
-        if (!m_hasPendingLootToast)
+        if (m_pendingLootToasts.empty())
             return false;
-        outMessage           = m_pendingLootToast;
-        m_hasPendingLootToast = false;
-        m_pendingLootToast.clear();
+        outMessage = m_pendingLootToasts.front();
+        m_pendingLootToasts.pop_front();
         return true;
     }
 
@@ -517,8 +517,7 @@ private:
     float m_lastMoveDirZ = 1.0f; // default facing forward
 
     // Loot drop toast queued from BeginFrame, consumed by Main.cpp each frame.
-    std::string m_pendingLootToast;
-    bool        m_hasPendingLootToast = false;
+    std::deque<std::string> m_pendingLootToasts;
 
     void QueueImpactFeedback(float hitStopSec, float shakeAmplitude, float shakeDuration)
     {
