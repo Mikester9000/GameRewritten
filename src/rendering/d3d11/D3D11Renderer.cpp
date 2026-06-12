@@ -749,6 +749,8 @@ void D3D11Renderer::ApplyGraphicsPreset(GraphicsPreset preset)
         m_lodDistanceScale = 0.75f;
         m_antiAliasingMode = AntiAliasingMode::FXAA;
         m_frameRateLimit = 60;
+        m_useCelShading = true;
+        m_celOutlineWidth = 0.03f;
         break;
     case GraphicsPreset::Medium:
         m_shadowResolution = 1024;
@@ -757,6 +759,8 @@ void D3D11Renderer::ApplyGraphicsPreset(GraphicsPreset preset)
         m_lodDistanceScale = 1.0f;
         m_antiAliasingMode = AntiAliasingMode::FXAA;
         m_frameRateLimit = 60;
+        m_useCelShading = true;
+        m_celOutlineWidth = 0.03f;
         break;
     case GraphicsPreset::High:
         m_shadowResolution = 2048;
@@ -765,6 +769,8 @@ void D3D11Renderer::ApplyGraphicsPreset(GraphicsPreset preset)
         m_lodDistanceScale = 1.25f;
         m_antiAliasingMode = AntiAliasingMode::SMAA;
         m_frameRateLimit = 120;
+        m_useCelShading = true;
+        m_celOutlineWidth = 0.03f;
         break;
     case GraphicsPreset::Ultra:
         m_shadowResolution = 4096;
@@ -773,6 +779,8 @@ void D3D11Renderer::ApplyGraphicsPreset(GraphicsPreset preset)
         m_lodDistanceScale = 1.5f;
         m_antiAliasingMode = AntiAliasingMode::TAA;
         m_frameRateLimit = 0;
+        m_useCelShading = true;
+        m_celOutlineWidth = 0.025f;
         break;
     case GraphicsPreset::Custom:
     default:

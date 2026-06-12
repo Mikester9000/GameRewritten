@@ -108,6 +108,9 @@
     <ClCompile Include="src\game\RuntimeScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\world\EventZone.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\assets\AssetLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -491,6 +494,9 @@
     <ClInclude Include="src\world\WorldGrid.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\world\EventZone.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\ui\tooltip_system.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -588,6 +594,7 @@
     <FxCompile Include="Shaders\outline_ps.hlsl" />
     <FxCompile Include="Shaders\outline_vs.hlsl" />
     <FxCompile Include="Shaders\lut_ps.hlsl" />
+    <FxCompile Include="Shaders\CelShading.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="docs\Development Roadmap.txt" />

@@ -32,6 +32,7 @@ public:
     void SetOpacity(float opacity);
     void SetUltrawideLayoutEnabled(bool enabled) { m_ultrawideLayoutEnabled = enabled; }
     void SetAreaName(const std::string& areaName);
+    void PushToast(const std::string& text);
     void SetContextPrompt(const std::string& prompt, bool visible);
     void SetStatusScreenOpen(bool open) { m_showStatusScreen = open; }
     void SetMapScreenOpen(bool open) { m_showMapScreen = open; }

@@ -71,7 +71,8 @@ public:
     // Expand a prefab into RUNTIME (dynamic/per-frame) render parts.
     void AddRuntimeInstance(const PrimitivePrefab& prefab,
                             float x, float y, float z,
-                            float yaw = 0.0f, float scale = 1.0f);
+                            float yaw = 0.0f, float scale = 1.0f,
+                            bool useCel = false);
 
     // Remove all RUNTIME instances (typically called once per frame before rebuild).
     void ClearRuntimeInstances();
@@ -108,6 +109,8 @@ private:
         float yaw;    // Y-axis rotation of the whole instance (radians)
         float r, g, b, a;
         bool  isTree; // selects tree shader vs default prim shader
+        bool  useCel = false;
+        bool  drawOutline = false;
     };
 
     std::vector<DrawPart> m_worldParts;
@@ -132,9 +135,15 @@ private:
     // Tree shader pair (trees, bushes — adds gradient + variation).
     ID3D11VertexShader* m_treeVS = nullptr;
     ID3D11PixelShader*  m_treePS = nullptr;
+    ID3D11VertexShader* m_celVS = nullptr;
+    ID3D11PixelShader*  m_celPS = nullptr;
+    ID3D11VertexShader* m_outlineVS = nullptr;
+    ID3D11PixelShader*  m_outlinePS = nullptr;
 
     // Per-draw constant buffer (MVP + world + tint + wind params).
     ID3D11Buffer* m_cb = nullptr;
+    ID3D11Buffer* m_celParamsCB = nullptr;
+    ID3D11RasterizerState* m_outlineRasterizerState = nullptr;
 
     // Global time (seconds since startup) and wind strength forwarded to tree shader.
     float m_globalTime   = 0.0f;
@@ -149,5 +158,6 @@ private:
     void AddInstanceToBucket(std::vector<DrawPart>& bucket,
                              const PrimitivePrefab& prefab,
                              float x, float y, float z,
-                             float yaw, float scale);
+                             float yaw, float scale,
+                             bool useCel);
 };

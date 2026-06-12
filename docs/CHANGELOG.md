@@ -1,3 +1,7 @@
+- 2026-06-12: Task 031 — added `EventZoneRegistry` (`src/game/world/EventZone.cpp/hpp`) and wired per-frame zone updates in `Main.cpp` for one-shot AABB trigger events.
+- 2026-06-12: Task 032 — added GT610-safe cel/toon shader path (`Shaders/CelShading.hlsl`) and renderer wiring so player/enemy runtime visuals use cel shading with outline.
+- 2026-06-12: Task 033 — added two world test zones that trigger distinct one-shot dialog lines plus HUD toast feedback via `EventZoneRegistry` callbacks.
+- 2026-06-12: Task 034 — added `AudioManager::SetCombatState(bool)` and Main-loop combat-state orchestration to switch BGM between exploration and battle tracks with cooldown exit.
 - 2026-06-03: Task 030 completion pass — verified minimap fog-of-war implementation remains active in `Minimap` (visited-cell persistence + dark fog for unvisited cells) and marked Task 030 complete in the ordered sequence.
 - 2026-06-03: Task 019 completion — added an ImGui draw-list defeat overlay in GameHUD with retry confirmation and hooked RuntimeScene/Main to defer respawn until retry is confirmed.
 - 2026-06-03: Task 018 completion — added a timed "Saving..." HUD indicator in GameHUD and wired a runtime trigger from Main world-reload flow.

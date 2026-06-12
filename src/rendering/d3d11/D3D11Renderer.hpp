@@ -97,6 +97,8 @@ public:
     // Attach a TextureCache so terrain draw calls can bind textures.
     // Pass nullptr to detach.  The renderer does not own the cache.
     void SetTextureCache(TextureCache* cache) { m_textureCache = cache; }
+    bool IsCelShadingEnabled() const { return m_useCelShading; }
+    float GetCelOutlineWidth() const { return m_celOutlineWidth; }
 private:
     using Vertex = D3D11RendererHelpers::TerrainVertex;
     struct TransformConstantBuffer { DirectX::XMFLOAT4X4 mvp; DirectX::XMFLOAT4X4 world; };
@@ -146,6 +148,8 @@ private:
     float m_lodDistanceScale = 1.0f;
     float m_particleDensity = 0.65f;
     int m_textureQualityLevel = 1;
+    bool m_useCelShading = true;
+    float m_celOutlineWidth = 0.03f;
     ID3D11Buffer* m_groundVertexBuffer = nullptr;
     ID3D11Buffer* m_groundIndexBuffer = nullptr;
     UINT m_groundIndexCount = 0;
