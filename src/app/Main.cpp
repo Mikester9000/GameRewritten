@@ -48,6 +48,7 @@
 #include "../world/DayNightCycle.hpp"
 #include "../world/WeatherSystem.hpp"
 #include "../game/ParticleSystem.hpp"
+#include "../game/world/EventZone.hpp"
 #include "FrameTiming.hpp"
 #include "InputActionMap.hpp"
 #include "InputEdgeState.hpp"
@@ -66,6 +67,7 @@ namespace
 constexpr float kMissConfirmDelaySec = 0.17f;
 constexpr float kMissIndicatorForwardOffset = 1.8f;
 constexpr float kMissIndicatorHeightOffset = 2.8f;
+constexpr float kCombatMusicReleaseDelaySec = 5.0f;
 
 void QueueAttackFeedback(const RuntimeScene& runtimeScene,
                          const CameraController& camController,
@@ -94,6 +96,62 @@ void QueueAttackFeedback(const RuntimeScene& runtimeScene,
     pendingMissTimerSec = kMissConfirmDelaySec;
     pendingMissIndicator = true;
     audioManager.PlaySFX("Content/Audio/sfx_attack.wav");
+}
+
+void HandleEventZoneTrigger(int eventID, DialogBox& dialogBox, GameHUD& gameHud)
+{
+    switch (eventID)
+    {
+    case 1:
+        dialogBox.Show("Guide", "You've entered the ruins...");
+        gameHud.PushToast("Event triggered: Ancient Ruins");
+        LOG_INFO("EventZone: triggered eventID=1");
+        break;
+    case 2:
+        dialogBox.Show("Guide", "Stay alert. Something is watching from the ridge.");
+        gameHud.PushToast("Event triggered: Watcher Ridge");
+        LOG_INFO("EventZone: triggered eventID=2");
+        break;
+    default:
+        LOG_INFO("EventZone: triggered eventID=" + std::to_string(eventID));
+        break;
+    }
+}
+
+void UpdateCombatMusicState(const RuntimeScene& runtimeScene,
+                            float dt,
+                            float& cooldownSec,
+                            AudioManager& audioManager)
+{
+    bool anyEnemyInCombatState = false;
+    for (int enemyIndex = 0; enemyIndex < runtimeScene.GetEnemyCount(); ++enemyIndex)
+    {
+        const EnemyActor& enemy = runtimeScene.GetEnemies()[enemyIndex];
+        if (enemy.isDead)
+            continue;
+
+        if (enemy.state == EnemyState::Chase || enemy.state == EnemyState::Attack)
+        {
+            anyEnemyInCombatState = true;
+            break;
+        }
+    }
+
+    if (anyEnemyInCombatState)
+    {
+        cooldownSec = kCombatMusicReleaseDelaySec;
+        audioManager.SetCombatState(true);
+        return;
+    }
+
+    if (cooldownSec > 0.0f)
+        cooldownSec -= dt;
+
+    if (cooldownSec <= 0.0f)
+    {
+        cooldownSec = 0.0f;
+        audioManager.SetCombatState(false);
+    }
 }
 }
 
@@ -323,6 +381,22 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     camController.Init(startupCellCenter, 0.0f, startupCellCenter, 0.0f, -0.5f);
     runtimeScene.InitEnemies(startupCellCenter, startupCellCenter);
 
+    EventZoneRegistry eventZoneRegistry;
+    eventZoneRegistry.AddZone({
+        { startupCellCenter + 6.0f, 1.0f, startupCellCenter + 2.0f },
+        { 2.5f, 2.0f, 2.5f },
+        1,
+        true,
+        false
+    });
+    eventZoneRegistry.AddZone({
+        { startupCellCenter + 12.0f, 1.0f, startupCellCenter + 10.0f },
+        { 2.5f, 2.0f, 2.5f },
+        2,
+        true,
+        false
+    });
+
     renderer.SetCameraPosition(startupCellCenter, 0.0f, startupCellCenter);
     renderer.SetCameraRotation(0.0f, -0.5f);
     imguiLayer.SetAudioManager(&audioManager);
@@ -344,7 +418,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     float gameTimeAccum = 0.0f;
 
     bool firstFrame = true;
-    bool dialogSmokeTestShown = false;
     FrameTiming::State frameTimingState;
     FrameTiming::Initialize(frameTimingState);
     InputEdge::State inputEdgeState;
@@ -370,6 +443,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Track the cell the player was in last frame to detect cell-crossing.
     // Initialize from the actual spawn position at the center of cell (0,0).
     int lastPlayerCX = 0, lastPlayerCZ = 0;
+    float combatMusicCooldownSec = 0.0f;
     worldGrid.WorldToCell(startupCellCenter, startupCellCenter, lastPlayerCX, lastPlayerCZ);
     if (WorldCell* spawnCell = worldGrid.FindCell(lastPlayerCX, lastPlayerCZ))
         gameHud.SetAreaName(spawnCell->terrainBiome);
@@ -451,12 +525,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         // Determines what is allowed in the steps below.
         if (GetForegroundWindow() != window.GetHandle())
             continue;
-
-        if (!dialogSmokeTestShown)
-        {
-            dialogBox.Show("???", "The wind carries a strange scent from the east...");
-            dialogSmokeTestShown = true;
-        }
 
         dialogBox.Update(deltaTime);
         imguiLayer.SetLetterboxEventActive(dialogBox.IsOpen());
@@ -592,6 +660,9 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             }
         }
 
+        eventZoneRegistry.Update({ camController.GetPlayerX(), camController.GetPlayerY(), camController.GetPlayerZ() },
+                                 [&](int eventID) { HandleEventZoneTrigger(eventID, dialogBox, gameHud); });
+
         const WorldEditorFrameOps::PlacementResult placementResult = WorldEditorFrameOps::HandlePlacementClick(
             window.GetHandle(),
             InputEdge::PollLeftButtonClicked(inputEdgeState),
@@ -634,6 +705,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 
         if (runtimeScene.ConsumeParryOccurred())
             audioManager.PlayParrySFX();
+
+        UpdateCombatMusicState(runtimeScene, combatDt, combatMusicCooldownSec, audioManager);
 
         {
             bool hasTarget = false;

@@ -8,7 +8,7 @@ Agents must read this before implementing anything to avoid reimplementing exist
 - 🔧 Stub — exists but needs expansion
 - ❌ Not started
 
-Latest task update: Task 030 (Fog of war on minimap) confirmed complete; Minimap persists visited cell coordinates and renders unvisited cells as dark fog until the player enters them.
+Latest task update: Tasks 031-034 completed; world event zones now trigger one-shot dialog/toast events, actor cel shading + outline is enabled, and combat BGM transitions between exploration/battle states.
 
 ## Systems
 
@@ -21,6 +21,7 @@ Latest task update: Task 030 (Fog of war on minimap) confirmed complete; Minimap
 | Ground/terrain shader | ✅ | `Shaders/ground_vs/ps.hlsl` |
 | Tree shader | ✅ | `Shaders/tree_vs/ps.hlsl` |
 | Primitive shader | ✅ | `Shaders/prim_vs/ps.hlsl` |
+| Cel/toon outline shader | ✅ | `Shaders/CelShading.hlsl`, `src/game/PrimitiveRenderer.cpp/hpp`, `src/rendering/d3d11/D3D11Renderer.cpp/hpp` |
 | Basic 3D shader | ✅ | `Shaders/basic3d_vs/ps.hlsl` |
 | Camera + player movement | ✅ | `src/game/CameraController.cpp/hpp` |
 | Gravity + jumping | ✅ | `src/game/CameraController.cpp` |
@@ -55,6 +56,7 @@ Latest task update: Task 030 (Fog of war on minimap) confirmed complete; Minimap
 | AABB collision | ✅ | `src/game/physics/AABB.hpp`, `src/game/physics/CollisionWorld.cpp/hpp`, `src/game/CameraController.cpp/hpp`, `src/app/WorldRuntimeRefresh.hpp`, `src/app/Main.cpp` |
 | Enemy actor | ✅ | `src/game/actors/EnemyActor.cpp/hpp` |
 | Dialog box | ✅ | `src/ui/DialogBox.cpp/hpp`, `src/app/Main.cpp` |
+| Event-driven dialog trigger | ✅ | `src/game/world/EventZone.cpp/hpp`, `src/app/Main.cpp`, `src/ui/GameHUD.cpp/hpp` |
 | Combat system | ✅ | `src/game/combat/HitBox.hpp`, `src/game/combat/CombatSystem.cpp/hpp` |
 | Audio manager | ✅ | `src/audio/AudioManager.hpp`, `src/audio/AudioManager.cpp` |
 | Minimap | ✅ | `src/ui/Minimap.cpp/hpp` |
@@ -108,7 +110,7 @@ Latest task update: Task 030 (Fog of war on minimap) confirmed complete; Minimap
 | Day/night cycle | ✅ | `src/world/DayNightCycle.cpp/hpp` |
 | Biome transition fade | ✅ | `src/world/WorldGrid.cpp/hpp` |
 | Fog of war on minimap | ✅ | `src/ui/Minimap.cpp/hpp` |
-| World event trigger zones | ❌ | `src/game/world/EventZone.cpp/hpp` |
+| World event trigger zones | ✅ | `src/game/world/EventZone.cpp/hpp`, `src/app/Main.cpp` |
 | Interaction hotspot registry stub | ❌ | `src/game/world/InteractionRegistry.cpp/hpp` |
 | Landmark discovery trigger stub | ❌ | `src/game/world/LandmarkTrigger.cpp/hpp` |
 | NPC actor | ❌ | `src/game/actors/NpcActor.cpp/hpp` |
@@ -127,6 +129,7 @@ Latest task update: Task 030 (Fog of war on minimap) confirmed complete; Minimap
 | Victory fanfare trigger | ✅ | `src/audio/AudioManager.cpp/hpp` |
 | Environmental ambient audio | ✅ | `src/audio/AudioManager.cpp/hpp` |
 | Looping BGM | ✅ | `src/audio/AudioManager.cpp/hpp` |
+| Combat music state transition | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/app/Main.cpp` |
 | Tactical Pause enter / exit SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/ui/TacticalPauseMenu.cpp/hpp` |
 | Lock-on acquire / break SFX | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/combat/Targeting.hpp` |
 | Enemy alert bark stub | ✅ | `src/audio/AudioManager.cpp/hpp`, `src/game/actors/EnemyActor.cpp/hpp` |

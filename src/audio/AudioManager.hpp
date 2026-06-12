@@ -43,6 +43,8 @@ public:
     void PlayEnemyAlertBark();
     // Plays the parry / counter SFX.
     void PlayParrySFX();
+    // Switches between exploration and combat BGM tracks.
+    void SetCombatState(bool inCombat);
 
     // --- Volume control ---
     void SetBGMVolume(float v);
@@ -62,4 +64,5 @@ private:
     bool m_loggedSfxVolumeLimit = false;
     bool m_bgmActive = false;
     bool m_ambActive = false;
+    bool m_inCombat = false;
 };

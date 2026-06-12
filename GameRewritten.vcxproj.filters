@@ -21,6 +21,7 @@
     <None Include="packages.config" />
     <None Include=".github\copilot-instructions.md" />
     <None Include="Shaders\triangle_ps.hlsl" />
+    <None Include="Shaders\CelShading.hlsl" />
     <None Include="Content\AssetRegistry.json" />
     <None Include="Content\Audio\README.md" />
     <None Include="Content\Materials\default.material.json" />
@@ -106,6 +107,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\game\RuntimeScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\world\EventZone.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\AssetLoader.cpp">
@@ -489,6 +493,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\world\WorldGrid.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\world\EventZone.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\tooltip_system.h">

@@ -36,6 +36,11 @@ struct PrimCB
     XMFLOAT4   windParams; // x=time, y=windStrength, z=0, w=0
 };
 
+struct CelParamsCB
+{
+    XMFLOAT4 outlineParams; // x=outline width
+};
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -114,6 +119,115 @@ bool PrimitiveRenderer::Initialize(D3D11Renderer& renderer)
         treeVSBlob = nullptr;
     }
 
+    // --- Compile cel + outline shaders ---
+    {
+        ID3DBlob* celVSBlob = nullptr;
+        ID3DBlob* celPSBlob = nullptr;
+        ID3DBlob* outlineVSBlob = nullptr;
+        ID3DBlob* outlinePSBlob = nullptr;
+        ID3DBlob* errBlob = nullptr;
+
+        HRESULT hr = D3DCompileFromFile(L"Shaders/CelShading.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                                        "CelVS", "vs_4_0", 0, 0, &celVSBlob, &errBlob);
+        if (FAILED(hr))
+        {
+            if (errBlob)
+            {
+                LOG_ERROR(std::string("PrimitiveRenderer CelVS compile error: ") +
+                          static_cast<const char*>(errBlob->GetBufferPointer()));
+                errBlob->Release();
+            }
+            return false;
+        }
+
+        hr = D3DCompileFromFile(L"Shaders/CelShading.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                                "CelPS", "ps_4_0", 0, 0, &celPSBlob, &errBlob);
+        if (FAILED(hr))
+        {
+            celVSBlob->Release();
+            if (errBlob)
+            {
+                LOG_ERROR(std::string("PrimitiveRenderer CelPS compile error: ") +
+                          static_cast<const char*>(errBlob->GetBufferPointer()));
+                errBlob->Release();
+            }
+            return false;
+        }
+
+        hr = D3DCompileFromFile(L"Shaders/CelShading.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                                "OutlineVS", "vs_4_0", 0, 0, &outlineVSBlob, &errBlob);
+        if (FAILED(hr))
+        {
+            celVSBlob->Release();
+            celPSBlob->Release();
+            if (errBlob)
+            {
+                LOG_ERROR(std::string("PrimitiveRenderer OutlineVS compile error: ") +
+                          static_cast<const char*>(errBlob->GetBufferPointer()));
+                errBlob->Release();
+            }
+            return false;
+        }
+
+        hr = D3DCompileFromFile(L"Shaders/CelShading.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                                "OutlinePS", "ps_4_0", 0, 0, &outlinePSBlob, &errBlob);
+        if (FAILED(hr))
+        {
+            celVSBlob->Release();
+            celPSBlob->Release();
+            outlineVSBlob->Release();
+            if (errBlob)
+            {
+                LOG_ERROR(std::string("PrimitiveRenderer OutlinePS compile error: ") +
+                          static_cast<const char*>(errBlob->GetBufferPointer()));
+                errBlob->Release();
+            }
+            return false;
+        }
+
+        hr = m_device->CreateVertexShader(celVSBlob->GetBufferPointer(), celVSBlob->GetBufferSize(),
+                                          nullptr, &m_celVS);
+        if (FAILED(hr))
+        {
+            celVSBlob->Release();
+            celPSBlob->Release();
+            outlineVSBlob->Release();
+            outlinePSBlob->Release();
+            return false;
+        }
+
+        hr = m_device->CreatePixelShader(celPSBlob->GetBufferPointer(), celPSBlob->GetBufferSize(),
+                                         nullptr, &m_celPS);
+        if (FAILED(hr))
+        {
+            celVSBlob->Release();
+            celPSBlob->Release();
+            outlineVSBlob->Release();
+            outlinePSBlob->Release();
+            return false;
+        }
+
+        hr = m_device->CreateVertexShader(outlineVSBlob->GetBufferPointer(), outlineVSBlob->GetBufferSize(),
+                                          nullptr, &m_outlineVS);
+        if (FAILED(hr))
+        {
+            celVSBlob->Release();
+            celPSBlob->Release();
+            outlineVSBlob->Release();
+            outlinePSBlob->Release();
+            return false;
+        }
+
+        hr = m_device->CreatePixelShader(outlinePSBlob->GetBufferPointer(), outlinePSBlob->GetBufferSize(),
+                                         nullptr, &m_outlinePS);
+        celVSBlob->Release();
+        celPSBlob->Release();
+        outlineVSBlob->Release();
+        outlinePSBlob->Release();
+        if (FAILED(hr))
+            return false;
+    }
+
     // --- Input layout (POSITION + NORMAL + COLOR, 40 bytes/vertex) ---
     D3D11_INPUT_ELEMENT_DESC layoutDesc[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -173,6 +287,20 @@ bool PrimitiveRenderer::Initialize(D3D11Renderer& renderer)
     hr = m_device->CreateBuffer(&cbd, nullptr, &m_cb);
     if (FAILED(hr)) return false;
 
+    D3D11_BUFFER_DESC celCbd{};
+    celCbd.Usage = D3D11_USAGE_DEFAULT;
+    celCbd.ByteWidth = sizeof(CelParamsCB);
+    celCbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    hr = m_device->CreateBuffer(&celCbd, nullptr, &m_celParamsCB);
+    if (FAILED(hr)) return false;
+
+    D3D11_RASTERIZER_DESC outlineRasterDesc{};
+    outlineRasterDesc.FillMode = D3D11_FILL_SOLID;
+    outlineRasterDesc.CullMode = D3D11_CULL_FRONT;
+    outlineRasterDesc.DepthClipEnable = TRUE;
+    hr = m_device->CreateRasterizerState(&outlineRasterDesc, &m_outlineRasterizerState);
+    if (FAILED(hr)) return false;
+
     LOG_INFO("PrimitiveRenderer: GPU resources initialized.");
     return true;
 }
@@ -182,10 +310,16 @@ bool PrimitiveRenderer::Initialize(D3D11Renderer& renderer)
 // ---------------------------------------------------------------------------
 void PrimitiveRenderer::Shutdown()
 {
+    if (m_outlineRasterizerState) { m_outlineRasterizerState->Release(); m_outlineRasterizerState = nullptr; }
+    if (m_celParamsCB) { m_celParamsCB->Release(); m_celParamsCB = nullptr; }
     if (m_cb)      { m_cb->Release();      m_cb      = nullptr; }
     if (m_ib)      { m_ib->Release();      m_ib      = nullptr; }
     if (m_vb)      { m_vb->Release();      m_vb      = nullptr; }
     if (m_layout)  { m_layout->Release();  m_layout  = nullptr; }
+    if (m_outlinePS) { m_outlinePS->Release(); m_outlinePS = nullptr; }
+    if (m_outlineVS) { m_outlineVS->Release(); m_outlineVS = nullptr; }
+    if (m_celPS)   { m_celPS->Release();   m_celPS   = nullptr; }
+    if (m_celVS)   { m_celVS->Release();   m_celVS   = nullptr; }
     if (m_primPS)  { m_primPS->Release();  m_primPS  = nullptr; }
     if (m_primVS)  { m_primVS->Release();  m_primVS  = nullptr; }
     if (m_treePS)  { m_treePS->Release();  m_treePS  = nullptr; }
@@ -202,12 +336,14 @@ void PrimitiveRenderer::Shutdown()
 void PrimitiveRenderer::AddInstanceToBucket(std::vector<DrawPart>& bucket,
                                             const PrimitivePrefab& prefab,
                                             float x, float y, float z,
-                                            float yaw, float scale)
+                                            float yaw, float scale,
+                                            bool useCel)
 {
     bool isTree = (prefab.category == "tree");
 
-    for (const auto& part : prefab.parts)
+    for (size_t partIndex = 0; partIndex < prefab.parts.size(); ++partIndex)
     {
+        const auto& part = prefab.parts[partIndex];
         // Rotate the part's local offset around Y by the instance yaw.
         float cosY = cosf(yaw), sinY = sinf(yaw);
         float rotOffX = part.offsetX * cosY - part.offsetZ * sinY;
@@ -229,6 +365,8 @@ void PrimitiveRenderer::AddInstanceToBucket(std::vector<DrawPart>& bucket,
         dp.b        = part.b;
         dp.a        = part.a;
         dp.isTree   = isTree;
+        dp.useCel   = useCel;
+        dp.drawOutline = useCel && partIndex == 0;
         bucket.push_back(dp);
     }
 }
@@ -240,7 +378,7 @@ void PrimitiveRenderer::AddWorldInstance(const PrimitivePrefab& prefab,
                                          float x, float y, float z,
                                          float yaw, float scale)
 {
-    AddInstanceToBucket(m_worldParts, prefab, x, y, z, yaw, scale);
+    AddInstanceToBucket(m_worldParts, prefab, x, y, z, yaw, scale, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -256,9 +394,10 @@ void PrimitiveRenderer::ClearWorldInstances()
 // ---------------------------------------------------------------------------
 void PrimitiveRenderer::AddRuntimeInstance(const PrimitivePrefab& prefab,
                                            float x, float y, float z,
-                                           float yaw, float scale)
+                                           float yaw, float scale,
+                                           bool useCel)
 {
-    AddInstanceToBucket(m_runtimeParts, prefab, x, y, z, yaw, scale);
+    AddInstanceToBucket(m_runtimeParts, prefab, x, y, z, yaw, scale, useCel);
 }
 
 // ---------------------------------------------------------------------------
@@ -307,17 +446,15 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
 
     ID3D11VertexShader* activeVS = nullptr;
     ID3D11PixelShader*  activePS = nullptr;
+    CelParamsCB celParams{};
+    celParams.outlineParams = XMFLOAT4(renderer.GetCelOutlineWidth(), 0.0f, 0.0f, 0.0f);
+    m_context->UpdateSubresource(m_celParamsCB, 0, nullptr, &celParams, 0, 0);
+    m_context->VSSetConstantBuffers(2, 1, &m_celParamsCB);
 
     auto drawParts = [&](const std::vector<DrawPart>& parts)
     {
         for (const auto& dp : parts)
         {
-            // Select shader pair.
-            ID3D11VertexShader* wantVS = (dp.isTree && m_treeVS) ? m_treeVS : m_primVS;
-            ID3D11PixelShader*  wantPS = (dp.isTree && m_treePS) ? m_treePS : m_primPS;
-            if (wantVS != activeVS) { m_context->VSSetShader(wantVS, nullptr, 0); activeVS = wantVS; }
-            if (wantPS != activePS) { m_context->PSSetShader(wantPS, nullptr, 0); activePS = wantPS; }
-
             // Build world matrix: scale → rotate (Y axis) → translate to (world + offset).
             // The offset was already rotated by yaw in AddInstanceToBucket, so rotation here
             // only affects cube faces/normals — matching placement orientation.
@@ -341,6 +478,32 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
             m_context->VSSetConstantBuffers(0, 1, &m_cb);
             m_context->PSSetConstantBuffers(0, 1, &m_cb);
 
+            const bool useCel = dp.useCel && renderer.IsCelShadingEnabled() && m_celVS && m_celPS;
+            if (useCel)
+            {
+                if (m_celVS != activeVS) { m_context->VSSetShader(m_celVS, nullptr, 0); activeVS = m_celVS; }
+                if (m_celPS != activePS) { m_context->PSSetShader(m_celPS, nullptr, 0); activePS = m_celPS; }
+                m_context->RSSetState(nullptr);
+                m_context->DrawIndexed(m_indexCount, 0, 0);
+
+                if (dp.drawOutline && m_outlineVS && m_outlinePS && m_outlineRasterizerState)
+                {
+                    m_context->RSSetState(m_outlineRasterizerState);
+                    m_context->VSSetShader(m_outlineVS, nullptr, 0);
+                    m_context->PSSetShader(m_outlinePS, nullptr, 0);
+                    m_context->DrawIndexed(m_indexCount, 0, 0);
+                    m_context->RSSetState(nullptr);
+                    activeVS = nullptr;
+                    activePS = nullptr;
+                }
+                continue;
+            }
+
+            // Select default shader pair.
+            ID3D11VertexShader* wantVS = (dp.isTree && m_treeVS) ? m_treeVS : m_primVS;
+            ID3D11PixelShader*  wantPS = (dp.isTree && m_treePS) ? m_treePS : m_primPS;
+            if (wantVS != activeVS) { m_context->VSSetShader(wantVS, nullptr, 0); activeVS = wantVS; }
+            if (wantPS != activePS) { m_context->PSSetShader(wantPS, nullptr, 0); activePS = wantPS; }
             m_context->DrawIndexed(m_indexCount, 0, 0);
         }
     };

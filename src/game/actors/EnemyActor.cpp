@@ -273,7 +273,7 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
         }
     }
 
-    primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, staggerScale * hitFlashScale * telegraphScale);
+    primitiveRenderer.AddRuntimeInstance(*visualPrefab, x, y, z, yaw, staggerScale * hitFlashScale * telegraphScale, true);
 }
 
 bool EnemyActor::IsHitFlashVisible() const

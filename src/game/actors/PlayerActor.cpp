@@ -131,5 +131,6 @@ void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,
     const ActorCommon::RuntimeActorPose pose = BuildRuntimePose(cameraController);
     primitiveRenderer.AddRuntimeInstance(*visualPrefab,
                                          pose.x, pose.y, pose.z,
-                                         pose.yaw, pose.scale);
+                                         pose.yaw, pose.scale,
+                                         true);
 }

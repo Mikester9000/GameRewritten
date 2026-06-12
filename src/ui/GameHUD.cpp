@@ -207,6 +207,16 @@ void GameHUD::SetAreaName(const std::string& areaName)
         m_toasts.pop_back();
 }
 
+void GameHUD::PushToast(const std::string& text)
+{
+    if (text.empty())
+        return;
+
+    m_toasts.push_front({ text, kToastDefaultLifeSec, kToastDefaultLifeSec });
+    while (static_cast<int>(m_toasts.size()) > kToastMaxVisible)
+        m_toasts.pop_back();
+}
+
 void GameHUD::SetContextPrompt(const std::string& prompt, bool visible)
 {
     m_contextPrompt = prompt;

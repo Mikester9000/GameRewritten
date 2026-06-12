@@ -141,3 +141,23 @@ This file records every change made by an automated agent or local LLM.
   FILES CHANGED: docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md, docs/FULL_TASK_SEQUENCE.md
   WHAT CHANGED: Verified existing minimap fog-of-war behavior remains implemented through visited-cell persistence in Minimap and dark-fog rendering for unvisited cells. Marked Task 030 complete in the ordered phase sequence and refreshed the systems/changelog status line.
   KNOWN ISSUES: dotnet build still fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-12] TASK: Task 031 — Event zone trigger registry and runtime integration
+  FILES CHANGED: src/game/world/EventZone.hpp, src/game/world/EventZone.cpp, src/app/Main.cpp, GameRewritten.vcxproj, GameRewritten.vcxproj.filters, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added a lightweight EventZone/EventZoneRegistry system with per-frame AABB overlap checks and one-shot trigger behavior. Wired two test zones in Main so entering each zone dispatches an event callback without embedding EventZone logic inside Main.
+  KNOWN ISSUES: dotnet build fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-12] TASK: Task 032 — GT610-safe cel shading + outline path for runtime actors
+  FILES CHANGED: Shaders/CelShading.hlsl, src/game/PrimitiveRenderer.hpp, src/game/PrimitiveRenderer.cpp, src/game/actors/PlayerActor.cpp, src/game/actors/EnemyActor.cpp, src/rendering/d3d11/D3D11Renderer.hpp, src/rendering/d3d11/D3D11Renderer.cpp, GameRewritten.vcxproj, GameRewritten.vcxproj.filters, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added a new cel shading HLSL path (3-tone quantized diffuse + ambient floor) and an inverted-hull outline pass compiled at SM 4.0. Runtime actor visuals now opt into cel shading, and renderer quality presets expose cel enable + outline width (Low uses 0.03).
+  KNOWN ISSUES: dotnet build fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-12] TASK: Task 033 — Event-driven dialog trigger wiring
+  FILES CHANGED: src/game/world/EventZone.cpp, src/ui/GameHUD.hpp, src/ui/GameHUD.cpp, src/app/Main.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Registered two one-shot world event zones near spawn and routed their callbacks through Main orchestration helpers to existing DialogBox::Show calls. Added GameHUD::PushToast so each trigger also displays HUD feedback while leaving combat/movement systems untouched.
+  KNOWN ISSUES: dotnet build fails in this environment due to missing Visual Studio C++ targets (MSB4278).
+
+[2026-06-12] TASK: Task 034 — Combat BGM state transition
+  FILES CHANGED: src/audio/AudioManager.hpp, src/audio/AudioManager.cpp, src/app/Main.cpp, docs/SYSTEMS.md, docs/CHANGELOG.md, docs/AGENT_WORK_LOG.md
+  WHAT CHANGED: Added AudioManager::SetCombatState(bool) to switch between exploration and battle BGM with guard against per-frame churn. Main now routes enemy chase/attack activity into a 5-second delayed combat-exit flow before returning to exploration music.
+  KNOWN ISSUES: dotnet build fails in this environment due to missing Visual Studio C++ targets (MSB4278).

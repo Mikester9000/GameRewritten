@@ -176,6 +176,22 @@ void AudioManager::PlayParrySFX()
     PlaySFXInternal(kSfxCombatParry);
 }
 
+void AudioManager::SetCombatState(bool inCombat)
+{
+    if (m_inCombat == inCombat)
+        return;
+
+    const std::string trackPath = inCombat ? kBgmBattleStandard : kBgmFieldDay;
+    if (!PlayBGM(trackPath))
+    {
+        LOG_WARN("AudioManager: combat state switched, but requested BGM failed to play.");
+        return;
+    }
+
+    m_inCombat = inCombat;
+    LOG_INFO(std::string("AudioManager: combat BGM state -> ") + (inCombat ? "battle" : "explore"));
+}
+
 // --- Volume ---
 
 void AudioManager::SetBGMVolume(float v)
