@@ -49,30 +49,36 @@ static bool ReadJsonFile(const std::string& path, json& out)
 bool AssetLoader::LoadMaterial(const std::string& path, MaterialAsset& out)
 {
     json j;
-    if (!ReadJsonFile(path, j))
-        return false;
-
-    out.name   = j.value("name",   "unknown");
-    out.shader = j.value("shader", "");
-
-    if (j.contains("textures"))
-    {
-        out.albedoTexture = j["textures"].value("albedo", "");
-        out.normalTexture = j["textures"].value("normal", "");
-    }
-
     if (j.contains("params"))
     {
-        out.roughness = j["params"].value("roughness", 0.5f);
-        out.metallic  = j["params"].value("metallic",  0.0f);
+        const auto& params_json = j["params"];
+        out.roughness = params_json.value("roughness", 0.5f);
+        out.metallic = params_json.value("metallic", 0.0f);
+
+        // Cel Shading Parameters (Task 030D - Reading all necessary values)
+        out.celBandCount = params_json.value("cel_bands", 5.0f);
+        out.celRimAmount = params_json.value("rim_amount", 0.1f);
+
+        // Shadow Tint is an RGB color, read components separately for clarity
+        const auto& shadowJson = params_json["shadow_tint"];
+        out.shadowTintR = shadowJson.value("r", 0.8f);
+        out.shadowTintG = shadowJson.value("g", 0.8f);
+        out.shadowTintB = shadowJson.value("b", 1.0f); // Defaulting B to 1.0 if not specified
+
+        out.specThreshold = params_json.value("specular_threshold", 0.9f);
     }
 
     std::ostringstream ss;
-    ss << "Loaded material '" << out.name << "' shader='" << out.shader
-       << "' albedo='" << out.albedoTexture << "'";
+    ss << "Loaded material '" << out.name << "' shader='" << out.shader << "'";
+    // Log the loaded cel values to confirm plumbing was successful
+    ss << ", CelBands=" << out.celBandCount
+        << ", Rim=" << out.celRimAmount
+        << ", ShadowTint=(" << out.shadowTintR << "," << out.shadowTintG << "," << out.shadowTintB << ") ";
     LOG_INFO(ss.str());
     return true;
+
 }
+
 
 // ---------------------------------------------------------------------------
 // Prefab

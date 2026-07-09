@@ -26,6 +26,12 @@
 //   scene.BeginFrame(deltaTime, renderer, playerX, playerY, playerZ);
 //   scene.damageNumbers.Update(deltaTime);
 //   scene.SubmitActors(camController, prefabLibrary);
+// Guard against Win32 "DialogBox" macro from windows.h (defines DialogBox→DialogBoxA/W).
+// NpcActor.hpp and DialogBox.hpp both handle this; RuntimeScene must also guard here
+// because InputActionMap.hpp pulls in windows.h before this class definition.
+#ifdef DialogBox
+#undef DialogBox
+#endif
 
 #include "actors/PlayerActor.hpp"
 #include "actors/EnemyActor.hpp"
@@ -50,12 +56,7 @@
 class D3D11Renderer;
 class PrefabLibrary;
 
-// Guard against Win32 "DialogBox" macro from windows.h (defines DialogBox→DialogBoxA/W).
-// NpcActor.hpp and DialogBox.hpp both handle this; RuntimeScene must also guard here
-// because InputActionMap.hpp pulls in windows.h before this class definition.
-#ifdef DialogBox
-#undef DialogBox
-#endif
+
 
 class RuntimeScene
 {

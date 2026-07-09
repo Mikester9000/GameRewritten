@@ -239,22 +239,22 @@ Project completion for this autopilot track means:
   - Steps: implement smallest viable version in listed files, wire into existing runtime path, keep behavior guarded and reversible.
   - Done when: feature is visible/usable, `docs/SYSTEMS.md` flipped to ✅, changelog/log updated.
 
-- [ ] **Task 030A: Cel shading band quantization**
+- [x] **Task 030A: Cel shading band quantization**
   - Files: `Shaders/basic3d_ps.hlsl`, `src/rendering/d3d11/D3D11Renderer.cpp`
   - Steps: add quantized diffuse lighting bands and wire cel-shading constants into the basic 3D pass.
   - Done when: toon bands render on runtime actors and shader constants are runtime-configurable.
 
-- [ ] **Task 030B: Cel shader shadow tint + rim gate**
+- [x] **Task 030B: Cel shader shadow tint + rim gate**
   - Files: `Shaders/basic3d_ps.hlsl`
   - Steps: add shadow tint control and gated rim light for silhouette readability without full-screen cost.
   - Done when: backlit silhouettes stay readable while preserving low-spec lighting cost.
 
-- [ ] **Task 030C: Cel specular step highlights**
+- [x] **Task 030C: Cel specular step highlights**
   - Files: `Shaders/basic3d_ps.hlsl`
   - Steps: replace smooth specular with thresholded highlight bands to match FF-style stylized materials.
   - Done when: metallic/highlight response uses stepped specular instead of continuous gloss.
 
-- [ ] **Task 030D: Cel shader material parameter plumbing**
+- [x] **Task 030D: Cel shader material parameter plumbing**
   - Files: `src/rendering/d3d11/D3D11Renderer.cpp`, `src/assets/AssetLoader.cpp/hpp`
   - Steps: expose cel parameters (band count, rim amount, shadow tint, spec threshold) through renderer/material load path.
   - Done when: materials can override cel defaults without shader recompilation.

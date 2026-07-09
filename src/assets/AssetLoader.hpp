@@ -24,8 +24,20 @@ struct MaterialAsset
     std::string albedoTexture;
     std::string normalTexture;
     float       roughness = 0.5f;
-    float       metallic  = 0.0f;
+    float       metallic = 0.0f;
+
+    // Cel Shading Parameters (Task 030D)
+    float       celBandCount = 5.0f;   // Default: 5 bands
+    float       celRimAmount = 0.1f;   // Default rim strength (was celRimAmount in C6)
+    float       shadowTintR = 1.0f;    // R component of shadow color
+    float       shadowTintG = 1.0f;    // G component of shadow color
+    float       shadowTintB = 1.0f;    // B component of shadow color
+    float       specThreshold = 0.9f;  // Default Specular threshold
+
+    // Other required parameters that might come from assets:
+    float       celDiffuseMin = 0.2f; // Added minimum diffuse value default
 };
+
 
 struct PrefabLOD
 {

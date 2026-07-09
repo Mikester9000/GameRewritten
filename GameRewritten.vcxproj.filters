@@ -74,6 +74,7 @@
     <None Include=".editorconfig" />
     <None Include="Content\Data\default_inventory.json" />
     <None Include="Content\Data\skill_tree_data.json" />
+    <None Include=".github\agents\my-agent.agent.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\app\Main.cpp">
