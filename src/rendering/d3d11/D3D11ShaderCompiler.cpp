@@ -6,6 +6,7 @@
 
 #include "D3D11ShaderCompiler.hpp"
 #include "../../logger/Logger.hpp"
+#include <iterator>
 #include <string>
 
 #pragma comment(lib, "d3dcompiler.lib")

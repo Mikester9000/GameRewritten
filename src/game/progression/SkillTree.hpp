@@ -37,5 +37,6 @@ private:
     std::vector<SkillNode> m_nodes;
     int                    m_nextId = 1;
 
+    SkillNode* FindNode(int id);
     const SkillNode* FindNode(int id) const;
 };

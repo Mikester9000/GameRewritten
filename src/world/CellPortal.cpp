@@ -3,6 +3,7 @@
 
 #include "CellPortal.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 int CellPortalSystem::AddPortal(const CellPortal& portal)
@@ -16,6 +17,7 @@ int CellPortalSystem::AddPortal(const CellPortal& portal)
 void CellPortalSystem::Clear()
 {
     m_portals.clear();
+    m_insidePortalIds.clear();
     m_nextId = 1;
 }
 
@@ -24,16 +26,36 @@ void CellPortalSystem::Update(
     const std::string& currentCell,
     const std::function<void(const CellPortal&)>& onEnter)
 {
+    const CellPortal* enteredPortal = nullptr;
+
     for (const CellPortal& p : m_portals)
     {
-        if (p.fromCell != currentCell) continue;
-
-        const float dx = playerPos.x - p.triggerPos.x;
-        const float dz = playerPos.z - p.triggerPos.z;
-        if (dx * dx + dz * dz <= p.triggerRadius * p.triggerRadius)
+        const bool sameCell = p.fromCell == currentCell;
+        float distSq = 0.0f;
+        if (sameCell)
         {
-            if (onEnter) onEnter(p);
-            return; // handle one portal per frame
+            const float dx = playerPos.x - p.triggerPos.x;
+            const float dz = playerPos.z - p.triggerPos.z;
+            distSq = dx * dx + dz * dz;
+        }
+        const bool inside = sameCell && distSq <= p.triggerRadius * p.triggerRadius;
+
+        auto it = std::find(m_insidePortalIds.begin(), m_insidePortalIds.end(), p.id);
+        const bool wasInside = it != m_insidePortalIds.end();
+
+        if (inside)
+        {
+            if (!wasInside)
+            {
+                m_insidePortalIds.push_back(p.id);
+                if (!enteredPortal) enteredPortal = &p;
+            }
+        }
+        else if (wasInside)
+        {
+            m_insidePortalIds.erase(it);
         }
     }
+
+    if (enteredPortal && onEnter) onEnter(*enteredPortal);
 }

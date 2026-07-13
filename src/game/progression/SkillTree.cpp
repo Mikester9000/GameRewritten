@@ -18,6 +18,13 @@ int SkillTree::AddNode(const std::string& abilityId,
     return n.id;
 }
 
+SkillNode* SkillTree::FindNode(int id)
+{
+    for (SkillNode& n : m_nodes)
+        if (n.id == id) return &n;
+    return nullptr;
+}
+
 const SkillNode* SkillTree::FindNode(int id) const
 {
     for (const SkillNode& n : m_nodes)
@@ -33,7 +40,7 @@ bool SkillTree::IsUnlocked(int nodeId) const
 
 bool SkillTree::Unlock(int nodeId, int& availableSP)
 {
-    SkillNode* n = const_cast<SkillNode*>(FindNode(nodeId));
+    SkillNode* n = FindNode(nodeId);
     if (!n || n->unlocked) return false;
     if (availableSP < n->spCost) return false;
 

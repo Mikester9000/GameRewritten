@@ -50,6 +50,7 @@ const Hotspot* InteractionRegistry::Query(const DirectX::XMFLOAT3& playerPos) co
 
 void InteractionRegistry::ForEach(const std::function<void(const Hotspot&)>& fn) const
 {
+    if (!fn) return;
     for (const Hotspot& h : m_hotspots)
         if (h.active) fn(h);
 }

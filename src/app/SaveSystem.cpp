@@ -9,6 +9,10 @@
 
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
+#include <system_error>
+#include <utility>
+#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -49,7 +53,12 @@ bool SaveSystem::Save(const PlayerStats& stats,
                       const QuestFlags& flags,
                       const LandmarkTriggerSystem& landmarks)
 {
-    FILE* f = fopen(GetSavePath().c_str(), "wb");
+    const std::string savePath = GetSavePath();
+#ifdef _WIN32
+    std::error_code ec;
+    std::filesystem::create_directories(std::filesystem::path(savePath).parent_path(), ec);
+#endif
+    FILE* f = fopen(savePath.c_str(), "wb");
     if (!f) return false;
 
     const auto& allFlags     = flags.GetAll();
@@ -92,24 +101,35 @@ bool SaveSystem::Load(PlayerStats& stats,
     if (fread(&stats, sizeof(stats), 1, f) != 1)
         { fclose(f); return false; }
 
-    flags.Clear();
+    std::vector<std::pair<std::string, bool>> loadedFlags;
+    loadedFlags.reserve(hdr.flagCount);
     for (int i = 0; i < hdr.flagCount; ++i)
     {
         std::string key; bool val = false;
-        if (!ReadStr(f, key) || fread(&val, sizeof(bool), 1, f) != 1) break;
-        flags.Set(key, val);
+        if (!ReadStr(f, key) || fread(&val, sizeof(bool), 1, f) != 1)
+            { fclose(f); return false; }
+        loadedFlags.emplace_back(std::move(key), val);
     }
 
-    auto& lms = const_cast<std::vector<Landmark>&>(
-        const_cast<const LandmarkTriggerSystem&>(landmarks).GetAll());
-    for (int i = 0; i < hdr.landmarkCount && i < static_cast<int>(lms.size()); ++i)
+    std::vector<std::pair<std::string, bool>> loadedLandmarks;
+    loadedLandmarks.reserve(hdr.landmarkCount);
+    for (int i = 0; i < hdr.landmarkCount; ++i)
     {
         std::string name; bool disc = false;
-        if (!ReadStr(f, name) || fread(&disc, sizeof(bool), 1, f) != 1) break;
-        if (lms[i].name == name) lms[i].discovered = disc;
+        if (!ReadStr(f, name) || fread(&disc, sizeof(bool), 1, f) != 1)
+            { fclose(f); return false; }
+        loadedLandmarks.emplace_back(std::move(name), disc);
     }
 
     fclose(f);
+    flags.Clear();
+    for (const auto& [key, val] : loadedFlags)
+        flags.Set(key, val);
+
+    landmarks.SetAllDiscovered(false);
+    for (const auto& [name, disc] : loadedLandmarks)
+        landmarks.SetDiscovered(name, disc);
+
     m_hasSave = true;
     return true;
 }

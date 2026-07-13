@@ -30,6 +30,8 @@ public:
                 const std::function<void(const Landmark&)>& onDiscover);
 
     const std::vector<Landmark>& GetAll() const { return m_landmarks; }
+    bool SetDiscovered(const std::string& name, bool discovered);
+    void SetAllDiscovered(bool discovered);
 
 private:
     std::vector<Landmark> m_landmarks;

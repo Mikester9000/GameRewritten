@@ -32,7 +32,26 @@ void LandmarkTriggerSystem::Update(const DirectX::XMFLOAT3& playerPos,
         if (dx * dx + dz * dz <= lm.radius * lm.radius)
         {
             lm.discovered = true;
-            onDiscover(lm);
+            if (onDiscover) onDiscover(lm);
         }
     }
+}
+
+bool LandmarkTriggerSystem::SetDiscovered(const std::string& name, bool discovered)
+{
+    for (Landmark& lm : m_landmarks)
+    {
+        if (lm.name == name)
+        {
+            lm.discovered = discovered;
+            return true;
+        }
+    }
+    return false;
+}
+
+void LandmarkTriggerSystem::SetAllDiscovered(bool discovered)
+{
+    for (Landmark& lm : m_landmarks)
+        lm.discovered = discovered;
 }

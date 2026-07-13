@@ -29,7 +29,7 @@ class DialogueRuntime
 {
 public:
     void LoadGraph(const std::vector<DialogueNode>& nodes);
-    void Start(int startNodeId, const QuestFlags& flags);
+    void Start(int startNodeId, QuestFlags& flags);
 
     bool        IsRunning()       const { return m_running; }
     const DialogueNode* Current() const;

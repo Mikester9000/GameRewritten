@@ -26,10 +26,9 @@ public:
     int  AddSlot(float x, float z, float radius, int enemyCount);
 
     // Call each frame.  Fires onActivate when a slot enters player range
-    // and has capacity; fires onClear when all enemies at a slot are dead.
+    // and has capacity.
     void Update(const DirectX::XMFLOAT3& playerPos,
-                const std::function<void(const EncounterSlot&)>& onActivate,
-                const std::function<void(int slotId)>&           onClear);
+                const std::function<void(const EncounterSlot&)>& onActivate);
 
     // Mark a slot's encounter as cleared (all enemies defeated).
     void NotifyClear(int slotId);

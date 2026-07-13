@@ -10,8 +10,20 @@ void AudioRouter::Play(const std::string& path, AudioBus bus, float volume)
 {
     if (!m_mgr) return;
     const float effective = std::max(0.0f, volume * m_busVolume[BusIndex(bus)]);
-    (void)path; (void)effective;
-    m_mgr->PlaySFX(path); // volume control via SetSFXVolume before calling
+    if (effective <= 0.0f) return;
+
+    switch (bus)
+    {
+    case AudioBus::BGM:
+        m_mgr->PlayBGM(path);
+        break;
+    case AudioBus::SFX:
+    case AudioBus::UI:
+    case AudioBus::Voice:
+    default:
+        m_mgr->PlaySFX(path); // per-call scaling not supported by AudioManager yet
+        break;
+    }
 }
 
 void AudioRouter::SetBusVolume(AudioBus bus, float volume)

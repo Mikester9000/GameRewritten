@@ -27,8 +27,7 @@ int EncounterDirector::ActiveCount() const
 
 void EncounterDirector::Update(
     const DirectX::XMFLOAT3& playerPos,
-    const std::function<void(const EncounterSlot&)>& onActivate,
-    const std::function<void(int)>&                  /*onClear*/)
+    const std::function<void(const EncounterSlot&)>& onActivate)
 {
     for (EncounterSlot& s : m_slots)
     {

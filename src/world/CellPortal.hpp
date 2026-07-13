@@ -33,5 +33,6 @@ public:
 
 private:
     std::vector<CellPortal> m_portals;
+    std::vector<int>        m_insidePortalIds;
     int                     m_nextId = 1;
 };

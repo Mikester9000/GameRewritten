@@ -9,7 +9,7 @@ void DialogueRuntime::LoadGraph(const std::vector<DialogueNode>& nodes)
     m_nodes = nodes;
 }
 
-void DialogueRuntime::Start(int startNodeId, const QuestFlags& flags)
+void DialogueRuntime::Start(int startNodeId, QuestFlags& flags)
 {
     m_currentId = startNodeId;
     m_running   = FindNode(startNodeId) != nullptr;
@@ -18,7 +18,7 @@ void DialogueRuntime::Start(int startNodeId, const QuestFlags& flags)
     {
         const DialogueNode* node = FindNode(startNodeId);
         if (node && !node->setFlagOnEnter.empty())
-            const_cast<QuestFlags&>(flags).Set(node->setFlagOnEnter);
+            flags.Set(node->setFlagOnEnter);
     }
 }
 
