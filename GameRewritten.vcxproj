@@ -309,6 +309,8 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\rendering\d3d11\D3D11Renderer.cpp" />
     <ClCompile Include="src\rendering\d3d11\D3D11ShaderCompiler.cpp" />
     <ClCompile Include="src\rendering\d3d11\Terrain_Renderer.cpp" />
+    <ClCompile Include="src\rendering\d3d11\PostProcessPass.cpp" />
+    <ClCompile Include="src\rendering\d3d11\WaterRenderer.cpp" />
 
     <ClCompile Include="src\ui\GameHUD.cpp" />
     <ClCompile Include="src\ui\TacticalPauseMenu.cpp" />
@@ -353,6 +355,11 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\world\ContinentImpostor.cpp" />
     <ClCompile Include="src\world\WeatherSystem.cpp" />
     <ClCompile Include="src\world\WorldGrid.cpp" />
+    <ClCompile Include="src\world\RainTerrainModifier.cpp" />
+    <ClCompile Include="src\world\SnowTerrainModifier.cpp" />
+    <ClCompile Include="src\world\AtmosphericFog.cpp" />
+    <ClCompile Include="src\world\VolumetricCloud.cpp" />
+    <ClCompile Include="src\world\WorldMapOverlay.cpp" />
     <ClCompile Include="src\renderer\PostProcessToggles.cpp" />
     <!-- Dear ImGui core (vendored, MIT licence) -->
     <ClCompile Include="third_party\imgui\imgui.cpp" />
