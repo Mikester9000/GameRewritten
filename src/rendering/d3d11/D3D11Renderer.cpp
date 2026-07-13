@@ -5,6 +5,7 @@
 // ============================================================
 
 #include "D3D11Renderer.hpp"
+#include "Terrain_Renderer.hpp"
 #include "D3D11ShaderCompiler.hpp"
 #include "../../logger/Logger.hpp"
 #include <algorithm>
@@ -398,6 +399,13 @@ void D3D11Renderer::SetSunDirection(float x, float y, float z)
     m_lightData.lightDirX = x;
     m_lightData.lightDirY = y;
     m_lightData.lightDirZ = z;
+}
+
+void D3D11Renderer::GetSunDirection(float& x, float& y, float& z) const
+{
+    x = m_lightData.lightDirX;
+    y = m_lightData.lightDirY;
+    z = m_lightData.lightDirZ;
 }
 
 float D3D11Renderer::GetAmbientStrength() const

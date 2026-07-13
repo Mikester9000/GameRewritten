@@ -7,7 +7,7 @@
 #include <vector>
 
 // Forward declarations to avoid heavy includes.
-struct EnemyActor;
+class EnemyActor;
 
 enum class TargetShape { Single, Cone, AoE };
 

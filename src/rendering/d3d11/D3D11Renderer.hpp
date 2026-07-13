@@ -7,6 +7,10 @@
 // ============================================================
 
 #pragma once
+// Suppress Windows min/max macros before including any Windows headers.
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #include <d3d11.h>
 #include <dxgi.h>
@@ -78,6 +82,7 @@ public:
 
     // Lighting Control
     void SetSunDirection(float x, float y, float z);
+    void GetSunDirection(float& x, float& y, float& z) const;
     float GetAmbientStrength() const;
     void SetAmbientStrength(float a);
 
