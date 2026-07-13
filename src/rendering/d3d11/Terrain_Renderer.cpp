@@ -5,7 +5,7 @@
 // DEPENDS ON: Terrain_renderer.hpp, D3D11RendererHelpers.hpp, DirectXMath.h
 // ============================================================
 
-#include "Terrain_renderer.hpp"
+#include "Terrain_Renderer.hpp"
 #include "../../logger/Logger.hpp" // Assume Logger is available
 #include <algorithm>
 #include <cmath>
@@ -37,7 +37,7 @@ void TerrainManager::Shutdown()
     // Release all resources owned by this manager.
     if (m_terrainPatchVertexBuffer)
     {
-        m_device->Release(m_terrainPatchVertexBuffer);
+        m_terrainPatchVertexBuffer->Release();
         m_terrainPatchVertexBuffer = nullptr;
     }
     m_terrainHeights.clear();
@@ -113,7 +113,7 @@ bool TerrainManager::RebuildTerrainPatch(const D3D11Renderer::TerrainParams& par
     const float halfRange = hScale * 1.5f;
 
     // --- Step 2: Build unindexed flat-shaded triangle vertices ---
-    std::vector<D3D11RendererHelpers::Vertex> triVerts;
+    std::vector<D3D11RendererHelpers::TerrainVertex> triVerts;
     triVerts.reserve(static_cast<size_t>(quadsX * quadsZ * 6));
 
     for (int z = 0; z < quadsZ; ++z)
@@ -154,7 +154,7 @@ bool TerrainManager::RebuildTerrainPatch(const D3D11Renderer::TerrainParams& par
     // Upload unindexed vertices to GPU
     D3D11_BUFFER_DESC vbd{};
     vbd.Usage = D3D11_USAGE_DEFAULT;
-    vbd.ByteWidth = static_cast<UINT>(triVerts.size() * sizeof(D3D11RendererHelpers::Vertex));
+    vbd.ByteWidth = static_cast<UINT>(triVerts.size() * sizeof(D3D11RendererHelpers::TerrainVertex));
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     D3D11_SUBRESOURCE_DATA vinit{};
     vinit.pSysMem = triVerts.data();
@@ -177,7 +177,7 @@ void TerrainManager::ClearResources()
     // Release GPU resources and internal height data.
     if (m_terrainPatchVertexBuffer)
     {
-        m_device->Release(m_terrainPatchVertexBuffer);
+        m_terrainPatchVertexBuffer->Release();
         m_terrainPatchVertexBuffer = nullptr;
     }
     m_terrainHeights.clear();

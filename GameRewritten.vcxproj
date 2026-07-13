@@ -265,6 +265,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\platform\win32\Win32Window.cpp" />
     <ClCompile Include="src\rendering\d3d11\D3D11RendererHelpers.cpp" />
     <ClCompile Include="src\rendering\d3d11\D3D11Renderer.cpp" />
+    <ClCompile Include="src\rendering\d3d11\D3D11ShaderCompiler.cpp" />
     <ClCompile Include="src\rendering\d3d11\Terrain_Renderer.cpp" />
 
     <ClCompile Include="src\ui\GameHUD.cpp" />
@@ -378,6 +379,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\platform\win32\Win32Window.hpp" />
     <ClInclude Include="src\rendering\d3d11\D3D11RendererHelpers.hpp" />
     <ClInclude Include="src\rendering\d3d11\D3D11Renderer.hpp" />
+    <ClInclude Include="src\rendering\d3d11\D3D11ShaderCompiler.hpp" />
     <ClInclude Include="src\rendering\d3d11\Terrain_Renderer.hpp" />
     <ClInclude Include="src\ui\GameHUD.hpp" />
     <ClInclude Include="src\ui\TacticalPauseMenu.hpp" />
