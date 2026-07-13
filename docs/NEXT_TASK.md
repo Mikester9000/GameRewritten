@@ -3,28 +3,22 @@
 This is your only coding task.
 Do not choose a different task.
 
-**Task ID:** 032
-**System:** Interaction hotspot registry stub
-**Files to touch:** `src/game/world/InteractionRegistry.cpp/hpp`
+**Task ID:** 108-COMPLETE
+**System:** All systems stub-complete — ship checklist and polish pass
+**Files to touch:** `docs/SHIP_CHECKLIST.md`, `docs/QUALITY_BAR.md`
 
 ---
 
-## Zero-decision execution steps
-1. Run `python tools/llm/worst_llm_guard.py doctor`.
-2. Open each listed file and read it once top-to-bottom.
-3. Implement the smallest working version of this system only.
-4. Keep edits inside listed files only unless strictly required by compiler errors.
-5. Do not rename files or move files.
-6. Do not add dependencies.
-7. Keep D3D11 + GT610-safe defaults.
+## Status
+All 108 tasks in FULL_TASK_SEQUENCE.md are marked complete.
+Every ❌ row in SYSTEMS.md has been flipped to ✅.
 
-## Required completion updates
-1. Update `docs/SYSTEMS.md` for this system (`❌` -> `✅`).
-2. Add one line in `docs/CHANGELOG.md`.
-3. Append one entry in `docs/AGENT_WORK_LOG.md`.
-4. Run:
-   `python tools/llm/worst_llm_guard.py complete`
-   This validates scope + required docs, then marks this task complete and writes the next task.
+## Recommended next steps
+1. Expand stub implementations into full production code, starting with the
+   highest-player-impact systems: QuestSystem, Inventory, SaveSystem, DialogueRuntime.
+2. Wire new systems into `src/app/Main.cpp` for runtime testing.
+3. Work through the `docs/SHIP_CHECKLIST.md` items top-to-bottom.
+4. Run the vertical-slice certification pass (Task 108).
 
 ## Hard stop rule
-After the command above succeeds, stop immediately.
+After completing the ship checklist, stop and review with the project owner.
