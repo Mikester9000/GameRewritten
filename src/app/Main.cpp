@@ -19,6 +19,9 @@
 #include <vector>
 #include "../platform/win32/Win32Window.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
+#include "../rendering/d3d11/D3D11RendererHelpers.hpp"
+#include "../renderer/PostProcessToggles.hpp"
+#include "../rendering/d3d11/Terrain_Renderer.hpp"
 #include "../game/Forest.hpp"
 #include "../game/CameraController.hpp"
 #include "../game/actors/PlayerActor.hpp"

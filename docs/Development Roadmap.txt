@@ -33,21 +33,21 @@ When choosing between two tasks:
 ## 1. Immediate Fixes and Stability
 
 ### 1.1 World startup consistency
-- [ ] Replace remaining hardcoded startup cell coordinates in `src/app/Main.cpp`
-- [ ] Change:
+- [x ] Replace remaining hardcoded startup cell coordinates in `src/app/Main.cpp`
+- [ x] Change:
   - `worldGrid.WorldToCell(200.0f, 200.0f, lastPlayerCX, lastPlayerCZ);`
   - to use `startupCellCenter`
-- [ ] Audit other hardcoded `200.0f` / `400.0f` world assumptions
-- [ ] Acceptance:
+- [x ] Audit other hardcoded `200.0f` / `400.0f` world assumptions
+- [ x] Acceptance:
   - world loads correctly for different `cell_size`
   - spawn works for `100`, `200`, or `400`
 
 ### 1.2 Renderer cleanup pass
-- [ ] Add a safe COM-release helper in `src/rendering/d3d11/D3D11Renderer.cpp`
-- [ ] Release missing `groundInputLayout` in `Shutdown()`
-- [ ] Remove duplicated shader compile patterns where practical
-- [ ] Clean duplicate comments and formatting issues
-- [ ] Acceptance:
+- [ x] Add a safe COM-release helper in `src/rendering/d3d11/D3D11Renderer.cpp`
+- [ x] Release missing `groundInputLayout` in `Shutdown()`
+- [ x] Remove duplicated shader compile patterns where practical
+- [ x] Clean duplicate comments and formatting issues
+- [ x] Acceptance:
   - no behavior changes
   - cleaner shutdown
   - fewer repeated code blocks
@@ -67,45 +67,45 @@ When choosing between two tasks:
 ## 2. Runtime Actor Foundation
 
 ### 2.1 Split static world visuals from runtime visuals
-- [ ] Refactor `src/game/PrimitiveRenderer.hpp`
-- [ ] Add separate storage for:
+- [ x] Refactor `src/game/PrimitiveRenderer.hpp`
+- [ x] Add separate storage for:
   - world/static instances
   - runtime/dynamic instances
-- [ ] Add APIs such as:
+- [ x] Add APIs such as:
   - `ClearWorldInstances()`
   - `AddWorldInstance(...)`
   - `ClearRuntimeInstances()`
   - `AddRuntimeInstance(...)`
-- [ ] Update draw path to render both groups
-- [ ] Acceptance:
+- [x ] Update draw path to render both groups
+- [ x] Acceptance:
   - world editor placed props remain stable
   - runtime player visual can update every frame without wiping world props
 
 ### 2.2 Actor model direction
-- [ ] Introduce the concept of runtime actors
+- [ x] Introduce the concept of runtime actors
 - [ ] Planned actor categories:
   - player
   - enemy
   - NPC
   - interactable prop
   - vehicle
-- [ ] Create a future home for actor code:
+- [x] Create a future home for actor code:
   - `src/game/actors/`
-- [ ] Acceptance:
+- [x] Acceptance:
   - the engine has a clear place for moving world entities
 
 ---
 ## 3. Player Character Visual
 
 ### 3.1 First player visual: FF7-style blockout
-- [ ] Create `Content/Prefabs/player_hero_blockout.prefab.json`
-- [ ] Register it in `Content/AssetRegistry.json`
-- [ ] Design goals:
+- [x] Create `Content/Prefabs/player_hero_blockout.prefab.json`
+- [x] Register it in `Content/AssetRegistry.json`
+- [x] Design goals:
   - chunky silhouette
   - clear head / torso / arms / legs
   - readable boots / hair block
   - very low part count
-- [ ] Acceptance:
+- [x] Acceptance:
   - visible third-person player character exists in-game
 
 ### 3.2 Hook player visual into runtime rendering

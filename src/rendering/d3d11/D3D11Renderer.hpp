@@ -15,6 +15,8 @@
 #include "D3D11RendererHelpers.hpp"
 #include "../../assets/TextureCache.hpp"
 
+class TerrainManager; // Forward declaration for SetTerrainManager()
+
 // A simple class for setting up and drawing with Direct3D 11.
 class D3D11Renderer
 {
@@ -49,17 +51,36 @@ public:
         float       noiseFreq2 = 0.03f;
     };
 
+    // Constructor / Destructor
     D3D11Renderer();
+    ~D3D11Renderer(); // Added destructor for cleanup!
+
+    // Initialize & Shutdown
     bool Initialize(HWND windowHandle, int width, int height);
     void Shutdown();
+
+    // Screen Management
     void ClearScreen(float red, float green, float blue, float alpha);
     void PresentFrame();
+
+    // Triangle Tests (for learning)
     void DrawRotatingTriangle(float deltaTime);
+
+    // Sky Rendering
     void DrawSky();
+
+    // Camera Control
     void SetCameraPosition(float x, float y, float z);
     void SetCameraRotation(float yaw, float pitch);
+    void GetCameraPosition(float& x, float& y, float& z) const;
+    void GetCameraRotation(float& yaw, float& pitch) const;
+
+    // Lighting Control
     void SetSunDirection(float x, float y, float z);
+    float GetAmbientStrength() const;
     void SetAmbientStrength(float a);
+
+    // Graphics Settings
     void SetVSyncEnabled(bool enabled);
     bool IsVSyncEnabled() const { return m_vsyncEnabled; }
     void SetFrameRateLimit(int fps);
@@ -68,61 +89,52 @@ public:
     GraphicsPreset GetGraphicsPreset() const { return m_graphicsPreset; }
     void SetAntiAliasingMode(AntiAliasingMode mode) { m_antiAliasingMode = mode; }
     AntiAliasingMode GetAntiAliasingMode() const { return m_antiAliasingMode; }
-    void GetCameraPosition(float& x, float& y, float& z) const;
-    void GetCameraRotation(float& yaw, float& pitch) const;
-    void GetSunDirection(float& x, float& y, float& z) const;
-    float GetAmbientStrength() const;
-    int GetShadowResolution() const { return m_shadowResolution; }
-    float GetLodDistanceScale() const { return m_lodDistanceScale; }
-    float GetParticleDensity() const { return m_particleDensity; }
-    int GetTextureQualityLevel() const { return m_textureQualityLevel; }
+
+    // Terrain Rendering (NEW SYSTEM!)
     void DrawGroundPlane();
     void DrawTerrainPatch();
-    // Rebuild the terrain mesh from biome/seed parameters (called on cell transition or F5).
+
+    // Rebuild the terrain mesh from biome/seed parameters 
+    // (called on cell transition or F5).
     bool RebuildTerrainPatch(const TerrainParams& params);
-    // Release the terrain mesh and mark terrain unavailable (for cells with terrain.enabled=false).
+
+    // Release the terrain mesh and mark terrain unavailable 
+    // (for cells with terrain.enabled=false).
     void ClearTerrainPatch();
+
+    // Height Sampling (collision, raycasting)
     float SampleTerrainHeight(float worldX, float worldZ) const;
     bool IsTerrainAvailable() const;
-    // Gravity and jumping control
+
+    // Gravity & Jumping Control
     void SetCameraVelocityY(float velocity);
     float GetCameraVelocityY() const;
     void SetIsGrounded(bool grounded);
     bool GetIsGrounded() const;
-    ID3D11Device* GetDevice() const;
-    ID3D11DeviceContext* GetContext() const;
+
+    // GPU Access
+    ID3D11Device* GetDevice() const { return device; }
+    ID3D11DeviceContext* GetContext() const { return context; }
     ID3D11Buffer* GetLightConstantBuffer() const { return m_lightCBuffer; }
     int GetRenderWidth() const { return renderWidth; }
     int GetRenderHeight() const { return renderHeight; }
 
-    // Attach a TextureCache so terrain draw calls can bind textures.
+    // Texture Cache Attachment (NEW!)
     void SetTextureCache(TextureCache* cache) { m_textureCache = cache; }
+
+    // Cel Shading
     bool IsCelShadingEnabled() const { return m_useCelShading; }
     float GetCelOutlineWidth() const { return m_celOutlineWidth; }
-
-    // Exposed for rendering calls. Note: worldTransform parameter is often redundant if the CB handles it internally.
     bool SetCelShadingParameters(float count, float minVal, float maxVal,
         float rimAmount, float shadowR, float shadowG, float shadowB,
         float specThreshold);
-
-    // Renamed signature slightly to align with call usage: WorldTransform is often calculated before this call.
     void DrawCharacterOutlinePass(float outlineThickness);
 
+    // Terrain Manager Attachment (NEW!)
+    void SetTerrainManager(TerrainManager* manager) { m_terrainManager = manager; }
 
 private:
-    using Vertex = D3D11RendererHelpers::TerrainVertex;
-    struct TransformConstantBuffer { DirectX::XMFLOAT4X4 mvp; DirectX::XMFLOAT4X4 world; };
-    // Matches HLSL LightCBuffer at register(b1); 32 bytes total.
-    struct LightCBuffer {
-        float lightDirX, lightDirY, lightDirZ;
-        float pad0; // Added explicit padding to ensure 4x4 alignment/size consistency
-        float lightColorR, lightColorG, lightColorB;
-        float ambientStrength;
-    };
-    static_assert(sizeof(LightCBuffer) == 32, "LightCBuffer must stay 32 bytes to match HLSL b1 packing.");
-    static_assert((sizeof(LightCBuffer) % 16) == 0, "LightCBuffer size must remain 16-byte aligned.");
-
-
+    // Helper Functions
     bool CreateTriangleResources();
     bool CreateRenderTarget();
     bool CreateTerrainPatch();
@@ -130,18 +142,31 @@ private:
     void CreateGroundShaders();
     void CreateSkyShaders();
     void SetupGroundAndTerrainSceneConstants(float farPlane);
-    // Signature matches the usage pattern: only needs thickness.
-   
 
-    static HRESULT CompileShaderFromFile(const wchar_t* path, const char* entryPoint, const char* target, ID3DBlob** outBlob);
+    static HRESULT CompileShaderFromFile(const wchar_t* path, const char* entryPoint,
+        const char* target, ID3D11ShaderResourceView** outSRV);
 
+    // Camera State
     float cameraX, cameraY, cameraZ;
     float cameraYaw, cameraPitch;
     float cameraVelocityY; // Vertical velocity for jumping and gravity
     bool isGrounded;       // Whether the camera is on the ground
+
+    // Render Settings
     int renderWidth;
     int renderHeight;
+    int m_shadowResolution = 1024;
+    float m_lodDistanceScale = 1.0f;
+    float m_particleDensity = 0.65f;
+    int m_textureQualityLevel = 1;
 
+    // Graphics Preset
+    GraphicsPreset m_graphicsPreset = GraphicsPreset::Medium;
+    AntiAliasingMode m_antiAliasingMode = AntiAliasingMode::FXAA;
+    bool m_vsyncEnabled = true;
+    int m_frameRateLimit = 60;
+
+    // Terrain State (Renderer-owned for simplicity)
     std::vector<float> m_terrainHeights; // row-major [z * vertsX + x]
     int m_terrainVertsX = 0;
     int m_terrainVertsZ = 0;
@@ -151,49 +176,59 @@ private:
     float m_terrainOriginX = 0.0f;   // world-space X of terrain mesh start
     float m_terrainOriginZ = 0.0f;   // world-space Z of terrain mesh start
     bool m_terrainAvailable = false;
-    void UpdateLightConstantBuffer();
+
+    // Active Biome
     std::string m_activeTerrainBiome = "grassland";
-    GraphicsPreset m_graphicsPreset = GraphicsPreset::Medium;
-    AntiAliasingMode m_antiAliasingMode = AntiAliasingMode::FXAA;
-    bool m_vsyncEnabled = true;
-    int m_frameRateLimit = 60;
-    int m_shadowResolution = 1024;
-    float m_lodDistanceScale = 1.0f;
-    float m_particleDensity = 0.65f;
-    int m_textureQualityLevel = 1;
-    bool m_useCelShading = true;
-    float m_celOutlineWidth = 0.03f;
-    ID3D11Buffer* m_groundVertexBuffer = nullptr;
-    ID3D11Buffer* m_groundIndexBuffer = nullptr;
-    UINT m_groundIndexCount = 0;
-    ID3D11Device* device;
-    ID3D11DeviceContext* context;
-    IDXGISwapChain* swapChain;
-    ID3D11RenderTargetView* renderTargetView;
-    D3D_FEATURE_LEVEL featureLevel;
+
+    // Shader Resources (General)
     ID3D11VertexShader* vertexShader = nullptr;
     ID3D11PixelShader* pixelShader = nullptr;
     ID3D11InputLayout* inputLayout = nullptr;
     ID3D11Buffer* vertexBuffer = nullptr;
-    ID3D11Buffer* transformConstantBuffer = nullptr;
-    ID3D11RasterizerState* rasterizerState = nullptr;
-    ID3D11Texture2D* depthTexture = nullptr;
-    ID3D11DepthStencilView* depthView = nullptr;
-    ID3D11Buffer* indexBuffer = nullptr;
-    ID3D11VertexShader* groundVertexShader = nullptr;
-    ID3D11PixelShader* groundPixelShader = nullptr;
-    ID3D11InputLayout* groundInputLayout = nullptr;
+
+    // Sky Shaders
     ID3D11VertexShader* skyVertexShader = nullptr;
     ID3D11PixelShader* skyPixelShader = nullptr;
     ID3D11InputLayout* skyInputLayout = nullptr;
+
+    // Ground/Terrain Shaders
+    ID3D11VertexShader* groundVertexShader = nullptr;
+    ID3D11PixelShader* groundPixelShader = nullptr;
+    ID3D11InputLayout* groundInputLayout = nullptr;
+
+    // GPU Buffers
+    ID3D11Buffer* m_groundVertexBuffer = nullptr;
+    ID3D11Buffer* m_groundIndexBuffer = nullptr;
+    UINT m_groundIndexCount = 0;
     ID3D11Buffer* m_lightCBuffer = nullptr;
-    LightCBuffer m_lightData = { 0.4f, -1.0f, 0.6f, 0.0f, 1.0f, 0.95f, 0.8f, 0.25f };
+    ID3D11Buffer* m_constantBuffer = nullptr;
     ID3D11Buffer* m_terrainPatchVertexBuffer = nullptr;
     UINT m_terrainPatchVertexCount = 0;
-    ID3D11DeviceContext* m_deviceContext; // Used for setting states, mapping resources.
-    ID3D11Buffer* m_constantBuffer;     // The persistent buffer holding shader constants (matrices, colors, etc.).
 
+    // Constant Buffer Structures
+    struct TransformConstantBuffer { DirectX::XMFLOAT4X4 mvp; DirectX::XMFLOAT4X4 world; };
+    struct LightCBuffer {
+        float lightDirX, lightDirY, lightDirZ;
+        float pad0;
+        float lightColorR, lightColorG, lightColorB;
+        float ambientStrength;
+    };
+    static_assert(sizeof(LightCBuffer) == 32, "LightCBuffer must stay 32 bytes!");
+    static_assert((sizeof(LightCBuffer) % 16) == 0, "Must be 16-byte aligned!");
+
+    // Device & SwapChain
+    ID3D11Device* device = nullptr;
+    ID3D11DeviceContext* context = nullptr;
+    IDXGISwapChain* swapChain = nullptr;
+    ID3D11RenderTargetView* renderTargetView = nullptr;
+    D3D_FEATURE_LEVEL featureLevel = 0;
+    ID3D11Texture2D* depthTexture = nullptr;
+    ID3D11DepthStencilView* depthView = nullptr;
+
+    // Sampling & Texture Handling
     TextureCache* m_textureCache = nullptr;
     ID3D11SamplerState* m_textureSampler = nullptr;
 
+    // TERRAIN MANAGER (NEW!) - Pointer to manager instance
+    TerrainManager* m_terrainManager = nullptr;
 };

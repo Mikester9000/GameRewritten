@@ -37,6 +37,7 @@
         "prefabs.fallen_log": "Content/Prefabs/fallen_log.prefab.json",
         "prefabs.mushroom_ring": "Content/Prefabs/mushroom_ring.prefab.json",
         "prefabs.grass.tree_oak_a": "Content/Prefabs/grass_tree_oak_a.prefab.json",
+        "prefabs.goblin_blockout": "Content/Prefabs/goblin_blockout.prefab.json",
         "prefabs.grass.tree_oak_b": "Content/Prefabs/grass_tree_oak_b.prefab.json",
         "prefabs.grass.tree_willow": "Content/Prefabs/grass_tree_willow.prefab.json",
         "prefabs.grass.bush_a": "Content/Prefabs/grass_bush_a.prefab.json",

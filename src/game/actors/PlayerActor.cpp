@@ -122,7 +122,7 @@ void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,
                                       const PrefabLibrary& prefabLibrary,
                                       PrimitiveRenderer& primitiveRenderer) const
 {
-    static const std::string kPlayerVisualPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+    static const std::string kPlayerVisualPrefabId = ActorCommon::PLAYERVISUALPREFABID;
     const PrimitivePrefab* visualPrefab =
         prefabLibrary.GetPrefab(kPlayerVisualPrefabId);
     if (!visualPrefab)
@@ -134,3 +134,4 @@ void PlayerActor::SubmitRuntimeVisual(const CameraController& cameraController,
                                          pose.yaw, pose.scale,
                                          true);
 }
+

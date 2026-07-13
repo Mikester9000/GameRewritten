@@ -347,6 +347,9 @@
     <ClCompile Include="src\game\animation\AnimationComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\rendering\d3d11\Terrain_Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\platform\win32\Win32Window.hpp">
@@ -604,6 +607,9 @@
     <ClInclude Include="src\rendering\d3d11\D3D11RendererHelpers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\rendering\d3d11\Terrain_Renderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ground_vs.hlsl" />
@@ -617,6 +623,9 @@
     <FxCompile Include="Shaders\outline_ps.hlsl" />
     <FxCompile Include="Shaders\outline_vs.hlsl" />
     <FxCompile Include="Shaders\lut_ps.hlsl" />
+    <FxCompile Include="Shaders\Celshaderheader.hlsl" />
+    <FxCompile Include="Shaders\SilhouetteHeader.hlsl" />
+    <FxCompile Include="Shaders\ColorGradingHeader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="docs\Development Roadmap.txt" />

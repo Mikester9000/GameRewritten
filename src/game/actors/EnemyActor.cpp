@@ -261,8 +261,9 @@ void EnemyActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
 
     if (!IsHitFlashVisible())
         return;
+    
 
-    static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+    static const std::string kPrefabId = ActorCommon::ENEMYVISUALPREFABID;
     const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
     if (!visualPrefab)
         return;
