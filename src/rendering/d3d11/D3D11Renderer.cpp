@@ -147,7 +147,6 @@ void D3D11Renderer::Shutdown()
 
     SafeRelease(m_lightCBuffer);
     SafeRelease(m_fallbackWhiteTexture);
-    SafeRelease(m_terrainPatchVertexBuffer);
     SafeRelease(m_textureSampler);
     SafeRelease(m_terrainSolidRasterState);
     SafeRelease(m_terrainNoCullRasterState);
@@ -293,7 +292,6 @@ bool D3D11Renderer::CreateTerrainPatch()
     m_terrainVertsX          = 0;
     m_terrainVertsZ          = 0;
     m_terrainAvailable       = false;
-    m_terrainPatchVertexCount = 0;
     return true;
 }
 
@@ -558,7 +556,7 @@ void D3D11Renderer::SetSunDirection(float x, float y, float z)
     m_lightData.lightDirY = y;
     m_lightData.lightDirZ = z;
     NormalizeLightDirection(m_lightData);
-    UploadLightConstants();
+    m_lightConstantsDirty = true;
 }
 
 void D3D11Renderer::GetSunDirection(float& x, float& y, float& z) const
@@ -576,7 +574,7 @@ float D3D11Renderer::GetAmbientStrength() const
 void D3D11Renderer::SetAmbientStrength(float a)
 {
     m_lightData.ambientStrength = std::clamp(a, 0.05f, 1.0f);
-    UploadLightConstants();
+    m_lightConstantsDirty = true;
 }
 
 void D3D11Renderer::SetVSyncEnabled(bool enabled)
@@ -597,7 +595,8 @@ void D3D11Renderer::ApplyGraphicsPreset(GraphicsPreset preset)
 void D3D11Renderer::Tick(float deltaTime)
 {
     (void)deltaTime;
-    UploadLightConstants();
+    if (m_lightConstantsDirty)
+        UploadLightConstants();
 }
 
 bool D3D11Renderer::ValidateRenderState(const char* stage) const
@@ -623,9 +622,6 @@ bool D3D11Renderer::ValidateRenderState(const char* stage) const
     require(m_fallbackWhiteTexture != nullptr, "fallback texture SRV missing");
     require(groundVertexShader != nullptr && groundPixelShader != nullptr, "ground shaders missing");
     require(groundInputLayout != nullptr, "ground input layout missing");
-
-    if (!m_terrainManager)
-        LOG_WARN(std::string("Render validation [") + at + "]: TerrainManager not bound; terrain draw will fallback.");
 
     return ok;
 }
@@ -662,7 +658,6 @@ void D3D11Renderer::DrawGroundPlane()
     }
 
     SetupGroundAndTerrainSceneConstants(2000.0f);
-    UploadLightConstants();
 
     ID3D11RasterizerState* rs = m_terrainSolidRasterState;
     if (m_debugTerrainWireframe)
@@ -711,7 +706,6 @@ void D3D11Renderer::DrawTerrainPatch()
     }
 
     SetupGroundAndTerrainSceneConstants(2000.0f);
-    UploadLightConstants();
 
     ID3D11RasterizerState* rs = m_terrainSolidRasterState;
     if (m_debugTerrainWireframe)
@@ -824,7 +818,7 @@ void D3D11Renderer::SetupGroundAndTerrainSceneConstants(float farPlane)
 
 void D3D11Renderer::UploadLightConstants()
 {
-    if (!m_lightCBuffer || !context)
+    if (!m_lightCBuffer || !context || !m_lightConstantsDirty)
         return;
 
     RenderContracts::LightCBuffer data = m_lightData;
@@ -837,4 +831,5 @@ void D3D11Renderer::UploadLightConstants()
         data.ambientStrength = 1.0f;
     }
     context->UpdateSubresource(m_lightCBuffer, 0, nullptr, &data, 0, 0);
+    m_lightConstantsDirty = false;
 }

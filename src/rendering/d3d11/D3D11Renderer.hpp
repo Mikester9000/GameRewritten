@@ -103,7 +103,13 @@ public:
     // Terrain Rendering
     void DrawGroundPlane();
     void DrawTerrainPatch();
-    void SetTerrainUnlitDebug(bool enabled) { m_debugTerrainUnlit = enabled; }
+    void SetTerrainUnlitDebug(bool enabled)
+    {
+        if (m_debugTerrainUnlit == enabled)
+            return;
+        m_debugTerrainUnlit = enabled;
+        m_lightConstantsDirty = true;
+    }
     void SetTerrainDisableCullingDebug(bool enabled) { m_debugTerrainDisableCulling = enabled; }
     void SetTerrainWireframeDebug(bool enabled) { m_debugTerrainWireframe = enabled; }
     bool IsTerrainUnlitDebugEnabled() const { return m_debugTerrainUnlit; }
@@ -228,11 +234,10 @@ private:
     UINT          m_groundIndexCount         = 0;
     ID3D11Buffer* m_lightCBuffer             = nullptr;
     ID3D11Buffer* m_constantBuffer           = nullptr;
-    ID3D11Buffer* m_terrainPatchVertexBuffer = nullptr;
-    UINT          m_terrainPatchVertexCount  = 0;
 
     // Light state (sun direction + ambient)
     RenderContracts::LightCBuffer m_lightData = RenderContracts::DefaultDirectionalLight();
+    bool m_lightConstantsDirty = true;
 
     // Cel Shading state
     bool  m_useCelShading   = false;
