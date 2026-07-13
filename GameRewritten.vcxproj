@@ -75,13 +75,13 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <!-- GR_ENABLE_TRACY activates Tracy zone macros in Debug builds -->
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;GR_ENABLE_TRACY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;GR_ENABLE_TRACY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)third_party;$(ProjectDir)third_party\imgui;$(ProjectDir)third_party\tracy;$(ProjectDir)third_party\DirectXTex;$(ProjectDir)ThirdParty\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(OutDir)ThirdParty.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -96,13 +96,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <!-- No GR_ENABLE_TRACY in Release -->
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)third_party;$(ProjectDir)third_party\imgui;$(ProjectDir)third_party\DirectXTex;$(ProjectDir)ThirdParty\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(OutDir)ThirdParty.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -261,10 +261,53 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClCompile Include="src\game\ParticleSystem.cpp" />
     <ClCompile Include="src\game\RuntimeScene.cpp" />
     <ClCompile Include="src\game\world\EventZone.cpp" />
+    <ClCompile Include="src\game\world\InteractionRegistry.cpp" />
+    <ClCompile Include="src\game\world\LandmarkTrigger.cpp" />
+    <ClCompile Include="src\game\world\NavTileStream.cpp" />
+    <ClCompile Include="src\game\world\FastTravel.cpp" />
+    <ClCompile Include="src\game\world\DiscoveryJournal.cpp" />
+    <ClCompile Include="src\game\quest\QuestSystem.cpp" />
+    <ClCompile Include="src\game\actors\ChestActor.cpp" />
+    <ClCompile Include="src\game\actors\BossActor.cpp" />
+    <ClCompile Include="src\game\inventory\Inventory.cpp" />
+    <ClCompile Include="src\game\inventory\EquipmentProgression.cpp" />
+    <ClCompile Include="src\game\combat\AtbSystem.cpp" />
+    <ClCompile Include="src\game\combat\AbilityTargeting.cpp" />
+    <ClCompile Include="src\game\ai\SquadCoordinator.cpp" />
+    <ClCompile Include="src\game\ai\EncounterDirector.cpp" />
+    <ClCompile Include="src\game\party\PartyRuntime.cpp" />
+    <ClCompile Include="src\game\traversal\TraversalMount.cpp" />
+    <ClCompile Include="src\game\traversal\TraversalController.cpp" />
+    <ClCompile Include="src\game\crafting\CraftingSystem.cpp" />
+    <ClCompile Include="src\game\dialogue\DialogueRuntime.cpp" />
+    <ClCompile Include="src\game\cutscene\CutsceneTimeline.cpp" />
+    <ClCompile Include="src\game\progression\SkillTree.cpp" />
+    <ClCompile Include="src\game\NewGameFlow.cpp" />
+    <ClCompile Include="src\world\ContinentTransition.cpp" />
+    <ClCompile Include="src\world\CellPortal.cpp" />
+    <ClCompile Include="src\world\PopulationDirector.cpp" />
+    <ClCompile Include="src\world\WorldEventScheduler.cpp" />
+    <ClCompile Include="src\world\RegionStateStore.cpp" />
+    <ClCompile Include="src\ui\WorldMap.cpp" />
+    <ClCompile Include="src\ui\CommandWheel.cpp" />
+    <ClCompile Include="src\ui\CombatDebugPanel.cpp" />
+    <ClCompile Include="src\ui\SubtitleOverlay.cpp" />
+    <ClCompile Include="src\ui\SettingsMenu.cpp" />
+    <ClCompile Include="src\ui\CreditsScreen.cpp" />
+    <ClCompile Include="src\ui\TutorialOverlay.cpp" />
+    <ClCompile Include="src\audio\AudioRouter.cpp" />
+    <ClCompile Include="src\audio\MusicStateMachine.cpp" />
+    <ClCompile Include="src\audio\VoicePlayback.cpp" />
+    <ClCompile Include="src\app\SaveSystem.cpp" />
+    <ClCompile Include="src\app\SaveMigration.cpp" />
+    <ClCompile Include="src\app\CrashDiagnostics.cpp" />
+    <ClCompile Include="src\app\InputBindingProfile.cpp" />
+    <ClCompile Include="src\app\AutoQualityScaler.cpp" />
     <ClCompile Include="src\logger\Logger.cpp" />
     <ClCompile Include="src\platform\win32\Win32Window.cpp" />
     <ClCompile Include="src\rendering\d3d11\D3D11RendererHelpers.cpp" />
     <ClCompile Include="src\rendering\d3d11\D3D11Renderer.cpp" />
+    <ClCompile Include="src\rendering\d3d11\D3D11ShaderCompiler.cpp" />
     <ClCompile Include="src\rendering\d3d11\Terrain_Renderer.cpp" />
 
     <ClCompile Include="src\ui\GameHUD.cpp" />
@@ -378,6 +421,7 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\platform\win32\Win32Window.hpp" />
     <ClInclude Include="src\rendering\d3d11\D3D11RendererHelpers.hpp" />
     <ClInclude Include="src\rendering\d3d11\D3D11Renderer.hpp" />
+    <ClInclude Include="src\rendering\d3d11\D3D11ShaderCompiler.hpp" />
     <ClInclude Include="src\rendering\d3d11\Terrain_Renderer.hpp" />
     <ClInclude Include="src\ui\GameHUD.hpp" />
     <ClInclude Include="src\ui\TacticalPauseMenu.hpp" />
@@ -426,6 +470,53 @@ xcopy /Y /D "$(ProjectDir)Shaders\*.hlsl" "$(OutDir)Shaders\"</Command>
     <ClInclude Include="src\world\WeatherSystem.hpp" />
     <ClInclude Include="src\world\WorldGrid.hpp" />
     <ClInclude Include="src\game\world\EventZone.hpp" />
+    <ClInclude Include="src\game\world\InteractionRegistry.hpp" />
+    <ClInclude Include="src\game\world\LandmarkTrigger.hpp" />
+    <ClInclude Include="src\game\world\NavTileStream.hpp" />
+    <ClInclude Include="src\game\world\FastTravel.hpp" />
+    <ClInclude Include="src\game\world\DiscoveryJournal.hpp" />
+    <ClInclude Include="src\game\quest\QuestFlags.hpp" />
+    <ClInclude Include="src\game\quest\QuestSystem.hpp" />
+    <ClInclude Include="src\game\quest\QuestSchema.hpp" />
+    <ClInclude Include="src\game\actors\ChestActor.hpp" />
+    <ClInclude Include="src\game\actors\BossActor.hpp" />
+    <ClInclude Include="src\game\ai\BossPhaseState.hpp" />
+    <ClInclude Include="src\game\ai\SquadCoordinator.hpp" />
+    <ClInclude Include="src\game\ai\EncounterDirector.hpp" />
+    <ClInclude Include="src\game\inventory\Inventory.hpp" />
+    <ClInclude Include="src\game\inventory\EquipmentProgression.hpp" />
+    <ClInclude Include="src\game\combat\AtbSystem.hpp" />
+    <ClInclude Include="src\game\combat\AbilityTargeting.hpp" />
+    <ClInclude Include="src\game\party\PartyRuntime.hpp" />
+    <ClInclude Include="src\game\traversal\TraversalMount.hpp" />
+    <ClInclude Include="src\game\traversal\TraversalController.hpp" />
+    <ClInclude Include="src\game\crafting\CraftingSystem.hpp" />
+    <ClInclude Include="src\game\dialogue\DialogueRuntime.hpp" />
+    <ClInclude Include="src\game\cutscene\CutsceneTimeline.hpp" />
+    <ClInclude Include="src\game\progression\SkillTree.hpp" />
+    <ClInclude Include="src\game\NewGameFlow.hpp" />
+    <ClInclude Include="src\world\SpawnTable.hpp" />
+    <ClInclude Include="src\world\ContinentTransition.hpp" />
+    <ClInclude Include="src\world\CellPortal.hpp" />
+    <ClInclude Include="src\world\PopulationDirector.hpp" />
+    <ClInclude Include="src\world\WorldEventScheduler.hpp" />
+    <ClInclude Include="src\world\RegionStateStore.hpp" />
+    <ClInclude Include="src\ui\WorldMap.hpp" />
+    <ClInclude Include="src\ui\CommandWheel.hpp" />
+    <ClInclude Include="src\ui\CombatDebugPanel.hpp" />
+    <ClInclude Include="src\ui\SubtitleOverlay.hpp" />
+    <ClInclude Include="src\ui\SettingsMenu.hpp" />
+    <ClInclude Include="src\ui\CreditsScreen.hpp" />
+    <ClInclude Include="src\ui\TutorialOverlay.hpp" />
+    <ClInclude Include="src\audio\AudioRouter.hpp" />
+    <ClInclude Include="src\audio\MusicStateMachine.hpp" />
+    <ClInclude Include="src\audio\SfxSpatialRules.hpp" />
+    <ClInclude Include="src\audio\VoicePlayback.hpp" />
+    <ClInclude Include="src\app\SaveSystem.hpp" />
+    <ClInclude Include="src\app\SaveMigration.hpp" />
+    <ClInclude Include="src\app\CrashDiagnostics.hpp" />
+    <ClInclude Include="src\app\InputBindingProfile.hpp" />
+    <ClInclude Include="src\app\AutoQualityScaler.hpp" />
     <ClCompile Include="src\assets\CreationMaterialLoader.cpp" />
     <ClCompile Include="src\game\animation\AnimClipLoader.cpp" />
     <ClCompile Include="src\game\animation\AnimPackManifestLoader.cpp" />

@@ -1,3 +1,26 @@
+// ============================================================
+// FILE: src/audio/volume_controller.h
+// SYSTEM: Audio
+// ROLE: per-channel and master volume control
+// DO NOT: store audio device handles or drive playback here.
+// OWNS: volume state and effective-volume calculation.
+// ============================================================
+//
+// [LEGO BLOCK: AUDIO VOLUME CONTROLLER]
+// -----------------------------------------------------------------
+// What it does: tracks master + per-named-channel volume levels.
+//
+// EXTEND: add a new channel at any time by calling:
+//   SetChannelVolume("yourChannel", 0.8f);
+//   No code changes to this class are needed.
+//
+// EXAMPLE — wire into a new AudioManager:
+//   #include "audio/volume_controller.h"
+//   gr::AudioVolumeController m_volumeCtrl;
+//   m_volumeCtrl.SetMasterVolume(settings.masterVol);
+//   float vol = m_volumeCtrl.GetEffectiveVolume("sfx");
+// -----------------------------------------------------------------
+
 #pragma once
 
 #include <string>

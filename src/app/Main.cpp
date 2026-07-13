@@ -2,14 +2,49 @@
 // FILE: src/app/Main.cpp
 // SYSTEM: App
 // ROLE: app startup/shutdown wiring and frame orchestration
-// DO NOT: Modify unrelated systems or break subsystem boundaries.
-// OWNS: Main module behavior and local implementation details.
+// DO NOT: add permanent gameplay logic here; own it in a subsystem.
+// OWNS: system construction, dependency injection, and game loop.
 // ============================================================
+//
+// ================================================================
+// HOW THIS FILE IS STRUCTURED  (Lego Block Architecture)
+// ================================================================
+// Main.cpp is the ORCHESTRATOR. It:
+//   1. Constructs every engine "lego block" (one system = one object)
+//   2. Wires them together by passing references/pointers
+//   3. Runs the game loop calling each block's Update() in order
+//   4. Shuts every block down cleanly on exit
+//
+// TO ADD A NEW SYSTEM ("snap in a new lego block"):
+//   STEP A — Add the include in the INCLUDES section below.
+//             Example: #include "../game/quests/QuestSystem.hpp"
+//   STEP B — Declare an instance in the SYSTEM OBJECTS section.
+//             Example: QuestSystem questSystem;
+//   STEP C — Call Init() in the INITIALIZATION section.
+//             Example: questSystem.Init(registry);
+//   STEP D — Call Update(dt) in the matching GAME LOOP section.
+//             Example: questSystem.Update(gameplayDt);
+//   STEP E — Call Shutdown() in the SHUTDOWN section.
+//             Example: questSystem.Shutdown();
+//
+// ================================================================
+// SYSTEM SECTIONS (in order of execution each frame):
+//   [1]  Frame Timing
+//   [2]  Input
+//   [3]  UI State (pause, dialog)
+//   [4]  Player Update
+//   [5]  Camera Update
+//   [6]  World Update (cell streaming, editor)
+//   [7]  Combat Update (enemies, hits, audio events)
+//   [8]  Actor Visuals Submission
+//   [9]  Draw (clear → 3D → UI → present)
+// ================================================================
 
-// Main.cpp
-// Application entry point: initializes all engine systems, runs the main game loop,
-// and shuts everything down cleanly on exit.
-
+// ================================================================
+// [LEGO: INCLUDES]
+// Add new system headers here, grouped by subsystem.
+// Each group maps to a block in the SYSTEM OBJECTS section below.
+// ================================================================
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <cstdint>
@@ -17,11 +52,23 @@
 #include <sstream>   // for std::ostringstream (cell crossing log)
 #include <unordered_map>
 #include <vector>
+
+// -- Platform --
 #include "../platform/win32/Win32Window.hpp"
+
+// -- Rendering --
 #include "../rendering/d3d11/D3D11Renderer.hpp"
 #include "../rendering/d3d11/D3D11RendererHelpers.hpp"
 #include "../renderer/PostProcessToggles.hpp"
 #include "../rendering/d3d11/Terrain_Renderer.hpp"
+
+// -- World / Environment --
+#include "../world/WorldGrid.hpp"
+#include "../world/DayNightCycle.hpp"
+#include "../world/WeatherSystem.hpp"
+// EXTEND: #include "../world/YourNewWorldSystem.hpp"
+
+// -- Game / Scene --
 #include "../game/Forest.hpp"
 #include "../game/CameraController.hpp"
 #include "../game/actors/PlayerActor.hpp"
@@ -29,6 +76,21 @@
 #include "../game/PrimitiveRenderer.hpp"
 #include "../game/RuntimeScene.hpp"
 #include "../game/physics/CollisionWorld.hpp"
+#include "../game/ParticleSystem.hpp"
+#include "../game/world/EventZone.hpp"
+#include "../game/loot/LootTable.hpp"
+// EXTEND: #include "../game/quests/QuestSystem.hpp"
+// EXTEND: #include "../game/dialogue/DialogueTree.hpp"
+
+// -- Animation --
+#include "../game/animation/AnimPackManifestLoader.hpp"
+#include "../game/animation/AnimClipLoader.hpp"
+#include "../game/animation/AnimationComponent.hpp"
+#include "../game/animation/AnimationSystem.hpp"
+#include "../game/animation/PlayerAnimBridge.hpp"
+#include "../game/animation/AnimEventDispatch.hpp"
+
+// -- UI --
 #include "../ui/GameHUD.hpp"
 #include "../ui/WeakPointReticle.hpp"
 #include "../ui/ImGuiLayer.hpp"
@@ -36,23 +98,20 @@
 #include "../ui/DialogBox.hpp"
 #include "../ui/Minimap.hpp"
 #include "../ui/WorldEditor.hpp"
+// EXTEND: #include "../ui/QuestJournal.hpp"
+// EXTEND: #include "../ui/ShopMenu.hpp"
+
+// -- Assets --
 #include "../assets/AssetLoader.hpp"
 #include "../assets/AssetRegistry.hpp"
 #include "../assets/CreationMaterialLoader.hpp"
 #include "../assets/TextureCache.hpp"
+
+// -- Audio --
 #include "../audio/AudioManager.hpp"
-#include "../game/animation/AnimPackManifestLoader.hpp"
-#include "../game/animation/AnimClipLoader.hpp"
-#include "../game/animation/AnimationComponent.hpp"
-#include "../game/animation/AnimationSystem.hpp"
-#include "../game/animation/PlayerAnimBridge.hpp"
-#include "../game/animation/AnimEventDispatch.hpp"
-#include "../world/WorldGrid.hpp"
-#include "../world/DayNightCycle.hpp"
-#include "../world/WeatherSystem.hpp"
-#include "../game/ParticleSystem.hpp"
-#include "../game/world/EventZone.hpp"
-#include "../game/loot/LootTable.hpp"
+// EXTEND: #include "../audio/MusicManager.hpp"
+
+// -- App layer (helpers used only by Main) --
 #include "FrameTiming.hpp"
 #include "InputActionMap.hpp"
 #include "InputEdgeState.hpp"
@@ -63,6 +122,7 @@
 #include "WorldRuntimeRefresh.hpp"
 #include <logger/Logger.hpp>
 
+// -- Third party --
 #include "tp_tracy.hpp"
 #include <imgui.h>
 
@@ -161,6 +221,12 @@ void UpdateCombatMusicState(const RuntimeScene& runtimeScene,
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
+    // ================================================================
+    // [LEGO: WINDOW]
+    // The Win32 window is the root surface. Everything else attaches to it.
+    // To change resolution or title, edit the constants here.
+    // EXTEND: pass a config struct from a settings file instead of literals.
+    // ================================================================
     Win32Window window;
     if (!window.Create(1280, 720, L"My Engine Seed (D3D11)"))
     {
@@ -168,12 +234,28 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         return 1;
     }
 
+    // ================================================================
+    // [LEGO: RENDERER]
+    // D3D11Renderer owns the swap chain, depth buffer, and all shaders.
+    // It must be initialized before any other system that submits draw calls.
+    // EXTEND: replace with a D3D12Renderer or VulkanRenderer here when ready —
+    //   swap the type and keep the same Initialize/Shutdown contract.
+    // ================================================================
     D3D11Renderer renderer;
     if (!renderer.Initialize(window.GetHandle(), window.GetWidth(), window.GetHeight()))
     {
         MessageBoxW(nullptr, L"Failed to initialize D3D11.", L"Error", 0);
         return 1;
     }
+
+    // ================================================================
+    // [LEGO: ASSET SYSTEMS]
+    // TextureCache, AssetRegistry, and related loaders form the asset
+    // pipeline. Load order matters: Registry must be loaded before
+    // PrefabLibrary, and TextureCache must attach to renderer first.
+    // EXTEND: add a new loader (e.g. SoundBankLoader) by declaring it
+    //   here and calling Load() with a registry path.
+    // ================================================================
 
     // --- Texture Cache ---
     // Loads D3D11 textures via DirectXTex and caches SRVs by file path.
@@ -185,6 +267,15 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // Press F5 at runtime to reload without restarting.
     AssetRegistry registry;
     registry.Load("Content/AssetRegistry.json");
+
+    // ================================================================
+    // [LEGO: WORLD SYSTEMS]
+    // WorldGrid, DayNightCycle, and WeatherSystem drive the open world.
+    // Each is independent — update order below controls their interaction.
+    // EXTEND: add a new world-layer system (e.g. EcosystemSystem for
+    //   wildlife simulation) by declaring it here and calling
+    //   ecosystem.Update(dt) in the [7] World Update game-loop section.
+    // ================================================================
 
     // --- World Grid ---
     // Loads Content/World/world.json which lists all world cells.
@@ -204,6 +295,15 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     // --- Ambient particle system ---
     // Dust motes / leaves drawn as ImGui background dots — zero extra draw calls.
     ParticleSystem particles;
+
+    // ================================================================
+    // [LEGO: SCENE / GAMEPLAY OBJECTS]
+    // PrimitiveRenderer, CollisionWorld, WorldEditor, HUD, and dialog
+    // all attach here. Forest is the vegetation renderer.
+    // EXTEND: add a new gameplay system (e.g. QuestSystem) here:
+    //   QuestSystem questSystem;
+    //   questSystem.Init(registry);
+    // ================================================================
 
     // Create and initialize forest (after renderer is initialized).
     Forest forest;
@@ -335,6 +435,15 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         }
     }
 
+    // ================================================================
+    // [LEGO: ANIMATION SYSTEM]
+    // Loads animation clips from a named pack manifest, builds a clip
+    // library, then advances AnimationComponent instances each frame.
+    // EXTEND: add new character packs by loading another manifest:
+    //   auto npcPaths = AnimPackManifestLoader::Load("npc_pack");
+    //   // then build npcClipLibrary the same way as heroClipLibrary
+    // ================================================================
+
     // ── Animation system — load hero_pack clips into a named library ───────
     std::unordered_map<std::string, LoadedAnimClip> heroClipLibrary;
     {
@@ -367,6 +476,17 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     std::vector<BoneTransformBuffer> animBuffers;
     // ── End animation system init ──────────────────────────────────────────
 
+    // ================================================================
+    // [LEGO: THIRD-PARTY SUBSYSTEMS + AUDIO]
+    // All third-party libraries (Jolt physics, miniaudio, Recast nav,
+    // DirectXTex, Tracy) are bootstrapped here via ThirdPartyBootstrap.
+    // AudioManager wraps miniaudio for BGM, SFX, and ambient tracks.
+    // EXTEND: add a new third-party library by:
+    //   1. Adding its smoke-test call in ThirdPartyBootstrap.hpp
+    //   2. Adding a wrapper class in src/audio/ or a relevant folder
+    //   3. Calling its Init() here and Shutdown() at the bottom
+    // ================================================================
+
     // ── ThirdParty subsystem smoke tests ──────────────────────────────────
     ThirdPartyBootstrap::InitializeAndRunSmokeTests();
     AudioManager audioManager;
@@ -374,6 +494,14 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     audioManager.PlayBGM("Content/Audio/bgm_field_day.ogg");
     audioManager.PlayAmbient("Content/Audio/amb_forest_day_loop.wav");
     // ── End ThirdParty smoke tests ─────────────────────────────────────────
+
+    // ================================================================
+    // [LEGO: PLAYER + CAMERA + RUNTIME SCENE]
+    // CameraController owns player movement and camera follow.
+    // RuntimeScene owns enemy/NPC instances and drives combat.
+    // EXTEND: add new actor types to RuntimeScene (src/game/RuntimeScene.hpp)
+    //   by following the same Init/Update/SubmitVisual pattern.
+    // ================================================================
 
     // --- Camera + player movement (now owned by CameraController) ---
     CameraController camController;
@@ -469,15 +597,29 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         lastPlayerCX,
         lastPlayerCZ
     };
+    // ================================================================
+    // GAME LOOP — one pass per frame
+    // Each numbered section is a "lego slot". Add new per-frame logic
+    // to the matching numbered section below; do not mix concerns.
+    // ================================================================
     // Main game loop: process Win32 messages, update, draw, repeat.
     while (window.ProcessEvents())
     {
-        // --- 1. Frame timing ---
-        // Establish deltaTime for this frame. Everything else uses it.
+        // ============================================================
+        // [1] FRAME TIMING
+        // Establish deltaTime. All systems downstream read this value.
+        // EXTEND: add a fixed-timestep accumulator here if you need
+        //   deterministic physics updates separate from render rate.
+        // ============================================================
         float deltaTime = FrameTiming::BeginFrame(frameTimingState);
         runtimeScene.UpdateImpactFeedback(deltaTime);
 
-        // --- 1a. Day/night cycle + weather update ---
+        // ============================================================
+        // [1a] ENVIRONMENT UPDATE (day/night, weather, biome blend)
+        // EXTEND: add a new time-driven environment effect here.
+        //   Example: seasonSystem.Update(deltaTime);
+        // ============================================================
+        // --- Day/night cycle + weather update ---
         dayNight.Advance(deltaTime);
         weather.Update(deltaTime);
         worldGrid.UpdateBiomeTransition(deltaTime);
@@ -498,7 +640,14 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         primRenderer.SetGlobalTime(gameTimeAccum);
         primRenderer.SetWindStrength(weather.GetWindStrength());
 
-        // --- 2. Input ---
+        // ============================================================
+        // [2] INPUT
+        // Read raw key/button state — no logic here, just booleans.
+        // EXTEND: add new InputAction enum values in InputActionMap.hpp,
+        //   bind a key in InputActionMap::Default(), then read it here.
+        //   Example:
+        //     const bool craftPressed = actionMap.IsPressed(InputAction::OpenCrafting, wasCraftDown);
+        // ============================================================
         // Read all input for this frame. No logic yet — just read state.
         const bool pausePressed  = actionMap.IsPressed(InputAction::TogglePause, wasPauseActionDown);
         const bool debugPressed  = actionMap.IsPressed(InputAction::ToggleDebug, wasDebugActionDown);
@@ -532,7 +681,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         const float scaledDt = tacticalPauseHeld ? deltaTime * kTacticalTimeScale : deltaTime;
         float gameplayDt = scaledDt;
 
-        // --- 3. UI state ---
+        // ============================================================
+        // [3] UI STATE
+        // Menus, dialogs, and cursor-visibility decisions.
+        // EXTEND: add new screen toggles here (shop, quest journal, map).
+        //   Pattern: bool shopOpen = false; ... if (shopKeyPressed) shopOpen = !shopOpen;
+        //   Then call shopMenu.Draw(io) in the [9] Draw section.
+        // ============================================================
         // Apply pause, cursor visibility, dialog update.
         // Determines what is allowed in the steps below.
         if (GetForegroundWindow() != window.GetHandle())
@@ -604,7 +759,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         gameHud.SetStatusScreenOpen(statusScreenOpen);
         gameHud.SetMapScreenOpen(mapScreenOpen);
 
-        // --- 4. Player update ---
+        // ============================================================
+        // [4] PLAYER UPDATE
+        // Drives player actor state machine (idle/attack/dodge/...).
+        // EXTEND: add a companion system update here:
+        //   companionActor.Update(combatDt, playerActor, camController);
+        // ============================================================
         // Update player state, stats, and dodge burst.
         // Uses input and grounded state from above.
         const bool playerIsGrounded = camController.IsGrounded();
@@ -615,7 +775,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             lastObservedPlayerLevel = playerActor.stats.level;
         }
 
-        // --- 5. Camera update ---
+        // ============================================================
+        // [5] CAMERA UPDATE
+        // Moves and rotates the camera. Must run AFTER player so
+        // lock-on target positions are up to date.
+        // EXTEND: add cutscene camera override here:
+        //   if (cutsceneSystem.IsActive()) cutsceneSystem.ApplyCamera(camController);
+        // ============================================================
         // Move and rotate the camera based on input and player state.
         if (!paused)
         {
@@ -645,7 +811,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         CursorMode::HandleMouseLookTransition(cursorModeState, allowMouseLook, centerPoint, firstFrame);
         camController.Update(gameplayDt, allowMovement, allowMouseLook, firstFrame, renderer);
 
-        // --- 6. World update ---
+        // ============================================================
+        // [6] WORLD UPDATE
+        // Cell crossing, asset hot-reload, world editor placement.
+        // Must run AFTER camera so player position is current.
+        // EXTEND: add quest zone / trigger zone checks here:
+        //   questSystem.CheckZoneTriggers(playerPos);
+        // ============================================================
         // Cell crossing detection, asset reload, editor placement.
         // Runs after camera so player position is up to date.
         {
@@ -690,7 +862,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
                 WorldRefresh::RefreshCellVisuals(*activeCell, cellRefreshContext);
         }
 
-        // --- 7. Combat update ---
+        // ============================================================
+        // [7] COMBAT & GAMEPLAY UPDATE
+        // Enemy AI, hit resolution, damage numbers, audio events,
+        // animation, respawn. All gameplay consequences land here.
+        // EXTEND: add a new combat feedback hook after the audio hooks:
+        //   if (runtimeScene.ConsumeSomethingNew()) audioManager.PlayNewSFX();
+        // ============================================================
         // Update enemies, resolve hits, spawn damage numbers.
         // Runs after world so terrain and positions are final.
         runtimeScene.BeginFrame(combatDt, renderer,
@@ -841,7 +1019,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             }
         }
 
-        // --- 8. Actor visuals ---
+        // ============================================================
+        // [8] ACTOR VISUALS SUBMISSION
+        // Push all actor states into the PrimitiveRenderer bucket for
+        // this frame. Must run after all state is resolved.
+        // EXTEND: add a new actor type's SubmitRuntimeVisual() here.
+        // ============================================================
         // Submit all actor visual data to the primitive renderer.
         // Runs after all state is resolved for this frame.
         runtimeScene.SubmitActors(camController, prefabLibrary);
@@ -853,7 +1036,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         gameHud.SetUltrawideLayoutEnabled(
             imguiLayer.UseUltrawideHudLayout(static_cast<float>(window.GetWidth()) / static_cast<float>(window.GetHeight())));
 
-        // --- 9. Draw ---
+        // ============================================================
+        // [9] DRAW
+        // Clear → 3D scene → ImGui begin → HUD → ImGui end → Present.
+        // NO game state changes here — read-only from all systems.
+        // EXTEND: add a new HUD element inside the !paused block:
+        //   questJournal.Draw(io);   // call Draw(), not Update()
+        // ============================================================
         // Clear screen, draw world, draw UI, present.
         // Nothing in this section changes game state.
         renderer.ClearScreen(0.1f, 0.1f, 0.15f, 1.0f);
@@ -997,6 +1186,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         GR_FRAME_MARK;
         Sleep(1); // tiny sleep so we don't peg CPU at 100%
     }
+    // ================================================================
+    // [LEGO: SHUTDOWN]
+    // Shut down every system in reverse initialization order.
+    // EXTEND: add yourSystem.Shutdown() here for every new system
+    //   that owns GPU resources, file handles, or threads.
+    // ================================================================
     primRenderer.Shutdown();
     forest.Shutdown();
     imguiLayer.Shutdown();

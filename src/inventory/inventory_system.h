@@ -1,3 +1,28 @@
+// ============================================================
+// FILE: src/inventory/inventory_system.h
+// SYSTEM: Inventory
+// ROLE: stackable item storage with capacity limits
+// DO NOT: hold item definitions or stats here; use AssetRegistry.
+// OWNS: item stack list and slot-count tracking.
+// ============================================================
+//
+// [LEGO BLOCK: INVENTORY SYSTEM]
+// -----------------------------------------------------------------
+// What it does: manages a list of InventoryItemStack entries.
+//   Automatically merges stacks up to maxStack before creating
+//   a new slot, and refuses adds when at capacity.
+//
+// EXTEND: add a "hotbar" subset view, item locking, or favourite
+//   flagging by adding a field to InventoryItemStack.
+//
+// EXAMPLE — pick up a dropped item:
+//   #include "inventory/inventory_system.h"
+//   gr::InventorySystem m_inventory;
+//   m_inventory.SetCapacity(80);
+//   bool added = m_inventory.AddItem("health_herb", "consumable", 3);
+//   int count = m_inventory.CountItem("health_herb"); // 3
+// -----------------------------------------------------------------
+
 #pragma once
 
 #include <string>

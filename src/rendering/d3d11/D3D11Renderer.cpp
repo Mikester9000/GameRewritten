@@ -5,12 +5,23 @@
 // ============================================================
 
 #include "D3D11Renderer.hpp"
+#include "D3D11ShaderCompiler.hpp"
 #include "../../logger/Logger.hpp"
 #include <algorithm>
 #include <cmath>
 #include <string>
 
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxgi.lib")
+
 using namespace DirectX;
+
+// File-scope safe-release helper; nulls the pointer after releasing.
+template<typename T>
+static void SafeRelease(T*& ptr)
+{
+    if (ptr) { ptr->Release(); ptr = nullptr; }
+}
 
 // ============================================================
 // CONSTRUCTOR & DESTRUCTOR
@@ -18,13 +29,13 @@ using namespace DirectX;
 
 D3D11Renderer::D3D11Renderer()
 {
-    renderWidth = 800;
+    renderWidth  = 800;
     renderHeight = 600;
 }
 
 D3D11Renderer::~D3D11Renderer()
 {
-    Shutdown(); // Clean up all GPU resources
+    Shutdown();
 }
 
 // ============================================================
@@ -33,65 +44,55 @@ D3D11Renderer::~D3D11Renderer()
 
 bool D3D11Renderer::Initialize(HWND windowHandle, int width, int height)
 {
-    renderWidth = width;
+    renderWidth  = width;
     renderHeight = height;
 
-    // Create device and context (simplified - full implementation omitted)
-    ID3D11Device* dev = nullptr;
-    ID3D11DeviceContext* ctx = nullptr;
-    IDXGISwapChain* chain = nullptr;
+    DXGI_SWAP_CHAIN_DESC scd               = {};
+    scd.BufferCount                        = 1;
+    scd.BufferDesc.Width                   = static_cast<UINT>(width);
+    scd.BufferDesc.Height                  = static_cast<UINT>(height);
+    scd.BufferDesc.Format                  = DXGI_FORMAT_R8G8B8A8_UNORM;
+    scd.BufferDesc.RefreshRate.Numerator   = 60;
+    scd.BufferDesc.RefreshRate.Denominator = 1;
+    scd.BufferUsage                        = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    scd.OutputWindow                       = windowHandle;
+    scd.SampleDesc.Count                   = 1;
+    scd.SampleDesc.Quality                 = 0;
+    scd.Windowed                           = TRUE;
 
-    D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_9_1; // Adjust based on needs
+    D3D_FEATURE_LEVEL featureLevels[] = {
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_1,
+        D3D_FEATURE_LEVEL_10_0,
+    };
 
-    HRESULT hr = D3D11CreateDevice(
+    HRESULT hr = D3D11CreateDeviceAndSwapChain(
         nullptr,
         D3D_DRIVER_TYPE_HARDWARE,
         nullptr,
         0,
-        &featureLevel,
-        1,
+        featureLevels, ARRAYSIZE(featureLevels),
         D3D11_SDK_VERSION,
-        &dev,
+        &scd,
+        &swapChain,
+        &device,
         &featureLevel,
-        &chain
+        &context
     );
 
-    if (FAILED(hr)) {
-        LOG_ERROR("Failed to create Direct3D device.");
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failed to create D3D11 device and swap chain.");
         return false;
     }
 
-    // Store device pointers
-    device = dev;
-    context = ctx;
-
-    hr = chain->GetDevice(&dev, nullptr);
-    if (SUCCEEDED(hr) && dev != device) {
-        device->Release();
-        device = dev;
-    }
-
-    hr = chain->GetImmediateContext(&ctx);
-    if (SUCCEEDED(hr) && ctx != context) {
-        context->Release();
-        context = ctx;
-    }
-
-    // Create render target and depth buffer
-    if (!CreateRenderTarget()) return false;
-
-    // Create triangle resources (rotating test object)
+    if (!CreateRenderTarget())      return false;
     if (!CreateTriangleResources()) return false;
 
-    // Create terrain patch geometry (initially empty)
-    if (!CreateTerrainPatch()) {
+    if (!CreateTerrainPatch())
         LOG_INFO("Initial terrain patch creation skipped.");
-    }
 
-    // Create ground plane shaders
     CreateGroundShaders();
-
-    // Create sky shaders
     CreateSkyShaders();
 
     return true;
@@ -105,7 +106,7 @@ void D3D11Renderer::Shutdown()
     SafeRelease(pixelShader);
     SafeRelease(inputLayout);
     SafeRelease(vertexBuffer);
-    SafeRelease(transformConstantBuffer);
+    SafeRelease(m_constantBuffer);
 
     SafeRelease(groundVertexShader);
     SafeRelease(groundPixelShader);
@@ -118,29 +119,18 @@ void D3D11Renderer::Shutdown()
     SafeRelease(skyInputLayout);
 
     SafeRelease(m_lightCBuffer);
-    SafeRelease(m_constantBuffer);
     SafeRelease(m_terrainPatchVertexBuffer);
+    SafeRelease(m_textureSampler);
 
-    SafeRelease(device);
-    SafeRelease(context);
-    SafeRelease(swapChain);
     SafeRelease(renderTargetView);
-    SafeRelease(depthTexture);
     SafeRelease(depthView);
+    SafeRelease(depthTexture);
+    SafeRelease(swapChain);
+    SafeRelease(context);
+    SafeRelease(device);
 
     m_textureCache = nullptr;
-    ClearTerrainPatch(); // Release terrain-specific resources
-}
-
-// ============================================================
-// HELPER FUNCTIONS: SAFE RELEASE MACRO (Add to Helpers file)
-// ============================================================
-
-void D3D11Renderer::SafeRelease(ID3D11DeviceChild* ptr) {
-    if (ptr) {
-        ptr->Release();
-        ptr = nullptr;
-    }
+    ClearTerrainPatch();
 }
 
 // ============================================================
@@ -149,23 +139,55 @@ void D3D11Renderer::SafeRelease(ID3D11DeviceChild* ptr) {
 
 bool D3D11Renderer::CreateTriangleResources()
 {
-    // Create vertex buffer for rotating triangle
-    std::vector<Vertex> verts(3);
-    verts[0] = { XMFLOAT3(-0.5f, -0.5f, 0.0f), XMFLOAT2(0.0f, 0.0f) };
-    verts[1] = { XMFLOAT3(0.5f, -0.5f, 0.0f), XMFLOAT2(1.0f, 0.0f) };
-    verts[2] = { XMFLOAT3(0.0f, 0.5f, 0.0f), XMFLOAT2(0.5f, 1.0f) };
+    // Vertex data: POSITION (float3) + COLOR (float4) — matches triangle_vs.hlsl
+    SimpleVertex verts[3] = {
+        { XMFLOAT3(-0.5f, -0.5f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3( 0.5f, -0.5f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+        { XMFLOAT3( 0.0f,  0.5f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+    };
+    m_triangleVertexCount = 3;
 
-    D3D11_BUFFER_DESC vbd = {};
-    vbd.Usage = D3D11_USAGE_DEFAULT;
-    vbd.ByteWidth = static_cast<UINT>(verts.size() * sizeof(Vertex));
-    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    D3D11_SUBRESOURCE_DATA vinit = {};
-    vinit.pSysMem = verts.data();
+    D3D11_BUFFER_DESC vbd   = {};
+    vbd.Usage               = D3D11_USAGE_DEFAULT;
+    vbd.ByteWidth           = sizeof(verts);
+    vbd.BindFlags           = D3D11_BIND_VERTEX_BUFFER;
+    D3D11_SUBRESOURCE_DATA init = {};
+    init.pSysMem            = verts;
 
-    HRESULT hr = device->CreateBuffer(&vbd, &vinit, &vertexBuffer);
-    if (FAILED(hr)) {
-        LOG_ERROR("Failed to create vertex buffer.");
+    HRESULT hr = device->CreateBuffer(&vbd, &init, &vertexBuffer);
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failed to create triangle vertex buffer.");
         return false;
+    }
+
+    // Compile vertex shader and create input layout
+    ID3DBlob* vsBlob = nullptr;
+    hr = D3D11ShaderCompiler::CompileFromFile(
+        L"Shaders/triangle_vs.hlsl", "main", "vs_4_0", &vsBlob);
+    if (SUCCEEDED(hr) && vsBlob)
+    {
+        device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
+            nullptr, &vertexShader);
+
+        D3D11_INPUT_ELEMENT_DESC triLayout[] = {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        };
+        device->CreateInputLayout(triLayout, 2,
+            vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &inputLayout);
+        vsBlob->Release();
+    }
+
+    // Compile pixel shader
+    ID3DBlob* psBlob = nullptr;
+    hr = D3D11ShaderCompiler::CompileFromFile(
+        L"Shaders/triangle_ps.hlsl", "main", "ps_4_0", &psBlob);
+    if (SUCCEEDED(hr) && psBlob)
+    {
+        device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(),
+            nullptr, &pixelShader);
+        psBlob->Release();
     }
 
     return true;
@@ -173,150 +195,128 @@ bool D3D11Renderer::CreateTriangleResources()
 
 bool D3D11Renderer::CreateRenderTarget()
 {
-    DXGI_SWAP_CHAIN_DESC sdc = {};
-    sdc.BufferDesc.Width = renderWidth;
-    sdc.BufferDesc.Height = renderHeight;
-    sdc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    sdc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sdc.BufferCount = 1;
-    sdc.Windowed = true;
-
-    ID3D11DeviceContext* ctx = context; // Context reference
-    HRESULT hr = swapChain->CreateOutputWindow(0, &ctx);
-
-    if (FAILED(hr)) {
-        LOG_ERROR("Failed to create render target.");
+    // Obtain the swap chain back buffer and create a render target view
+    ID3D11Texture2D* backBuffer = nullptr;
+    HRESULT hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+        reinterpret_cast<void**>(&backBuffer));
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failed to get swap chain back buffer.");
         return false;
     }
+
+    hr = device->CreateRenderTargetView(backBuffer, nullptr, &renderTargetView);
+    backBuffer->Release();
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failed to create render target view.");
+        return false;
+    }
+
+    // Create depth stencil texture
+    D3D11_TEXTURE2D_DESC depthDesc   = {};
+    depthDesc.Width                  = static_cast<UINT>(renderWidth);
+    depthDesc.Height                 = static_cast<UINT>(renderHeight);
+    depthDesc.MipLevels              = 1;
+    depthDesc.ArraySize              = 1;
+    depthDesc.Format                 = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthDesc.SampleDesc.Count       = 1;
+    depthDesc.SampleDesc.Quality     = 0;
+    depthDesc.Usage                  = D3D11_USAGE_DEFAULT;
+    depthDesc.BindFlags              = D3D11_BIND_DEPTH_STENCIL;
+
+    hr = device->CreateTexture2D(&depthDesc, nullptr, &depthTexture);
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failed to create depth texture.");
+        return false;
+    }
+
+    hr = device->CreateDepthStencilView(depthTexture, nullptr, &depthView);
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failed to create depth stencil view.");
+        return false;
+    }
+
+    // Bind render target and depth buffer to the output merger
+    context->OMSetRenderTargets(1, &renderTargetView, depthView);
+
+    // Set the full-window viewport
+    D3D11_VIEWPORT vp = {};
+    vp.Width          = static_cast<float>(renderWidth);
+    vp.Height         = static_cast<float>(renderHeight);
+    vp.MinDepth       = 0.0f;
+    vp.MaxDepth       = 1.0f;
+    vp.TopLeftX       = 0.0f;
+    vp.TopLeftY       = 0.0f;
+    context->RSSetViewports(1, &vp);
 
     return true;
 }
 
 bool D3D11Renderer::CreateTerrainPatch()
 {
-    // Initial empty patch creation
-    m_terrainVertsX = 0;
-    m_terrainVertsZ = 0;
-    m_terrainAvailable = false;
+    // No initial geometry — geometry is built on demand via RebuildTerrainPatch().
+    m_terrainVertsX          = 0;
+    m_terrainVertsZ          = 0;
+    m_terrainAvailable       = false;
     m_terrainPatchVertexCount = 0;
-
-    D3D11_BUFFER_DESC vbd = {};
-    vbd.Usage = D3D11_USAGE_DEFAULT;
-    vbd.ByteWidth = 0;
-    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-    ID3D11Buffer* emptyBuffer = nullptr;
-    HRESULT hr = device->CreateBuffer(&vbd, nullptr, &emptyBuffer);
-    if (SUCCEEDED(hr)) {
-        m_terrainPatchVertexBuffer = emptyBuffer;
-        LOG_INFO("Terrain patch buffer created (empty).");
-    }
-
     return true;
 }
 
 void D3D11Renderer::CreateGroundShaders()
 {
-    ID3DBlob* vertexBlob = nullptr;
-    ID3DBlob* pixelBlob = nullptr;
+    // Vertex shader
+    ID3DBlob* vsBlob = nullptr;
+    HRESULT hr = D3D11ShaderCompiler::CompileFromFile(
+        L"Shaders/ground_vs.hlsl", "main", "vs_4_0", &vsBlob);
+    if (SUCCEEDED(hr) && vsBlob)
+    {
+        device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
+            nullptr, &groundVertexShader);
 
-    HRESULT hr = CompileShaderFromFile(
-        L"shaders/groundVertex.hlsl",
-        "vs_main",
-        "vs_4_0",
-        &vertexBlob
-    );
+        // Input layout matches TerrainVertex (POSITION | NORMAL | COLOR)
+        D3D11ShaderCompiler::CreateTerrainInputLayout(
+            device, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &groundInputLayout);
 
-    if (SUCCEEDED(hr)) {
-        device->CreateVertexShader(vertexBlob->GetBufferPointer(), nullptr, &groundVertexShader);
-        vertexBlob->Release();
+        vsBlob->Release();
     }
 
-    hr = CompileShaderFromFile(
-        L"shaders/groundPixel.hlsl",
-        "ps_main",
-        "ps_4_0",
-        &pixelBlob
-    );
-
-    if (SUCCEEDED(hr)) {
-        device->CreatePixelShader(pixelBlob->GetBufferPointer(), nullptr, &groundPixelShader);
-        pixelBlob->Release();
-
-        // Create input layout for terrain vertex format
-        DXGI_FORMAT format = DXGI_FORMAT_R32G32B32_FLOAT; // Example: position-only
-        ID3D11InputElement* elements[1] = { nullptr };
-        UINT strides[1] = { 0 };
-        UINT offsets[1] = { 0 };
-
-        elements[0]->Format = format;
-        elements[0]->ElementOffset = 0;
-        elements[0]->SemanticName = "POSITION";
-        elements[0]->SemanticIndex = 0;
-        elements[0]->InputSlot = 0;
-
-        hr = D3D11CreateDevice(
-            nullptr, D3D_DRIVER_TYPE_NULL, nullptr, 0,
-            nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &context
-        );
-
-        if (SUCCEEDED(hr)) {
-            device->CreateInputLayout(elements, 1, vertexBlob->GetBufferPointer(),
-                sizeof(Vertex), &groundInputLayout);
-        }
+    // Pixel shader
+    ID3DBlob* psBlob = nullptr;
+    hr = D3D11ShaderCompiler::CompileFromFile(
+        L"Shaders/ground_ps.hlsl", "main", "ps_4_0", &psBlob);
+    if (SUCCEEDED(hr) && psBlob)
+    {
+        device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(),
+            nullptr, &groundPixelShader);
+        psBlob->Release();
     }
 }
 
 void D3D11Renderer::CreateSkyShaders()
 {
-    ID3DBlob* vertexBlob = nullptr;
-    ID3DBlob* pixelBlob = nullptr;
-
-    HRESULT hr = CompileShaderFromFile(
-        L"shaders/skyVertex.hlsl",
-        "vs_main",
-        "vs_4_0",
-        &vertexBlob
-    );
-
-    if (SUCCEEDED(hr)) {
-        device->CreateVertexShader(vertexBlob->GetBufferPointer(), nullptr, &skyVertexShader);
-        vertexBlob->Release();
+    // The sky vertex shader uses SV_VertexID — no vertex buffer or input layout required.
+    ID3DBlob* vsBlob = nullptr;
+    HRESULT hr = D3D11ShaderCompiler::CompileFromFile(
+        L"Shaders/sky_vs.hlsl", "main", "vs_4_0", &vsBlob);
+    if (SUCCEEDED(hr) && vsBlob)
+    {
+        device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
+            nullptr, &skyVertexShader);
+        vsBlob->Release();
     }
 
-    hr = CompileShaderFromFile(
-        L"shaders/skyPixel.hlsl",
-        "ps_main",
-        "ps_4_0",
-        &pixelBlob
-    );
-
-    if (SUCCEEDED(hr)) {
-        device->CreatePixelShader(pixelBlob->GetBufferPointer(), nullptr, &skyPixelShader);
-        pixelBlob->Release();
-
-        // Create input layout for sky vertex format
-        DXGI_FORMAT format = DXGI_FORMAT_R32G32B32_FLOAT;
-        ID3D11InputElement* elements[1] = { nullptr };
-
-        elements[0]->Format = format;
-        hr = D3D11CreateDevice(
-            nullptr, D3D_DRIVER_TYPE_NULL, nullptr, 0,
-            nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &context
-        );
-
-        if (SUCCEEDED(hr)) {
-            device->CreateInputLayout(elements, 1, vertexBlob->GetBufferPointer(),
-                sizeof(Vertex), &skyInputLayout);
-        }
+    ID3DBlob* psBlob = nullptr;
+    hr = D3D11ShaderCompiler::CompileFromFile(
+        L"Shaders/sky_ps.hlsl", "main", "ps_4_0", &psBlob);
+    if (SUCCEEDED(hr) && psBlob)
+    {
+        device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(),
+            nullptr, &skyPixelShader);
+        psBlob->Release();
     }
-}
-
-HRESULT D3D11Renderer::CompileShaderFromFile(const wchar_t* path, const char* entryPoint,
-    const char* target, ID3D11ShaderResourceView** outSRV) {
-    // Simplified shader compilation - use real D3DCompile in production
-    LOG_INFO("Compiling shader: " + std::string(path));
-    return S_OK; // Placeholder for actual HLSL loader logic
 }
 
 // ============================================================
@@ -325,13 +325,17 @@ HRESULT D3D11Renderer::CompileShaderFromFile(const wchar_t* path, const char* en
 
 void D3D11Renderer::ClearScreen(float red, float green, float blue, float alpha)
 {
-    device->ClearRenderTargetView(renderTargetView, { red, green, blue, alpha });
+    float clearColor[4] = { red, green, blue, alpha };
+    context->ClearRenderTargetView(renderTargetView, clearColor);
+    context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 void D3D11Renderer::PresentFrame()
 {
-    HRESULT hr = swapChain->Present(0, 1);
-    if (hr == DXGI_ERROR_DEVICERemoved || hr == DXGI_ERROR_DEVICELOST) {
+    UINT syncInterval = m_vsyncEnabled ? 1u : 0u;
+    HRESULT hr = swapChain->Present(syncInterval, 0);
+    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+    {
         LOG_ERROR("Device lost. Restart required.");
         Shutdown();
     }
@@ -339,72 +343,54 @@ void D3D11Renderer::PresentFrame()
 
 void D3D11Renderer::DrawRotatingTriangle(float deltaTime)
 {
-    // Rotate triangle around center
-    float angle = 0.0f;
+    if (!vertexShader || !pixelShader || !inputLayout || !vertexBuffer)
+        return;
 
-    // Draw triangle (same as terrain but with rotation logic)
-    UINT stride = sizeof(Vertex);
+    UINT stride = sizeof(SimpleVertex);
     UINT offset = 0;
     context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    // Apply shader states for triangle
-    context->VSSetShader(vertexShader, nullptr, 0);
-    context->PSSetShader(pixelShader, nullptr, 0);
-
     context->IASetInputLayout(inputLayout);
-
-    UINT vertexCount = static_cast<UINT>(verts.size());
-    context->Draw(vertexCount, 0);
+    context->VSSetShader(vertexShader, nullptr, 0);
+    context->PSSetShader(pixelShader,  nullptr, 0);
+    context->Draw(m_triangleVertexCount, 0);
 }
 
 void D3D11Renderer::DrawSky()
 {
-    // Clear screen for sky (dark blue background)
-    ClearScreen(0.1f, 0.2f, 0.5f, 1.0f);
-
-    if (!skyVertexShader || !skyPixelShader || !skyInputLayout) {
+    if (!skyVertexShader || !skyPixelShader)
+    {
         LOG_ERROR("Sky shaders not initialized.");
         return;
     }
 
-    // Enable sky shaders
-    context->VSSetShader(skyVertexShader, nullptr, 0);
-    context->PSSetShader(skyPixelShader, nullptr, 0);
-    context->IASetInputLayout(skyInputLayout);
-
-    // Set primitive topology to draw triangles
+    // Sky uses SV_VertexID — no vertex buffer or input layout needed.
+    // Draw a full-screen triangle (3 vertices cover the entire screen).
+    context->IASetInputLayout(nullptr);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    // Draw sky quad (simplified - replace with actual geometry)
-    UINT vertexCount = 4; // Quad has 4 vertices for D3D11
-    context->Draw(vertexCount, 0);
+    context->VSSetShader(skyVertexShader, nullptr, 0);
+    context->PSSetShader(skyPixelShader,  nullptr, 0);
+    context->Draw(3, 0);
 }
 
 void D3D11Renderer::SetCameraPosition(float x, float y, float z)
 {
-    cameraX = x;
-    cameraY = y;
-    cameraZ = z;
+    cameraX = x; cameraY = y; cameraZ = z;
 }
 
 void D3D11Renderer::SetCameraRotation(float yaw, float pitch)
 {
-    cameraYaw = yaw;
-    cameraPitch = pitch;
+    cameraYaw = yaw; cameraPitch = pitch;
 }
 
 void D3D11Renderer::GetCameraPosition(float& x, float& y, float& z) const
 {
-    x = cameraX;
-    y = cameraY;
-    z = cameraZ;
+    x = cameraX; y = cameraY; z = cameraZ;
 }
 
 void D3D11Renderer::GetCameraRotation(float& yaw, float& pitch) const
 {
-    yaw = cameraYaw;
-    pitch = cameraPitch;
+    yaw = cameraYaw; pitch = cameraPitch;
 }
 
 void D3D11Renderer::SetSunDirection(float x, float y, float z)
@@ -424,25 +410,9 @@ void D3D11Renderer::SetAmbientStrength(float a)
     m_lightData.ambientStrength = a;
 }
 
-bool D3D11Renderer::SetVSyncEnabled(bool enabled)
+void D3D11Renderer::SetVSyncEnabled(bool enabled)
 {
-    if (enabled != m_vsyncEnabled) {
-        HRESULT hr = swapChain->GetDevice(&device, nullptr);
-        if (SUCCEEDED(hr)) {
-            device->Release(); // Release old device
-        }
-        m_vsyncEnabled = enabled;
-
-        hr = D3D11CreateDevice(
-            nullptr, D3D_DRIVER_TYPE_NULL, nullptr, 0,
-            nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &context
-        );
-
-        if (SUCCEEDED(hr)) {
-            device->Release(); // Release old device
-        }
-    }
-    return m_vsyncEnabled == enabled;
+    m_vsyncEnabled = enabled;
 }
 
 void D3D11Renderer::SetFrameRateLimit(int fps)
@@ -456,108 +426,80 @@ void D3D11Renderer::ApplyGraphicsPreset(GraphicsPreset preset)
 }
 
 // ============================================================
-// TERRAIN RENDERING FUNCTIONS (MAIN SYSTEM!)
+// TERRAIN RENDERING FUNCTIONS
 // ============================================================
 
 bool D3D11Renderer::RebuildTerrainPatch(const TerrainParams& params)
 {
-    if (!m_terrainManager) {
+    if (!m_terrainManager)
+    {
         LOG_ERROR("Cannot rebuild terrain: TerrainManager not initialized.");
         return false;
     }
-
-    // Delegate geometry building to manager (manager owns mesh logic)
     return m_terrainManager->RebuildTerrainPatch(params);
 }
 
 void D3D11Renderer::DrawGroundPlane()
 {
-    // Simple ground plane draw call
-    if (!m_groundVertexBuffer || !groundVertexShader || !groundPixelShader) {
+    if (!m_groundVertexBuffer || !groundVertexShader || !groundPixelShader)
+    {
         LOG_ERROR("Ground resources not initialized.");
         return;
     }
 
     context->IASetInputLayout(groundInputLayout);
     context->VSSetShader(groundVertexShader, nullptr, 0);
-    context->PSSetShader(groundPixelShader, nullptr, 0);
+    context->PSSetShader(groundPixelShader,  nullptr, 0);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    UINT stride = sizeof(Vertex);
+    UINT stride = sizeof(D3D11RendererHelpers::TerrainVertex);
     UINT offset = 0;
     context->IASetVertexBuffers(0, 1, &m_groundVertexBuffer, &stride, &offset);
-
-    // Draw ground plane (6 vertices for a quad)
     context->Draw(6, 0);
 }
 
-void D3D11Renderer::DrawTerrainPatch() const
+void D3D11Renderer::DrawTerrainPatch()
 {
-    // 1. Check if terrain manager exists
-    if (!m_terrainManager) {
+    if (!m_terrainManager)
+    {
         LOG_ERROR("Cannot draw terrain: TerrainManager not initialized.");
         return;
     }
 
-    // 2. Check if terrain is available (don't rebuild every frame!)
-    if (!m_terrainManager->IsTerrainAvailable()) {
-        LOG_INFO("Terrain not available - skip this draw call.");
+    if (!m_terrainManager->IsTerrainAvailable())
         return;
-    }
 
-    // 3. Set up input layout and shaders
     context->IASetInputLayout(groundInputLayout);
     context->VSSetShader(groundVertexShader, nullptr, 0);
-    context->PSSetShader(groundPixelShader, nullptr, 0);
+    context->PSSetShader(groundPixelShader,  nullptr, 0);
 
-    // 4. Bind constant buffer for lighting (register 1)
-    if (m_lightCBuffer) {
+    // Bind light constants to pixel shader register b1
+    if (m_lightCBuffer)
         context->PSSetConstantBuffers(1, 1, &m_lightCBuffer);
-    }
 
-    // 5. Bind texture and sampler if cache is attached
-    if (m_textureCache) {
-        ID3D11ShaderResourceView* srv = m_textureCache->GetActiveTexture();
-        if (srv) {
-            context->PSSetShaderResources(0, 1, &srv);
+    // Bind optional sampler for texture sampling in ground_ps.hlsl
+    if (m_textureSampler)
+        context->PSSetSamplers(0, 1, &m_textureSampler);
 
-            // Set sampler state for low-poly aesthetic (point filtering)
-            if (m_textureSampler) {
-                context->PSSetSamplers(0, 1, &m_textureSampler);
-            }
-        }
-    }
-
-    // 6. Set primitive topology to draw triangles
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    // 7. Bind vertex buffer from manager (manager owns the mesh data)
-    UINT stride = sizeof(D3D11RendererHelpers::Vertex);
+    UINT stride = sizeof(D3D11RendererHelpers::TerrainVertex);
     UINT offset = 0;
 
-    ID3D11Buffer* terrainVertexBuffer = m_terrainManager->GetVertexBuffer();
-    if (!terrainVertexBuffer) {
+    ID3D11Buffer* terrainVB = m_terrainManager->GetVertexBuffer();
+    if (!terrainVB)
+    {
         LOG_ERROR("Terrain vertex buffer not allocated!");
         return;
     }
 
-    context->IASetVertexBuffers(0, 1, &terrainVertexBuffer, &stride, &offset);
-
-    // 8. Get vertex count from manager (manager reports how many vertices to draw)
-    UINT vertexCount = m_terrainManager->GetVertexCount();
-
-    // 9. Draw the terrain mesh!
-    context->Draw(vertexCount, 0);
-
-    // ✅ Success - terrain drawn!
+    context->IASetVertexBuffers(0, 1, &terrainVB, &stride, &offset);
+    context->Draw(m_terrainManager->GetVertexCount(), 0);
 }
 
 float D3D11Renderer::SampleTerrainHeight(float worldX, float worldZ) const
 {
-    if (!m_terrainManager) {
-        return 0.0f;
-    }
-
+    if (!m_terrainManager) return 0.0f;
     return m_terrainManager->SampleTerrainHeight(worldX, worldZ);
 }
 
@@ -566,44 +508,44 @@ bool D3D11Renderer::IsTerrainAvailable() const
     return m_terrainManager && m_terrainManager->IsTerrainAvailable();
 }
 
-// ============================================================
-// CAMERA & PHYSICS CONTROL (FOR THIRD-PERSON)
-// ============================================================
-
-void D3D11Renderer::SetCameraVelocityY(float velocity)
+void D3D11Renderer::ClearTerrainPatch()
 {
-    cameraVelocityY = velocity;
-}
-
-float D3D11Renderer::GetCameraVelocityY() const
-{
-    return cameraVelocityY;
-}
-
-void D3D11Renderer::SetIsGrounded(bool grounded)
-{
-    isGrounded = grounded;
-}
-
-bool D3D11Renderer::GetIsGrounded() const
-{
-    return isGrounded;
+    m_terrainHeights.clear();
+    m_terrainAvailable = false;
+    m_terrainVertsX    = 0;
+    m_terrainVertsZ    = 0;
 }
 
 // ============================================================
-// TEXTURE CACHE & CEL SHADING
+// CAMERA & PHYSICS CONTROL
 // ============================================================
 
-void D3D11Renderer::SetTextureCache(TextureCache* cache) { m_textureCache = cache; }
+void D3D11Renderer::SetCameraVelocityY(float velocity) { cameraVelocityY = velocity; }
+float D3D11Renderer::GetCameraVelocityY() const        { return cameraVelocityY; }
+void D3D11Renderer::SetIsGrounded(bool grounded)        { isGrounded = grounded; }
+bool D3D11Renderer::GetIsGrounded() const               { return isGrounded; }
+
+// ============================================================
+// CEL SHADING
+// ============================================================
 
 bool D3D11Renderer::SetCelShadingParameters(float count, float minVal, float maxVal,
-    float rimAmount, float shadowR, float shadowG, float shadowB,
-    float specThreshold) {
-    // Cel shading would be enabled here (set shader constants)
+    float rimAmount, float shadowR, float shadowG, float shadowB, float specThreshold)
+{
+    // Cel shading constants would be uploaded to a shader cbuffer here.
     return true;
 }
 
-void D3D11Renderer::DrawCharacterOutlinePass(float outlineThickness) {
-    // Outline pass for cel-shaded characters
+void D3D11Renderer::DrawCharacterOutlinePass(float outlineThickness)
+{
     LOG_INFO("Drawing character outline (placeholder).");
+}
+
+// ============================================================
+// SCENE CONSTANTS SETUP
+// ============================================================
+
+void D3D11Renderer::SetupGroundAndTerrainSceneConstants(float farPlane)
+{
+    // TODO: Upload the current view/projection matrices to m_constantBuffer.
 }

@@ -25,24 +25,5 @@
       "console": "integratedTerminal",
       "preLaunchTask": "Build Release x64 (MSBuild)"
     },
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": true,
-      "cwd": "c:/Users/m_man/source/repos/GameRewritten/src/rendering/d3d11",
-      "program": "c:/Users/m_man/source/repos/GameRewritten/src/rendering/d3d11/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
-    }
   ]
 }
