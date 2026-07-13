@@ -11,6 +11,7 @@
 
 #include "PrimitiveRenderer.hpp"
 #include "../rendering/d3d11/D3D11Renderer.hpp"
+#include "../rendering/d3d11/RenderContracts.hpp"
 #include "../logger/Logger.hpp"
 
 #include <d3dcompiler.h>
@@ -35,6 +36,8 @@ struct PrimCB
     XMFLOAT4   tintColor;  // per-part RGBA color
     XMFLOAT4   windParams; // x=time, y=windStrength, z=0, w=0
 };
+static_assert(sizeof(PrimCB) == 160, "PrimCB layout must match HLSL PerDraw.");
+static_assert((sizeof(PrimCB) % 16) == 0, "PrimCB must be 16-byte aligned.");
 
 struct CelParamsCB
 {
@@ -442,7 +445,7 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
     m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     ID3D11Buffer* lightCBuffer = renderer.GetLightConstantBuffer();
     if (lightCBuffer)
-        m_context->PSSetConstantBuffers(1, 1, &lightCBuffer);
+        m_context->PSSetConstantBuffers(RenderContracts::kLightBufferRegister, 1, &lightCBuffer);
 
     ID3D11VertexShader* activeVS = nullptr;
     ID3D11PixelShader*  activePS = nullptr;
@@ -475,8 +478,8 @@ void PrimitiveRenderer::Draw(const D3D11Renderer& renderer)
             cb.windParams = { m_globalTime, m_windStrength, 0.0f, 0.0f };
 
             m_context->UpdateSubresource(m_cb, 0, nullptr, &cb, 0, 0);
-            m_context->VSSetConstantBuffers(0, 1, &m_cb);
-            m_context->PSSetConstantBuffers(0, 1, &m_cb);
+            m_context->VSSetConstantBuffers(RenderContracts::kTransformBufferRegister, 1, &m_cb);
+            m_context->PSSetConstantBuffers(RenderContracts::kTransformBufferRegister, 1, &m_cb);
 
             const bool useCel = dp.useCel && renderer.IsCelShadingEnabled() && m_celVS && m_celPS;
             if (useCel)

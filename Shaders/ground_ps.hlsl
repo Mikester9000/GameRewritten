@@ -21,9 +21,12 @@ float4 main(PSInput input) : SV_TARGET
 {
     float3 normalIn = input.normal;
     float3 n = (dot(normalIn, normalIn) > 0.000001f) ? normalize(normalIn) : float3(0.0f, 1.0f, 0.0f);
-    float diff = saturate(dot(n, -lightDir));
+    float3 ld = (dot(lightDir, lightDir) > 0.000001f) ? lightDir : float3(0.45f, -1.0f, 0.35f);
+    float diff = saturate(dot(n, -normalize(ld)));
     float3 texColor = diffuseTexture.Sample(diffuseSampler, input.uv).rgb;
-    float3 baseColor = texColor * input.color.rgb;
-    float3 litColor = baseColor * (lightColor * diff + float3(ambientStrength, ambientStrength, ambientStrength));
+    float3 baseColor = input.color.rgb * lerp(float3(1.0f, 1.0f, 1.0f), texColor, 0.65f);
+    float ambient = max(ambientStrength, 0.10f);
+    float3 safeLightColor = (dot(lightColor, lightColor) > 0.000001f) ? lightColor : float3(1.0f, 1.0f, 1.0f);
+    float3 litColor = baseColor * (safeLightColor * diff + ambient.xxx);
     return float4(litColor, input.color.a);
 }
