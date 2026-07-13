@@ -21,7 +21,7 @@
 #include <algorithm>
 
 // ImGui include (same path as the rest of the project)
-#include "../../../third_party/imgui/imgui.h"
+#include "../../third_party/imgui/imgui.h"
 
 
 // ============================================================

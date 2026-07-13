@@ -54,7 +54,7 @@ struct CloudParams
     float cloudSunTint[3]     = { 1.0f, 0.97f, 0.88f }; // Warm white sun highlight
     float cloudEdgeSoftness   = 0.08f; // Cloud edge sharpness [0.01=sharp, 0.15=fluffy]
 
-    float _pad[3]; // 16-byte alignment
+    float _pad[4]; // 16-byte alignment
 };
 
 

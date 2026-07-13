@@ -33,6 +33,7 @@
 
 #pragma once
 #include <string>
+#include <vector>
 
 class WeatherSystem; // Forward declare — include WeatherSystem.hpp in .cpp
 
@@ -164,6 +165,3 @@ private:
     // --------------------------------------------------------
     static float GetBiomeSlipFactor(const std::string& biome);
 };
-
-// Required for GetPuddles() — include <vector> here
-#include <vector>

@@ -1,5 +1,3 @@
-#include "ColorGradingHeader.hlsl"
-
 // ============================================================
 // FILE: Shaders/lut_ps.hlsl
 // SYSTEM: Rendering / Post-Process
