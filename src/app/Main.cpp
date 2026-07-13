@@ -116,6 +116,7 @@
 #include "InputActionMap.hpp"
 #include "InputEdgeState.hpp"
 #include "CursorModeController.hpp"
+#include "EngineContext.hpp"
 #include "WorldEditorFrameOps.hpp"
 #include "WorldReloadFlow.hpp"
 #include "ThirdPartyBootstrap.hpp"
@@ -246,6 +247,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     {
         MessageBoxW(nullptr, L"Failed to initialize D3D11.", L"Error", 0);
         return 1;
+    }
+
+    EngineContext engineContext;
+    if (!engineContext.Initialize(renderer))
+    {
+        LOG_WARN("Main: EngineContext render-world wiring failed; terrain will use renderer fallback path.");
     }
 
     // ================================================================
@@ -570,12 +577,16 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     bool wasTacticalPauseHeld = false; // tracks edge transitions for SFX
     bool wasStatusKeyDown = false;
     bool wasMapKeyDown = false;
+    bool wasTerrainUnlitKeyDown = false;
+    bool wasTerrainNoCullKeyDown = false;
+    bool wasTerrainWireframeKeyDown = false;
     bool statusScreenOpen = false;
     bool mapScreenOpen = false;
     int lastObservedPlayerLevel = playerActor.stats.level;
     CursorMode::State cursorModeState;
     bool useTerrainPatch = true;
     bool pendingMissIndicator = false;
+    bool loggedRenderValidationFailure = false;
     float pendingMissTimerSec = 0.0f;
     float pendingMissWorldX = 0.0f;
     float pendingMissWorldY = 0.0f;
@@ -635,6 +646,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             // Combine day/night ambient with weather modifier.
             renderer.SetAmbientStrength(dayNight.GetAmbientStrength() * weather.GetAmbientModifier());
         }
+        renderer.Tick(deltaTime);
+        engineContext.Tick(deltaTime);
+        if (!engineContext.Validate() && !loggedRenderValidationFailure)
+        {
+            LOG_WARN("Main: render validation failed; fallback rendering path may be active.");
+            loggedRenderValidationFailure = true;
+        }
 
         // Push wind time and strength to primitive renderer for tree sway.
         primRenderer.SetGlobalTime(gameTimeAccum);
@@ -660,13 +678,25 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         constexpr int kTacticalPauseKey   = VK_TAB;
         constexpr int kStatusScreenKey = 'C';
         constexpr int kMapScreenKey = 'M';
+        constexpr int kTerrainUnlitToggleKey = VK_F6;
+        constexpr int kTerrainNoCullToggleKey = VK_F7;
+        constexpr int kTerrainWireframeToggleKey = VK_F8;
         const bool tacticalPauseHeld = actionMap.IsVirtualKeyHeld(kTacticalPauseKey);
         const bool statusKeyDown = actionMap.IsVirtualKeyHeld(kStatusScreenKey);
         const bool mapKeyDown = actionMap.IsVirtualKeyHeld(kMapScreenKey);
+        const bool terrainUnlitKeyDown = actionMap.IsVirtualKeyHeld(kTerrainUnlitToggleKey);
+        const bool terrainNoCullKeyDown = actionMap.IsVirtualKeyHeld(kTerrainNoCullToggleKey);
+        const bool terrainWireframeKeyDown = actionMap.IsVirtualKeyHeld(kTerrainWireframeToggleKey);
         const bool statusPressed = statusKeyDown && !wasStatusKeyDown;
         const bool mapPressed = mapKeyDown && !wasMapKeyDown;
+        const bool terrainUnlitPressed = terrainUnlitKeyDown && !wasTerrainUnlitKeyDown;
+        const bool terrainNoCullPressed = terrainNoCullKeyDown && !wasTerrainNoCullKeyDown;
+        const bool terrainWireframePressed = terrainWireframeKeyDown && !wasTerrainWireframeKeyDown;
         wasStatusKeyDown = statusKeyDown;
         wasMapKeyDown = mapKeyDown;
+        wasTerrainUnlitKeyDown = terrainUnlitKeyDown;
+        wasTerrainNoCullKeyDown = terrainNoCullKeyDown;
+        wasTerrainWireframeKeyDown = terrainWireframeKeyDown;
 
         // Tactical Pause SFX on edge transitions.
         if (tacticalPauseHeld && !wasTacticalPauseHeld)
@@ -700,6 +730,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
             imguiLayer.TogglePauseMenu();
         if (debugPressed)
             imguiLayer.ToggleDebugOverlay();
+        if (terrainUnlitPressed)
+            renderer.SetTerrainUnlitDebug(!renderer.IsTerrainUnlitDebugEnabled());
+        if (terrainNoCullPressed)
+            renderer.SetTerrainDisableCullingDebug(!renderer.IsTerrainDisableCullingDebugEnabled());
+        if (terrainWireframePressed)
+            renderer.SetTerrainWireframeDebug(!renderer.IsTerrainWireframeDebugEnabled());
         if (reloadPressed)
         {
             WorldReload::ReloadAssetsAndWorld(worldReloadContext);
@@ -1048,13 +1084,32 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
         renderer.ClearScreen(0.1f, 0.1f, 0.15f, 1.0f);
         {
             GR_ZONE_SCOPED_N("Renderer Frame");
+            auto drawTerrainPass = [&]()
+            {
+                if (useTerrainPatch)
+                    renderer.DrawTerrainPatch();
+                else
+                    renderer.DrawGroundPlane();
+            };
+            auto drawActorsPass = [&]()
+            {
+                forest.Draw(renderer);
+                primRenderer.Draw(renderer);
+            };
+            auto drawLightingPass = [&]()
+            {
+                // TODO(next-ai): purpose=add full-screen lighting/post pass stage
+                // required inputs/outputs=gbuffer or lit color target in/out
+                // invariants=must execute after terrain/actor geometry and before debug overlays
+                // acceptance checks=pass can be toggled independently without changing world update flow
+                // file ownership/expected edit scope=src/app/Main.cpp only
+            };
+
             renderer.DrawSky();
-            if (useTerrainPatch)
-                renderer.DrawTerrainPatch();
-            else
-                renderer.DrawGroundPlane();
-            forest.Draw(renderer);
-            primRenderer.Draw(renderer);
+            drawTerrainPass();  // Render pass 1
+            drawActorsPass();   // Render pass 2
+            drawLightingPass(); // Render pass 3 (stub)
+            engineContext.DebugDraw();
 
             imguiLayer.BeginFrame();
 
@@ -1198,6 +1253,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
     audioManager.Shutdown();
     ThirdPartyBootstrap::Shutdown();
     textureCache.ReleaseAll();
+    engineContext.Shutdown();
     renderer.Shutdown();
     window.Close();
     return 0;

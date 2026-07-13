@@ -34,7 +34,7 @@ bool TerrainManager::Initialize(ID3D11Device* device, ID3D11DeviceContext* conte
     m_device = device;
     m_context = context;
     // We don't build the mesh until we have concrete parameters (like cell size).
-    return true;
+    return Validate();
 }
 
 void TerrainManager::Shutdown()
@@ -47,6 +47,30 @@ void TerrainManager::Shutdown()
     }
     m_terrainHeights.clear();
     m_terrainAvailable = false;
+}
+
+void TerrainManager::Tick(float deltaTime)
+{
+    (void)deltaTime;
+}
+
+bool TerrainManager::Validate() const
+{
+    if (!m_device || !m_context)
+    {
+        LOG_ERROR("TerrainManager validation failed: D3D11 device/context unavailable.");
+        return false;
+    }
+    return true;
+}
+
+void TerrainManager::DebugDraw()
+{
+    // TODO(next-ai): purpose=draw terrain chunk bounds and LOD/culling diagnostics
+    // required inputs/outputs=terrain bounds + debug renderer; output diagnostic primitives
+    // invariants=must be read-only and never mutate height/mesh data
+    // acceptance checks=debug overlay renders bounds without affecting terrain draw calls
+    // file ownership/expected edit scope=src/rendering/d3d11/Terrain_Renderer.cpp only
 }
 
 // Helper to set up internal state variables based on input parameters.
@@ -69,6 +93,9 @@ void TerrainManager::SetupInternal(const D3D11Renderer::TerrainParams& params)
 
 bool TerrainManager::RebuildTerrainPatch(const D3D11Renderer::TerrainParams& params)
 {
+    if (!Validate())
+        return BuildFallbackPlane(params.cellOriginX, params.cellOriginZ, params.cellWorldSize);
+
     // Step 1: Setup state based on input parameters
     SetupInternal(params);
 
@@ -155,20 +182,16 @@ bool TerrainManager::RebuildTerrainPatch(const D3D11Renderer::TerrainParams& par
     }
 
     m_terrainPatchVertexCount = static_cast<UINT>(triVerts.size());
-
-    // Upload unindexed vertices to GPU
-    D3D11_BUFFER_DESC vbd{};
-    vbd.Usage = D3D11_USAGE_DEFAULT;
-    vbd.ByteWidth = static_cast<UINT>(triVerts.size() * sizeof(D3D11RendererHelpers::TerrainVertex));
-    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    D3D11_SUBRESOURCE_DATA vinit{};
-    vinit.pSysMem = triVerts.data();
-    HRESULT hr = m_device->CreateBuffer(&vbd, &vinit, &m_terrainPatchVertexBuffer);
-
-    if (FAILED(hr))
+    if (triVerts.empty())
     {
-        LOG_ERROR("Failed to create terrain vertex buffer.");
-        return false;
+        LOG_ERROR("TerrainManager generated empty terrain mesh; switching to fallback plane.");
+        return BuildFallbackPlane(params.cellOriginX, params.cellOriginZ, params.cellWorldSize);
+    }
+
+    if (!UploadVertices(triVerts))
+    {
+        LOG_ERROR("Failed to upload terrain mesh; switching to fallback plane.");
+        return BuildFallbackPlane(params.cellOriginX, params.cellOriginZ, params.cellWorldSize);
     }
 
     // Success
@@ -230,4 +253,57 @@ float TerrainManager::SampleTerrainHeight(float worldX, float worldZ) const
     float hx1 = h01 + (h11 - h01) * sx;
     float h = hx0 + (hx1 - hx0) * sz;
     return h;
+}
+
+bool TerrainManager::UploadVertices(const std::vector<D3D11RendererHelpers::TerrainVertex>& verts)
+{
+    if (!m_device || verts.empty())
+        return false;
+
+    D3D11_BUFFER_DESC vbd{};
+    vbd.Usage = D3D11_USAGE_DEFAULT;
+    vbd.ByteWidth = static_cast<UINT>(verts.size() * sizeof(D3D11RendererHelpers::TerrainVertex));
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    D3D11_SUBRESOURCE_DATA vinit{};
+    vinit.pSysMem = verts.data();
+    return SUCCEEDED(m_device->CreateBuffer(&vbd, &vinit, &m_terrainPatchVertexBuffer));
+}
+
+bool TerrainManager::BuildFallbackPlane(float originX, float originZ, float worldSize)
+{
+    ClearResources();
+    if (!m_device)
+        return false;
+
+    const float y = 0.0f;
+    const float x0 = originX;
+    const float z0 = originZ;
+    const float x1 = originX + std::max(8.0f, worldSize);
+    const float z1 = originZ + std::max(8.0f, worldSize);
+
+    std::vector<D3D11RendererHelpers::TerrainVertex> verts;
+    verts.reserve(6);
+    const float nx = 0.0f, ny = 1.0f, nz = 0.0f;
+    const float r = 0.35f, g = 0.45f, b = 0.35f, a = 1.0f;
+    verts.push_back({ x0, y, z0, nx, ny, nz, r, g, b, a });
+    verts.push_back({ x0, y, z1, nx, ny, nz, r, g, b, a });
+    verts.push_back({ x1, y, z0, nx, ny, nz, r, g, b, a });
+    verts.push_back({ x1, y, z0, nx, ny, nz, r, g, b, a });
+    verts.push_back({ x0, y, z1, nx, ny, nz, r, g, b, a });
+    verts.push_back({ x1, y, z1, nx, ny, nz, r, g, b, a });
+
+    if (!UploadVertices(verts))
+        return false;
+
+    m_terrainPatchVertexCount = static_cast<UINT>(verts.size());
+    m_terrainVertsX = 2;
+    m_terrainVertsZ = 2;
+    m_terrainCellSize = std::max(8.0f, worldSize);
+    m_terrainOriginX = originX;
+    m_terrainOriginZ = originZ;
+    m_terrainHeights.assign(4, y);
+    m_terrainAvailable = true;
+
+    LOG_WARN("TerrainManager: using fallback terrain plane.");
+    return true;
 }

@@ -22,6 +22,9 @@ public:
     // Setup/Teardown
     bool Initialize(ID3D11Device* device, ID3D11DeviceContext* context);
     void Shutdown();
+    void Tick(float deltaTime);
+    bool Validate() const;
+    void DebugDraw();
 
     // Core API Calls (The main interaction points)
     // Rebuilds the mesh for a specific area. Returns true on success.
@@ -35,6 +38,7 @@ public:
     ID3D11Buffer* GetVertexBuffer() const { return m_terrainPatchVertexBuffer; }
     UINT GetVertexCount() const { return m_terrainPatchVertexCount; }
     void ClearResources(); // Helper to release resources cleanly.
+    bool BuildFallbackPlane(float originX, float originZ, float worldSize);
 
 
 private:
@@ -59,4 +63,5 @@ private:
 
     // Internal Helpers
     void SetupInternal(const D3D11Renderer::TerrainParams& params);
+    bool UploadVertices(const std::vector<D3D11RendererHelpers::TerrainVertex>& verts);
 };

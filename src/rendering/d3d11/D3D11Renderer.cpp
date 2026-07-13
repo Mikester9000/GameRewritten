@@ -24,6 +24,25 @@ static void SafeRelease(T*& ptr)
     if (ptr) { ptr->Release(); ptr = nullptr; }
 }
 
+static void NormalizeLightDirection(RenderContracts::LightCBuffer& lightData)
+{
+    const float lenSq =
+        lightData.lightDirX * lightData.lightDirX +
+        lightData.lightDirY * lightData.lightDirY +
+        lightData.lightDirZ * lightData.lightDirZ;
+
+    if (lenSq <= 0.000001f)
+    {
+        lightData = RenderContracts::DefaultDirectionalLight();
+        return;
+    }
+
+    const float invLen = 1.0f / std::sqrt(lenSq);
+    lightData.lightDirX *= invLen;
+    lightData.lightDirY *= invLen;
+    lightData.lightDirZ *= invLen;
+}
+
 // ============================================================
 // CONSTRUCTOR & DESTRUCTOR
 // ============================================================
@@ -89,12 +108,19 @@ bool D3D11Renderer::Initialize(HWND windowHandle, int width, int height)
 
     if (!CreateRenderTarget())      return false;
     if (!CreateTriangleResources()) return false;
+    if (!CreateSceneConstantBuffers()) return false;
+    if (!CreateFallbackResources()) return false;
+    if (!CreateTerrainRasterizerStates()) return false;
 
     if (!CreateTerrainPatch())
         LOG_INFO("Initial terrain patch creation skipped.");
+    if (!CreateGroundPlaneGeometry())
+        LOG_WARN("Ground fallback geometry creation failed.");
 
     CreateGroundShaders();
     CreateSkyShaders();
+    UploadLightConstants();
+    ValidateRenderState("Initialize");
 
     return true;
 }
@@ -120,8 +146,12 @@ void D3D11Renderer::Shutdown()
     SafeRelease(skyInputLayout);
 
     SafeRelease(m_lightCBuffer);
+    SafeRelease(m_fallbackWhiteTexture);
     SafeRelease(m_terrainPatchVertexBuffer);
     SafeRelease(m_textureSampler);
+    SafeRelease(m_terrainSolidRasterState);
+    SafeRelease(m_terrainNoCullRasterState);
+    SafeRelease(m_terrainWireRasterState);
 
     SafeRelease(renderTargetView);
     SafeRelease(depthView);
@@ -131,6 +161,7 @@ void D3D11Renderer::Shutdown()
     SafeRelease(device);
 
     m_textureCache = nullptr;
+    m_loggedMissingTerrainWarning = false;
     ClearTerrainPatch();
 }
 
@@ -263,6 +294,133 @@ bool D3D11Renderer::CreateTerrainPatch()
     m_terrainVertsZ          = 0;
     m_terrainAvailable       = false;
     m_terrainPatchVertexCount = 0;
+    return true;
+}
+
+bool D3D11Renderer::CreateGroundPlaneGeometry()
+{
+    SafeRelease(m_groundVertexBuffer);
+    static const D3D11RendererHelpers::TerrainVertex verts[6] = {
+        { -800.0f, 0.0f, -800.0f, 0.0f, 1.0f, 0.0f, 0.45f, 0.55f, 0.45f, 1.0f },
+        { -800.0f, 0.0f,  800.0f, 0.0f, 1.0f, 0.0f, 0.45f, 0.55f, 0.45f, 1.0f },
+        {  800.0f, 0.0f, -800.0f, 0.0f, 1.0f, 0.0f, 0.45f, 0.55f, 0.45f, 1.0f },
+        {  800.0f, 0.0f, -800.0f, 0.0f, 1.0f, 0.0f, 0.45f, 0.55f, 0.45f, 1.0f },
+        { -800.0f, 0.0f,  800.0f, 0.0f, 1.0f, 0.0f, 0.45f, 0.55f, 0.45f, 1.0f },
+        {  800.0f, 0.0f,  800.0f, 0.0f, 1.0f, 0.0f, 0.45f, 0.55f, 0.45f, 1.0f },
+    };
+
+    D3D11_BUFFER_DESC vbd = {};
+    vbd.Usage = D3D11_USAGE_DEFAULT;
+    vbd.ByteWidth = sizeof(verts);
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    D3D11_SUBRESOURCE_DATA init = {};
+    init.pSysMem = verts;
+    return SUCCEEDED(device->CreateBuffer(&vbd, &init, &m_groundVertexBuffer));
+}
+
+bool D3D11Renderer::CreateSceneConstantBuffers()
+{
+    D3D11_BUFFER_DESC transformDesc = {};
+    transformDesc.Usage = D3D11_USAGE_DEFAULT;
+    transformDesc.ByteWidth = sizeof(RenderContracts::TransformCBuffer);
+    transformDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    if (FAILED(device->CreateBuffer(&transformDesc, nullptr, &m_constantBuffer)))
+    {
+        LOG_ERROR("Failed to create scene transform constant buffer.");
+        return false;
+    }
+
+    D3D11_BUFFER_DESC lightDesc = {};
+    lightDesc.Usage = D3D11_USAGE_DEFAULT;
+    lightDesc.ByteWidth = sizeof(RenderContracts::LightCBuffer);
+    lightDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    D3D11_SUBRESOURCE_DATA lightInit = {};
+    lightInit.pSysMem = &m_lightData;
+    if (FAILED(device->CreateBuffer(&lightDesc, &lightInit, &m_lightCBuffer)))
+    {
+        LOG_ERROR("Failed to create scene light constant buffer.");
+        return false;
+    }
+
+    return true;
+}
+
+bool D3D11Renderer::CreateFallbackResources()
+{
+    D3D11_TEXTURE2D_DESC texDesc = {};
+    texDesc.Width = 1;
+    texDesc.Height = 1;
+    texDesc.MipLevels = 1;
+    texDesc.ArraySize = 1;
+    texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    texDesc.SampleDesc.Count = 1;
+    texDesc.Usage = D3D11_USAGE_IMMUTABLE;
+    texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+    const unsigned int whitePixel = 0xFFFFFFFFu;
+    D3D11_SUBRESOURCE_DATA initData = {};
+    initData.pSysMem = &whitePixel;
+    initData.SysMemPitch = sizeof(whitePixel);
+
+    ID3D11Texture2D* tex = nullptr;
+    if (FAILED(device->CreateTexture2D(&texDesc, &initData, &tex)))
+    {
+        LOG_ERROR("Failed to create fallback white texture.");
+        return false;
+    }
+
+    const HRESULT srvHr = device->CreateShaderResourceView(tex, nullptr, &m_fallbackWhiteTexture);
+    tex->Release();
+    if (FAILED(srvHr))
+    {
+        LOG_ERROR("Failed to create fallback white texture SRV.");
+        return false;
+    }
+
+    D3D11_SAMPLER_DESC sampDesc = {};
+    sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    if (FAILED(device->CreateSamplerState(&sampDesc, &m_textureSampler)))
+    {
+        LOG_ERROR("Failed to create terrain/ground sampler.");
+        return false;
+    }
+
+    return true;
+}
+
+bool D3D11Renderer::CreateTerrainRasterizerStates()
+{
+    D3D11_RASTERIZER_DESC solidDesc = {};
+    solidDesc.FillMode = D3D11_FILL_SOLID;
+    solidDesc.CullMode = D3D11_CULL_BACK;
+    solidDesc.DepthClipEnable = TRUE;
+    if (FAILED(device->CreateRasterizerState(&solidDesc, &m_terrainSolidRasterState)))
+    {
+        LOG_ERROR("Failed to create terrain solid rasterizer state.");
+        return false;
+    }
+
+    D3D11_RASTERIZER_DESC wireDesc = solidDesc;
+    wireDesc.FillMode = D3D11_FILL_WIREFRAME;
+    wireDesc.CullMode = D3D11_CULL_NONE;
+    if (FAILED(device->CreateRasterizerState(&wireDesc, &m_terrainWireRasterState)))
+    {
+        LOG_ERROR("Failed to create terrain wireframe rasterizer state.");
+        return false;
+    }
+
+    D3D11_RASTERIZER_DESC noCullDesc = solidDesc;
+    noCullDesc.CullMode = D3D11_CULL_NONE;
+    if (FAILED(device->CreateRasterizerState(&noCullDesc, &m_terrainNoCullRasterState)))
+    {
+        LOG_ERROR("Failed to create terrain no-cull rasterizer state.");
+        return false;
+    }
+
     return true;
 }
 
@@ -399,6 +557,8 @@ void D3D11Renderer::SetSunDirection(float x, float y, float z)
     m_lightData.lightDirX = x;
     m_lightData.lightDirY = y;
     m_lightData.lightDirZ = z;
+    NormalizeLightDirection(m_lightData);
+    UploadLightConstants();
 }
 
 void D3D11Renderer::GetSunDirection(float& x, float& y, float& z) const
@@ -415,7 +575,8 @@ float D3D11Renderer::GetAmbientStrength() const
 
 void D3D11Renderer::SetAmbientStrength(float a)
 {
-    m_lightData.ambientStrength = a;
+    m_lightData.ambientStrength = std::clamp(a, 0.05f, 1.0f);
+    UploadLightConstants();
 }
 
 void D3D11Renderer::SetVSyncEnabled(bool enabled)
@@ -431,6 +592,51 @@ void D3D11Renderer::SetFrameRateLimit(int fps)
 void D3D11Renderer::ApplyGraphicsPreset(GraphicsPreset preset)
 {
     m_graphicsPreset = preset;
+}
+
+void D3D11Renderer::Tick(float deltaTime)
+{
+    (void)deltaTime;
+    UploadLightConstants();
+}
+
+bool D3D11Renderer::ValidateRenderState(const char* stage) const
+{
+    const char* at = stage ? stage : "unknown";
+    bool ok = true;
+
+    auto require = [&](bool condition, const char* message)
+    {
+        if (!condition)
+        {
+            LOG_ERROR(std::string("Render validation [") + at + "]: " + message);
+            ok = false;
+        }
+    };
+
+    require(device != nullptr, "device missing");
+    require(context != nullptr, "context missing");
+    require(renderTargetView != nullptr, "render target view missing");
+    require(depthView != nullptr, "depth view missing");
+    require(m_constantBuffer != nullptr, "transform constant buffer missing");
+    require(m_lightCBuffer != nullptr, "light constant buffer missing");
+    require(m_fallbackWhiteTexture != nullptr, "fallback texture SRV missing");
+    require(groundVertexShader != nullptr && groundPixelShader != nullptr, "ground shaders missing");
+    require(groundInputLayout != nullptr, "ground input layout missing");
+
+    if (!m_terrainManager)
+        LOG_WARN(std::string("Render validation [") + at + "]: TerrainManager not bound; terrain draw will fallback.");
+
+    return ok;
+}
+
+void D3D11Renderer::DebugDraw()
+{
+    // TODO(next-ai): purpose=draw terrain bounds/debug overlays
+    // required inputs/outputs=TerrainManager mesh bounds + camera frustum; output debug primitives
+    // invariants=must not mutate world state; must run after terrain draw and before PresentFrame
+    // acceptance checks=bounds are visible when debug flag is enabled and no gameplay state changes
+    // file ownership/expected edit scope=src/rendering/d3d11/D3D11Renderer.cpp only
 }
 
 // ============================================================
@@ -455,39 +661,79 @@ void D3D11Renderer::DrawGroundPlane()
         return;
     }
 
+    SetupGroundAndTerrainSceneConstants(2000.0f);
+    UploadLightConstants();
+
+    ID3D11RasterizerState* rs = m_terrainSolidRasterState;
+    if (m_debugTerrainWireframe)
+        rs = m_terrainWireRasterState;
+    else if (m_debugTerrainDisableCulling)
+        rs = m_terrainNoCullRasterState;
+    if (rs) context->RSSetState(rs);
+
     context->IASetInputLayout(groundInputLayout);
     context->VSSetShader(groundVertexShader, nullptr, 0);
     context->PSSetShader(groundPixelShader,  nullptr, 0);
+    if (m_constantBuffer)
+        context->VSSetConstantBuffers(RenderContracts::kTransformBufferRegister, 1, &m_constantBuffer);
+    if (m_lightCBuffer)
+        context->PSSetConstantBuffers(RenderContracts::kLightBufferRegister, 1, &m_lightCBuffer);
+    if (m_fallbackWhiteTexture)
+        context->PSSetShaderResources(0, 1, &m_fallbackWhiteTexture);
+    if (m_textureSampler)
+        context->PSSetSamplers(0, 1, &m_textureSampler);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     UINT stride = sizeof(D3D11RendererHelpers::TerrainVertex);
     UINT offset = 0;
     context->IASetVertexBuffers(0, 1, &m_groundVertexBuffer, &stride, &offset);
     context->Draw(6, 0);
+    context->RSSetState(nullptr);
 }
 
 void D3D11Renderer::DrawTerrainPatch()
 {
     if (!m_terrainManager)
     {
-        LOG_ERROR("Cannot draw terrain: TerrainManager not initialized.");
+        if (!m_loggedMissingTerrainWarning)
+        {
+            LOG_WARN("TerrainManager missing; drawing fallback ground plane.");
+            m_loggedMissingTerrainWarning = true;
+        }
+        DrawGroundPlane();
         return;
     }
 
     if (!m_terrainManager->IsTerrainAvailable())
+    {
+        DrawGroundPlane();
         return;
+    }
 
+    SetupGroundAndTerrainSceneConstants(2000.0f);
+    UploadLightConstants();
+
+    ID3D11RasterizerState* rs = m_terrainSolidRasterState;
+    if (m_debugTerrainWireframe)
+        rs = m_terrainWireRasterState;
+    else if (m_debugTerrainDisableCulling)
+        rs = m_terrainNoCullRasterState;
+    if (rs) context->RSSetState(rs);
     context->IASetInputLayout(groundInputLayout);
     context->VSSetShader(groundVertexShader, nullptr, 0);
     context->PSSetShader(groundPixelShader,  nullptr, 0);
+    if (m_constantBuffer)
+        context->VSSetConstantBuffers(RenderContracts::kTransformBufferRegister, 1, &m_constantBuffer);
 
     // Bind light constants to pixel shader register b1
     if (m_lightCBuffer)
-        context->PSSetConstantBuffers(1, 1, &m_lightCBuffer);
+        context->PSSetConstantBuffers(RenderContracts::kLightBufferRegister, 1, &m_lightCBuffer);
 
     // Bind optional sampler for texture sampling in ground_ps.hlsl
     if (m_textureSampler)
         context->PSSetSamplers(0, 1, &m_textureSampler);
+    if (m_fallbackWhiteTexture)
+        context->PSSetShaderResources(0, 1, &m_fallbackWhiteTexture);
 
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -495,14 +741,16 @@ void D3D11Renderer::DrawTerrainPatch()
     UINT offset = 0;
 
     ID3D11Buffer* terrainVB = m_terrainManager->GetVertexBuffer();
-    if (!terrainVB)
+    if (!terrainVB || m_terrainManager->GetVertexCount() == 0)
     {
-        LOG_ERROR("Terrain vertex buffer not allocated!");
+        LOG_WARN("Terrain vertex buffer unavailable; drawing fallback ground plane.");
+        DrawGroundPlane();
         return;
     }
 
     context->IASetVertexBuffers(0, 1, &terrainVB, &stride, &offset);
     context->Draw(m_terrainManager->GetVertexCount(), 0);
+    context->RSSetState(nullptr);
 }
 
 float D3D11Renderer::SampleTerrainHeight(float worldX, float worldZ) const
@@ -518,10 +766,13 @@ bool D3D11Renderer::IsTerrainAvailable() const
 
 void D3D11Renderer::ClearTerrainPatch()
 {
+    if (m_terrainManager)
+        m_terrainManager->ClearResources();
     m_terrainHeights.clear();
     m_terrainAvailable = false;
     m_terrainVertsX    = 0;
     m_terrainVertsZ    = 0;
+    m_loggedMissingTerrainWarning = false;
 }
 
 // ============================================================
@@ -555,5 +806,35 @@ void D3D11Renderer::DrawCharacterOutlinePass(float outlineThickness)
 
 void D3D11Renderer::SetupGroundAndTerrainSceneConstants(float farPlane)
 {
-    // TODO: Upload the current view/projection matrices to m_constantBuffer.
+    if (!m_constantBuffer)
+        return;
+
+    const float safeWidth = std::max(1, renderWidth);
+    const float safeHeight = std::max(1, renderHeight);
+    const float aspect = static_cast<float>(safeWidth) / static_cast<float>(safeHeight);
+    const auto mats = D3D11RendererHelpers::BuildSceneMatrices(
+        cameraX, cameraY, cameraZ, cameraYaw, cameraPitch,
+        aspect, 0.1f, std::max(100.0f, farPlane));
+
+    RenderContracts::TransformCBuffer cb = {};
+    DirectX::XMStoreFloat4x4(&cb.world, DirectX::XMMatrixTranspose(mats.world));
+    DirectX::XMStoreFloat4x4(&cb.mvp, DirectX::XMMatrixTranspose(mats.world * mats.view * mats.projection));
+    context->UpdateSubresource(m_constantBuffer, 0, nullptr, &cb, 0, 0);
+}
+
+void D3D11Renderer::UploadLightConstants()
+{
+    if (!m_lightCBuffer || !context)
+        return;
+
+    RenderContracts::LightCBuffer data = m_lightData;
+    NormalizeLightDirection(data);
+    if (m_debugTerrainUnlit)
+    {
+        data.lightColorR = 0.0f;
+        data.lightColorG = 0.0f;
+        data.lightColorB = 0.0f;
+        data.ambientStrength = 1.0f;
+    }
+    context->UpdateSubresource(m_lightCBuffer, 0, nullptr, &data, 0, 0);
 }

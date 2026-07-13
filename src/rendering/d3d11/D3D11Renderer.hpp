@@ -18,6 +18,7 @@
 #include <vector>
 #include <string>
 #include "D3D11RendererHelpers.hpp"
+#include "RenderContracts.hpp"
 #include "../../assets/TextureCache.hpp"
 
 class TerrainManager; // Forward declaration for SetTerrainManager()
@@ -63,6 +64,9 @@ public:
     // Initialize & Shutdown
     bool Initialize(HWND windowHandle, int width, int height);
     void Shutdown();
+    void Tick(float deltaTime);
+    bool ValidateRenderState(const char* stage) const;
+    void DebugDraw();
 
     // Screen Management
     void ClearScreen(float red, float green, float blue, float alpha);
@@ -99,6 +103,12 @@ public:
     // Terrain Rendering
     void DrawGroundPlane();
     void DrawTerrainPatch();
+    void SetTerrainUnlitDebug(bool enabled) { m_debugTerrainUnlit = enabled; }
+    void SetTerrainDisableCullingDebug(bool enabled) { m_debugTerrainDisableCulling = enabled; }
+    void SetTerrainWireframeDebug(bool enabled) { m_debugTerrainWireframe = enabled; }
+    bool IsTerrainUnlitDebugEnabled() const { return m_debugTerrainUnlit; }
+    bool IsTerrainDisableCullingDebugEnabled() const { return m_debugTerrainDisableCulling; }
+    bool IsTerrainWireframeDebugEnabled() const { return m_debugTerrainWireframe; }
 
     // Rebuild the terrain mesh from biome/seed parameters
     // (called on cell transition or F5).
@@ -144,9 +154,14 @@ private:
     bool CreateTriangleResources();
     bool CreateRenderTarget();
     bool CreateTerrainPatch();
+    bool CreateGroundPlaneGeometry();
+    bool CreateSceneConstantBuffers();
+    bool CreateFallbackResources();
+    bool CreateTerrainRasterizerStates();
     void CreateGroundShaders();
     void CreateSkyShaders();
     void SetupGroundAndTerrainSceneConstants(float farPlane);
+    void UploadLightConstants();
 
     // Simple vertex for the test triangle (POSITION + COLOR).
     // Matches triangle_vs.hlsl input signature.
@@ -216,20 +231,8 @@ private:
     ID3D11Buffer* m_terrainPatchVertexBuffer = nullptr;
     UINT          m_terrainPatchVertexCount  = 0;
 
-    // Constant Buffer Structures
-    struct TransformConstantBuffer { DirectX::XMFLOAT4X4 mvp; DirectX::XMFLOAT4X4 world; };
-    struct LightCBuffer
-    {
-        float lightDirX, lightDirY, lightDirZ;
-        float pad0;
-        float lightColorR, lightColorG, lightColorB;
-        float ambientStrength;
-    };
-    static_assert(sizeof(LightCBuffer) == 32, "LightCBuffer must stay 32 bytes!");
-    static_assert((sizeof(LightCBuffer) % 16) == 0, "Must be 16-byte aligned!");
-
     // Light state (sun direction + ambient)
-    LightCBuffer m_lightData = { 0.5f, -1.0f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.3f };
+    RenderContracts::LightCBuffer m_lightData = RenderContracts::DefaultDirectionalLight();
 
     // Cel Shading state
     bool  m_useCelShading   = false;
@@ -247,6 +250,15 @@ private:
     // Sampling & Texture Handling
     TextureCache*       m_textureCache   = nullptr;
     ID3D11SamplerState* m_textureSampler = nullptr;
+    ID3D11ShaderResourceView* m_fallbackWhiteTexture = nullptr;
+
+    ID3D11RasterizerState* m_terrainSolidRasterState = nullptr;
+    ID3D11RasterizerState* m_terrainNoCullRasterState = nullptr;
+    ID3D11RasterizerState* m_terrainWireRasterState = nullptr;
+    bool m_debugTerrainUnlit = false;
+    bool m_debugTerrainDisableCulling = false;
+    bool m_debugTerrainWireframe = false;
+    bool m_loggedMissingTerrainWarning = false;
 
     // Terrain Manager - Pointer to manager instance
     TerrainManager* m_terrainManager = nullptr;

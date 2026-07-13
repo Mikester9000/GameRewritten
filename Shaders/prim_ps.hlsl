@@ -26,10 +26,14 @@ struct PSIn
 
 float4 main(PSIn input) : SV_TARGET
 {
-    float3 n    = normalize(input.worldNorm);
-    float3 l    = normalize(-lightDir); // direction toward the light
+    float3 nIn  = input.worldNorm;
+    float3 n    = (dot(nIn, nIn) > 0.000001f) ? normalize(nIn) : float3(0.0f, 1.0f, 0.0f);
+    float3 ld   = (dot(lightDir, lightDir) > 0.000001f) ? lightDir : float3(0.45f, -1.0f, 0.35f);
+    float3 l    = normalize(-ld); // direction toward the light
     float  diff = saturate(dot(n, l));
 
-    float3 litColor = tintColor.rgb * (lightColor * diff + ambientStrength.xxx);
+    float ambient = max(ambientStrength, 0.08f);
+    float3 safeLightColor = (dot(lightColor, lightColor) > 0.000001f) ? lightColor : float3(1.0f, 1.0f, 1.0f);
+    float3 litColor = tintColor.rgb * (safeLightColor * diff + ambient.xxx);
     return float4(litColor, tintColor.a);
 }
