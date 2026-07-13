@@ -17,7 +17,7 @@
 // ============================================================
 
 #include "WorldMapOverlay.hpp"
-#include "DiscoveryJournal.hpp"
+#include "../game/world/DiscoveryJournal.hpp"
 #include <algorithm>
 
 // ImGui include (same path as the rest of the project)
