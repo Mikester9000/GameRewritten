@@ -119,7 +119,7 @@ void VehicleActor::SubmitRuntimeVisual(const PrefabLibrary& prefabLibrary,
                                       PrimitiveRenderer&   primitiveRenderer) const
 {
     // Reuses the player blockout prefab for vehicle visuals for now.
-    static const std::string kPrefabId = ActorCommon::PLAYER_VISUAL_PREFAB_ID;
+    static const std::string kPrefabId = ActorCommon::PLAYERVISUALPREFABID;
     const PrimitivePrefab* visualPrefab = prefabLibrary.GetPrefab(kPrefabId);
 
     if (!visualPrefab)
