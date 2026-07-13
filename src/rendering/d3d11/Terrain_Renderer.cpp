@@ -5,6 +5,11 @@
 // DEPENDS ON: Terrain_renderer.hpp, D3D11RendererHelpers.hpp, DirectXMath.h
 // ============================================================
 
+// Must come before any Windows header to suppress min/max macros.
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include "Terrain_Renderer.hpp"
 #include "../../logger/Logger.hpp" // Assume Logger is available
 #include <algorithm>

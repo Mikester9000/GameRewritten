@@ -58,8 +58,8 @@ bool SaveSystem::Save(const PlayerStats& stats,
     std::error_code ec;
     std::filesystem::create_directories(std::filesystem::path(savePath).parent_path(), ec);
 #endif
-    FILE* f = fopen(savePath.c_str(), "wb");
-    if (!f) return false;
+    FILE* f = nullptr;
+    if (fopen_s(&f, savePath.c_str(), "wb") != 0 || !f) return false;
 
     const auto& allFlags     = flags.GetAll();
     const auto& allLandmarks = landmarks.GetAll();
@@ -91,8 +91,8 @@ bool SaveSystem::Load(PlayerStats& stats,
                       QuestFlags& flags,
                       LandmarkTriggerSystem& landmarks)
 {
-    FILE* f = fopen(GetSavePath().c_str(), "rb");
-    if (!f) return false;
+    FILE* f = nullptr;
+    if (fopen_s(&f, GetSavePath().c_str(), "rb") != 0 || !f) return false;
 
     SaveHeader hdr{};
     if (fread(&hdr, sizeof(hdr), 1, f) != 1 || hdr.version != kSaveVersion)

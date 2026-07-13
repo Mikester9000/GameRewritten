@@ -12,7 +12,7 @@ struct SkillNode
     std::string abilityId;      // matches AbilityProgression ability id
     std::string displayName;
     int         spCost        = 1;
-    std::vector<int> requires; // prerequisite node ids (all must be unlocked)
+    std::vector<int> prereqs;  // prerequisite node ids (all must be unlocked)
     bool        unlocked      = false;
 };
 

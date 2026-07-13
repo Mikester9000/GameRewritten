@@ -6,7 +6,7 @@
 
 #include <vector>
 
-struct EnemyActor; // forward
+class EnemyActor; // forward
 
 enum class SquadRole { Attacker, Flanker, Reserve };
 
