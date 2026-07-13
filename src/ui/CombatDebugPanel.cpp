@@ -33,8 +33,8 @@ void CombatDebugPanel::Draw(float dt, const PlayerStats* player, const CombatSys
     {
         ImGui::Text("HP:    %d / %d", player->hp,    player->maxHp);
         ImGui::Text("MP:    %d / %d", player->mp,    player->maxMp);
-        ImGui::Text("Surge: %.2f",    player->surgeGauge);
-        ImGui::Text("Limit: %.2f",    player->limitGauge);
+        ImGui::Text("Surge: %.2f",    player->surgeCharge);
+        ImGui::Text("Limit: %.2f",    player->limitCharge);
     }
 
     ImGui::End();
