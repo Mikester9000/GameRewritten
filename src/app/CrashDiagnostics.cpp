@@ -24,8 +24,8 @@ std::string CrashDiagnostics::GetLogPath()
 
 void CrashDiagnostics::WriteDiagnostic(const std::string& reason)
 {
-    FILE* f = fopen(GetLogPath().c_str(), "a");
-    if (!f) return;
+    FILE* f = nullptr;
+    if (fopen_s(&f, GetLogPath().c_str(), "a") != 0 || !f) return;
 
     const time_t t = time(nullptr);
     char tbuf[64];

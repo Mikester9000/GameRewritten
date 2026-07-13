@@ -344,6 +344,21 @@
     <ClCompile Include="src\world\WorldGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\world\RainTerrainModifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\SnowTerrainModifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\AtmosphericFog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\VolumetricCloud.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\WorldMapOverlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\PostProcessToggles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -474,6 +489,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\rendering\d3d11\Terrain_Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rendering\d3d11\PostProcessPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rendering\d3d11\WaterRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -644,6 +665,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\world\WorldGrid.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\RainTerrainModifier.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\SnowTerrainModifier.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\AtmosphericFog.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\VolumetricCloud.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\WorldMapOverlay.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\game\world\EventZone.hpp">
@@ -877,6 +913,12 @@
     <ClInclude Include="src\rendering\d3d11\Terrain_Renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\rendering\d3d11\PostProcessPass.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rendering\d3d11\WaterRenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ground_vs.hlsl" />
@@ -890,6 +932,10 @@
     <FxCompile Include="Shaders\outline_ps.hlsl" />
     <FxCompile Include="Shaders\outline_vs.hlsl" />
     <FxCompile Include="Shaders\lut_ps.hlsl" />
+    <FxCompile Include="Shaders\water_vs.hlsl" />
+    <FxCompile Include="Shaders\water_ps.hlsl" />
+    <FxCompile Include="Shaders\fog_ps.hlsl" />
+    <FxCompile Include="Shaders\cloud_ps.hlsl" />
     <FxCompile Include="Shaders\Celshaderheader.hlsl" />
     <FxCompile Include="Shaders\SilhouetteHeader.hlsl" />
     <FxCompile Include="Shaders\ColorGradingHeader.hlsl" />

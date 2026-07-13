@@ -1,7 +1,19 @@
 # Known Issues and Fragile Spots
 
 Use this before touching risky areas.  
-See also: [CURRENT_STATE.md](./CURRENT_STATE.md), [SAFE_REFACTOR_RULES.md](./SAFE_REFACTOR_RULES.md).
+See also: [CURRENT_STATE.md](./CURRENT_STATE.md), [SAFE_REFACTOR_RULES.md](./SAFE_REFACTOR_RULES.md),
+[engine_foundation.md](./engine/engine_foundation.md).
+
+## ✅ RESOLVED — Build-blocking compile errors (stabilisation pass)
+The following errors were resolved in the build stabilisation pass. See
+`docs/engine/engine_foundation.md` §4 for root cause details.
+- C2059/C2238: `SkillTree::requires` keyword clash → renamed to `prereqs`
+- C1083: Wrong ImGui include path in 7 UI files → fixed to `../../third_party/imgui/imgui.h`
+- C4996: `fopen` deprecated → replaced with `fopen_s` in SaveSystem and CrashDiagnostics
+- C2027: `TerrainManager` incomplete type in D3D11Renderer.cpp → included `Terrain_Renderer.hpp`
+- C2589: `std::min` macro collision → added `#define NOMINMAX` before `<windows.h>` in `D3D11Renderer.hpp`
+- C2039: `GetSunDirection` missing from D3D11Renderer → method added
+- C4099: `struct`/`class` mismatch for `EnemyActor` → forward decls corrected to `class`
 
 ## 1) Main loop is overloaded
 - **Impact:** harder maintenance, more regression risk.

@@ -3,7 +3,7 @@
 
 #include "WorldMap.hpp"
 
-#include "../ThirdParty/imgui/imgui.h"
+#include "../../third_party/imgui/imgui.h"
 
 namespace
 {

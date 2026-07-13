@@ -13,7 +13,7 @@ int SkillTree::AddNode(const std::string& abilityId,
     n.abilityId   = abilityId;
     n.displayName = displayName;
     n.spCost      = spCost;
-    n.requires    = prereqs;
+    n.prereqs     = prereqs;
     m_nodes.push_back(n);
     return n.id;
 }
@@ -44,7 +44,7 @@ bool SkillTree::Unlock(int nodeId, int& availableSP)
     if (!n || n->unlocked) return false;
     if (availableSP < n->spCost) return false;
 
-    for (int req : n->requires)
+    for (int req : n->prereqs)
         if (!IsUnlocked(req)) return false;
 
     availableSP -= n->spCost;
